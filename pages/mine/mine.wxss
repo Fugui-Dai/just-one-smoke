@@ -1,0 +1,257 @@
+/* pages/mine/mine.wxss */
+.mine-page-container {
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle at 50% 18%, #161b26 0%, #080a0f 75%);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* ==================== 顶部自定义导航栏 ==================== */
+.custom-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(8, 10, 15, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  box-sizing: border-box;
+}
+
+.navbar-content {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 20rpx;
+  box-sizing: border-box;
+}
+
+.nav-back-btn {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60rpx;
+  height: 60rpx;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  color: #e2e8f0;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.nav-back-btn:active {
+  transform: scale(0.92);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.back-arrow {
+  font-size: 36rpx;
+  line-height: 1;
+  color: #fbbf24;
+}
+
+.nav-center-title-box {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.nav-center-title-text {
+  font-size: 34rpx;
+  font-weight: 800;
+  letter-spacing: 2rpx;
+  color: #f8fafc;
+  text-align: center;
+}
+
+.nav-placeholder {
+  width: 60rpx;
+  height: 60rpx;
+}
+
+/* ==================== 偏好设置弹窗 (Profile Edit Modal) ==================== */
+.glass-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30rpx;
+  box-sizing: border-box;
+}
+
+.profile-dialog-card {
+  width: 100%;
+  max-width: 660rpx;
+  max-height: 82vh;
+  background: #131826;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 36rpx;
+  padding: 32rpx;
+  box-shadow: 0 24rpx 64rpx rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.dialog-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24rpx;
+}
+
+.dialog-header-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.dialog-close-icon {
+  font-size: 32rpx;
+  color: #94a3b8;
+  padding: 6rpx 14rpx;
+}
+
+.dialog-scroll-form {
+  max-height: 58vh;
+  overflow-y: auto;
+}
+
+.form-item-group {
+  margin-bottom: 26rpx;
+}
+
+.form-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+
+.form-label-name {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.form-label-tip {
+  font-size: 18rpx;
+  color: #64748b;
+}
+
+.stepper-box {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18rpx;
+  overflow: hidden;
+}
+
+.stepper-btn {
+  width: 80rpx;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.stepper-input {
+  flex: 1;
+  text-align: center;
+  color: #f8fafc;
+  font-size: 28rpx;
+  font-weight: 700;
+  height: 72rpx;
+}
+
+.quick-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 14rpx;
+}
+
+.chip {
+  font-size: 20rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 16rpx;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+}
+
+.chip.active-chip {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: #f59e0b;
+  color: #fbbf24;
+}
+
+.text-field {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18rpx;
+  height: 72rpx;
+  padding: 0 20rpx;
+  font-size: 24rpx;
+  color: #f8fafc;
+}
+
+.dialog-footer-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 24rpx;
+}
+
+.footer-btn-cancel {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  border-radius: 28rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  padding: 16rpx 0;
+  border: none;
+}
+
+.footer-btn-save {
+  flex: 2;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #0b0f19;
+  font-weight: 700;
+  border-radius: 28rpx;
+  font-size: 26rpx;
+  padding: 16rpx 0;
+  border: none;
+}

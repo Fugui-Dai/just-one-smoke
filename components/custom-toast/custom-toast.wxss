@@ -1,0 +1,173 @@
+/* components/custom-toast/custom-toast.wxss */
+
+.toast-hud-wrapper {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(112rpx + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999999;
+  pointer-events: none;
+  padding: 0 32rpx;
+  box-sizing: border-box;
+}
+
+.toast-capsule-card {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  max-width: 86vw;
+  min-height: 76rpx;
+  padding: 16rpx 36rpx;
+  border-radius: 44rpx;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, rgba(32, 25, 19, 0.95) 0%, rgba(18, 14, 11, 0.98) 100%);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1.5rpx solid rgba(194, 155, 111, 0.32);
+  box-shadow: 
+    0 16rpx 48rpx rgba(0, 0, 0, 0.65),
+    0 2rpx 8rpx rgba(0, 0, 0, 0.4),
+    inset 0 1rpx 2rpx rgba(255, 255, 255, 0.16);
+  transform-origin: center bottom;
+  overflow: hidden;
+}
+
+/* 动效：T-Motion 弹簧物理升腾入场与淡出 */
+.toast-visible .toast-capsule-card {
+  animation: toastSpringIn 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.toast-exiting .toast-capsule-card {
+  animation: toastFadeOut 0.24s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes toastSpringIn {
+  0% {
+    transform: translateY(44rpx) scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes toastFadeOut {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(24rpx) scale(0.96);
+    opacity: 0;
+  }
+}
+
+/* 专属背景环境微光 */
+.toast-ambient-glow {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0.6;
+}
+
+/* 1. 燃情模式 (Flame - 琥珀金红) */
+.toast-capsule-card.type-flame {
+  border-color: rgba(245, 158, 11, 0.52);
+  background: linear-gradient(135deg, rgba(48, 28, 14, 0.96) 0%, rgba(24, 15, 8, 0.98) 100%);
+  box-shadow: 
+    0 16rpx 48rpx rgba(0, 0, 0, 0.65),
+    0 0 24rpx rgba(245, 158, 11, 0.28),
+    inset 0 1rpx 2rpx rgba(255, 255, 255, 0.2);
+}
+.toast-capsule-card.type-flame .toast-ambient-glow {
+  background: radial-gradient(circle at 18% 50%, rgba(245, 158, 11, 0.3) 0%, transparent 65%);
+}
+
+/* 2. 成就与成功模式 (Success - 香槟金/翠微光) */
+.toast-capsule-card.type-success {
+  border-color: rgba(52, 211, 153, 0.48);
+  background: linear-gradient(135deg, rgba(18, 38, 28, 0.96) 0%, rgba(10, 22, 17, 0.98) 100%);
+  box-shadow: 
+    0 16rpx 48rpx rgba(0, 0, 0, 0.65),
+    0 0 24rpx rgba(16, 185, 129, 0.25),
+    inset 0 1rpx 2rpx rgba(255, 255, 255, 0.2);
+}
+.toast-capsule-card.type-success .toast-ambient-glow {
+  background: radial-gradient(circle at 18% 50%, rgba(16, 185, 129, 0.28) 0%, transparent 65%);
+}
+
+/* 3. 灵动爆珠与信息模式 (Bead / Info - 极境冰蓝) */
+.toast-capsule-card.type-bead,
+.toast-capsule-card.type-info {
+  border-color: rgba(56, 189, 248, 0.48);
+  background: linear-gradient(135deg, rgba(16, 34, 48, 0.96) 0%, rgba(9, 20, 30, 0.98) 100%);
+  box-shadow: 
+    0 16rpx 48rpx rgba(0, 0, 0, 0.65),
+    0 0 24rpx rgba(56, 189, 248, 0.25),
+    inset 0 1rpx 2rpx rgba(255, 255, 255, 0.2);
+}
+.toast-capsule-card.type-bead .toast-ambient-glow,
+.toast-capsule-card.type-info .toast-ambient-glow {
+  background: radial-gradient(circle at 18% 50%, rgba(56, 189, 248, 0.28) 0%, transparent 65%);
+}
+
+/* 4. 轻量警示模式 (Warn - 暖珊瑚红) */
+.toast-capsule-card.type-warn {
+  border-color: rgba(248, 113, 113, 0.48);
+  background: linear-gradient(135deg, rgba(48, 20, 22, 0.96) 0%, rgba(26, 11, 13, 0.98) 100%);
+  box-shadow: 
+    0 16rpx 48rpx rgba(0, 0, 0, 0.65),
+    0 0 24rpx rgba(239, 68, 68, 0.25),
+    inset 0 1rpx 2rpx rgba(255, 255, 255, 0.2);
+}
+.toast-capsule-card.type-warn .toast-ambient-glow {
+  background: radial-gradient(circle at 18% 50%, rgba(239, 68, 68, 0.28) 0%, transparent 65%);
+}
+
+/* 图标微区域 */
+.toast-icon-box {
+  font-size: 32rpx;
+  margin-right: 14rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.toast-icon-char {
+  line-height: 1;
+  display: inline-block;
+}
+
+/* 文本微区域 */
+.toast-text-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.toast-title-text {
+  font-size: 27rpx;
+  font-weight: 600;
+  color: #ffffff;
+  line-height: 1.35;
+  letter-spacing: 0.5rpx;
+  white-space: pre-wrap;
+}
+
+.toast-desc-text {
+  font-size: 21rpx;
+  color: rgba(255, 255, 255, 0.68);
+  line-height: 1.25;
+  margin-top: 4rpx;
+}

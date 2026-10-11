@@ -1,0 +1,2474 @@
+/* components/stats-view/stats-view.wxss */
+
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.stats-scroll {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+}
+
+.stats-content {
+  padding: 24rpx;
+  padding-bottom: calc(60rpx + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+  box-sizing: border-box;
+}
+
+/* ==================== 全局模块卡片标题通用排版规范 ==================== */
+.section-top-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.section-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.sec-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #06b6d4;
+  box-shadow: 0 0 10rpx #06b6d4;
+  flex-shrink: 0;
+}
+
+.sec-dot.green {
+  background: #10b981;
+  box-shadow: 0 0 10rpx #10b981;
+}
+
+.sec-dot.gold {
+  background: #f59e0b;
+  box-shadow: 0 0 10rpx #f59e0b;
+}
+
+.sec-heading {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #f8fafc;
+  letter-spacing: 0.5rpx;
+}
+
+.sec-sub-info {
+  font-size: 22rpx;
+  color: #94a3b8;
+}
+
+/* 0. 个人微信头像与昵称名片卡片 (自适应全宽排版，无多余图标，展示打开第几天) */
+/* 0. 个人微信头像、昵称与打卡卡片 (左侧头像，中间两行信息，右侧打卡方卡) */
+.user-profile-header-card {
+  background: linear-gradient(135deg, rgba(22, 28, 42, 0.85) 0%, rgba(13, 17, 26, 0.94) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 28rpx;
+  padding: 22rpx 24rpx;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 12rpx 36rpx rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.user-profile-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-width: 0;
+}
+
+/* 左侧头像与昵称组合：头像严格靠左，名字紧随其后 */
+.user-profile-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  margin-right: 16rpx;
+}
+
+/* 微信原生头像按钮：严格靠左对齐，彻底清除微信默认 button:not([size='mini']) 的 184px 宽度与 margin: auto */
+button.user-avatar-btn,
+.user-avatar-btn {
+  position: relative !important;
+  width: 96rpx !important;
+  min-width: 96rpx !important;
+  max-width: 96rpx !important;
+  height: 96rpx !important;
+  min-height: 96rpx !important;
+  max-height: 96rpx !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  background: transparent !important;
+  border-radius: 50% !important;
+  border: none !important;
+  line-height: normal !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+}
+
+button.user-avatar-btn::after,
+.user-avatar-btn::after {
+  display: none !important;
+  border: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.user-avatar-img {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  border: 2rpx solid rgba(56, 189, 248, 0.4);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.5), 0 0 12rpx rgba(56, 189, 248, 0.15);
+  background: #0f172a;
+  display: block;
+  flex-shrink: 0;
+}
+
+/* 名字列：紧贴头像右侧 */
+.user-info-col {
+  flex: 1;
+  min-width: 0;
+  margin-left: 14rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.user-nickname-input {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #ffffff;
+  caret-color: transparent !important;
+  line-height: 48rpx;
+  height: 48rpx;
+  min-height: 48rpx;
+  letter-spacing: 0.5rpx;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0;
+  margin: 0;
+  max-width: 380rpx;
+}
+
+/* 最右边打卡状态方卡 (已打卡 / X天 / 连 X) */
+.user-punch-card {
+  flex-shrink: 0;
+  margin-left: 16rpx;
+  min-width: 110rpx;
+  padding: 10rpx 16rpx;
+  background: linear-gradient(135deg, rgba(16, 28, 28, 0.88) 0%, rgba(10, 20, 22, 0.96) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  border-radius: 20rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.punch-card-title {
+  font-size: 20rpx;
+  color: #94a3b8;
+  line-height: 1.2;
+  margin-bottom: 2rpx;
+}
+
+.punch-card-days-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2rpx;
+}
+
+.punch-card-num {
+  font-size: 34rpx;
+  font-weight: 800;
+  color: #34d399;
+  line-height: 1.1;
+  text-shadow: 0 0 10rpx rgba(52, 211, 153, 0.35);
+}
+
+.punch-card-unit {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #a7f3d0;
+}
+
+.punch-card-streak {
+  font-size: 18rpx;
+  color: #10b981;
+  margin-top: 2rpx;
+  line-height: 1.1;
+}
+
+/* ==================== VIP 尊享特权入口横幅 (腾讯黑金曜石奢雅标准) ==================== */
+.vip-entry-banner {
+  position: relative;
+  background: 
+    radial-gradient(ellipse at 88% -10%, rgba(229, 192, 123, 0.16) 0%, transparent 60%),
+    radial-gradient(ellipse at 10% 110%, rgba(56, 189, 248, 0.06) 0%, transparent 50%),
+    linear-gradient(135deg, rgba(22, 28, 42, 0.90) 0%, rgba(13, 17, 26, 0.96) 100%);
+  border: 1px solid rgba(229, 192, 123, 0.24);
+  border-radius: 26rpx;
+  padding: 20rpx 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 12rpx 36rpx rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(254, 240, 138, 0.16);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  overflow: hidden;
+  box-sizing: border-box;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.vip-entry-banner:active {
+  transform: scale(0.985);
+  border-color: rgba(229, 192, 123, 0.4);
+}
+
+.vip-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  flex: 1;
+  min-width: 0;
+  margin-right: 16rpx;
+}
+
+/* 3D 曜石黑金微光皇冠容器 */
+.vb-emblem-wrap {
+  width: 60rpx;
+  height: 60rpx;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.vb-emblem-svg {
+  width: 60rpx;
+  height: 60rpx;
+  display: block;
+}
+
+.vip-banner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  flex: 1;
+  min-width: 0;
+}
+
+.vb-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+/* 标题：奢雅香槟白金 */
+.vb-main {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #f7e7ca;
+  letter-spacing: 0.8rpx;
+  line-height: 1.2;
+}
+
+/* 黑金超微胶囊微标 */
+.vb-black-gold-tag {
+  font-size: 18rpx;
+  font-weight: 700;
+  color: #e5c07b;
+  background: rgba(229, 192, 123, 0.12);
+  border: 1px solid rgba(229, 192, 123, 0.32);
+  padding: 2rpx 12rpx;
+  border-radius: 999px;
+  letter-spacing: 0.5rpx;
+  line-height: 1.2;
+  flex-shrink: 0;
+}
+
+/* 副文案：钛银冷灰，清晰可读 */
+.vb-sub {
+  font-size: 22rpx;
+  color: #8c9bb0;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 右侧 CTA 胶囊：丝滑香槟钛金 */
+.vip-banner-btn {
+  background: linear-gradient(135deg, #f5d499 0%, #d4a757 100%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 10rpx 22rpx;
+  border-radius: 999px;
+  box-shadow: 0 4rpx 16rpx rgba(212, 167, 87, 0.35);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vbb-text {
+  font-size: 22rpx;
+  font-weight: 800;
+  color: #17120a;
+  letter-spacing: 0.5rpx;
+  line-height: 1;
+}
+
+
+
+/* 四维健康收益矩阵 */
+.cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20rpx;
+}
+
+.stat-glass-card {
+  background: rgba(22, 28, 40, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 24rpx;
+  padding: 22rpx;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.35);
+}
+
+.stat-glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4rpx;
+}
+
+.card-glow-orange::before { background: linear-gradient(90deg, #ff6600, #f97316); }
+.card-glow-emerald::before { background: linear-gradient(90deg, #10b981, #059669); }
+.card-glow-cyan::before { background: linear-gradient(90deg, #06b6d4, #0284c7); }
+.card-glow-purple::before { background: linear-gradient(90deg, #8b5cf6, #7c3aed); }
+
+.card-meta-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}
+
+.icon-circle {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+}
+
+.icon-circle-svg {
+  width: 28rpx;
+  height: 28rpx;
+  display: block;
+}
+
+.icon-bg-orange { background: rgba(255, 102, 0, 0.18); }
+.icon-bg-emerald { background: rgba(16, 185, 129, 0.18); }
+.icon-bg-cyan { background: rgba(6, 182, 212, 0.18); }
+.icon-bg-purple { background: rgba(139, 92, 246, 0.18); }
+
+.card-tag-badge {
+  font-size: 18rpx;
+  padding: 2rpx 10rpx;
+  border-radius: 10rpx;
+  background: rgba(255, 255, 255, 0.06);
+  color: #9ca3af;
+}
+
+.card-numeric-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4rpx;
+  margin-bottom: 4rpx;
+}
+
+.currency-prefix {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #10b981;
+}
+
+.card-big-number {
+  font-size: 42rpx;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.5rpx;
+}
+
+.card-metric-unit {
+  font-size: 20rpx;
+  color: #9ca3af;
+  margin-left: 4rpx;
+}
+
+.card-field-name {
+  font-size: 22rpx;
+  color: #9ca3af;
+  margin-bottom: 10rpx;
+  display: block;
+}
+
+.card-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin-bottom: 8rpx;
+}
+
+.card-bottom-insight {
+  font-size: 18rpx;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+/* ==================== 3. 钱包 (一张纸币是一元 × 金额，调皮搞笑微缩纸币) ==================== */
+.wallet-section-card {
+  background: linear-gradient(135deg, rgba(16, 36, 26, 0.92) 0%, rgba(9, 20, 15, 0.96) 100%);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  border-radius: 28rpx;
+  padding: 24rpx 28rpx;
+  box-shadow: 0 12rpx 36rpx rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-sizing: border-box;
+}
+
+.wallet-top-header {
+  margin-bottom: 16rpx;
+}
+
+.sec-pill-tag {
+  font-size: 18rpx;
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.15);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  padding: 2rpx 10rpx;
+  border-radius: 12rpx;
+  font-weight: 600;
+  margin-left: 10rpx;
+}
+
+.wallet-saved-badge {
+  display: flex;
+  align-items: baseline;
+  gap: 6rpx;
+}
+
+.wsb-label {
+  font-size: 20rpx;
+  color: #94a3b8;
+}
+
+.wsb-val {
+  font-size: 28rpx;
+  font-weight: 900;
+  color: #34d399;
+  font-family: monospace;
+  text-shadow: 0 0 10rpx rgba(52, 211, 153, 0.4);
+}
+
+/* 核心算式展台：[调皮1元小纸币] × 金额 = 累计省下 */
+.wallet-formula-stage {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14rpx 6rpx 10rpx;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 调皮搞笑 1 元微缩纸币外层包裹 (带多层叠钞质感与 Q 弹触感) */
+.funny-mini-bill-wrap {
+  position: relative;
+  width: 240rpx;
+  height: 122rpx;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.funny-mini-bill-wrap:active {
+  transform: scale(0.92) rotate(-2deg);
+}
+
+/* 3D 叠纸堆叠背板效果 (厚度与立体感) */
+.bill-stack-back {
+  position: absolute;
+  border-radius: 10rpx;
+  background: #154530;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.4);
+}
+
+.bill-stack-back.layer-2 {
+  top: -4rpx;
+  left: -4rpx;
+  right: 4rpx;
+  bottom: 4rpx;
+  opacity: 0.5;
+}
+
+.bill-stack-back.layer-1 {
+  top: -2rpx;
+  left: -2rpx;
+  right: 2rpx;
+  bottom: 2rpx;
+  opacity: 0.75;
+}
+
+/* 钞票图片容器 */
+.bill-img-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 10rpx;
+  overflow: hidden;
+  box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.5), 0 0 10rpx rgba(52, 211, 153, 0.35);
+  border: 1.5rpx solid rgba(52, 211, 153, 0.6);
+  background: #0f2c1f;
+}
+
+.funny-banknote-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.bill-denom-pill {
+  position: absolute;
+  bottom: 5rpx;
+  right: 6rpx;
+  font-size: 15rpx;
+  font-weight: 800;
+  color: #064e3b;
+  background: #a7f3d0;
+  padding: 2rpx 8rpx;
+  border-radius: 8rpx;
+  line-height: 1.2;
+  box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.4);
+}
+
+/* 算式符号 */
+.formula-operator {
+  font-size: 36rpx;
+  font-weight: 900;
+  line-height: 1;
+  padding: 0 6rpx;
+}
+
+.formula-multiply {
+  color: #34d399;
+  text-shadow: 0 0 8rpx rgba(52, 211, 153, 0.4);
+}
+
+.formula-equal {
+  color: #64748b;
+}
+
+/* 乘数金额 */
+.formula-multiplier-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 80rpx;
+}
+
+.multiplier-num {
+  font-size: 40rpx;
+  font-weight: 900;
+  color: #f8fafc;
+  font-family: monospace;
+  line-height: 1;
+}
+
+.multiplier-label {
+  font-size: 18rpx;
+  color: #94a3b8;
+  margin-top: 6rpx;
+}
+
+/* 累计结果 */
+.formula-result-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  min-width: 120rpx;
+}
+
+.result-val-row {
+  display: flex;
+  align-items: baseline;
+  gap: 2rpx;
+}
+
+.result-yen {
+  font-size: 22rpx;
+  font-weight: 800;
+  color: #fbbf24;
+}
+
+.result-val {
+  font-size: 38rpx;
+  font-weight: 900;
+  color: #fbbf24;
+  line-height: 1;
+  font-family: monospace;
+  text-shadow: 0 0 10rpx rgba(251, 191, 36, 0.35);
+}
+
+.result-label {
+  font-size: 18rpx;
+  color: #94a3b8;
+  margin-top: 6rpx;
+}
+
+/* 底部幽默提示条 */
+.wallet-humor-footer {
+  margin-top: 14rpx;
+  padding: 10rpx 14rpx;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 14rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.whf-icon {
+  font-size: 22rpx;
+}
+
+.whf-text {
+  font-size: 20rpx;
+  color: #6ee7b7;
+  font-weight: 500;
+}
+
+/* ==================== 5. 系统统计 (4项关键数据 + 7天累计折线图) ==================== */
+.system-stats-card {
+  background: rgba(22, 28, 40, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 28rpx;
+  padding: 24rpx;
+  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.35);
+}
+
+.stats-top-four-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12rpx;
+  margin-bottom: 20rpx;
+}
+
+.st-cell {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18rpx;
+  padding: 16rpx 8rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.st-cell.gold-cell {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.25);
+}
+
+.st-num {
+  font-size: 30rpx;
+  font-weight: 800;
+  color: #f8fafc;
+  line-height: 1.2;
+}
+
+.st-num.gold {
+  color: #fbbf24;
+}
+
+.st-label {
+  font-size: 22rpx;
+  color: #94a3b8;
+  margin-top: 6rpx;
+}
+
+/* 抢回健康寿命 (吸烟统计中纯文字展示) */
+.stats-life-text-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  padding: 4rpx 8rpx;
+  margin-bottom: 16rpx;
+  line-height: 1.4;
+}
+
+.life-text-label {
+  font-size: 24rpx;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.life-text-val {
+  font-size: 26rpx;
+  color: #38bdf8;
+  font-weight: 700;
+  margin-left: 2rpx;
+}
+
+.life-text-sub {
+  font-size: 22rpx;
+  color: #64748b;
+  margin-left: 6rpx;
+}
+
+.line-chart-box {
+  background: rgba(11, 15, 25, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 20rpx;
+  padding: 16rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.lcb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8rpx;
+}
+
+.lcb-title {
+  font-size: 24rpx;
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+.lcb-badge {
+  font-size: 20rpx;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.15);
+  border-radius: 8rpx;
+  padding: 2rpx 8rpx;
+}
+
+.trend-line-chart-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* WHO 临床时间轴 */
+.who-section-card {
+  background: rgba(22, 28, 40, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 28rpx;
+  padding: 28rpx;
+  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.35);
+}
+
+.who-medical-spine {
+  display: flex;
+  flex-direction: column;
+}
+
+.who-node-item {
+  display: flex;
+  gap: 20rpx;
+}
+
+.node-spine-axis {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 32rpx;
+}
+
+.node-milestone-dot {
+  width: 22rpx;
+  height: 22rpx;
+  border-radius: 50%;
+  background: #374151;
+  border: 2px solid #1f2937;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 6rpx;
+}
+
+.node-check-mark {
+  font-size: 14rpx;
+  color: #ffffff;
+  font-weight: 900;
+}
+
+.who-node-item.is-unlocked .node-milestone-dot {
+  background: #10b981;
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 12rpx #10b981;
+}
+
+.node-axis-line {
+  flex: 1;
+  width: 2rpx;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 6rpx 0;
+  min-height: 52rpx;
+}
+
+.who-node-item.is-unlocked .node-axis-line {
+  background: rgba(16, 185, 129, 0.25);
+}
+
+.node-info-card {
+  flex: 1;
+  padding-bottom: 26rpx;
+}
+
+.node-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6rpx;
+}
+
+.node-title-box {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.node-icon-emoji {
+  font-size: 26rpx;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 4rpx;
+}
+
+.node-dot-symbol {
+  font-size: 14rpx;
+  color: #ffffff;
+  font-weight: 900;
+}
+
+.node-dot-hollow {
+  font-size: 12rpx;
+  color: #64748b;
+}
+
+.node-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.who-range-tag {
+  font-size: 18rpx;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 12rpx;
+  padding: 2rpx 10rpx;
+  font-weight: 600;
+}
+
+.who-quick-toggle {
+  font-size: 22rpx;
+  color: #34d399;
+  padding: 6rpx 16rpx;
+  background: rgba(16, 185, 129, 0.12);
+  border-radius: 16rpx;
+}
+
+.node-status-tag {
+  font-size: 22rpx;
+  padding: 2rpx 10rpx;
+  border-radius: 10rpx;
+}
+
+.tag-passed {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.15);
+}
+
+.tag-progress {
+  color: #9ca3af;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.node-clinical-desc {
+  font-size: 24rpx;
+  color: #9ca3af;
+  line-height: 1.45;
+}
+
+.who-expand-footer-btn {
+  width: 100%;
+  margin-top: 14rpx;
+  padding: 14rpx 0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 18rpx;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.who-expand-footer-btn:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.wef-text {
+  font-size: 25rpx;
+  color: #34d399;
+  font-weight: 600;
+}
+
+/* 医生寄语卡片 */
+.doctor-quote-card {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.85) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 26rpx;
+  padding: 26rpx;
+}
+
+.quote-header {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-bottom: 12rpx;
+}
+
+.quote-icon { font-size: 28rpx; }
+.quote-title {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #93c5fd;
+}
+
+.quote-body {
+  font-size: 25rpx;
+  color: #d1d5db;
+  line-height: 1.55;
+  font-style: italic;
+}
+
+/* ============================================================
+   生理机能自愈数字孪生体 (上半身透光人体与脏器生物荧光)
+   腾讯 CDC / 腾讯健康标准高阶科技医疗可视化美学
+   ============================================================ */
+.body-twin-card {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.88) 0%, rgba(10, 15, 29, 0.96) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  border-radius: 28rpx;
+  padding: 28rpx;
+  box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  position: relative;
+  overflow: hidden;
+}
+
+.twin-top-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.twin-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.twin-badge-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 4rpx 14rpx;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: 20rpx;
+}
+
+.live-dot {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8rpx #10b981;
+}
+
+.live-text {
+  font-size: 20rpx;
+  color: #a7f3d0;
+  font-weight: 600;
+}
+
+/* 科技全息人体上半身透视视窗 (3D 医学全息扫描与 HUD 界面) */
+.twin-torso-stage {
+  position: relative;
+  width: 100%;
+  height: 600rpx;
+  background-color: #030712;
+  background-image: 
+    linear-gradient(rgba(56, 189, 248, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56, 189, 248, 0.05) 1px, transparent 1px),
+    radial-gradient(ellipse at 50% 50%, rgba(14, 116, 144, 0.22) 0%, rgba(15, 23, 42, 0.75) 60%, rgba(2, 6, 23, 0.98) 100%);
+  background-size: 28rpx 28rpx, 28rpx 28rpx, 100% 100%;
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  border-radius: 24rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  box-sizing: border-box;
+  box-shadow: inset 0 0 40rpx rgba(6, 182, 212, 0.12), 0 10rpx 36rpx rgba(0, 0, 0, 0.55);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* 四角 HUD 科技护角支架 */
+.hud-bracket {
+  position: absolute;
+  width: 22rpx;
+  height: 22rpx;
+  border-color: #38bdf8;
+  border-style: solid;
+  pointer-events: none;
+  z-index: 12;
+  opacity: 0.85;
+}
+.hud-bracket-tl { top: 12rpx; left: 12rpx; border-width: 3rpx 0 0 3rpx; }
+.hud-bracket-tr { top: 12rpx; right: 12rpx; border-width: 3rpx 3rpx 0 0; }
+.hud-bracket-bl { bottom: 12rpx; left: 12rpx; border-width: 0 0 3rpx 3rpx; }
+.hud-bracket-br { bottom: 12rpx; right: 12rpx; border-width: 0 3rpx 3rpx 0; }
+
+/* 顶部科幻医疗扫描状态横条 */
+.hud-stage-banner {
+  position: absolute;
+  top: 14rpx;
+  left: 28rpx;
+  right: 28rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+  pointer-events: none;
+}
+.hud-scanner-code {
+  font-family: monospace;
+  font-size: 17rpx;
+  color: rgba(56, 189, 248, 0.85);
+  letter-spacing: 2rpx;
+  font-weight: 700;
+}
+.hud-scanner-status {
+  font-family: monospace;
+  font-size: 17rpx;
+  color: #10b981;
+  letter-spacing: 1rpx;
+  font-weight: 600;
+}
+
+/* 3D 全息医学透明人体与脏器高清渲染图 */
+.torso-hologram-img {
+  position: absolute;
+  top: 10rpx;
+  bottom: 24rpx;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: 420rpx;
+  height: 560rpx;
+  display: block;
+  z-index: 2;
+  filter: drop-shadow(0 0 20rpx rgba(6, 182, 212, 0.4));
+  pointer-events: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ==========================================================================
+   纯 GPU 硬件加速·仿生血流动力学与生理微物理视效层 (0卡顿·零JS占用·60fps满帧)
+   ========================================================================== */
+.torso-hemodynamic-layer {
+  position: absolute;
+  top: 10rpx;
+  bottom: 24rpx;
+  left: 0;
+  right: 0;
+  margin: auto;
+  width: 420rpx;
+  height: 560rpx;
+  pointer-events: none;
+  z-index: 3;
+  overflow: hidden;
+  mix-blend-mode: screen;
+}
+
+/* 1. 心脏真实生理节律泵核 (Cardiac Pulse Core · lub-dub 1.25s) */
+.cardiac-chamber-core {
+  position: absolute;
+  left: 214rpx;
+  top: 230rpx;
+  width: 36rpx;
+  height: 46rpx;
+  margin-left: -18rpx;
+  margin-top: -23rpx;
+  border-radius: 50% 50% 45% 45%;
+  background: radial-gradient(ellipse at 50% 40%, rgba(255, 60, 60, 0.92) 0%, rgba(239, 68, 68, 0.6) 45%, rgba(245, 158, 11, 0.25) 75%, transparent 100%);
+  filter: blur(2px);
+  transform-origin: center center;
+  animation: cardiacLubDub 1.25s cubic-bezier(0.25, 0.1, 0.25, 1) infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes cardiacLubDub {
+  0% { transform: scale(0.95); opacity: 0.35; }
+  12% { transform: scale(1.24); opacity: 0.95; } /* 第一心音：强缩射血 */
+  22% { transform: scale(1.02); opacity: 0.55; }
+  32% { transform: scale(1.14); opacity: 0.82; } /* 第二心音：微弹射血 */
+  48% { transform: scale(0.98); opacity: 0.40; }
+  100% { transform: scale(0.95); opacity: 0.35; } /* 舒张充盈静息 */
+}
+
+.cardiac-aorta-wave {
+  position: absolute;
+  left: 214rpx;
+  top: 230rpx;
+  width: 72rpx;
+  height: 72rpx;
+  margin-left: -36rpx;
+  margin-top: -36rpx;
+  border-radius: 50%;
+  border: 1.5rpx solid rgba(255, 99, 71, 0.65);
+  box-shadow: 0 0 16rpx rgba(239, 68, 68, 0.5);
+  transform-origin: center center;
+  animation: aortaWavePulse 1.25s cubic-bezier(0.1, 0.8, 0.2, 1) infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes aortaWavePulse {
+  0% { transform: scale(0.35); opacity: 0; }
+  14% { transform: scale(0.65); opacity: 0.85; }
+  42% { transform: scale(1.35); opacity: 0; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+/* 2. 动静脉向心与离心微光血管流道 (Vascular Tracks & Flows) */
+.vascular-track {
+  position: absolute;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: 999px;
+}
+
+/* 左臂上段 (大臂) */
+.v-track-arm-l-upper {
+  left: 116rpx;
+  top: 188rpx;
+  width: 14rpx;
+  height: 125rpx;
+  transform: rotate(26deg);
+  transform-origin: top center;
+}
+
+/* 左臂下段 (小臂至手腕) */
+.v-track-arm-l-lower {
+  left: 72rpx;
+  top: 300rpx;
+  width: 14rpx;
+  height: 155rpx;
+  transform: rotate(18deg);
+  transform-origin: top center;
+}
+
+/* 右臂上段 (大臂) */
+.v-track-arm-r-upper {
+  right: 116rpx;
+  top: 188rpx;
+  width: 14rpx;
+  height: 125rpx;
+  transform: rotate(-26deg);
+  transform-origin: top center;
+}
+
+/* 右臂下段 (小臂至手腕) */
+.v-track-arm-r-lower {
+  right: 72rpx;
+  top: 300rpx;
+  width: 14rpx;
+  height: 155rpx;
+  transform: rotate(-18deg);
+  transform-origin: top center;
+}
+
+/* 降主动脉至腹腔 */
+.v-track-descending {
+  left: 210rpx;
+  top: 255rpx;
+  width: 14rpx;
+  height: 135rpx;
+  margin-left: -7rpx;
+}
+
+/* 动脉流光粒子 (赤红金暖流·由内向外射血) */
+.artery-pulse-flow {
+  position: absolute;
+  left: 1rpx;
+  width: 4rpx;
+  height: 36rpx;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(254, 240, 138, 0) 0%, rgba(245, 158, 11, 0.75) 40%, rgba(239, 68, 68, 0.95) 80%, rgba(254, 240, 138, 1) 100%);
+  box-shadow: 0 0 8rpx rgba(239, 68, 68, 0.7);
+  animation: flowDownwards 1.35s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform, opacity;
+}
+
+/* 静脉流光粒子 (清冽青蓝微光·向心回流) */
+.vein-pulse-flow {
+  position: absolute;
+  right: 1rpx;
+  width: 4rpx;
+  height: 36rpx;
+  border-radius: 999px;
+  background: linear-gradient(0deg, rgba(56, 189, 248, 0) 0%, rgba(14, 165, 233, 0.6) 40%, rgba(56, 189, 248, 0.95) 80%, rgba(167, 243, 208, 1) 100%);
+  box-shadow: 0 0 8rpx rgba(56, 189, 248, 0.7);
+  animation: flowUpwards 1.75s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  will-change: transform, opacity;
+}
+
+/* 腹主动脉下行流光 */
+.aorta-blood-flow {
+  position: absolute;
+  left: 4rpx;
+  width: 5rpx;
+  height: 38rpx;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(239, 68, 68, 0) 0%, rgba(239, 68, 68, 0.85) 60%, rgba(245, 158, 11, 1) 100%);
+  box-shadow: 0 0 10rpx rgba(239, 68, 68, 0.7);
+  animation: flowDownwards 1.4s cubic-bezier(0.3, 0.1, 0.3, 1) infinite;
+  will-change: transform, opacity;
+}
+
+.delay-1 {
+  animation-delay: 0.65s;
+}
+
+@keyframes flowDownwards {
+  0% { transform: translateY(-40rpx); opacity: 0; }
+  25% { opacity: 0.85; }
+  80% { opacity: 0.85; }
+  100% { transform: translateY(165rpx); opacity: 0; }
+}
+
+@keyframes flowUpwards {
+  0% { transform: translateY(165rpx); opacity: 0; }
+  25% { opacity: 0.85; }
+  80% { opacity: 0.85; }
+  100% { transform: translateY(-40rpx); opacity: 0; }
+}
+
+/* 3. 神经突触电位微闪节点 (Synaptic Micro-Sparks) */
+.synapse-node {
+  position: absolute;
+  width: 7rpx;
+  height: 7rpx;
+  border-radius: 50%;
+  background: #fef08a;
+  box-shadow: 0 0 8rpx #f59e0b, 0 0 16rpx rgba(251, 191, 36, 0.6);
+  animation: synapseFlicker 3.2s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.node-shoulder-l { left: 146rpx; top: 168rpx; animation-delay: 0.2s; }
+.node-forearm-l { left: 74rpx; top: 345rpx; animation-delay: 1.3s; }
+.node-shoulder-r { right: 146rpx; top: 168rpx; animation-delay: 2.1s; }
+.node-forearm-r { right: 74rpx; top: 345rpx; animation-delay: 0.8s; }
+.node-cranial { left: 210rpx; top: 56rpx; margin-left: -3.5rpx; animation-delay: 1.7s; }
+.node-solar { left: 210rpx; top: 295rpx; margin-left: -3.5rpx; animation-delay: 2.6s; }
+
+@keyframes synapseFlicker {
+  0%, 100% { transform: scale(0.7); opacity: 0.25; }
+  45% { transform: scale(0.7); opacity: 0.25; }
+  50% { transform: scale(1.45); opacity: 1; filter: drop-shadow(0 0 8rpx #fbbf24); }
+  55% { transform: scale(0.9); opacity: 0.45; }
+  60% { transform: scale(1.15); opacity: 0.75; }
+  68% { transform: scale(0.7); opacity: 0.25; }
+}
+
+/* 4. 空间 3D 全息浮游光子 (Holographic Ambient Photons) */
+.ambient-photon {
+  position: absolute;
+  width: 4rpx;
+  height: 4rpx;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 8rpx #38bdf8, 0 0 14rpx rgba(56, 189, 248, 0.5);
+  animation: floatPhoton 5.5s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.photon-1 { left: 75rpx; bottom: 70rpx; animation-delay: 0s; animation-duration: 4.8s; }
+.photon-2 { left: 155rpx; bottom: 120rpx; animation-delay: 1.6s; animation-duration: 5.4s; }
+.photon-3 { right: 85rpx; bottom: 85rpx; animation-delay: 0.9s; animation-duration: 5.1s; }
+.photon-4 { right: 155rpx; bottom: 140rpx; animation-delay: 2.4s; animation-duration: 5.8s; }
+.photon-5 { left: 208rpx; bottom: 50rpx; animation-delay: 3.2s; animation-duration: 6.2s; }
+
+@keyframes floatPhoton {
+  0% { transform: translate(0, 0); opacity: 0; }
+  25% { opacity: 0.75; }
+  75% { opacity: 0.55; }
+  100% { transform: translate(12rpx, -90rpx); opacity: 0; }
+}
+
+/* HUD 数据引出框 (半透明磨砂科技卡片) */
+.hud-card {
+  position: absolute;
+  width: 176rpx;
+  background: rgba(6, 15, 30, 0.84);
+  border: 1px solid rgba(56, 189, 248, 0.26);
+  border-radius: 14rpx;
+  padding: 10rpx 12rpx;
+  box-sizing: border-box;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.55);
+  z-index: 10;
+  transition: all 0.25s ease;
+}
+.hud-card:active {
+  transform: scale(0.95);
+}
+.hud-card.is-active {
+  border-color: rgba(56, 189, 248, 0.85);
+  background: rgba(14, 116, 144, 0.38);
+  box-shadow: 0 0 18rpx rgba(56, 189, 248, 0.5);
+}
+.hud-card-tl { top: 48rpx; left: 14rpx; }
+.hud-card-bl { bottom: 94rpx; left: 14rpx; }
+.hud-card-tr { top: 48rpx; right: 14rpx; }
+.hud-card-br { bottom: 94rpx; right: 14rpx; }
+
+.hud-card-header {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 6rpx;
+}
+.hud-card-title {
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #f1f5f9;
+  line-height: 1.2;
+}
+.hud-card-en {
+  font-size: 15rpx;
+  font-family: monospace;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5rpx;
+}
+
+.hud-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+.hud-metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.hud-metric-label {
+  font-size: 18rpx;
+  color: #94a3b8;
+}
+.hud-metric-val {
+  font-size: 20rpx;
+  font-weight: 700;
+  font-family: monospace;
+}
+.hud-metric-val.cyan { color: #38bdf8; text-shadow: 0 0 8rpx rgba(56, 189, 248, 0.6); }
+.hud-metric-val.orange { color: #f59e0b; text-shadow: 0 0 8rpx rgba(245, 158, 11, 0.6); }
+.hud-metric-val.purple { color: #c084fc; text-shadow: 0 0 8rpx rgba(192, 132, 252, 0.6); }
+.hud-metric-val.green { color: #34d399; text-shadow: 0 0 8rpx rgba(52, 211, 153, 0.6); }
+
+.hud-progress-track {
+  width: 100%;
+  height: 6rpx;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4rpx;
+  overflow: hidden;
+}
+.hud-progress-bar {
+  height: 100%;
+  border-radius: 4rpx;
+  transition: width 0.4s ease;
+}
+.hud-progress-bar.cyan-bar { background: linear-gradient(90deg, #0284c7, #38bdf8); }
+.hud-progress-bar.orange-bar { background: linear-gradient(90deg, #d97706, #f59e0b); }
+.hud-progress-bar.green-bar { background: linear-gradient(90deg, #059669, #34d399); }
+.hud-progress-bar.purple-bar { background: linear-gradient(90deg, #7c3aed, #c084fc); }
+
+/* HUD 矢量引线 (折线与发光锚点，精准指向解剖位置) */
+.hud-lead-line {
+  position: absolute;
+  pointer-events: none;
+  z-index: 5;
+}
+/* 左上指向左肺叶 (胸腔左中部) */
+.hud-lead-line.to-lung {
+  top: 104rpx;
+  left: 190rpx;
+  width: 72rpx;
+  height: 64rpx;
+  border-top: 2rpx solid rgba(56, 189, 248, 0.7);
+  border-right: 2rpx solid rgba(56, 189, 248, 0.7);
+}
+.hud-lead-line.to-lung::after {
+  content: '';
+  position: absolute;
+  right: -5rpx;
+  bottom: -5rpx;
+  width: 10rpx;
+  height: 10rpx;
+  background: #38bdf8;
+  border-radius: 50%;
+  box-shadow: 0 0 10rpx #38bdf8;
+}
+
+/* 右上指向心脏 (正中偏左纵隔心区) */
+.hud-lead-line.to-heart {
+  top: 104rpx;
+  right: 190rpx;
+  width: 72rpx;
+  height: 74rpx;
+  border-top: 2rpx solid rgba(245, 158, 11, 0.7);
+  border-left: 2rpx solid rgba(245, 158, 11, 0.7);
+}
+.hud-lead-line.to-heart::after {
+  content: '';
+  position: absolute;
+  left: -5rpx;
+  bottom: -5rpx;
+  width: 10rpx;
+  height: 10rpx;
+  background: #f59e0b;
+  border-radius: 50%;
+  box-shadow: 0 0 10rpx #f59e0b;
+}
+
+/* 左下指向腹部自主神经中枢与脏器 */
+.hud-lead-line.to-visceral {
+  bottom: 140rpx;
+  left: 190rpx;
+  width: 68rpx;
+  height: 52rpx;
+  border-bottom: 2rpx solid rgba(192, 132, 252, 0.7);
+  border-right: 2rpx solid rgba(192, 132, 252, 0.7);
+}
+.hud-lead-line.to-visceral::after {
+  content: '';
+  position: absolute;
+  right: -5rpx;
+  top: -5rpx;
+  width: 10rpx;
+  height: 10rpx;
+  background: #c084fc;
+  border-radius: 50%;
+  box-shadow: 0 0 10rpx #c084fc;
+}
+
+/* 右下指向大动脉与全身微循环血管网 */
+.hud-lead-line.to-blood {
+  bottom: 140rpx;
+  right: 190rpx;
+  width: 68rpx;
+  height: 52rpx;
+  border-bottom: 2rpx solid rgba(52, 211, 153, 0.7);
+  border-left: 2rpx solid rgba(52, 211, 153, 0.7);
+}
+.hud-lead-line.to-blood::after {
+  content: '';
+  position: absolute;
+  left: -5rpx;
+  top: -5rpx;
+  width: 10rpx;
+  height: 10rpx;
+  background: #34d399;
+  border-radius: 50%;
+  box-shadow: 0 0 10rpx #34d399;
+}
+
+/* 交互触控热区透明层 */
+.body-touch-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 8;
+}
+
+.organ-hotspot {
+  position: absolute;
+  cursor: pointer;
+  background: transparent;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.organ-hotspot:active {
+  background: transparent;
+}
+
+/* 头部大脑神经热区 */
+.organ-hotspot.spot-brain {
+  top: 4%;
+  left: 36%;
+  width: 28%;
+  height: 16%;
+  border-radius: 50% 50% 30% 30%;
+}
+
+/* 双肺自愈热区 */
+.organ-hotspot.spot-lungs {
+  top: 26%;
+  left: 24%;
+  width: 52%;
+  height: 32%;
+  border-radius: 40rpx;
+}
+
+/* 心脏搏动热区 (置于双肺上层) */
+.organ-hotspot.spot-heart {
+  top: 34%;
+  left: 45%;
+  width: 18%;
+  height: 20%;
+  border-radius: 50%;
+  z-index: 9;
+}
+
+/* 血液循环与微动脉热区 */
+.organ-hotspot.spot-blood {
+  top: 60%;
+  left: 26%;
+  width: 48%;
+  height: 24%;
+  border-radius: 30rpx;
+}
+
+
+/* 选中器官医学临床深度分析卡片 */
+.twin-detail-card {
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20rpx;
+  padding: 24rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.35);
+}
+
+.detail-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dh-left {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+}
+
+.dh-icon {
+  font-size: 38rpx;
+}
+
+.dh-svg-icon {
+  width: 52rpx;
+  height: 52rpx;
+  display: block;
+}
+
+.dh-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 2rpx;
+}
+
+.dh-organ-name {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.dh-stage-title {
+  font-size: 20rpx;
+  color: #94a3b8;
+}
+
+.dh-badge {
+  font-size: 20rpx;
+  font-weight: 700;
+  padding: 6rpx 16rpx;
+  border-radius: 24rpx;
+}
+
+/* 动态三项指标矩阵 */
+.detail-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12rpx;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 16rpx;
+  padding: 14rpx;
+}
+
+.dm-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4rpx;
+}
+
+.dm-val {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #f1f5f9;
+  font-family: monospace;
+}
+
+.dm-val.is-highlight {
+  font-size: 26rpx;
+}
+
+.dm-label {
+  font-size: 18rpx;
+  color: #64748b;
+}
+
+/* WHO 临床病理自愈解读 */
+.detail-clinical-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 10rpx;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12rpx;
+  padding: 14rpx 18rpx;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.cb-icon {
+  font-size: 22rpx;
+  margin-top: 2rpx;
+}
+
+.cb-text {
+  font-size: 20rpx;
+  color: #cbd5e1;
+  line-height: 1.5;
+}
+
+/* ==================== 6. 紧凑无烟自律打卡日历 ==================== */
+.calendar-section-card.mini-calendar {
+  background: rgba(22, 28, 40, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 28rpx;
+  padding: 24rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.35);
+}
+
+.cal-top-header {
+  margin-bottom: 16rpx;
+}
+
+/* 标题下方的月份切换控制条 (左右两边显示 < 和 >，中间显示当前年月) */
+.compact-month-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14rpx;
+  padding: 0 6rpx;
+}
+
+.cal-month-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cal-month-text {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  padding: 4rpx 22rpx;
+  border-radius: 20rpx;
+  letter-spacing: 1rpx;
+}
+
+.cal-arrow-btn {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.cal-arrow-btn:active {
+  transform: scale(0.92);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.cal-arrow-icon {
+  font-size: 32rpx;
+  color: #cbd5e1;
+  line-height: 1;
+}
+
+.compact-week-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  margin-bottom: 8rpx;
+  padding-bottom: 6rpx;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.c-week-lbl {
+  font-size: 18rpx;
+  color: #64748b;
+  font-weight: 600;
+}
+
+/* 紧凑日历网格：间距减小，正圆圈日期单元格 */
+.compact-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  row-gap: 8rpx;
+  column-gap: 0;
+  margin-bottom: 14rpx;
+  padding: 0 4rpx;
+}
+
+.compact-cell-touch-area {
+  width: 100%;
+  height: 64rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.compact-cell {
+  position: relative;
+  width: 54rpx;
+  height: 54rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: transparent;
+  border: 2rpx solid transparent;
+  box-sizing: border-box;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.c-day-num {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #94a3b8;
+  line-height: 1;
+}
+
+/* 1. 打卡无烟日 (柔和薄荷圆环) */
+.compact-cell.is-punched {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(52, 211, 153, 0.35);
+}
+
+.compact-cell.is-punched .c-day-num {
+  color: #34d399;
+  font-weight: 700;
+}
+
+/* 2. 今天 (柔和麦金圆环) */
+.compact-cell.is-today {
+  border-color: rgba(245, 158, 11, 0.55);
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.compact-cell.is-today .c-day-num {
+  color: #fbbf24;
+  font-weight: 800;
+}
+
+/* 打卡微光圆点指示 (纯净无光晕，小巧精致) */
+.c-punch-mark {
+  position: absolute;
+  bottom: 6rpx;
+  width: 6rpx;
+  height: 6rpx;
+  border-radius: 50%;
+  background: #34d399;
+}
+
+.c-today-dot {
+  position: absolute;
+  bottom: 6rpx;
+  width: 6rpx;
+  height: 6rpx;
+  border-radius: 50%;
+  background: #f59e0b;
+}
+
+.compact-cell.is-future {
+  opacity: 0.3;
+}
+
+.compact-cal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: rgba(0, 0, 0, 0.22);
+  border-radius: 14rpx;
+  padding: 8rpx 6rpx;
+}
+
+.cc-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cc-num {
+  font-size: 24rpx;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.cc-num.is-green { color: #34d399; }
+.cc-unit { font-size: 18rpx; font-weight: 500; margin-left: 2rpx; }
+.cc-label { font-size: 20rpx; color: #64748b; margin-top: 2rpx; }
+.cc-divider { width: 1px; height: 24rpx; background: rgba(255, 255, 255, 0.08); }
+
+/* ==================== 8. 意见反馈 (严格左对齐，杜绝居中) ==================== */
+.feedback-section-card {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24rpx;
+  overflow: hidden;
+  box-shadow: 0 8rpx 28rpx rgba(0, 0, 0, 0.3);
+  text-align: left;
+}
+
+.feedback-action-btn {
+  width: 100% !important;
+  padding: 22rpx 24rpx !important;
+  margin: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  line-height: normal !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  text-align: left !important;
+  box-sizing: border-box !important;
+}
+
+.feedback-action-btn::after {
+  border: none !important;
+}
+
+.fb-content-left {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 16rpx !important;
+  flex: 1 !important;
+  text-align: left !important;
+}
+
+.fb-icon-circle {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30rpx;
+  flex-shrink: 0;
+}
+
+.fb-text-box {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  text-align: left !important;
+  gap: 4rpx !important;
+  flex: 1 !important;
+}
+
+.fb-title-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 12rpx !important;
+  text-align: left !important;
+  width: 100% !important;
+}
+
+.fb-main-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #f8fafc;
+  text-align: left !important;
+}
+
+.fb-badge {
+  font-size: 20rpx;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 2rpx 10rpx;
+  border-radius: 10rpx;
+  font-weight: 600;
+}
+
+.fb-sub-title {
+  font-size: 23rpx;
+  color: #94a3b8;
+  line-height: 1.35;
+  text-align: left !important;
+  display: block !important;
+}
+
+.fb-arrow {
+  font-size: 34rpx;
+  color: #64748b;
+  font-weight: 300;
+  margin-left: 10rpx;
+  flex-shrink: 0;
+}
+
+/* ==================== 官方免责声明与健康指引 ==================== */
+.disclaimer-footer-card {
+  padding: 24rpx 28rpx;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 24rpx;
+}
+
+.disclaimer-header {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 14rpx;
+}
+
+.disclaimer-icon {
+  font-size: 26rpx;
+}
+
+.disclaimer-title {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 1rpx;
+}
+
+.disclaimer-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+  margin-bottom: 16rpx;
+}
+
+.disclaimer-p {
+  font-size: 22rpx;
+  color: #64748b;
+  line-height: 1.55;
+  text-align: justify;
+}
+
+.disclaimer-copy {
+  text-align: center;
+  padding-top: 14rpx;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.disclaimer-copy text {
+  font-size: 22rpx;
+  color: #475569;
+}
+
+/* ==================== 🏆 荣耀勋章殿堂 · 赛博成就展柜 (Tencent Games 曜石展柜标准) ==================== */
+.honor-wall-card {
+  background: linear-gradient(145deg, rgba(24, 20, 16, 0.92) 0%, rgba(15, 12, 10, 0.97) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  border-radius: 28rpx;
+  padding: 24rpx;
+  box-shadow: 0 12rpx 36rpx rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(245, 158, 11, 0.15);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.honor-top-header {
+  margin-bottom: 14rpx;
+}
+
+.sec-pill-tag.gold-pill {
+  font-size: 18rpx;
+  font-weight: 800;
+  color: #1e1204;
+  background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
+  padding: 2rpx 12rpx;
+  border-radius: 10rpx;
+}
+
+.honor-header-rate {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.hhr-text {
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #fbbf24;
+}
+
+.hhr-percent {
+  font-size: 20rpx;
+  color: #94a3b8;
+}
+
+.honor-progress-track {
+  width: 100%;
+  height: 8rpx;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 6rpx;
+  overflow: hidden;
+  margin-bottom: 24rpx;
+}
+
+.honor-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
+  box-shadow: 0 0 10rpx rgba(245, 158, 11, 0.6);
+  border-radius: 6rpx;
+  transition: width 0.4s ease;
+}
+
+.honor-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20rpx 12rpx;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.honor-badge-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.18s ease;
+}
+
+.honor-badge-item:active {
+  transform: scale(0.93);
+}
+
+.badge-emblem-shell {
+  width: 116rpx;
+  height: 116rpx;
+  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5rpx solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  transition: all 0.25s ease;
+}
+
+.honor-badge-item.is-locked .badge-emblem-shell {
+  background: rgba(18, 18, 20, 0.6);
+  border-color: rgba(255, 255, 255, 0.07);
+}
+
+.honor-badge-item.is-unlocked.tier-green .badge-emblem-shell {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.16) 0%, rgba(5, 150, 105, 0.08) 100%);
+}
+
+.honor-badge-item.is-unlocked.tier-blue .badge-emblem-shell {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.18) 0%, rgba(14, 165, 233, 0.08) 100%);
+}
+
+.honor-badge-item.is-unlocked.tier-purple .badge-emblem-shell {
+  background: linear-gradient(135deg, rgba(192, 132, 252, 0.2) 0%, rgba(147, 51, 234, 0.08) 100%);
+}
+
+.honor-badge-item.is-unlocked.tier-gold .badge-emblem-shell {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.22) 0%, rgba(217, 119, 6, 0.1) 100%);
+}
+
+.honor-badge-item.is-unlocked.tier-red .badge-emblem-shell {
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.25) 0%, rgba(225, 29, 72, 0.12) 100%);
+}
+
+.badge-lock-tag {
+  position: absolute;
+  top: 6rpx;
+  right: 6rpx;
+  width: 28rpx;
+  height: 28rpx;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lock-icon {
+  font-size: 16rpx;
+}
+
+.badge-tier-tag {
+  position: absolute;
+  top: -6rpx;
+  right: -6rpx;
+  font-size: 14rpx;
+  font-weight: 800;
+  padding: 1rpx 8rpx;
+  border-radius: 8rpx;
+  line-height: 1.2;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.5);
+}
+
+.badge-icon-emoji {
+  font-size: 52rpx;
+  transition: transform 0.2s ease;
+}
+
+.locked-emoji {
+  filter: grayscale(1) opacity(0.35);
+  transform: scale(0.9);
+}
+
+.badge-name {
+  font-size: 21rpx;
+  font-weight: 800;
+  color: #f8fafc;
+  margin-top: 10rpx;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 124rpx;
+}
+
+.honor-badge-item.is-locked .badge-name {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.badge-sub-progress {
+  font-size: 16rpx;
+  color: #94a3b8;
+  margin-top: 2rpx;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 124rpx;
+}
+
+.badge-sub-progress.done-text {
+  color: #10b981;
+  font-weight: 700;
+}
+
+/* ==================== 荣耀勋章详情弹窗 (证书海报规范) ==================== */
+.achievement-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx;
+  box-sizing: border-box;
+}
+
+.achievement-cert-card {
+  width: 100%;
+  max-width: 600rpx;
+  background: linear-gradient(150deg, #1c1815 0%, #120e0b 100%);
+  border: 1.5rpx solid rgba(245, 158, 11, 0.5);
+  border-radius: 36rpx;
+  padding: 40rpx 32rpx;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.9), 0 0 30rpx rgba(245, 158, 11, 0.2);
+  box-sizing: border-box;
+  animation: popCertCard 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes popCertCard {
+  from { transform: scale(0.85); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.cert-close-btn {
+  position: absolute;
+  top: 24rpx;
+  right: 24rpx;
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cert-halo-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 10rpx;
+  margin-bottom: 12rpx;
+}
+
+.cert-emblem-core {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 36rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2rpx solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16rpx;
+}
+
+.cert-icon-emoji {
+  font-size: 72rpx;
+}
+
+.cert-tier-pill {
+  font-size: 18rpx;
+  font-weight: 800;
+  padding: 4rpx 16rpx;
+  border-radius: 20rpx;
+  border: 1px solid;
+}
+
+.cert-title {
+  font-size: 34rpx;
+  font-weight: 900;
+  color: #f8fafc;
+  letter-spacing: 1rpx;
+  margin-bottom: 8rpx;
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.8);
+}
+
+.cert-status-badge {
+  font-size: 20rpx;
+  font-weight: 800;
+  padding: 4rpx 16rpx;
+  border-radius: 12rpx;
+  margin-bottom: 24rpx;
+}
+
+.cert-status-badge.badge-passed {
+  background: rgba(16, 185, 129, 0.16);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.cert-status-badge.badge-progress {
+  background: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.cert-desc {
+  font-size: 23rpx;
+  color: #cbd5e1;
+  text-align: center;
+  line-height: 1.5;
+  margin-bottom: 24rpx;
+  padding: 0 16rpx;
+}
+
+.cert-progress-box {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20rpx;
+  padding: 18rpx 22rpx;
+  box-sizing: border-box;
+  margin-bottom: 20rpx;
+}
+
+.cp-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 20rpx;
+  margin-bottom: 10rpx;
+}
+
+.cp-label {
+  color: #94a3b8;
+}
+
+.cp-val {
+  font-weight: 800;
+  font-size: 22rpx;
+}
+
+.cp-track {
+  width: 100%;
+  height: 10rpx;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8rpx;
+  overflow: hidden;
+}
+
+.cp-bar {
+  height: 100%;
+  border-radius: 8rpx;
+  transition: width 0.4s ease;
+}
+
+.cert-quote-box {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 14rpx 18rpx;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 18rpx;
+  margin-bottom: 28rpx;
+  box-sizing: border-box;
+}
+
+.cq-icon {
+  font-size: 26rpx;
+}
+
+.cq-text {
+  font-size: 19rpx;
+  color: #fbbf24;
+  line-height: 1.4;
+}
+
+.cert-confirm-btn {
+  width: 100%;
+  height: 80rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #1e1204;
+  font-size: 26rpx;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  box-shadow: 0 6rpx 20rpx rgba(245, 158, 11, 0.4);
+}
+
+

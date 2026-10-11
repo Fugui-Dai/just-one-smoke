@@ -1,0 +1,96 @@
+<scroll-view 
+  class="leaderboard-scroll" 
+  scroll-y="{{ true }}" 
+  enable-back-to-top="{{ true }}" 
+  enhanced="{{ true }}" 
+  bounces="{{ true }}" 
+  show-scrollbar="{{ false }}"
+>
+  <view class="leaderboard-content" style="padding-top: {{ topPadding }}px;">
+    
+    <!-- 我的排位尊贵卡片 (Sticky My Rank) -->
+    <view class="my-rank-card">
+      <view class="my-rank-top">
+        <view class="my-rank-identity">
+          <view class="my-rank-badge-num">No.{{ myRankInfo.rank || 1 }}</view>
+          <image class="my-rank-avatar-img" src="{{ profile.avatarUrl || defaultAvatarSvg }}" mode="aspectFill" />
+          <view class="my-rank-text-wrap">
+            <text class="my-rank-name">{{ profile.nickName || '微信烟友' }}</text>
+            <text class="my-rank-title">{{ myRankInfo.title || '无烟先锋' }}</text>
+          </view>
+        </view>
+        <view class="my-rank-beat">
+          <text class="beat-label">战胜全国</text>
+          <text class="beat-pct">{{ myRankInfo.beatPercent || 50 }}%</text>
+        </view>
+      </view>
+      <view class="my-rank-metrics">
+        <view class="metric-item">
+          <text class="m-val">{{ totalSubstituted }}</text>
+          <text class="m-lbl">累计替烟(支)</text>
+        </view>
+        <view class="metric-item">
+          <text class="m-val">¥{{ totalSavedMoney }}</text>
+          <text class="m-lbl">节省烟资</text>
+        </view>
+        <view class="metric-item">
+          <text class="m-val">{{ quitDays + 1 }}</text>
+          <text class="m-lbl">坚持天数</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 英雄榜单列表 (单核心替烟荣誉榜) -->
+    <view class="rank-list-wrapper">
+      <view 
+        class="rank-row-card {{ item.rank <= 3 ? 'top-' + item.rank : '' }} {{ item.isMe ? 'is-me-card' : '' }}"
+        wx:for="{{ list }}"
+        wx:key="id"
+      >
+        <!-- 排名序号 / 皇冠 -->
+        <view class="rank-number-box">
+          <text class="crown-icon" wx:if="{{ item.rank === 1 }}">👑</text>
+          <text class="crown-icon" wx:elif="{{ item.rank === 2 }}">🥈</text>
+          <text class="crown-icon" wx:elif="{{ item.rank === 3 }}">🥉</text>
+          <text class="plain-rank {{ item.isMe ? 'is-me-rank' : '' }}" wx:else>{{ item.rank }}</text>
+        </view>
+
+        <!-- 英雄头像与信息 (支持本人高清头像与微信Svg回退) -->
+        <image class="hero-avatar-img" src="{{ item.avatarUrl || defaultAvatarSvg }}" mode="aspectFill" wx:if="{{ item.avatarUrl || item.isMe }}" />
+        <view class="hero-avatar" wx:else>{{ item.avatar }}</view>
+
+        <view class="hero-info-main">
+          <view class="hero-title-line">
+            <text class="hero-name {{ item.isMe ? 'is-me-name' : '' }}">{{ item.nickname }}</text>
+            <text class="hero-title-tag" wx:if="{{ item.title }}">{{ item.title }}</text>
+            <text class="me-badge" wx:if="{{ item.isMe }}">我</text>
+          </view>
+          <text class="hero-quote">“{{ item.quote }}”</text>
+          <view class="hero-data-tags">
+            <text class="data-tag">替烟 {{ item.substituted }} 支</text>
+            <text class="data-tag green">省 ¥{{ item.savedMoney }}</text>
+            <text class="data-tag purple">坚持 {{ item.days }} 天</text>
+          </view>
+        </view>
+
+        <!-- 点赞清风互动按钮 -->
+        <view 
+          class="like-btn-wrap {{ item.isLiked ? 'liked' : '' }}"
+          catchtap="onLikeItem"
+          data-id="{{ item.id }}"
+        >
+          <text class="like-heart">{{ item.isLiked ? '❤️' : '🤍' }}</text>
+          <text class="like-count">{{ item.likes }}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部已展示前50名英雄结语 -->
+    <view class="list-end-footer" wx:if="{{ list.length >= 50 }}">
+      <view class="footer-divider-line"></view>
+      <text class="footer-text">✦ 全国前 50 席英雄榜 · 顶峰相见 ✦</text>
+      <view class="footer-divider-line"></view>
+    </view>
+
+  </view>
+</scroll-view>

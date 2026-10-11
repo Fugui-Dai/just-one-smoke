@@ -1,0 +1,23 @@
+<!-- components/custom-toast/custom-toast.wxml -->
+<view 
+  class="toast-hud-wrapper {{ visible ? 'toast-visible' : 'toast-hidden' }} {{ isExiting ? 'toast-exiting' : '' }}" 
+  style="{{ customStyle }}" 
+  catchtouchmove="preventTouchMove"
+  wx:if="{{ rendered }}"
+>
+  <view class="toast-capsule-card {{ typeClass }}">
+    <!-- 专属环境流光层 -->
+    <view class="toast-ambient-glow"></view>
+
+    <!-- 图标徽章 -->
+    <view class="toast-icon-box" wx:if="{{ iconText }}">
+      <text class="toast-icon-char">{{ iconText }}</text>
+    </view>
+
+    <!-- 文本内容 -->
+    <view class="toast-text-box">
+      <text class="toast-title-text">{{ title }}</text>
+      <text class="toast-desc-text" wx:if="{{ desc }}">{{ desc }}</text>
+    </view>
+  </view>
+</view>

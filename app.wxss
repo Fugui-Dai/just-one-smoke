@@ -1,0 +1,43 @@
+/** app.wxss **/
+page {
+  height: 100%;
+  width: 100%;
+  background-color: #080a0f;
+  color: #f3f4f6;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  box-sizing: border-box;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app-container,
+.pack-page-container,
+.mine-page-container,
+.leaderboard-page-container {
+  background-color: #080a0f;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+view, text, button, input, scroll-view, image {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+button::after {
+  border: none;
+}
+
+/* 全局统一样式：矢量返回箭头图标 (替代「<返回」文本，标准返回键) */
+.back-chevron-arrow {
+  width: 18rpx;
+  height: 18rpx;
+  border-left: 4rpx solid #fbbf24;
+  border-bottom: 4rpx solid #fbbf24;
+  transform: rotate(45deg);
+  margin-left: 6rpx;
+  box-sizing: border-box;
+}

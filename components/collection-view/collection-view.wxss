@@ -1,0 +1,4 @@
+/* components/collection-view/collection-view.wxss */
+.collection-view-placeholder {
+  display: none;
+}

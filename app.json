@@ -1,0 +1,26 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/shop/shop",
+    "pages/leaderboard/leaderboard",
+    "pages/mine/mine",
+    "pages/pack/pack",
+    "pages/vip/vip"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#080a0f",
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "我抽一支",
+    "navigationStyle": "custom",
+    "backgroundColor": "#080a0f",
+    "backgroundColorTop": "#080a0f",
+    "backgroundColorBottom": "#080a0f",
+    "backgroundTextStyle": "dark",
+    "enablePullDownRefresh": false
+  },
+  "usingComponents": {
+    "custom-toast": "/components/custom-toast/custom-toast"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

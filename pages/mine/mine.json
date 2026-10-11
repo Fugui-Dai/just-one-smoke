@@ -1,0 +1,14 @@
+{
+  "navigationStyle": "custom",
+  "navigationBarTitleText": "健康与个人中心",
+  "navigationBarBackgroundColor": "#080a0f",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#080a0f",
+  "backgroundColorTop": "#080a0f",
+  "backgroundColorBottom": "#080a0f",
+  "backgroundTextStyle": "dark",
+  "disableScroll": true,
+  "usingComponents": {
+    "stats-view": "/components/stats-view/stats-view"
+  }
+}

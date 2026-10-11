@@ -1,0 +1,42 @@
+<!-- pages/leaderboard/leaderboard.wxml -->
+<view class="leaderboard-page-container">
+
+  <!-- ==================== 顶部统一导航栏 (安全避让微信原生胶囊按钮) ==================== -->
+  <view class="custom-navbar" style="padding-top: {{ statusBarHeight }}px; height: {{ statusBarHeight + navBarHeight }}px;">
+    <view class="navbar-content" style="height: {{ navBarHeight }}px; padding-right: {{ capsuleRightSpace }}px;">
+      
+      <!-- 返回按钮 -->
+      <view class="nav-back-btn" bindtap="onNavigateBack">
+        <view class="back-chevron-arrow"></view>
+      </view>
+
+      <!-- 导航中心标题 -->
+      <view class="nav-center-title-box">
+        <text class="nav-center-title-text">全国戒烟英雄榜</text>
+      </view>
+
+      <!-- 右侧占位保持对称 -->
+      <view class="nav-placeholder"></view>
+
+    </view>
+  </view>
+
+  <!-- ==================== 排行榜内容 ==================== -->
+  <leaderboard-view 
+    list="{{ leaderboardList }}"
+    myRankInfo="{{ myRankInfo }}"
+    profile="{{ profile }}"
+    currentCategory="{{ leaderboardCategory }}"
+    totalSubstituted="{{ totalSubstituted }}"
+    totalSavedMoney="{{ totalSavedMoney }}"
+    quitDays="{{ quitDays }}"
+    topPadding="{{ statusBarHeight + navBarHeight }}"
+    bindchangecategory="onLeaderboardCategoryChange"
+    bindlike="onLeaderboardLike"
+  />
+
+  <!-- 全局腾讯级灵动微胶囊 Toast HUD -->
+  <custom-toast id="customToast" />
+
+</view>
+

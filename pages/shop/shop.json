@@ -1,0 +1,11 @@
+{
+  "navigationStyle": "custom",
+  "navigationBarTitleText": "名烟商店",
+  "navigationBarBackgroundColor": "#080a0f",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#080a0f",
+  "backgroundColorTop": "#080a0f",
+  "backgroundColorBottom": "#080a0f",
+  "backgroundTextStyle": "dark",
+  "disableScroll": true
+}

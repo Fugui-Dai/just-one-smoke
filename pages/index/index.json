@@ -1,0 +1,12 @@
+{
+  "navigationStyle": "custom",
+  "navigationBarTitleText": "我抽一支 · 拟真纯享",
+  "navigationBarBackgroundColor": "#080a0f",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#080a0f",
+  "backgroundColorTop": "#080a0f",
+  "backgroundColorBottom": "#080a0f",
+  "backgroundTextStyle": "dark",
+  "disableScroll": true,
+  "usingComponents": {}
+}

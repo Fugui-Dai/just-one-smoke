@@ -1,0 +1,1322 @@
+/* pages/vip/vip.wxss */
+
+page {
+  background-color: #07090e;
+  min-height: 100%;
+  color: #f8fafc;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.vip-page-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(circle at 50% -10%, rgba(168, 85, 247, 0.28) 0%, rgba(124, 58, 237, 0.12) 35%, #0d0718 70%, #06040b 100%);
+  box-sizing: border-box;
+  position: relative;
+  overflow-x: hidden;
+  transition: background 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.vip-page-container.theme-day {
+  background: radial-gradient(circle at 50% -10%, rgba(16, 185, 129, 0.32) 0%, rgba(5, 150, 105, 0.16) 35%, #041612 70%, #020b09 100%);
+}
+
+.vip-page-container.theme-month {
+  background: radial-gradient(circle at 50% -10%, rgba(168, 85, 247, 0.32) 0%, rgba(124, 58, 237, 0.18) 35%, #10081d 70%, #08040f 100%);
+}
+
+.vip-page-container.theme-lifetime {
+  background: radial-gradient(circle at 50% -10%, rgba(251, 191, 36, 0.35) 0%, rgba(180, 83, 9, 0.22) 35%, #160e03 70%, #080602 100%);
+}
+
+/* ==================== 顶部极光沉浸导航栏 ==================== */
+.custom-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(7, 9, 14, 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.navbar-content {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 20rpx;
+  box-sizing: border-box;
+}
+
+.nav-back-btn {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60rpx;
+  height: 60rpx;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  color: #e2e8f0;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.nav-back-btn:active {
+  transform: scale(0.92);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.nav-center-title-box {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 5;
+  gap: 8rpx;
+}
+
+.nav-crown-icon {
+  font-size: 30rpx;
+}
+
+.nav-center-title-text {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #f8fafc;
+  letter-spacing: 1rpx;
+  max-width: 420rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.nav-placeholder {
+  width: 60rpx;
+  height: 60rpx;
+}
+
+/* ==================== 原生流式滚动内容区 ==================== */
+.vip-scroll-content {
+  width: 100%;
+  padding: 24rpx;
+  padding-bottom: calc(340rpx + env(safe-area-inset-bottom, 28px));
+  display: flex;
+  flex-direction: column;
+  gap: 26rpx;
+  box-sizing: border-box;
+}
+
+/* ==================== 1. 腾讯游戏级 3D 浮雕黑金星曜 Header ==================== */
+.vip-hero-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  padding: 16rpx 20rpx 4rpx;
+}
+
+.hero-aurora-glow {
+  position: absolute;
+  top: -60rpx;
+  width: 520rpx;
+  height: 260rpx;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.45) 0%, rgba(124, 58, 237, 0.18) 55%, transparent 80%);
+  filter: blur(48px);
+  z-index: 0;
+  pointer-events: none;
+  transition: all 0.5s ease;
+}
+
+.hero-aurora-glow-secondary {
+  position: absolute;
+  top: 40rpx;
+  width: 380rpx;
+  height: 200rpx;
+  background: radial-gradient(circle, rgba(192, 132, 252, 0.25) 0%, transparent 75%);
+  filter: blur(36px);
+  z-index: 0;
+  pointer-events: none;
+  transition: all 0.5s ease;
+}
+
+.theme-day .hero-aurora-glow {
+  background: radial-gradient(circle, rgba(52, 211, 153, 0.48) 0%, rgba(16, 185, 129, 0.22) 55%, transparent 80%);
+}
+
+.theme-day .hero-aurora-glow-secondary {
+  background: radial-gradient(circle, rgba(110, 231, 183, 0.28) 0%, transparent 75%);
+}
+
+.theme-month .hero-aurora-glow {
+  background: radial-gradient(circle, rgba(192, 132, 252, 0.5) 0%, rgba(168, 85, 247, 0.25) 55%, transparent 80%);
+}
+
+.theme-month .hero-aurora-glow-secondary {
+  background: radial-gradient(circle, rgba(147, 51, 234, 0.3) 0%, transparent 75%);
+}
+
+.theme-lifetime .hero-aurora-glow {
+  background: radial-gradient(circle, rgba(254, 240, 138, 0.55) 0%, rgba(245, 158, 11, 0.28) 55%, transparent 80%);
+}
+
+.theme-lifetime .hero-aurora-glow-secondary {
+  background: radial-gradient(circle, rgba(217, 119, 6, 0.35) 0%, transparent 75%);
+}
+
+/* 腾讯游戏级漂浮星光粒子 */
+.hero-ambient-particles {
+  position: absolute;
+  top: -40rpx;
+  left: 0;
+  right: 0;
+  height: 360rpx;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.p-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(14px);
+  opacity: 0.55;
+  animation: orbFloat 6s infinite ease-in-out alternate;
+  transition: background 0.5s ease;
+}
+
+.p-orb-1 {
+  width: 130rpx;
+  height: 130rpx;
+  top: 20rpx;
+  left: 12%;
+}
+
+.p-orb-2 {
+  width: 160rpx;
+  height: 160rpx;
+  top: 10rpx;
+  right: 10%;
+  animation-delay: -2.5s;
+}
+
+.p-orb-3 {
+  width: 90rpx;
+  height: 90rpx;
+  top: 80rpx;
+  left: 48%;
+  animation-delay: -4.5s;
+}
+
+@keyframes orbFloat {
+  0% { transform: translate(0, 0) scale(0.92); opacity: 0.45; }
+  100% { transform: translate(18rpx, 24rpx) scale(1.18); opacity: 0.7; }
+}
+
+.theme-day .p-orb { background: rgba(52, 211, 153, 0.4); }
+.theme-month .p-orb { background: rgba(192, 132, 252, 0.42); }
+.theme-lifetime .p-orb { background: rgba(251, 191, 36, 0.42); }
+
+.hero-crown-wrapper {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.crown-ring-halo {
+  position: absolute;
+  top: -8rpx;
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  border: 2rpx dashed rgba(251, 191, 36, 0.4);
+  animation: rotateRing 12s linear infinite;
+}
+
+@keyframes rotateRing {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.crown-emblem {
+  width: 108rpx;
+  height: 108rpx;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffd54f 0%, #d49520 60%, #8d5d0e 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10rpx 30rpx rgba(245, 158, 11, 0.45), inset 0 2rpx 6rpx rgba(255, 255, 255, 0.6);
+  border: 2rpx solid rgba(255, 255, 255, 0.4);
+}
+
+.crown-emoji {
+  font-size: 56rpx;
+  filter: drop-shadow(0 4rpx 6rpx rgba(0, 0, 0, 0.3));
+}
+
+.crown-level-badge {
+  margin-top: 10rpx;
+  font-size: 20rpx;
+  font-weight: 800;
+  letter-spacing: 2rpx;
+  color: #1e1305;
+  background: linear-gradient(90deg, #fef08a, #f59e0b);
+  padding: 2rpx 16rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 12rpx rgba(245, 158, 11, 0.3);
+}
+
+.hero-text-block {
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6rpx;
+  margin-bottom: 12rpx;
+}
+
+.hero-main-title {
+  font-size: 40rpx;
+  font-weight: 800;
+  letter-spacing: 1.5rpx;
+  background: linear-gradient(135deg, #ffffff 0%, #fef08a 50%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  color: transparent;
+  text-shadow: 0 4rpx 20rpx rgba(245, 158, 11, 0.25);
+}
+
+.hero-sub-slogan {
+  font-size: 22rpx;
+  color: #94a3b8;
+  letter-spacing: 0.5rpx;
+}
+
+/* 用户状态栏 */
+.current-status-strip {
+  z-index: 1;
+  width: 100%;
+  max-width: 660rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14rpx 24rpx;
+  border-radius: 20rpx;
+  box-sizing: border-box;
+  font-size: 22rpx;
+  backdrop-filter: blur(12px);
+}
+
+.status-inactive {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.status-active {
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.08));
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.status-left {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.status-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 10rpx #34d399;
+}
+
+.status-inactive .status-dot {
+  background: #64748b;
+  box-shadow: none;
+}
+
+.status-title {
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+.status-right {
+  font-weight: 600;
+  color: #fbbf24;
+}
+
+.status-right.hint {
+  color: #94a3b8;
+  font-size: 22rpx;
+}
+
+/* ==================== 2. 三档定价套餐 (Horizontal 3-Tier Selector) ==================== */
+.pricing-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.section-badge-bar {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  padding-left: 6rpx;
+}
+
+.sb-dot {
+  width: 8rpx;
+  height: 24rpx;
+  border-radius: 4rpx;
+  background: #38bdf8;
+}
+
+.sb-dot.gold {
+  background: #fbbf24;
+}
+
+.sb-dot.purple {
+  background: #c084fc;
+}
+
+.sb-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.sb-note {
+  font-size: 22rpx;
+  color: #64748b;
+  margin-left: auto;
+}
+
+.pricing-cards-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+}
+
+.tier-card {
+  position: relative;
+  background: linear-gradient(165deg, rgba(26, 32, 46, 0.85) 0%, rgba(13, 18, 28, 0.95) 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24rpx;
+  padding: 24rpx 10rpx 16rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: all 0.25s ease;
+  overflow: hidden;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.3);
+}
+
+.tier-card.is-selected {
+  background: linear-gradient(165deg, rgba(45, 36, 20, 0.95) 0%, rgba(25, 20, 11, 0.98) 100%);
+  border-color: #fbbf24;
+  box-shadow: 0 12rpx 36rpx rgba(245, 158, 11, 0.35);
+  transform: translateY(-4rpx);
+}
+
+.tier-card.is-highlight {
+  border-color: rgba(251, 191, 36, 0.4);
+}
+
+/* 推荐角标 */
+.tier-tag-ribbon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(90deg, #3b82f6, #06b6d4);
+  padding: 4rpx 0;
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.5rpx;
+}
+
+.tier-tag-ribbon.ribbon-hot {
+  background: linear-gradient(90deg, #f59e0b, #ef4444);
+}
+
+.tier-name-box {
+  margin-top: 14rpx;
+  margin-bottom: 12rpx;
+}
+
+.tier-name {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #f1f5f9;
+  display: block;
+}
+
+.tier-period {
+  font-size: 22rpx;
+  color: #94a3b8;
+  margin-top: 2rpx;
+  display: block;
+}
+
+.tier-price-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  margin-bottom: 8rpx;
+}
+
+.price-currency {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #fbbf24;
+}
+
+.price-integer {
+  font-size: 48rpx;
+  font-weight: 900;
+  color: #fbbf24;
+  line-height: 1;
+  letter-spacing: -1rpx;
+  margin: 0 2rpx;
+}
+
+.tier-card.is-selected .price-integer {
+  color: #fde047;
+  text-shadow: 0 2rpx 12rpx rgba(253, 224, 71, 0.4);
+}
+
+.price-unit {
+  font-size: 20rpx;
+  color: #94a3b8;
+}
+
+.tier-daily-box {
+  margin-bottom: 6rpx;
+}
+
+.daily-label {
+  font-size: 22rpx;
+  color: #34d399;
+  font-weight: 600;
+  background: rgba(16, 185, 129, 0.12);
+  padding: 2rpx 10rpx;
+  border-radius: 12rpx;
+  display: inline-block;
+}
+
+.daily-label.gold {
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.15);
+}
+
+.tier-original-price {
+  font-size: 22rpx;
+  color: #64748b;
+  text-decoration: line-through;
+  margin-bottom: 14rpx;
+}
+
+.tier-select-circle {
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tier-select-circle.circle-active {
+  background: #fbbf24;
+  border-color: #fbbf24;
+  box-shadow: 0 0 12rpx rgba(251, 191, 36, 0.6);
+}
+
+.check-tick {
+  font-size: 20rpx;
+  color: #1e1305;
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* ==================== 3. 6 大核心特权矩阵 (Privileges Grid) ==================== */
+.privileges-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.privileges-matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16rpx;
+}
+
+.privilege-glass-card {
+  background: rgba(22, 28, 40, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 20rpx;
+  padding: 20rpx 16rpx;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.25);
+}
+
+.priv-icon-circle {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 18rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.3);
+}
+
+.priv-icon-text {
+  font-size: 32rpx;
+}
+
+.priv-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.priv-title {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.priv-subtitle {
+  font-size: 22rpx;
+  color: #94a3b8;
+  line-height: 1.35;
+}
+
+/* ==================== 4. 普通用户 vs VIP 对比表 ==================== */
+.compare-table-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.compare-card {
+  background: rgba(22, 28, 40, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 22rpx;
+  overflow: hidden;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.25);
+}
+
+.compare-thead {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  padding: 18rpx 20rpx;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.th-item {
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.th-feat {
+  text-align: left;
+}
+
+.th-vip {
+  color: #fbbf24;
+}
+
+.compare-trow {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  padding: 18rpx 20rpx;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  align-items: center;
+}
+
+.compare-trow:last-child {
+  border-bottom: none;
+}
+
+.td-item {
+  font-size: 22rpx;
+  text-align: center;
+}
+
+.td-feat {
+  text-align: left;
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+.td-free {
+  color: #64748b;
+}
+
+.td-vip {
+  color: #38bdf8;
+  font-weight: 600;
+}
+
+/* ==================== 5. 官方安全与体验保障说明 ==================== */
+.safety-guarantee-card {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 20rpx;
+  padding: 20rpx 24rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.guarantee-header {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.gh-icon {
+  font-size: 24rpx;
+}
+
+.gh-title {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.guarantee-tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.gt-item {
+  font-size: 22rpx;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.bottom-safe-spacer {
+  height: 140rpx;
+}
+
+/* ==================== 底部固定高规格收银台 (Sticky Checkout Bar) ==================== */
+.sticky-checkout-dock {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(10, 14, 23, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(251, 191, 36, 0.25);
+  box-shadow: 0 -10rpx 40rpx rgba(0, 0, 0, 0.6);
+  padding: 16rpx 24rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
+}
+
+.agreement-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  margin-bottom: 16rpx;
+  min-height: 36rpx;
+}
+
+.custom-checkbox {
+  width: 28rpx;
+  height: 28rpx;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  border-radius: 6rpx;
+  border: 2rpx solid #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.custom-checkbox.is-checked {
+  background: #fbbf24;
+  border-color: #fbbf24;
+  box-shadow: 0 0 10rpx rgba(251, 191, 36, 0.5);
+}
+
+.checkbox-tick {
+  font-size: 18rpx;
+  color: #1e1305;
+  font-weight: 900;
+  line-height: 1;
+  display: block;
+}
+
+.agreement-text {
+  font-size: 24rpx;
+  line-height: 28rpx;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+}
+
+.agreement-prefix {
+  line-height: 28rpx;
+}
+
+.agreement-link {
+  color: #fbbf24;
+  text-decoration: underline;
+  line-height: 28rpx;
+}
+
+.checkout-main-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  width: 100%;
+}
+
+.checkout-price-left {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.cpl-amount-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6rpx;
+}
+
+.cpl-label {
+  font-size: 22rpx;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.cpl-sym {
+  font-size: 26rpx;
+  color: #fbbf24;
+  font-weight: 800;
+}
+
+.cpl-price {
+  font-size: 46rpx;
+  font-weight: 900;
+  color: #fbbf24;
+  line-height: 1;
+  letter-spacing: -1rpx;
+  font-variant-numeric: tabular-nums;
+}
+
+.cpl-orig {
+  font-size: 22rpx;
+  color: #64748b;
+  text-decoration: line-through;
+  margin-left: 8rpx;
+}
+
+.cpl-tip {
+  font-size: 22rpx;
+  color: #94a3b8;
+  margin-top: 6rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* 经典尊贵曜金恒定开通大按键 (绝对定宽定高居右，切换价格绝不形变、绝不移位) */
+.checkout-cta-btn {
+  width: 270rpx;
+  min-width: 270rpx;
+  max-width: 270rpx;
+  height: 84rpx;
+  flex-shrink: 0;
+  border-radius: 42rpx;
+  background: linear-gradient(135deg, #fef08a 0%, #f59e0b 50%, #b45309 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8rpx 28rpx rgba(245, 158, 11, 0.42);
+  border: none;
+  padding: 0;
+  transition: transform 0.15s ease, opacity 0.2s ease;
+}
+
+.checkout-cta-btn:active {
+  transform: scale(0.97);
+}
+
+.checkout-cta-btn::after {
+  display: none;
+}
+
+.checkout-cta-btn.btn-disabled {
+  opacity: 0.55;
+  filter: grayscale(0.5);
+}
+
+.checkout-cta-btn.btn-disabled .btn-shine-sweep {
+  display: none;
+}
+
+/* 腾讯游戏级收银台 CTA 尊贵耀目光刃扫光 (Luminous Sweeping Light Blade) */
+.btn-shine-sweep {
+  position: absolute;
+  top: -60%;
+  left: -80rpx;
+  width: 70rpx;
+  height: 220%;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.25) 25%,
+    rgba(255, 255, 255, 0.90) 50%,
+    rgba(254, 240, 138, 0.85) 65%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(26deg);
+  animation: ctaBtnSweep 3.2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+  z-index: 1;
+}
+
+@keyframes ctaBtnSweep {
+  0% {
+    transform: translateX(-40rpx) rotate(26deg);
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  28% {
+    transform: translateX(420rpx) rotate(26deg);
+    opacity: 1;
+  }
+  32%, 100% {
+    transform: translateX(420rpx) rotate(26deg);
+    opacity: 0;
+  }
+}
+
+.btn-cta-text {
+  position: relative;
+  z-index: 2;
+  font-size: 32rpx;
+  font-weight: 900;
+  color: #1e1305;
+  letter-spacing: 2rpx;
+  white-space: nowrap;
+}
+
+/* ==================== 模态弹窗公共基础 ==================== */
+.glass-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx;
+  box-sizing: border-box;
+}
+
+.success-dialog-card {
+  width: 100%;
+  max-width: 600rpx;
+  background: linear-gradient(160deg, #1e2538 0%, #0d121f 100%);
+  border: 1.5px solid rgba(251, 191, 36, 0.4);
+  border-radius: 32rpx;
+  padding: 40rpx 32rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.6);
+}
+
+.dialog-confetti-badge {
+  font-size: 64rpx;
+  margin-bottom: 12rpx;
+}
+
+.dialog-title {
+  font-size: 34rpx;
+  font-weight: 800;
+  color: #fbbf24;
+  margin-bottom: 8rpx;
+}
+
+.dialog-subtitle {
+  font-size: 22rpx;
+  color: #94a3b8;
+  margin-bottom: 28rpx;
+}
+
+.dialog-rights-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 18rpx;
+  padding: 20rpx;
+  box-sizing: border-box;
+  margin-bottom: 32rpx;
+}
+
+.drl-item {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  font-size: 22rpx;
+  color: #e2e8f0;
+  text-align: left;
+}
+
+.drl-tick {
+  color: #34d399;
+  font-weight: 900;
+}
+
+.dialog-primary-btn {
+  width: 100%;
+  height: 80rpx;
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  border-radius: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #1e1305;
+  border: none;
+}
+
+.protocol-dialog-card {
+  width: 100%;
+  max-width: 620rpx;
+  background: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 28rpx;
+  padding: 32rpx;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.protocol-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.proto-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.proto-close-btn {
+  font-size: 32rpx;
+  color: #94a3b8;
+  padding: 8rpx;
+}
+
+.proto-scroll {
+  max-height: 480rpx;
+}
+
+.proto-content {
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+}
+
+.proto-p {
+  font-size: 22rpx;
+  color: #94a3b8;
+  line-height: 1.55;
+}
+
+/* ==================== 腾讯游戏级 3 档情绪场域氛围系统 (Tencent Emotion Mood Theme) ==================== */
+
+/* 1. 情绪药丸胶囊 (Mood Pill) */
+.theme-mood-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 6rpx 22rpx;
+  border-radius: 30rpx;
+  font-size: 22rpx;
+  font-weight: 700;
+  letter-spacing: 1rpx;
+  margin-bottom: 10rpx;
+  transition: all 0.4s ease;
+  backdrop-filter: blur(12px);
+}
+
+.mood-spark {
+  font-size: 24rpx;
+  animation: sparkPulse 2s infinite ease-in-out;
+}
+
+@keyframes sparkPulse {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.3); opacity: 1; }
+}
+
+.theme-day .theme-mood-pill {
+  background: rgba(16, 185, 129, 0.16);
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  color: #6ee7b7;
+}
+
+.theme-month .theme-mood-pill {
+  background: rgba(168, 85, 247, 0.2);
+  border: 1px solid rgba(192, 132, 252, 0.45);
+  color: #d8b4fe;
+}
+
+.theme-lifetime .theme-mood-pill {
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(251, 191, 36, 0.48);
+  color: #fde047;
+}
+
+/* 2. 动态氛围主标题与发光 */
+.theme-day .hero-main-title {
+  background: linear-gradient(135deg, #ffffff 0%, #a7f3d0 45%, #34d399 100%);
+  -webkit-background-clip: text;
+  text-shadow: 0 4rpx 24rpx rgba(16, 185, 129, 0.35);
+}
+
+.theme-month .hero-main-title {
+  background: linear-gradient(135deg, #ffffff 0%, #f3e8ff 45%, #c084fc 100%);
+  -webkit-background-clip: text;
+  text-shadow: 0 4rpx 24rpx rgba(168, 85, 247, 0.4);
+}
+
+.theme-lifetime .hero-main-title {
+  background: linear-gradient(135deg, #ffffff 0%, #fef08a 45%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  text-shadow: 0 4rpx 24rpx rgba(245, 158, 11, 0.4);
+}
+
+/* 3. 专属 3D 皇冠与徽章 */
+.theme-day .crown-emblem {
+  background: radial-gradient(circle at 35% 35%, #a7f3d0 0%, #10b981 60%, #064e3b 100%);
+  box-shadow: 0 10rpx 32rpx rgba(16, 185, 129, 0.55), inset 0 2rpx 6rpx rgba(255, 255, 255, 0.6);
+}
+
+.theme-day .crown-ring-halo {
+  border-color: rgba(52, 211, 153, 0.55);
+}
+
+.theme-day .crown-level-badge {
+  background: linear-gradient(90deg, #a7f3d0, #10b981);
+  color: #022c22;
+  box-shadow: 0 4rpx 14rpx rgba(16, 185, 129, 0.35);
+}
+
+.theme-month .crown-emblem {
+  background: radial-gradient(circle at 35% 35%, #e9d5ff 0%, #a855f7 60%, #581c87 100%);
+  box-shadow: 0 10rpx 32rpx rgba(168, 85, 247, 0.6), inset 0 2rpx 6rpx rgba(255, 255, 255, 0.6);
+}
+
+.theme-month .crown-ring-halo {
+  border-color: rgba(192, 132, 252, 0.55);
+}
+
+.theme-month .crown-level-badge {
+  background: linear-gradient(90deg, #f3e8ff, #a855f7);
+  color: #3b0764;
+  box-shadow: 0 4rpx 14rpx rgba(168, 85, 247, 0.4);
+}
+
+.theme-lifetime .crown-emblem {
+  background: radial-gradient(circle at 35% 35%, #fef08a 0%, #f59e0b 60%, #78350f 100%);
+  box-shadow: 0 10rpx 36rpx rgba(245, 158, 11, 0.65), inset 0 2rpx 8rpx rgba(255, 255, 255, 0.7);
+}
+
+.theme-lifetime .crown-ring-halo {
+  border-color: rgba(251, 191, 36, 0.6);
+}
+
+.theme-lifetime .crown-level-badge {
+  background: linear-gradient(90deg, #fef08a, #f59e0b);
+  color: #1e1305;
+  box-shadow: 0 4rpx 14rpx rgba(245, 158, 11, 0.45);
+}
+
+/* 4. 专属档位角标 */
+.ribbon-day {
+  background: linear-gradient(90deg, #10b981, #059669) !important;
+}
+
+.ribbon-month {
+  background: linear-gradient(90deg, #c084fc, #9333ea) !important;
+}
+
+.ribbon-lifetime {
+  background: linear-gradient(90deg, #f59e0b, #d97706) !important;
+}
+
+/* 5. 档位卡片专属选中辉光 */
+.tier-card.tier-card-day.is-selected {
+  background: linear-gradient(165deg, rgba(6, 78, 59, 0.95) 0%, rgba(2, 44, 34, 0.98) 100%);
+  border-color: #34d399;
+  box-shadow: 0 14rpx 38rpx rgba(16, 185, 129, 0.42);
+}
+
+.tier-card.tier-card-day.is-selected .tier-select-circle {
+  background: #34d399;
+  border-color: #34d399;
+  box-shadow: 0 0 12rpx rgba(52, 211, 153, 0.6);
+}
+
+.tier-card.tier-card-day.is-selected .price-integer,
+.tier-card.tier-card-day.is-selected .price-currency {
+  color: #34d399;
+}
+
+.tier-card.tier-card-month.is-selected {
+  background: linear-gradient(165deg, rgba(59, 7, 100, 0.95) 0%, rgba(24, 9, 44, 0.98) 100%);
+  border-color: #c084fc;
+  box-shadow: 0 14rpx 38rpx rgba(168, 85, 247, 0.48);
+}
+
+.tier-card.tier-card-month.is-selected .tier-select-circle {
+  background: #a855f7;
+  border-color: #a855f7;
+  box-shadow: 0 0 12rpx rgba(192, 132, 252, 0.6);
+}
+
+.tier-card.tier-card-month.is-selected .price-integer,
+.tier-card.tier-card-month.is-selected .price-currency {
+  color: #d8b4fe;
+}
+
+.tier-card.tier-card-lifetime.is-selected {
+  background: linear-gradient(165deg, rgba(69, 26, 3, 0.95) 0%, rgba(25, 20, 11, 0.98) 100%);
+  border-color: #fbbf24;
+  box-shadow: 0 14rpx 38rpx rgba(245, 158, 11, 0.52);
+}
+
+.tier-card.tier-card-lifetime.is-selected .tier-select-circle {
+  background: #fbbf24;
+  border-color: #fbbf24;
+  box-shadow: 0 0 12rpx rgba(251, 191, 36, 0.6);
+}
+
+.tier-card.tier-card-lifetime.is-selected .price-integer,
+.tier-card.tier-card-lifetime.is-selected .price-currency {
+  color: #fbbf24;
+}
+
+/* 6. 专属主题收银台与协议勾选 */
+.theme-day .sticky-checkout-dock {
+  border-top-color: rgba(16, 185, 129, 0.38);
+}
+
+.theme-day .cpl-sym,
+.theme-day .cpl-price {
+  color: #34d399;
+}
+
+.theme-day .custom-checkbox.is-checked {
+  background: #10b981;
+  border-color: #10b981;
+  box-shadow: 0 0 12rpx rgba(16, 185, 129, 0.55);
+}
+
+.theme-day .agreement-link {
+  color: #34d399;
+}
+
+.theme-month .sticky-checkout-dock {
+  border-top-color: rgba(168, 85, 247, 0.42);
+}
+
+.theme-month .cpl-sym,
+.theme-month .cpl-price {
+  color: #c084fc;
+}
+
+.theme-month .custom-checkbox.is-checked {
+  background: #a855f7;
+  border-color: #a855f7;
+  box-shadow: 0 0 12rpx rgba(168, 85, 247, 0.55);
+}
+
+.theme-month .agreement-link {
+  color: #c084fc;
+}
+
+.theme-lifetime .sticky-checkout-dock {
+  border-top-color: rgba(245, 158, 11, 0.45);
+}
+
+.theme-lifetime .cpl-sym,
+.theme-lifetime .cpl-price {
+  color: #fbbf24;
+}
+
+.theme-lifetime .custom-checkbox.is-checked {
+  background: #fbbf24;
+  border-color: #fbbf24;
+  box-shadow: 0 0 12rpx rgba(251, 191, 36, 0.55);
+}
+
+.theme-lifetime .agreement-link {
+  color: #fbbf24;
+}

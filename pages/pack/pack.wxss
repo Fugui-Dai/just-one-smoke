@@ -1,0 +1,2775 @@
+/* pages/pack/pack.wxss */
+
+/* ==================== 1. 全局容器与暗黑舞台背景 ==================== */
+.pack-page-container {
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle at 50% 18%, #161b26 0%, #080a0f 75%);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* ==================== 2. 自定义导航栏 ==================== */
+.custom-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(8, 10, 15, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  box-sizing: border-box;
+}
+
+.navbar-content {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 20rpx;
+  box-sizing: border-box;
+}
+
+.nav-back-btn {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60rpx;
+  height: 60rpx;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  color: #e2e8f0;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.nav-back-btn:active {
+  transform: scale(0.92);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.nav-title-box {
+  display: flex;
+  align-items: center;
+}
+
+.nav-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #f8fafc;
+  letter-spacing: 1rpx;
+}
+
+.nav-center-title-box {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.nav-center-title-text {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 1rpx;
+  max-width: 420rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.nav-sound-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26rpx;
+  margin-right: 12rpx;
+}
+
+.nav-sound-btn.muted {
+  opacity: 0.5;
+}
+
+.nav-placeholder {
+  width: 80rpx;
+}
+
+
+/* ==================== 3. 主内容区域 ==================== */
+.pack-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* 顶部烟盒信息卡 */
+.pack-meta-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14rpx 32rpx;
+  z-index: 30;
+}
+
+.brand-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.brand-main-name {
+  font-size: 32rpx;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.brand-badge-tag {
+  font-size: 18rpx;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  padding: 2rpx 10rpx;
+  border-radius: 12rpx;
+  font-weight: 600;
+}
+
+.brand-tagline {
+  font-size: 20rpx;
+  color: #94a3b8;
+  margin-top: 4rpx;
+}
+
+/* 烟盒余量胶囊 */
+.pack-inventory-pill {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+}
+
+.inv-pulse-dot {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 10rpx #10b981;
+}
+
+.inv-text {
+  font-size: 20rpx;
+  color: #34d399;
+  font-weight: 700;
+}
+
+.pack-inventory-pill.pill-low {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+.pack-inventory-pill.pill-low .inv-pulse-dot { background: #f59e0b; box-shadow: 0 0 10rpx #f59e0b; }
+.pack-inventory-pill.pill-low .inv-text { color: #fbbf24; }
+
+.pack-inventory-pill.pill-empty {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+.pack-inventory-pill.pill-empty .inv-pulse-dot { background: #ef4444; box-shadow: 0 0 10rpx #ef4444; }
+.pack-inventory-pill.pill-empty .inv-text { color: #f87171; }
+
+
+/* ==================== 4. 3D 拟真烟盒舞台 (3D Pack Stage) ==================== */
+.pack-3d-stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  perspective: 2400px;
+  -webkit-perspective: 2400px;
+}
+
+/* 3D 烟盒主体外壳容器 (严格 360x580，1:1 无损对齐真实烟盒立面切片) */
+.pack-box-wrapper {
+  position: relative;
+  width: 360rpx;
+  height: 580rpx;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  transition: transform 0.4s ease;
+  filter: drop-shadow(0 26rpx 48rpx rgba(0, 0, 0, 0.75));
+}
+
+/* 细支烟盒比例 (保持 360x580 纯画幅统一，无拉伸畸变) */
+.pack-box-wrapper.slender-box {
+  width: 360rpx;
+  height: 580rpx;
+}
+
+/* 雪茄大号木盒比例 (保持 360x580 纯画幅统一，无拉伸畸变) */
+.pack-box-wrapper.cigar-box {
+  width: 360rpx;
+  height: 580rpx;
+}
+
+/* ==================== 盒内内胆与金箔层 ==================== */
+.pack-inner-chamber {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 360rpx;
+  height: 240rpx;
+  background: #09090b;
+  border-radius: 12rpx 12rpx 0 0;
+  border-left: 2rpx solid rgba(255, 255, 255, 0.22);
+  border-right: 2rpx solid rgba(255, 255, 255, 0.22);
+  box-sizing: border-box;
+  overflow: hidden;
+  z-index: 5;
+  box-shadow: inset 0 10rpx 20rpx rgba(0, 0, 0, 0.85);
+}
+
+/* 金锡箔纸内衬 (细腻压纹微光) */
+.foil-paper-liner {
+  position: absolute;
+  inset: 0;
+  background: var(--foil-color, #f59e0b);
+  opacity: 0.92;
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.2) 0px,
+    rgba(255, 255, 255, 0.2) 2px,
+    transparent 2px,
+    transparent 6px
+  ),
+  repeating-linear-gradient(
+    -45deg,
+    rgba(0, 0, 0, 0.08) 0px,
+    rgba(0, 0, 0, 0.08) 2px,
+    transparent 2px,
+    transparent 6px
+  );
+  box-shadow: inset 0 0 16rpx rgba(0, 0, 0, 0.6);
+}
+
+.foil-notch-cutout {
+  position: absolute;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 40rpx;
+  background: #0a0a0c;
+  border-radius: 0 0 20rpx 20rpx;
+  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.6);
+}
+
+/* 真实硬盒内衬领口卡纸 (Inner Collar Frame) */
+.inner-collar-frame {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(240rpx - var(--lid-h, 168rpx) + 38rpx);
+  z-index: 8;
+  pointer-events: none;
+}
+
+.collar-u-notch {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 70%, #cbd5e1 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 -2rpx 8rpx rgba(0, 0, 0, 0.35);
+  clip-path: polygon(
+    0% 0%,
+    24% 0%,
+    32% 55%,
+    68% 55%,
+    76% 0%,
+    100% 0%,
+    100% 100%,
+    0% 100%
+  );
+  -webkit-clip-path: polygon(
+    0% 0%,
+    24% 0%,
+    32% 55%,
+    68% 55%,
+    76% 0%,
+    100% 0%,
+    100% 100%,
+    0% 100%
+  );
+}
+
+.collar-card-rim {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2rpx;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+/* 盒内过滤嘴矩阵排列 */
+.cigarettes-matrix {
+  position: absolute;
+  top: 36rpx;
+  left: 16rpx;
+  right: 16rpx;
+  bottom: 12rpx;
+  display: grid;
+  gap: 8rpx;
+  align-items: center;
+  justify-content: center;
+  z-index: 6;
+}
+
+/* 常规 20 支排列 (2 排，每排 10 支) */
+.cigarettes-matrix.standard-matrix {
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 6rpx;
+}
+
+/* 细支 20 支排列 (2 排，每排 10 支细腻小圆孔) */
+.cigarettes-matrix.slender-matrix {
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 4rpx;
+}
+
+/* 雪茄 5 支排列 (1 排 5 支大雪茄) */
+.cigarettes-matrix.cigar-matrix {
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: 1fr;
+  gap: 12rpx;
+}
+
+.cig-filter-slot {
+  width: 100%;
+  height: 100%;
+  min-height: 52rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: transform 0.2s ease;
+}
+
+.cig-filter-slot:active {
+  transform: translateY(-8rpx);
+}
+
+.cig-filter-slot.slot-pulled-out {
+  transform: translateY(-56rpx);
+  transition: transform 1.2s cubic-bezier(0.2, 0.85, 0.32, 1);
+  filter: drop-shadow(0 0 10rpx rgba(251, 191, 36, 0.7));
+}
+
+/* 立体圆柱过滤嘴 */
+.slot-filter-cylinder {
+  width: 100%;
+  height: 100%;
+  border-radius: 8rpx 8rpx 0 0;
+  position: relative;
+  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.5), inset 0 2rpx 3rpx rgba(255, 255, 255, 0.35);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.filter-top-bevel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8rpx;
+  border-radius: 50% 50% 0 0;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.filter-mini-band {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 6rpx;
+  box-shadow: 0 1rpx 3rpx rgba(0, 0, 0, 0.4);
+}
+
+.filter-bead-spark {
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  position: absolute;
+  top: 40%;
+  box-shadow: 0 0 8rpx currentColor;
+  animation: pulse-bead-spark 2s infinite ease-in-out;
+}
+
+@keyframes pulse-bead-spark {
+  0%, 100% { opacity: 0.7; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* 空凹槽 */
+.slot-empty-groove {
+  width: 100%;
+  height: 100%;
+  border-radius: 8rpx 8rpx 0 0;
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 6rpx 10rpx rgba(0, 0, 0, 0.9);
+}
+
+
+/* ==================== 3D 翻盖盒盖 (Flip-Top Lid) ==================== */
+.pack-flip-lid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 360rpx;
+  height: var(--lid-h, 168rpx);
+  z-index: 30;
+  transform-origin: top center;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  transition: transform 0.65s cubic-bezier(0.25, 1.4, 0.5, 1);
+  box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.45);
+  box-sizing: border-box;
+}
+
+/* 盒盖打开状态：向上3D翻转并与下盒身保持 100% 等宽对齐 */
+.pack-box-wrapper.lid-open .pack-flip-lid {
+  transform: rotateX(-168deg) translateY(0rpx) translateZ(1rpx);
+}
+
+.lid-face-outer {
+  position: absolute;
+  inset: 0;
+  background: var(--lid-grad, #991b1b);
+  border-radius: 12rpx 12rpx 0 0;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-bottom: none;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 14rpx;
+  overflow: hidden;
+  box-shadow: inset 0 2rpx 6rpx rgba(255, 255, 255, 0.35);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.lid-bevel-edge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4rpx;
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.lid-seal-tape {
+  align-self: center;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 2rpx 16rpx;
+  border-radius: 6rpx;
+  border: 1px solid #ffffff;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.3);
+}
+
+.seal-text {
+  font-size: 16rpx;
+  font-weight: 800;
+  color: #1e293b;
+  letter-spacing: 2rpx;
+}
+
+.lid-brand-print {
+  display: flex;
+  justify-content: center;
+}
+
+.lid-sub-text {
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #fef08a;
+  letter-spacing: 2rpx;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.5);
+}
+
+/* 真实名烟盖顶大图切片 (100% 严丝合缝，解码期由品牌同色渐变托底防黑闪) */
+.lid-face-outer.has-real-lid {
+  padding: 0;
+  background: var(--lid-grad, #161b26);
+  border: none;
+  border-radius: 12rpx 12rpx 0 0;
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.pack-lid-real-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 360rpx;
+  height: 580rpx;
+  display: block;
+  pointer-events: none;
+  filter: contrast(1.03) brightness(1.02);
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* 闭合时底部极细物理缝隙阴影 */
+.lid-bottom-slit-shadow {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2rpx;
+  background: rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+
+/* 盒盖翻转内侧 (拟真白卡纸与铝箔折边) */
+.lid-face-inner {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 60%, #e2e8f0 100%);
+  transform: rotateX(180deg);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 12rpx 12rpx 0 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: inset 0 -4rpx 12rpx rgba(0, 0, 0, 0.25);
+}
+
+/* 盒盖内翻折铝箔边 (顶部金/银箔衬边) */
+.lid-inner-foil-strip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 36rpx;
+  opacity: 0.9;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.25);
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.25) 0px,
+    rgba(255, 255, 255, 0.25) 2px,
+    transparent 2px,
+    transparent 6px
+  );
+}
+
+/* 盒盖白卡纸内衬与品牌钢印 */
+.lid-inner-cardstock {
+  position: absolute;
+  top: 40rpx;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lid-inner-watermark {
+  font-size: 16rpx;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 3rpx;
+  opacity: 0.65;
+  text-transform: uppercase;
+}
+
+/* 盒盖内侧两侧微折舌阴影 */
+.lid-dust-flap {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 14rpx;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.12), transparent);
+}
+.lid-dust-flap.right {
+  right: 0;
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.12), transparent);
+}
+
+/* ==================== 烟盒主体箱体 (Pack Main Body) ==================== */
+.pack-main-body {
+  position: absolute;
+  top: var(--lid-h, 168rpx);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 360rpx;
+  z-index: 10;
+  border-radius: 0 0 12rpx 12rpx;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* 盒身切口白色卡纸厚度剖面光边缘 */
+.body-top-rim-edge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2rpx;
+  background: rgba(255, 255, 255, 0.55);
+  z-index: 15;
+}
+
+.body-face-outer {
+  position: absolute;
+  inset: 0;
+  background: var(--box-grad, #7f1d1d);
+  border-radius: 0 0 12rpx 12rpx;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-top: none;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20rpx 18rpx 16rpx 18rpx;
+  box-shadow: inset 0 2rpx 4rpx rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+}
+
+.body-face-outer.has-real-body {
+  padding: 0;
+  background: var(--box-grad, #161b26);
+  border: none;
+  border-radius: 0 0 12rpx 12rpx;
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.pack-body-real-img {
+  position: absolute;
+  top: calc(-1 * var(--lid-h, 168rpx));
+  left: 0;
+  width: 360rpx;
+  height: 580rpx;
+  display: block;
+  pointer-events: none;
+  filter: contrast(1.03) brightness(1.02);
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* 品牌中央徽标 */
+.brand-emblem-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10rpx 0;
+  width: 100%;
+}
+
+.emblem-big-title {
+  font-size: 52rpx;
+  font-weight: 900;
+  color: var(--accent-color, #fbbf24);
+  letter-spacing: 6rpx;
+  text-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.7);
+  font-family: serif;
+}
+
+.emblem-sub-title {
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #fef08a;
+  letter-spacing: 3rpx;
+  margin-top: 6rpx;
+}
+
+/* 1. 中华天安门 */
+.emblem-tiananmen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 2rpx solid #f59e0b;
+  outline: 1rpx solid rgba(245, 158, 11, 0.4);
+  padding: 12rpx 28rpx;
+  border-radius: 8rpx;
+  background: rgba(0, 0, 0, 0.15);
+}
+.tiananmen-facade-gate {
+  font-size: 40rpx;
+  filter: drop-shadow(0 2rpx 6rpx rgba(245, 158, 11, 0.6));
+}
+.chunghwa-font {
+  color: #fde047;
+  font-size: 56rpx;
+  letter-spacing: 8rpx;
+}
+.emblem-star-row {
+  font-size: 20rpx;
+  color: #fde047;
+  letter-spacing: 6rpx;
+  margin-top: 4rpx;
+}
+.emblem-eng-sub {
+  font-size: 16rpx;
+  color: #fbbf24;
+  letter-spacing: 4rpx;
+  font-weight: 800;
+}
+
+/* 2. 炫赫门 */
+.emblem-dragon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.nanjing-red-seal-big {
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 20rpx;
+  font-weight: 900;
+  padding: 2rpx 12rpx;
+  border-radius: 4rpx;
+  border: 1rpx solid #fef08a;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.5);
+  margin-bottom: 6rpx;
+}
+.xuanhemen-font {
+  color: #fde047;
+  font-size: 50rpx;
+  letter-spacing: 6rpx;
+}
+
+/* 3. 利群三段 */
+.emblem-liqun {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+.liqun-gold-separator {
+  width: 80%;
+  height: 4rpx;
+  background: linear-gradient(90deg, transparent 0%, #f59e0b 50%, transparent 100%);
+  margin-bottom: 8rpx;
+}
+.liqun-font {
+  color: #f8fafc;
+  text-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.8);
+  font-size: 54rpx;
+}
+
+/* 4. 黄鹤楼1916 */
+.emblem-1916 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 2rpx solid #b45309;
+  border-radius: 50%;
+  width: 190rpx;
+  height: 190rpx;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.15);
+}
+.bronze-crane-tower {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  background: #f59e0b;
+  box-shadow: 0 0 10rpx #f59e0b;
+}
+.hhl-font {
+  color: #fef3c7;
+  font-size: 44rpx;
+}
+.emblem-vintage-year {
+  font-size: 24rpx;
+  font-weight: 900;
+  color: #fde047;
+  letter-spacing: 3rpx;
+}
+
+/* 5. 高希霸古巴标 */
+.emblem-cohiba {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.cohiba-checker-board {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4rpx;
+  margin-bottom: 8rpx;
+}
+.c-dot {
+  width: 12rpx;
+  height: 12rpx;
+  background: #ffffff;
+}
+.cohiba-taino-gold-ribbon {
+  width: 120rpx;
+  height: 6rpx;
+  background: #f59e0b;
+  margin-bottom: 6rpx;
+}
+.emblem-cohiba-title {
+  font-size: 42rpx;
+  font-weight: 900;
+  color: #1e1b4b;
+  background: #f59e0b;
+  padding: 2rpx 18rpx;
+  border-radius: 4rpx;
+  letter-spacing: 4rpx;
+}
+.emblem-cohiba-habana {
+  font-size: 18rpx;
+  font-weight: 700;
+  color: #cbd5e1;
+  letter-spacing: 2rpx;
+  margin-top: 4rpx;
+}
+
+/* 6. 万宝路 Chevron */
+.emblem-marlboro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.marlboro-chevron {
+  width: 120rpx;
+  height: 16rpx;
+  background: #38bdf8;
+  clip-path: polygon(0 0, 50% 100%, 100% 0, 100% 40%, 50% 100%, 0 40%);
+  margin-bottom: 6rpx;
+}
+.emblem-marlboro-name {
+  font-size: 44rpx;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 2rpx;
+}
+.emblem-ice-tag {
+  font-size: 20rpx;
+  font-weight: 800;
+  color: #38bdf8;
+  margin-top: 6rpx;
+}
+
+/* 7. 芙蓉王 */
+.emblem-crown {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.crown-gold-icon {
+  font-size: 48rpx;
+  filter: drop-shadow(0 2rpx 8rpx rgba(245, 158, 11, 0.7));
+}
+.crown-blue-ribbon {
+  background: #1e3a8a;
+  color: #fef08a;
+  font-size: 16rpx;
+  font-weight: 800;
+  padding: 2rpx 16rpx;
+  border-radius: 12rpx;
+  letter-spacing: 2rpx;
+  margin-top: 4rpx;
+}
+
+/* 8. 白沙 */
+.emblem-baisha {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.baisha-shield-ring {
+  background: #1e3a8a;
+  border: 2rpx solid #fbbf24;
+  width: 70rpx;
+  height: 70rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6rpx;
+}
+.baisha-crane-icons {
+  font-size: 34rpx;
+}
+
+/* 9. 贵烟跨越 */
+.emblem-kuayue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+.kuayue-bead-spark {
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 50%;
+  background: #f97316;
+  box-shadow: 0 0 16rpx #f97316;
+  margin-bottom: 6rpx;
+  animation: pulse-bead-spark 2s infinite ease-in-out;
+}
+
+/* 10. 大卫杜夫签名 */
+.emblem-davidoff {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.davidoff-signature {
+  font-size: 48rpx;
+  font-family: serif;
+  font-style: italic;
+  font-weight: 700;
+  color: #1e293b;
+}
+.davidoff-geneve {
+  font-size: 18rpx;
+  font-weight: 600;
+  color: #475569;
+  letter-spacing: 2rpx;
+}
+
+/* 11. 红塔山 */
+.emblem-hongtashan {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.hongtashan-pagoda-badge {
+  width: 50rpx;
+  height: 50rpx;
+  border-radius: 50%;
+  border: 2rpx solid #dc2626;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6rpx;
+}
+.pagoda-gold-sun {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  background: #dc2626;
+}
+
+/* 12. 红双喜 */
+.emblem-shuangxi {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.shuangxi-gold-medallion {
+  width: 70rpx;
+  height: 70rpx;
+  border-radius: 50%;
+  border: 3rpx solid #fde047;
+  background: rgba(253, 224, 71, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6rpx;
+}
+.shuangxi-xi-glyph {
+  font-size: 40rpx;
+  font-weight: 900;
+  color: #fde047;
+}
+
+/* 13. 宽窄 */
+.emblem-kuanzhai {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.kuanzhai-name-plaque {
+  background: #78350f;
+  color: #fde047;
+  font-size: 32rpx;
+  font-weight: 900;
+  padding: 4rpx 28rpx;
+  border-radius: 4rpx;
+  border: 1rpx solid #f59e0b;
+  letter-spacing: 8rpx;
+  margin-bottom: 6rpx;
+}
+
+/* 14. 中南海 */
+.emblem-zhongnanhai {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.znh-font {
+  color: #0f172a;
+}
+
+/* 底部官方健康警示框 (真实两段式标准) */
+.pack-warning-banner {
+  background: rgba(0, 0, 0, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8rpx;
+  padding: 8rpx 10rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: inset 0 1rpx 3rpx rgba(0, 0, 0, 0.6);
+}
+
+.warning-company-header {
+  font-size: 16rpx;
+  font-weight: 700;
+  color: #cbd5e1;
+  letter-spacing: 2rpx;
+  margin-bottom: 2rpx;
+}
+
+.warning-line {
+  font-size: 18rpx;
+  font-weight: 700;
+  color: #f8fafc;
+  letter-spacing: 1rpx;
+  text-align: center;
+}
+
+.tar-spec-line {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  margin-top: 4rpx;
+}
+
+.spec-tag {
+  font-size: 14rpx;
+  color: #94a3b8;
+}
+
+.spec-dot-divider {
+  font-size: 14rpx;
+  color: #64748b;
+}
+
+/* 锁定磨砂遮罩 */
+.pack-locked-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 14, 22, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 25;
+}
+
+.lock-shield-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24rpx;
+}
+
+.lock-shield-icon {
+  font-size: 52rpx;
+  margin-bottom: 8rpx;
+}
+
+.lock-shield-title {
+  font-size: 26rpx;
+  font-weight: 800;
+  color: #f8fafc;
+  margin-bottom: 6rpx;
+}
+
+.lock-shield-desc {
+  font-size: 20rpx;
+  color: #f87171;
+}
+
+
+/* ==================== 抽出一支烟的飞升动画 (Pulled Cigarette) ==================== */
+.pulled-cigarette-flight {
+  position: absolute;
+  top: 100rpx;
+  left: 50%;
+  transform: translateX(-50%) translateY(40rpx) scale(0.95);
+  width: 26rpx;
+  height: 380rpx;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  opacity: 0;
+  /* 0.8s 优雅丝滑自然飞升抽出 */
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease, filter 0.8s ease;
+}
+
+.pulled-cigarette-flight.in-flight {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-235rpx) rotate(-2deg) scale(1.06);
+  filter: drop-shadow(0 16rpx 36rpx rgba(245, 158, 11, 0.65));
+}
+
+.flight-cig-paper {
+  flex: 1;
+  background: var(--paper-bg, #fffdf5);
+  border-radius: 4rpx 4rpx 0 0;
+  box-shadow: inset 2rpx 0 4rpx rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+.flight-cig-fire-tip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6rpx;
+  background: #374151;
+}
+
+.flight-cig-filter {
+  height: 90rpx;
+  background: var(--filter-bg, #991b1b);
+  border-radius: 0 0 4rpx 4rpx;
+  position: relative;
+  box-shadow: inset 0 2rpx 4rpx rgba(255, 255, 255, 0.35);
+}
+
+.flight-filter-band {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8rpx;
+  background: var(--band-bg, #f59e0b);
+}
+
+.flight-bead-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  box-shadow: 0 0 8rpx currentColor;
+}
+
+.flight-sparks {
+  position: absolute;
+  inset: 0;
+}
+.spark-dot {
+  position: absolute;
+  width: 6rpx;
+  height: 6rpx;
+  border-radius: 50%;
+  background: #ffbe3b;
+  box-shadow: 0 0 10rpx #ffbe3b;
+  animation: spark-fly 0.6s infinite ease-out;
+}
+.s1 { top: 20%; left: -16rpx; }
+.s2 { top: 60%; right: -16rpx; animation-delay: 0.2s; }
+.s3 { top: 80%; left: -10rpx; animation-delay: 0.4s; }
+
+@keyframes spark-fly {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0) translate(10rpx, -20rpx); opacity: 0; }
+}
+
+
+/* 烟盒下方专属品牌经典标语 */
+.pack-slogan-card {
+  margin-top: 24rpx;
+  max-width: 90%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slogan-ribbon {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.16) 0%, rgba(22, 28, 40, 0.85) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.5);
+  border-radius: 28rpx;
+  padding: 10rpx 28rpx;
+  animation: fadeInSlogan 0.35s ease;
+}
+
+.slogan-quote {
+  font-size: 26rpx;
+  color: #fbbf24;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.slogan-text {
+  font-size: 22rpx;
+  color: #fef08a;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.8);
+  text-align: center;
+}
+
+@keyframes fadeInSlogan {
+  from { opacity: 0; transform: translateY(12rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 底部操作提示标签 */
+.pack-interaction-hint {
+  margin-top: 24rpx;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 8rpx 24rpx;
+  border-radius: 24rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+.hint-icon { font-size: 20rpx; }
+.hint-text { font-size: 20rpx; color: #cbd5e1; font-weight: 500; }
+
+
+/* ==================== 5. 底部立体选烟操作区 (Bottom Dock) ==================== */
+.pack-bottom-dock {
+  background: rgba(14, 18, 28, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 36rpx 36rpx 0 0;
+  padding: 20rpx 24rpx;
+  padding-bottom: calc(28rpx + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
+}
+
+.brand-scroll-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14rpx;
+}
+
+.scroll-heading {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.scroll-count-tag {
+  font-size: 18rpx;
+  color: #94a3b8;
+}
+
+/* 品牌横滑预览栏 */
+.brand-coverflow-scroll {
+  white-space: nowrap;
+  display: flex;
+  gap: 16rpx;
+  padding-bottom: 16rpx;
+}
+
+.brand-card-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 14rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12rpx 18rpx;
+  border-radius: 20rpx;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.brand-card-item.is-active-brand {
+  background: rgba(245, 158, 11, 0.16);
+  border-color: #f59e0b;
+  box-shadow: 0 0 16rpx rgba(245, 158, 11, 0.35);
+}
+
+.brand-card-item.is-locked-brand {
+  opacity: 0.55;
+}
+
+.mini-pack-preview {
+  width: 36rpx;
+  height: 52rpx;
+  border-radius: 6rpx;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mini-lid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 14rpx;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.mini-logo-text {
+  font-size: 12rpx;
+  font-weight: 900;
+  color: #ffffff;
+}
+
+.mini-meta-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.mini-brand-name {
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.mini-bottom-row {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  margin-top: 4rpx;
+}
+
+.mini-price {
+  font-size: 18rpx;
+  font-weight: 700;
+  color: #fbbf24;
+}
+
+.mini-active-status {
+  font-size: 16rpx;
+  color: #34d399;
+}
+
+.mini-lock-status {
+  font-size: 16rpx;
+  color: #ef4444;
+}
+
+/* 核心操作三连键 */
+.action-buttons-row {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 8rpx;
+}
+
+.action-btn-card {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24rpx;
+  padding: 16rpx 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.action-btn-card:active {
+  transform: scale(0.94);
+}
+
+.btn-icon {
+  font-size: 36rpx;
+}
+
+.btn-text-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.btn-main-title {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.btn-sub-note {
+  font-size: 18rpx;
+  color: #94a3b8;
+  margin-top: 2rpx;
+}
+
+/* 核心抽烟大按键 (单一大按键全宽华丽排版) */
+.action-btn-card.pull-btn {
+  flex: 1;
+  width: 100%;
+  padding: 22rpx 32rpx;
+  background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
+  border-color: #fde047;
+  border-radius: 32rpx;
+  box-shadow: 0 10rpx 28rpx rgba(245, 158, 11, 0.45);
+}
+
+.action-btn-card.pull-btn .btn-icon {
+  font-size: 42rpx;
+}
+
+.action-btn-card.pull-btn .btn-main-title {
+  color: #0b0f19;
+  font-size: 30rpx;
+  font-weight: 900;
+  letter-spacing: 2rpx;
+}
+
+.action-btn-card.pull-btn .btn-sub-note {
+  color: #451a03;
+  font-size: 20rpx;
+  font-weight: 700;
+  margin-top: 2rpx;
+}
+
+.action-btn-card.btn-disabled {
+  opacity: 0.5;
+  filter: grayscale(1);
+}
+
+
+/* ==================== 6. 取烟成功装配弹窗 (Modal) ==================== */
+.glass-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 36rpx;
+  box-sizing: border-box;
+}
+
+.drawn-confirm-card {
+  width: 100%;
+  max-width: 620rpx;
+  background: linear-gradient(145deg, #1e2538 0%, #0d121f 100%);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 36rpx;
+  padding: 40rpx 32rpx;
+  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.drawn-badge-glow {
+  font-size: 64rpx;
+  margin-bottom: 10rpx;
+}
+
+.drawn-title {
+  font-size: 32rpx;
+  font-weight: 800;
+  color: #f8fafc;
+  margin-bottom: 8rpx;
+}
+
+.drawn-subtitle {
+  font-size: 22rpx;
+  color: #94a3b8;
+  margin-bottom: 28rpx;
+}
+
+.drawn-preview-box {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24rpx;
+  padding: 24rpx;
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  margin-bottom: 30rpx;
+  box-sizing: border-box;
+}
+
+.preview-cig-cylinder {
+  width: 24rpx;
+  height: 120rpx;
+  border-radius: 6rpx;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.45);
+  flex-shrink: 0;
+}
+
+.preview-filter {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 36rpx;
+}
+
+.preview-band {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4rpx;
+}
+
+.preview-bead {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6rpx;
+  height: 6rpx;
+  border-radius: 50%;
+}
+
+.preview-meta {
+  flex: 1;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+}
+
+.pm-name {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #f8fafc;
+  margin-bottom: 4rpx;
+}
+
+.pm-spec {
+  font-size: 20rpx;
+  color: #fbbf24;
+  margin-bottom: 4rpx;
+}
+
+.pm-note {
+  font-size: 18rpx;
+  color: #94a3b8;
+}
+
+.drawn-actions-stack {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.primary-smoke-btn {
+  width: 100%;
+  background: linear-gradient(90deg, #d97706 0%, #f59e0b 100%);
+  color: #0b0f19;
+  font-size: 28rpx;
+  font-weight: 800;
+  border-radius: 36rpx;
+  padding: 20rpx 0;
+  line-height: 1.4;
+  border: none;
+}
+
+.secondary-stay-btn {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  font-size: 24rpx;
+  font-weight: 600;
+  border-radius: 36rpx;
+  padding: 16rpx 0;
+  line-height: 1.4;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ==================== 8. 模式切换胶囊 (货架全景 vs 3D翻盖) ==================== */
+.mode-switch-capsule {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 32rpx;
+  padding: 4rpx;
+  gap: 4rpx;
+}
+
+.mode-capsule-item {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 26rpx;
+  font-size: 20rpx;
+  color: #94a3b8;
+  transition: all 0.25s ease;
+}
+
+.mode-capsule-item.active-mode {
+  background: linear-gradient(90deg, #d97706 0%, #f59e0b 100%);
+  color: #0b0f19;
+  font-weight: 700;
+  box-shadow: 0 2rpx 8rpx rgba(245, 158, 11, 0.35);
+}
+
+.mc-icon {
+  font-size: 22rpx;
+}
+
+.mc-text {
+  font-size: 20rpx;
+}
+
+/* ==================== 9. 名烟精品陈列货架视图 (The Shelf Showcase) ==================== */
+.shelf-view-scroll {
+  width: 100%;
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+.shelf-content-container {
+  padding: 16rpx 16rpx 160rpx 16rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.shelf-banner-card {
+  width: 100%;
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.9) 100%);
+  border: 1px solid rgba(251, 191, 36, 0.25);
+  border-radius: 28rpx;
+  padding: 24rpx 28rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.s-banner-badge {
+  font-size: 18rpx;
+  color: #fbbf24;
+  font-weight: 700;
+  letter-spacing: 1rpx;
+  margin-bottom: 6rpx;
+}
+
+.s-banner-title {
+  font-size: 30rpx;
+  font-weight: 800;
+  color: #f8fafc;
+  display: block;
+}
+
+.s-banner-sub {
+  font-size: 20rpx;
+  color: #94a3b8;
+  margin-top: 4rpx;
+  display: block;
+}
+
+.s-banner-count {
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 20rpx;
+  padding: 12rpx 20rpx;
+  text-align: center;
+}
+
+.s-count-num {
+  font-size: 34rpx;
+  font-weight: 800;
+  color: #fbbf24;
+  display: block;
+  line-height: 1;
+}
+
+.s-count-label {
+  font-size: 18rpx;
+  color: #cbd5e1;
+}
+
+/* 分类筛选胶囊条 */
+.category-filter-strip {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  overflow-x: auto;
+  padding-bottom: 6rpx;
+}
+
+.cat-filter-item {
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10rpx 24rpx;
+  border-radius: 30rpx;
+  font-size: 22rpx;
+  color: #94a3b8;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.cat-filter-item.active-cat {
+  background: rgba(245, 158, 11, 0.18);
+  border-color: #f59e0b;
+  color: #fbbf24;
+  font-weight: 700;
+}
+
+/* 货架三列立体陈列网格 (3-Column Tobacco Showcase) */
+.shelf-display-cabinet {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14rpx;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.shelf-pack-card {
+  background: rgba(18, 23, 34, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18rpx;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.4);
+  box-sizing: border-box;
+}
+
+.shelf-pack-card.is-currently-equipped {
+  border-color: #f59e0b;
+  box-shadow: 0 0 20rpx rgba(245, 158, 11, 0.3);
+}
+
+.shelf-pack-card.is-locked-pack {
+  filter: grayscale(100%);
+  -webkit-filter: grayscale(100%);
+  opacity: 0.55;
+}
+
+.shelf-pack-card:active {
+  transform: scale(0.97);
+}
+
+/* 正在使用右上角高亮浮标 */
+.shelf-equipped-badge {
+  position: absolute;
+  top: 8rpx;
+  right: 8rpx;
+  z-index: 10;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #0b0f19;
+  font-size: 14rpx;
+  font-weight: 800;
+  padding: 2rpx 8rpx;
+  border-radius: 10rpx;
+  box-shadow: 0 2rpx 8rpx rgba(245, 158, 11, 0.5);
+  pointer-events: none;
+}
+
+.card-ambient-spot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 90rpx;
+  opacity: 0.18;
+  filter: blur(20rpx);
+  pointer-events: none;
+}
+
+/* 烟盒正面立面 Facade (100% 还原真实生活名烟壳质感) */
+.shelf-pack-facade {
+  height: 260rpx;
+  width: 100%;
+  position: relative;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 6rpx 6rpx 4rpx 6rpx;
+  box-sizing: border-box;
+  overflow: hidden;
+  box-shadow: inset 0 2rpx 4rpx rgba(255, 255, 255, 0.2);
+}
+
+/* 真实高清烟盒图片模式：微缩精致陈列，完整展现名烟立面 */
+.shelf-pack-facade.has-real-pack {
+  height: 250rpx;
+  padding: 10rpx 12rpx 8rpx 12rpx;
+  background: radial-gradient(circle at 50% 40%, #151d2f 0%, #0b0f19 85%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.shelf-pack-real-img {
+  width: 100%;
+  height: 100%;
+  max-height: 232rpx;
+  display: block;
+  object-fit: contain;
+  border-radius: 8rpx;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  filter: drop-shadow(0 8rpx 16rpx rgba(0, 0, 0, 0.7)) contrast(1.03) brightness(1.02);
+  image-rendering: -webkit-optimize-contrast;
+}
+
+.shelf-pack-card:active .shelf-pack-real-img {
+  transform: scale(1.04);
+}
+
+/* 细支烟盒外观比例 */
+.shelf-pack-facade.slender-facade {
+  padding: 6rpx 10rpx 4rpx 10rpx;
+}
+.shelf-pack-facade.has-real-pack.slender-facade {
+  padding: 10rpx 12rpx 8rpx 12rpx;
+}
+
+/* ==================== 表面高光反射与游戏级动态扫光层 (Cellophane Shimmer Sweep) ==================== */
+.facade-sheen-overlay {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 5;
+  border-radius: inherit;
+}
+
+/* 腾讯设计级 12° 微倾发丝全息光刃 (默认静止，进入页面静置聚焦后再低频启动) */
+.facade-sheen-overlay::after {
+  content: '';
+  position: absolute;
+  top: -40%;
+  left: -80%;
+  width: 48%;
+  height: 180%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 46%,
+    rgba(255, 255, 255, 0.22) 49%,
+    rgba(255, 255, 255, 0.62) 50%,
+    rgba(255, 255, 255, 0.22) 51%,
+    transparent 54%,
+    transparent 100%
+  );
+  transform: rotate(12deg);
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: none;
+}
+
+/* 静置期过后启动全货架低频舒缓流光 (10s 长周期：前段静置留白，中段轻扫，后段静置) */
+.shelf-pack-card .facade-sheen-overlay.is-sheen-active::after {
+  animation: cardSheenSweep 10s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+  animation-delay: 0s;
+}
+
+/* 当前使用中的烟：SSR 尊享香槟金温润发丝光刃 */
+.shelf-pack-card.is-currently-equipped .facade-sheen-overlay::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 46%,
+    rgba(245, 158, 11, 0.30) 49%,
+    rgba(254, 240, 138, 0.75) 50%,
+    rgba(245, 158, 11, 0.30) 51%,
+    transparent 54%,
+    transparent 100%
+  );
+  animation: none;
+}
+
+.shelf-pack-card.is-currently-equipped .facade-sheen-overlay.is-sheen-active::after {
+  animation: cardSheenSweep 10s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+  animation-delay: 0s;
+}
+
+/* 触控交互：点击时微按压反馈，保持全局扫光时间轴同步不失步 */
+.shelf-pack-card:active {
+  transform: scale(0.97);
+  transition: transform 0.15s ease;
+}
+
+/* 3D 舞台开盒视图彻底关闭扫光 */
+.pack-3d-stage .facade-sheen-overlay {
+  display: none !important;
+}
+
+@keyframes cardSheenSweep {
+  0%, 35% {
+    transform: translateX(0) rotate(12deg);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  68% {
+    transform: translateX(380%) rotate(12deg);
+    opacity: 1;
+  }
+  74%, 100% {
+    transform: translateX(380%) rotate(12deg);
+    opacity: 0;
+  }
+}
+
+@keyframes cardSheenQuickSweep {
+  0% {
+    transform: translateX(0) rotate(12deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(380%) rotate(12deg);
+    opacity: 1;
+  }
+}
+
+/* 翻盖与顶部封签 */
+.facade-lid {
+  height: 30rpx;
+  width: 100%;
+  border-radius: 4rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4rpx;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 2;
+}
+
+/* 极细金色防伪拉带 (Tear Tape) */
+.facade-gold-tear-tape {
+  width: 40rpx;
+  height: 3rpx;
+  background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 50%, #d97706 100%);
+  box-shadow: 0 0 4rpx rgba(245, 158, 11, 0.8);
+  border-radius: 2rpx;
+}
+
+/* 真实烟盒原厂封签贴条 */
+.facade-seal-tape {
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 4rpx;
+  padding: 1rpx 6rpx;
+  font-size: 10rpx;
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+  letter-spacing: 0.5rpx;
+}
+
+/* 翻盖 3D 开口凹凸压痕线 */
+.facade-lid-crease {
+  width: 100%;
+  height: 2rpx;
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: 0 1rpx 0 rgba(255, 255, 255, 0.15);
+  margin: 2rpx 0;
+}
+
+/* 盒身中央真实名烟图腾核心区 */
+.facade-emblem-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rpx 0;
+  max-width: 100%;
+  position: relative;
+  z-index: 2;
+}
+
+.art-brand-title {
+  font-size: 20rpx;
+  font-weight: 900;
+  color: #f8fafc;
+  letter-spacing: 1rpx;
+  text-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.7);
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+/* 1. 软中华：天安门双金线华表五星 */
+.facade-art-chunghwa {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.mini-gold-frame {
+  border: 1px solid #f59e0b;
+  outline: 1px solid rgba(245, 158, 11, 0.35);
+  padding: 2rpx 14rpx;
+  border-radius: 4rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.mini-tiananmen-icon {
+  font-size: 18rpx;
+  line-height: 1;
+}
+.art-stars-line {
+  font-size: 11rpx;
+  color: #fde047;
+  letter-spacing: 2rpx;
+  line-height: 1;
+}
+
+/* 2. 南京·炫赫门：金陵龙纹滚边、红方印、金隶书 */
+.facade-art-xuanhemen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.mini-dragon-filigree {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+.nanjing-red-stamp {
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 11rpx;
+  font-weight: 900;
+  padding: 1rpx 4rpx;
+  border-radius: 2rpx;
+  border: 1rpx solid #fef08a;
+  line-height: 1.2;
+}
+.gold-calligraphy {
+  color: #fde047;
+}
+
+/* 3. 利群：经典红灰三段色块、双金线隔离、草书「利群」 */
+.facade-art-liqun {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+.liqun-gold-band {
+  width: 70%;
+  height: 2rpx;
+  background: #f59e0b;
+  margin-bottom: 2rpx;
+}
+.liqun-title {
+  color: #f8fafc;
+  font-size: 22rpx;
+}
+.art-eng-sub {
+  font-size: 10rpx;
+  color: #e2e8f0;
+  letter-spacing: 1rpx;
+}
+
+/* 4. 黄鹤楼1916：双环铜塔与复古1916 */
+.facade-art-1916 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.mini-crane-ring {
+  border: 1px solid #78350f;
+  border-radius: 50%;
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.12);
+}
+.art-ancient-text {
+  font-size: 13rpx;
+  font-weight: 800;
+  color: #78350f;
+  line-height: 1;
+}
+.art-year-1916 {
+  font-size: 12rpx;
+  font-weight: 900;
+  color: #b45309;
+  letter-spacing: 1rpx;
+  line-height: 1;
+}
+
+/* 5. 高希霸：3排黑底白点棋盘格、金条、COHIBA */
+.facade-art-cohiba {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.mini-cohiba-checker {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 2rpx;
+  margin-bottom: 2rpx;
+}
+.mini-c-dot {
+  width: 5rpx;
+  height: 5rpx;
+  background: #ffffff;
+}
+.mini-taino-gold-bar {
+  width: 60rpx;
+  height: 3rpx;
+  background: #f59e0b;
+  margin-bottom: 2rpx;
+}
+.art-cohiba-title {
+  font-size: 17rpx;
+  font-weight: 900;
+  color: #0b0f19;
+  background: #f59e0b;
+  padding: 1rpx 8rpx;
+  border-radius: 2rpx;
+  letter-spacing: 1rpx;
+}
+
+/* 6. 万宝路：锐角冰蓝山峰V槽与ICE BLAST */
+.facade-art-marlboro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.mini-marlboro-chevron {
+  width: 50rpx;
+  height: 8rpx;
+  background: #38bdf8;
+  clip-path: polygon(0 0, 50% 100%, 100% 0, 100% 40%, 50% 100%, 0 40%);
+  margin-bottom: 2rpx;
+}
+.art-marlboro-text {
+  font-size: 18rpx;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 1rpx;
+}
+.art-ice-badge {
+  font-size: 10rpx;
+  font-weight: 800;
+  color: #38bdf8;
+}
+
+/* 7. 芙蓉王：宝蓝盾徽与金色王冠 👑 */
+.facade-art-furongwang {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.mini-royal-shield {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(30, 58, 138, 0.4);
+  padding: 2rpx 10rpx;
+  border-radius: 8rpx;
+  border: 1px solid #f59e0b;
+}
+.mini-crown-glyph {
+  font-size: 18rpx;
+  line-height: 1;
+}
+
+/* 8. 白沙：双鹤展翅椭圆徽章 */
+.facade-art-baisha {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.mini-baisha-oval {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+  background: rgba(30, 58, 138, 0.85);
+  border: 1px solid #fbbf24;
+  padding: 2rpx 8rpx;
+  border-radius: 12rpx;
+}
+.baisha-cranes {
+  font-size: 14rpx;
+  line-height: 1;
+}
+.art-baisha-title {
+  font-size: 16rpx;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+/* 9. 贵烟跨越：纯黑星空、流星金色弧线、橙爆珠光环 */
+.facade-art-kuayue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+.mini-orange-bead-halo {
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  background: #f97316;
+  box-shadow: 0 0 8rpx #f97316;
+  margin-bottom: 2rpx;
+}
+
+/* 10. 大卫杜夫：象牙白草书签名 */
+.facade-art-davidoff {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.art-davidoff-script {
+  font-size: 22rpx;
+  font-family: serif;
+  font-style: italic;
+  font-weight: 700;
+  color: #1e293b;
+}
+.art-geneve-text {
+  font-size: 9rpx;
+  color: #64748b;
+  letter-spacing: 1rpx;
+}
+
+/* 11. 红塔山与红双喜 */
+.facade-art-hongtashan, .facade-art-shuangxi {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.mini-white-pagoda {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  background: #dc2626;
+  margin-bottom: 2rpx;
+}
+.mini-shuangxi-char {
+  font-size: 22rpx;
+  font-weight: 900;
+  color: #fde047;
+  line-height: 1;
+}
+
+/* 12. 宽窄门楼 */
+.facade-art-kuanzhai {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.mini-kuanzhai-plaque {
+  background: #78350f;
+  color: #fde047;
+  font-size: 15rpx;
+  font-weight: 900;
+  padding: 1rpx 10rpx;
+  border-radius: 2rpx;
+  border: 1px solid #f59e0b;
+  letter-spacing: 2rpx;
+}
+
+/* 13. 中南海 */
+.facade-art-zhongnanhai {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+.art-znh-title {
+  font-size: 18rpx;
+  font-weight: 800;
+  color: #0f172a;
+}
+.art-znh-badge {
+  font-size: 10rpx;
+  font-weight: 800;
+  background: #2563eb;
+  color: #ffffff;
+  padding: 1rpx 4rpx;
+  border-radius: 4rpx;
+}
+
+/* 14. 云烟/黄鹤楼/朝天门/纯氧 */
+.facade-art-yunyan, .facade-art-ruanlan, .facade-art-chaotianmen, .facade-art-zen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.art-zen-title {
+  font-size: 20rpx;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 2rpx;
+}
+.art-zen-sub {
+  font-size: 10rpx;
+  color: #e0f2fe;
+}
+
+/* 底部标准中国烟草双层警示框 (真实烟盒标配) */
+.facade-warning-strip {
+  background: rgba(0, 0, 0, 0.65);
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  padding: 2rpx 4rpx;
+  border-radius: 2rpx;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 2;
+}
+
+.facade-warn-company {
+  font-size: 9rpx;
+  color: rgba(255, 255, 255, 0.65);
+  display: block;
+  line-height: 1.1;
+  letter-spacing: 0.5rpx;
+}
+
+.facade-warn-text {
+  font-size: 9rpx;
+  color: rgba(255, 255, 255, 0.85);
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+/* 货架商品信息与价格 (3列显示完整无遮挡) */
+.shelf-meta-block {
+  padding: 10rpx 10rpx 12rpx 10rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  box-sizing: border-box;
+  flex: 1;
+}
+
+.meta-title-row {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.shelf-brand-title {
+  font-size: 19rpx;
+  font-weight: 800;
+  color: #f8fafc;
+  line-height: 1.25;
+  min-height: 48rpx;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  word-break: break-all;
+}
+
+/* 价格行与焦油标签 (清晰呈现无重叠) */
+.shelf-price-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.price-val-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 2rpx;
+}
+
+.price-symbol {
+  font-size: 16rpx;
+  color: #fbbf24;
+  font-weight: 700;
+}
+
+.price-val {
+  font-size: 26rpx;
+  font-weight: 900;
+  color: #fbbf24;
+  line-height: 1;
+}
+
+.price-unit {
+  font-size: 15rpx;
+  color: #94a3b8;
+}
+
+.tar-tag {
+  font-size: 14rpx;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 1rpx 6rpx;
+  border-radius: 4rpx;
+  line-height: 1.2;
+}
+
+/* 余量指示行 */
+.shelf-inventory-line {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+}
+
+.stock-dot {
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background: #10b981;
+  flex-shrink: 0;
+}
+
+.stock-dot.stock-empty {
+  background: #ef4444;
+}
+
+.stock-text {
+  font-size: 15rpx;
+  color: #94a3b8;
+  white-space: nowrap;
+}
+
+/* 快速操作触控条 */
+.shelf-actions-bar {
+  display: flex;
+  width: 100%;
+  margin-top: 2rpx;
+}
+
+.act-btn {
+  width: 100%;
+  font-size: 16rpx;
+  font-weight: 700;
+  border-radius: 14rpx;
+  padding: 8rpx 0;
+  line-height: 1.2;
+  margin: 0;
+  text-align: center;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.act-btn.btn-equip {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.act-btn.btn-equip.btn-active {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #0b0f19;
+  border-color: #f59e0b;
+  font-weight: 800;
+}
+
+.pack-lock-tip {
+  font-size: 14rpx;
+  color: #ef4444;
+  margin-top: 2rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+
+/* 3D 视图下的价格行与容器 */
+.pack-3d-stage-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.detail-price-line {
+  display: flex;
+  align-items: baseline;
+  gap: 4rpx;
+  margin-top: 6rpx;
+}
+
+.dp-sym {
+  font-size: 22rpx;
+  color: #cbd5e1;
+}
+
+.dp-num {
+  font-size: 32rpx;
+  font-weight: 900;
+  color: #fbbf24;
+}
+
+.dp-unit {
+  font-size: 22rpx;
+  color: #94a3b8;
+}
+
+.dp-spec {
+  font-size: 20rpx;
+  color: #64748b;
+  margin-left: 8rpx;
+}
+
+/* ==================== 老辈白纸手卷旱烟专属拟真动效与质感 ==================== */
+/* 1. 盒内插槽纯白纸手搓吸嘴切面 */
+.slot-hanyan-cylinder {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffffff 0%, #f5f4ef 50%, #e2dfd5 100%);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 2rpx 4rpx rgba(255, 255, 255, 0.8), 0 2rpx 6rpx rgba(0, 0, 0, 0.4);
+}
+
+.hanyan-slot-rim {
+  position: absolute;
+  inset: 2rpx;
+  border-radius: 50%;
+  border: 1.5rpx solid #d6d1c4;
+}
+
+.hanyan-slot-tobacco-core {
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  background: radial-gradient(circle, #78350f 0%, #451a03 70%, #291004 100%);
+  box-shadow: inset 0 1rpx 2rpx rgba(0, 0, 0, 0.7);
+}
+
+/* 2. 抽出一支时的白纸大喇叭筒飞升模型 */
+.flight-hanyan-cone {
+  width: 36rpx;
+  height: 240rpx;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.flight-hanyan-tobacco-head {
+  width: 36rpx;
+  height: 22rpx;
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.hanyan-loose-strand {
+  position: absolute;
+  width: 4rpx;
+  background: #d97706;
+  border-radius: 2rpx;
+}
+
+.hanyan-loose-strand.s1 {
+  height: 16rpx;
+  left: 6rpx;
+  top: -8rpx;
+  transform: rotate(-15deg);
+  background: #f59e0b;
+}
+
+.hanyan-loose-strand.s2 {
+  height: 20rpx;
+  left: 16rpx;
+  top: -12rpx;
+  transform: rotate(4deg);
+  background: #b45309;
+}
+
+.hanyan-loose-strand.s3 {
+  height: 15rpx;
+  right: 6rpx;
+  top: -6rpx;
+  transform: rotate(20deg);
+  background: #78350f;
+}
+
+.flight-hanyan-paper-body {
+  width: 100%;
+  flex: 1;
+  background: linear-gradient(90deg, #d6d1c4 0%, #faf8f2 25%, #ffffff 50%, #faf8f2 75%, #c8c2b5 100%);
+  clip-path: polygon(0 0, 100% 0, 78% 100%, 22% 100%);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.35);
+}
+
+.flight-hanyan-seam {
+  position: absolute;
+  top: 30rpx;
+  width: 100%;
+  height: 2rpx;
+  background: rgba(168, 162, 158, 0.45);
+  transform: rotate(25deg);
+}
+
+.flight-hanyan-stamp {
+  font-size: 14rpx;
+  font-weight: 800;
+  color: rgba(185, 28, 28, 0.75);
+  writing-mode: vertical-lr;
+  letter-spacing: 2rpx;
+}
+
+.flight-hanyan-mouth {
+  width: 20rpx;
+  height: 16rpx;
+  background: #ebe7df;
+  border-radius: 0 0 4rpx 4rpx;
+  border: 1rpx solid #c8c2b5;
+}
+
+/* 3. 货架卡片立面上的白纸手卷微缩图标 */
+.facade-art-hanyan {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  margin-top: 14rpx;
+}
+
+.mini-hanyan-cone-facade {
+  width: 32rpx;
+  height: 70rpx;
+  background: linear-gradient(90deg, #d6d1c4 0%, #ffffff 40%, #e2dfd5 100%);
+  clip-path: polygon(0 0, 100% 0, 75% 100%, 25% 100%);
+  position: relative;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.2);
+}
+
+.cone-facade-tobacco {
+  position: absolute;
+  top: -6rpx;
+  left: 4rpx;
+  right: 4rpx;
+  height: 8rpx;
+  background: #b45309;
+  border-radius: 4rpx 4rpx 0 0;
+}
+
+.art-hanyan-sub {
+  font-size: 16rpx;
+  color: #8c531b;
+  font-weight: 600;
+}
+
+/* 4. 3D 烟盒正面的复古老辈旱烟徽章 */
+.emblem-hanyan {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+}
+
+.hanyan-big-cone-crest {
+  width: 60rpx;
+  height: 110rpx;
+  background: linear-gradient(90deg, #c8c2b5 0%, #ffffff 35%, #faf8f2 65%, #c8c2b5 100%);
+  clip-path: polygon(0 0, 100% 0, 75% 100%, 25% 100%);
+  position: relative;
+  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.25);
+  margin-bottom: 6rpx;
+}
+
+.cone-crest-tobacco-spill {
+  position: absolute;
+  top: -10rpx;
+  left: 6rpx;
+  right: 6rpx;
+  height: 14rpx;
+  background: linear-gradient(180deg, #f59e0b 0%, #b45309 60%, #78350f 100%);
+  border-radius: 6rpx 6rpx 0 0;
+}
+
+.hanyan-font {
+  color: #292524 !important;
+  font-size: 44rpx !important;
+  letter-spacing: 4rpx;
+}
+
+.hanyan-gold-seal {
+  background: #b91c1c;
+  color: #ffffff;
+  font-size: 18rpx;
+  font-weight: 800;
+  padding: 4rpx 16rpx;
+  border-radius: 6rpx;
+  letter-spacing: 2rpx;
+  margin-top: 6rpx;
+  box-shadow: 0 2rpx 8rpx rgba(185, 28, 28, 0.4);
+}

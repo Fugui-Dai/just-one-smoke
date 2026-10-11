@@ -1,0 +1,119 @@
+<!-- pages/mine/mine.wxml -->
+<view class="mine-page-container">
+
+  <!-- ==================== 顶部统一导航栏 (安全避让微信原生胶囊按钮) ==================== -->
+  <view class="custom-navbar" style="padding-top: {{ statusBarHeight }}px; height: {{ statusBarHeight + navBarHeight }}px;">
+    <view class="navbar-content" style="height: {{ navBarHeight }}px; padding-right: {{ capsuleRightSpace }}px;">
+      
+      <!-- 返回按钮 -->
+      <view class="nav-back-btn" bindtap="onNavigateBack">
+        <view class="back-chevron-arrow"></view>
+      </view>
+
+      <!-- 导航中心标题 -->
+      <view class="nav-center-title-box">
+        <text class="nav-center-title-text">我的</text>
+      </view>
+
+      <!-- 占位平衡 (已删除设置图标) -->
+      <view class="nav-placeholder"></view>
+
+    </view>
+  </view>
+
+  <!-- ==================== 个人中心 / 健康数据看板 ==================== -->
+  <stats-view 
+    profile="{{ profile }}"
+    myRankInfo="{{ myRankInfo }}"
+    totalSubstituted="{{ totalSubstituted }}"
+    totalPacksSaved="{{ totalPacksSaved }}"
+    totalSavedMoney="{{ totalSavedMoney }}"
+    totalTarAvoided="{{ totalTarAvoided }}"
+    totalLifeRegained="{{ totalLifeRegained }}"
+    lifeRegainedHours="{{ lifeRegainedHours }}"
+    totalIgnites="{{ totalIgnites }}"
+    totalFinishedCigs="{{ totalFinishedCigs }}"
+    quitDays="{{ quitDays }}"
+    weeklyAvg="{{ weeklyAvg }}"
+    todayCount="{{ todayCount }}"
+    dailyTrends="{{ dailyTrends }}"
+    whoStages="{{ whoStages }}"
+    topPadding="{{ statusBarHeight + navBarHeight }}"
+    bindopenprofile="openProfileModal"
+    bindupdateavatar="onUpdateAvatar"
+    bindupdatenickname="onUpdateNickname"
+    bindtoleaderboard="goToLeaderboard"
+  />
+
+  <!-- ==================== 偏好设置弹窗 (烟价/习惯) ==================== -->
+  <view class="glass-modal-backdrop" wx:if="{{ showProfileModal }}" catchtouchmove="preventTouchMove">
+    <view class="profile-dialog-card">
+      <view class="dialog-top-bar">
+        <text class="dialog-header-title">⚙️ 吸烟偏好设置</text>
+        <view class="dialog-close-icon" bindtap="closeProfileModal">✕</view>
+      </view>
+
+      <scroll-view class="dialog-scroll-form" scroll-y>
+        
+        <!-- 单包烟价 -->
+        <view class="form-item-group">
+          <view class="form-label-row">
+            <text class="form-label-name">单包香烟价格 (元)</text>
+            <text class="form-label-tip">用于精准测算替烟省下的烟资</text>
+          </view>
+          <view class="stepper-box">
+            <view class="stepper-btn" bindtap="adjustPackPrice" data-delta="-1">-</view>
+            <input class="stepper-input" type="number" value="{{ editProfile.packPrice }}" bindinput="onInputPackPrice" />
+            <view class="stepper-btn" bindtap="adjustPackPrice" data-delta="1">+</view>
+          </view>
+          <view class="quick-chips">
+            <view class="chip {{ editProfile.packPrice === 15 ? 'active-chip' : '' }}" bindtap="setQuickPrice" data-val="15">¥15</view>
+            <view class="chip {{ editProfile.packPrice === 18 ? 'active-chip' : '' }}" bindtap="setQuickPrice" data-val="18">¥18 炫赫门</view>
+            <view class="chip {{ editProfile.packPrice === 25 ? 'active-chip' : '' }}" bindtap="setQuickPrice" data-val="25">¥25 芙蓉王</view>
+            <view class="chip {{ editProfile.packPrice === 26 ? 'active-chip' : '' }}" bindtap="setQuickPrice" data-val="26">¥26 江南韵</view>
+            <view class="chip {{ editProfile.packPrice === 65 ? 'active-chip' : '' }}" bindtap="setQuickPrice" data-val="65">¥65 软中华</view>
+            <view class="chip {{ editProfile.packPrice === 100 ? 'active-chip' : '' }}" bindtap="setQuickPrice" data-val="100">¥100 1916</view>
+          </view>
+        </view>
+
+        <!-- 日均吸烟量 -->
+        <view class="form-item-group">
+          <view class="form-label-row">
+            <text class="form-label-name">戒烟前日均抽烟量 (支)</text>
+            <text class="form-label-tip">每日基准吸烟支数</text>
+          </view>
+          <view class="stepper-box">
+            <view class="stepper-btn" bindtap="adjustCigsPerDay" data-delta="-1">-</view>
+            <input class="stepper-input" type="number" value="{{ editProfile.cigsPerDay }}" bindinput="onInputCigsPerDay" />
+            <view class="stepper-btn" bindtap="adjustCigsPerDay" data-delta="1">+</view>
+          </view>
+        </view>
+
+        <!-- 历史烟龄 -->
+        <view class="form-item-group">
+          <view class="form-label-row">
+            <text class="form-label-name">吸烟年限 (年)</text>
+            <text class="form-label-tip">既往烟龄历史</text>
+          </view>
+          <view class="stepper-box">
+            <view class="stepper-btn" bindtap="adjustSmokeYears" data-delta="-1">-</view>
+            <input class="stepper-input" type="number" value="{{ editProfile.smokeYears }}" bindinput="onInputSmokeYears" />
+            <view class="stepper-btn" bindtap="adjustSmokeYears" data-delta="1">+</view>
+          </view>
+        </view>
+
+
+
+      </scroll-view>
+
+      <view class="dialog-footer-actions">
+        <button class="footer-btn-cancel" bindtap="closeProfileModal">取消</button>
+        <button class="footer-btn-save" bindtap="saveProfile">保存偏好设置</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 全局腾讯级灵动微胶囊 Toast HUD -->
+  <custom-toast id="customToast" />
+
+</view>

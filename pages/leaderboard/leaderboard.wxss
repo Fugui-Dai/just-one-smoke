@@ -1,0 +1,71 @@
+/* pages/leaderboard/leaderboard.wxss */
+.leaderboard-page-container {
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle at 50% 18%, #161b26 0%, #080a0f 75%);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* ==================== 顶部自定义导航栏 ==================== */
+.custom-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(8, 10, 15, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  box-sizing: border-box;
+}
+
+.navbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 20rpx;
+  box-sizing: border-box;
+}
+
+.nav-back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60rpx;
+  height: 60rpx;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  color: #e2e8f0;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.nav-back-btn:active {
+  transform: scale(0.92);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.nav-center-title-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-center-title-text {
+  font-size: 30rpx;
+  font-weight: 700;
+  letter-spacing: 1rpx;
+  background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.nav-placeholder {
+  width: 80rpx;
+}

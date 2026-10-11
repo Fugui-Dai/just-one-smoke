@@ -1,0 +1,14 @@
+{
+  "navigationStyle": "custom",
+  "navigationBarTitleText": "全国戒烟英雄榜",
+  "navigationBarBackgroundColor": "#080a0f",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#080a0f",
+  "backgroundColorTop": "#080a0f",
+  "backgroundColorBottom": "#080a0f",
+  "backgroundTextStyle": "dark",
+  "disableScroll": true,
+  "usingComponents": {
+    "leaderboard-view": "/components/leaderboard-view/leaderboard-view"
+  }
+}

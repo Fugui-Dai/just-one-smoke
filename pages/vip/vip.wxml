@@ -1,0 +1,278 @@
+<!-- pages/vip/vip.wxml -->
+<view class="vip-page-container theme-{{ currentTheme }}">
+
+  <!-- ==================== 顶部极光沉浸导航栏 ==================== -->
+  <view class="custom-navbar" style="padding-top: {{ statusBarHeight }}px; height: {{ statusBarHeight + navBarHeight }}px;">
+    <view class="navbar-content" style="height: {{ navBarHeight }}px; padding-right: {{ capsuleRightSpace }}px;">
+      
+      <!-- 返回按钮 -->
+      <view class="nav-back-btn" bindtap="onNavigateBack">
+        <view class="back-chevron-arrow"></view>
+      </view>
+
+      <!-- 导航中心标题 -->
+      <view class="nav-center-title-box">
+        <text class="nav-crown-icon">👑</text>
+        <text class="nav-center-title-text">VIP会员特权中心</text>
+      </view>
+
+      <!-- 占位平衡 -->
+      <view class="nav-placeholder"></view>
+
+    </view>
+  </view>
+
+  <!-- ==================== VIP 主体流式滚动区 (微信原生顺畅平滑滚动) ==================== -->
+  <view class="vip-scroll-content" style="padding-top: {{ statusBarHeight + navBarHeight + 10 }}px;">
+
+      <!-- 1. 腾讯游戏级 3D 浮雕黑金星曜 Header 舞台 (根据所选档位动态渲染专属气氛) -->
+      <view class="vip-hero-stage">
+        
+        <!-- 动态沉浸环境氛围光晕与星光微粒 -->
+        <view class="hero-aurora-glow"></view>
+        <view class="hero-aurora-glow-secondary"></view>
+        <view class="hero-ambient-particles">
+          <view class="p-orb p-orb-1"></view>
+          <view class="p-orb p-orb-2"></view>
+          <view class="p-orb p-orb-3"></view>
+        </view>
+
+        <!-- 3D 皇冠与尊贵徽章 -->
+        <view class="hero-crown-wrapper">
+          <view class="crown-ring-halo"></view>
+          <view class="crown-emblem">
+            <text class="crown-emoji">👑</text>
+          </view>
+          <view class="crown-level-badge">{{ selectedTier.themeName }}</view>
+        </view>
+
+        <!-- 主副标案 (随所选档位动态响应，情绪价值拉满) -->
+        <view class="hero-text-block">
+          <view class="theme-mood-pill">
+            <text class="mood-spark">✨</text>
+            <text class="mood-text">{{ selectedTier.themeName }} · {{ selectedTier.name }}</text>
+          </view>
+          <text class="hero-main-title">{{ selectedTier.heroTitle }}</text>
+          <text class="hero-sub-slogan">{{ selectedTier.heroSlogan }}</text>
+        </view>
+
+        <!-- 当前用户会员状态提示卡 -->
+        <view class="current-status-strip {{ vipInfo.isVip ? 'status-active' : 'status-inactive' }}">
+          <view class="status-left">
+            <text class="status-dot"></text>
+            <text class="status-title">{{ vipInfo.isVip ? (vipInfo.isLifetime ? '至尊终身特权生效中' : '尊享特权生效中') : '当前暂未开通 VIP 特权' }}</text>
+          </view>
+          <text class="status-right" wx:if="{{ vipInfo.isVip }}">{{ vipInfo.isLifetime ? '终身有效' : (vipInfo.formattedExpire + ' 到期') }}</text>
+          <text class="status-right hint" wx:else>开通立享 6 大特权</text>
+        </view>
+
+      </view>
+
+
+      <!-- 2. 腾讯游戏经典 3 档横向对比定价套餐 (Horizontal 3-Tier Selector) -->
+      <view class="pricing-section">
+        <view class="section-badge-bar">
+          <text class="sb-dot"></text>
+          <text class="sb-title">精选会员方案</text>
+          <text class="sb-note">随时开通 · 立即生效</text>
+        </view>
+
+        <view class="pricing-cards-row">
+          
+          <block wx:for="{{ tiers }}" wx:key="id">
+            <view 
+              class="tier-card tier-card-{{ item.id }} {{ selectedTierId === item.id ? 'is-selected' : '' }} {{ item.highlight ? 'is-highlight' : '' }}"
+              bindtap="onSelectTier"
+              data-id="{{ item.id }}"
+            >
+              <!-- 推荐角标 -->
+              <view class="tier-tag-ribbon ribbon-{{ item.id }} {{ item.highlight ? 'ribbon-hot' : '' }}" wx:if="{{ item.badge }}">
+                <text class="ribbon-text">{{ item.badge }}</text>
+              </view>
+
+              <!-- 套餐名称与时长 -->
+              <view class="tier-name-box">
+                <text class="tier-name">{{ item.name }}</text>
+                <text class="tier-period">{{ item.period }}</text>
+              </view>
+
+              <!-- 价格主体 -->
+              <view class="tier-price-row">
+                <text class="price-currency">¥</text>
+                <text class="price-integer">{{ item.price }}</text>
+                <text class="price-unit">{{ item.id === 'day' ? '/天' : (item.id === 'month' ? '/月' : '') }}</text>
+              </view>
+
+              <!-- 折合日均 / 划算标签 -->
+              <view class="tier-daily-box">
+                <text class="daily-label" wx:if="{{ item.id !== 'lifetime' }}">低至 ¥{{ item.dailyCost }}/天</text>
+                <text class="daily-label gold" wx:else>{{ item.dailyCost }}</text>
+              </view>
+
+              <!-- 原价对比划线 -->
+              <text class="tier-original-price">原价 ¥{{ item.originalPrice }}</text>
+
+              <!-- 选中标记圆圈 -->
+              <view class="tier-select-circle {{ selectedTierId === item.id ? 'circle-active' : '' }}">
+                <text class="check-tick" wx:if="{{ selectedTierId === item.id }}">✓</text>
+              </view>
+
+            </view>
+          </block>
+
+        </view>
+      </view>
+
+
+      <!-- 3. 腾讯游戏标配：6 大核心特权矩阵 (Visual Privileges Grid) -->
+      <view class="privileges-section">
+        <view class="section-badge-bar">
+          <text class="sb-dot gold"></text>
+          <text class="sb-title">VIP 专属 6 大特权</text>
+          <text class="sb-note">尊崇体验 · 一应俱全</text>
+        </view>
+
+        <view class="privileges-matrix-grid">
+          <block wx:for="{{ privileges }}" wx:key="id">
+            <view class="privilege-glass-card">
+              <view class="priv-icon-circle" style="background: {{ item.bgGradient }}; color: {{ item.color }};">
+                <text class="priv-icon-text">{{ item.icon }}</text>
+              </view>
+              <view class="priv-info">
+                <text class="priv-title">{{ item.title }}</text>
+                <text class="priv-subtitle">{{ item.subtitle }}</text>
+              </view>
+            </view>
+          </block>
+        </view>
+      </view>
+
+
+      <!-- 4. 普通用户 VS VIP 会员价值透视对比表 -->
+      <view class="compare-table-section">
+        <view class="section-badge-bar">
+          <text class="sb-dot purple"></text>
+          <text class="sb-title">特权深度对比</text>
+          <text class="sb-note">价值一目了然</text>
+        </view>
+
+        <view class="compare-card">
+          <view class="compare-thead">
+            <text class="th-item th-feat">功能权益</text>
+            <text class="th-item th-free">普通烟民</text>
+            <text class="th-item th-vip">VIP会员</text>
+          </view>
+          
+          <block wx:for="{{ compareRows }}" wx:key="feature">
+            <view class="compare-trow">
+              <text class="td-item td-feat">{{ item.feature }}</text>
+              <text class="td-item td-free">{{ item.freeText }}</text>
+              <text class="td-item td-vip">{{ item.vipText }}</text>
+            </view>
+          </block>
+        </view>
+      </view>
+
+
+      <!-- 5. 官方安全与体验保障说明 -->
+      <view class="safety-guarantee-card">
+        <view class="guarantee-header">
+          <text class="gh-icon">🛡️</text>
+          <text class="gh-title">服务体验官方承诺</text>
+        </view>
+        <view class="guarantee-tips-list">
+          <text class="gt-item">· 开通后特权立即生效并绑定当前微信设备。</text>
+          <text class="gt-item">· 无任何强制扣费，到期自动停权不扣款。</text>
+          <text class="gt-item">· 纯净绿色体验，健康减压生活陪伴。</text>
+        </view>
+      </view>
+
+      <!-- 底部安全留白避让固定收银台 -->
+      <view class="bottom-safe-spacer"></view>
+
+    </view>
+
+
+  <!-- ==================== 底部固定高规格收银台 (Tencent Sticky Checkout Bar) ==================== -->
+  <view class="sticky-checkout-dock">
+    
+    <!-- 协议勾选行 -->
+    <view class="agreement-row" bindtap="toggleAgreement">
+      <view class="custom-checkbox {{ isAgreed ? 'is-checked' : '' }}">
+        <text class="checkbox-tick" wx:if="{{ isAgreed }}">✓</text>
+      </view>
+      <view class="agreement-text">
+        <text class="agreement-prefix">我已阅读并同意</text>
+        <text class="agreement-link" catchtap="openProtocolModal">《VIP会员服务协议》</text>
+      </view>
+    </view>
+
+    <!-- 结算操作主栏 -->
+    <view class="checkout-main-bar">
+      
+      <!-- 左侧价格展示 -->
+      <view class="checkout-price-left">
+        <view class="cpl-amount-row">
+          <text class="cpl-label">应付</text>
+          <text class="cpl-sym">¥</text>
+          <text class="cpl-price">{{ selectedTier.price }}</text>
+          <text class="cpl-orig">¥{{ selectedTier.originalPrice }}</text>
+        </view>
+        <text class="cpl-tip">已选：{{ selectedTier.name }}（{{ selectedTier.shortDesc || selectedTier.desc }}）</text>
+      </view>
+
+      <!-- 右侧恒定高奢曜金开通按键 (定宽定高居右稳固，内嵌呼吸流光扫光) -->
+      <button 
+        class="checkout-cta-btn {{ !isAgreed ? 'btn-disabled' : '' }}" 
+        bindtap="onSubscribe"
+      >
+        <view class="btn-shine-sweep"></view>
+        <text class="btn-cta-text">立即开通</text>
+      </button>
+
+    </view>
+
+  </view>
+
+
+  <!-- ==================== 开通成功庆祝弹窗 (Success Modal) ==================== -->
+  <view class="glass-modal-backdrop" wx:if="{{ showSuccessModal }}" catchtouchmove="preventTouchMove">
+    <view class="success-dialog-card">
+      <view class="dialog-confetti-badge">🎉</view>
+      <text class="dialog-title">恭喜开通【{{ activatedTierName }}】</text>
+      <text class="dialog-subtitle">全域免广告、全套名烟已全量装配至您的账号！</text>
+
+      <view class="dialog-rights-list">
+        <view class="drl-item"><text class="drl-tick">✓</text><text>已免除所有激励视频等待</text></view>
+        <view class="drl-item"><text class="drl-tick">✓</text><text>中华/炫赫门等25款名烟已全解锁</text></view>
+        <view class="drl-item"><text class="drl-tick">✓</text><text>已点亮 VIP 专属荣耀金冠标识</text></view>
+      </view>
+
+      <button class="dialog-primary-btn" bindtap="closeSuccessModal">立即回展柜品吸体验</button>
+    </view>
+  </view>
+
+
+  <!-- ==================== 服务协议弹窗 (Protocol Modal) ==================== -->
+  <view class="glass-modal-backdrop" wx:if="{{ showProtocolModal }}" catchtouchmove="preventTouchMove">
+    <view class="protocol-dialog-card">
+      <view class="protocol-top-bar">
+        <text class="proto-title">VIP 会员服务与隐私协议</text>
+        <view class="proto-close-btn" bindtap="closeProtocolModal">✕</view>
+      </view>
+      <scroll-view class="proto-scroll" scroll-y>
+        <view class="proto-content">
+          <text class="proto-p">1. 本小程序为身心健康减压与替烟辅助模拟工具，VIP会员服务为数字化虚拟内容。</text>
+          <text class="proto-p">2. 开通VIP后，您可在有效期内尊享全域跳过激励广告、全套名烟模拟图鉴品吸、无限整盒复位及专属个性化动效等特权。</text>
+          <text class="proto-p">3. 所有名烟仅为生活拟真外观艺术设计，不涉及任何烟草制品实物销售与交易，倡导绿色健康生活。</text>
+          <text class="proto-p">4. 服务采用单次周期订购，到期后自动恢复为普通模式，绝无隐性自动续费扣款。</text>
+        </view>
+      </scroll-view>
+      <button class="dialog-primary-btn" bindtap="closeProtocolModal">我已知晓并同意</button>
+    </view>
+  </view>
+
+  <!-- 全局腾讯级灵动微胶囊 Toast HUD -->
+  <custom-toast id="customToast" />
+
+</view>

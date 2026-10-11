@@ -1,0 +1,649 @@
+<scroll-view 
+  class="stats-scroll" 
+  scroll-y="{{ true }}" 
+  enable-back-to-top="{{ true }}" 
+  enhanced="{{ true }}" 
+  bounces="{{ true }}" 
+  show-scrollbar="{{ false }}"
+>
+  <view class="stats-content" style="padding-top: {{ topPadding }}px;">
+    
+    <!-- 0. 个人微信头像、昵称与打卡卡片 (左侧圆形头像，中间昵称与本地保存提示，右侧打卡方卡) -->
+    <view class="user-profile-header-card">
+      <view class="user-profile-row">
+        <!-- 左侧区域：头像严格靠左，名字紧随头像 -->
+        <view class="user-profile-left">
+          <!-- 微信原生选择头像按钮 (严格靠左，尺寸锁定，防止微信默认button样式拉伸) -->
+          <button 
+            class="user-avatar-btn" 
+            open-type="chooseAvatar" 
+            bindchooseavatar="onChooseAvatar"
+            size="mini"
+            style="width: 96rpx; min-width: 96rpx; max-width: 96rpx; height: 96rpx; min-height: 96rpx; max-height: 96rpx; margin: 0; padding: 0; border: none; background: transparent; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"
+          >
+            <image 
+              class="user-avatar-img" 
+              src="{{ profile.avatarUrl || defaultAvatarSvg }}" 
+              mode="aspectFill" 
+            />
+          </button>
+
+          <!-- 昵称紧随头像：微信官方昵称选择控件 (光标全透明隐形，点击弹出微信昵称胶囊) -->
+          <view class="user-info-col">
+            <input 
+              class="user-nickname-input" 
+              type="nickname" 
+              value="{{ profile.nickName || '无烟觉醒者' }}" 
+              bindinput="onNicknameChange"
+              bindchange="onNicknameChange" 
+              bindblur="onNicknameBlur" 
+              cursor-color="transparent"
+            />
+          </view>
+        </view>
+
+        <!-- 最右边打卡状态方卡 (已打卡 / 2天 / 连 2) -->
+        <view class="user-punch-card">
+          <text class="punch-card-title">已打卡</text>
+          <view class="punch-card-days-row">
+            <text class="punch-card-num">{{ quitDays + 1 }}</text>
+            <text class="punch-card-unit">天</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- VIP 尊享特权入口横幅 (腾讯黑金曜石奢雅标准) -->
+    <view class="vip-entry-banner" bindtap="onGoToVip">
+      <view class="vip-banner-left">
+        <!-- 矢量 3D 曜石黑金极清微光皇冠 -->
+        <view class="vb-emblem-wrap">
+          <image class="vb-emblem-svg" src="{{ vipCrownSvg }}" mode="aspectFit" />
+        </view>
+        <view class="vip-banner-text">
+          <view class="vb-title-row">
+            <text class="vb-main">{{ vipInfo.isVip ? (vipInfo.isLifetime ? '至尊终身特权' : 'VIP 尊享特权') : 'VIP 尊享会员' }}</text>
+            <text class="vb-black-gold-tag">{{ vipInfo.isVip ? '生效中' : '黑金特权' }}</text>
+          </view>
+          <text class="vb-sub">{{ vipInfo.isVip ? (vipInfo.isLifetime ? '永久跳过广告 · 25款名烟全免解锁' : (vipInfo.formattedExpire + ' 到期 · 尊享全免特权')) : '全域免看广告 · 25款名烟全解锁 · 专属特权' }}</text>
+        </view>
+      </view>
+      <!-- 右侧优雅丝滑胶囊按钮 -->
+      <view class="vip-banner-btn">
+        <text class="vbb-text">{{ vipInfo.isVip ? '查看特权 ›' : '立即开通 ›' }}</text>
+      </view>
+    </view>
+
+    <!-- 2. 生理机能自愈数字孪生体 (上半身透光人体与脏器生物荧光) -->
+    <view class="body-twin-card">
+      <view class="twin-top-header">
+        <view class="twin-title-wrap">
+          <text class="sec-dot green"></text>
+          <text class="sec-heading">机能透视 · 自愈数字孪生体</text>
+        </view>
+        <view class="twin-badge-live">
+          <text class="live-dot"></text>
+          <text class="live-text">生物拟态透视</text>
+        </view>
+      </view>
+
+      <!-- 科技全息人体上半身透视视窗 (科幻与医疗科技风格 · 3D 全息医学透明人体内脏扫描) -->
+      <view class="twin-torso-stage">
+        <!-- HUD 护角装饰与科技边框 -->
+        <view class="hud-bracket hud-bracket-tl"></view>
+        <view class="hud-bracket hud-bracket-tr"></view>
+        <view class="hud-bracket hud-bracket-bl"></view>
+        <view class="hud-bracket hud-bracket-br"></view>
+
+        <!-- 顶部科幻医疗扫描状态条 -->
+        <view class="hud-stage-banner">
+          <view class="hud-banner-left">
+            <text class="hud-scanner-code">SYSTEM // BIO-SCAN V3.4</text>
+          </view>
+          <view class="hud-banner-right">
+            <text class="hud-scanner-status">● REALTIME 3D RECOVERY</text>
+          </view>
+        </view>
+
+        <!-- 3D 全息医学透明人体与脏器渲染 (100% 绝对静止锚定，杜绝机械缩放与引线错位) -->
+        <image 
+          class="torso-hologram-img" 
+          src="/images/hologram-torso.jpg" 
+          mode="aspectFit"
+          show-menu-by-longpress="{{ false }}"
+        />
+
+        <!-- 纯 GPU 硬件加速·仿生血流动力学与生理微物理视效层 (0卡顿·零JS占用·60fps满帧) -->
+        <view class="torso-hemodynamic-layer">
+          <!-- 1. 心脏真实生理节律泵核 (Cardiac Pulse Core · lub-dub 1.25s 心动射血) -->
+          <view class="cardiac-chamber-core"></view>
+          <view class="cardiac-aorta-wave"></view>
+
+          <!-- 2. 动静脉向心与离心微光血管流道 (Vascular Streams) -->
+          <!-- 左臂血管束：肱动脉射血 (暖红金) & 静脉向心回流 (青蓝) -->
+          <view class="vascular-track v-track-arm-l-upper">
+            <view class="artery-pulse-flow flow-down"></view>
+            <view class="vein-pulse-flow flow-up"></view>
+          </view>
+          <view class="vascular-track v-track-arm-l-lower">
+            <view class="artery-pulse-flow flow-down delay-1"></view>
+            <view class="vein-pulse-flow flow-up delay-1"></view>
+          </view>
+
+          <!-- 右臂血管束：肱动脉射血 (暖红金) & 静脉向心回流 (青蓝) -->
+          <view class="vascular-track v-track-arm-r-upper">
+            <view class="artery-pulse-flow flow-down"></view>
+            <view class="vein-pulse-flow flow-up"></view>
+          </view>
+          <view class="vascular-track v-track-arm-r-lower">
+            <view class="artery-pulse-flow flow-down delay-1"></view>
+            <view class="vein-pulse-flow flow-up delay-1"></view>
+          </view>
+
+          <!-- 腹部降主动脉流道 -->
+          <view class="vascular-track v-track-descending">
+            <view class="aorta-blood-flow flow-down"></view>
+          </view>
+
+          <!-- 3. 神经突触电位微闪节点 (Synaptic Micro-Sparks) -->
+          <view class="synapse-node node-shoulder-l"></view>
+          <view class="synapse-node node-forearm-l"></view>
+          <view class="synapse-node node-shoulder-r"></view>
+          <view class="synapse-node node-forearm-r"></view>
+          <view class="synapse-node node-cranial"></view>
+          <view class="synapse-node node-solar"></view>
+
+          <!-- 4. 空间 3D 全息浮游光子 (Holographic Ambient Photons) -->
+          <view class="ambient-photon photon-1"></view>
+          <view class="ambient-photon photon-2"></view>
+          <view class="ambient-photon photon-3"></view>
+          <view class="ambient-photon photon-4"></view>
+          <view class="ambient-photon photon-5"></view>
+        </view>
+
+
+        <!-- HUD 数据引线 (纯 CSS 矢量引线折线与发光锚点，精准指向人体靶器官) -->
+        <view class="hud-lead-line to-lung"></view>
+        <view class="hud-lead-line to-visceral"></view>
+        <view class="hud-lead-line to-heart"></view>
+        <view class="hud-lead-line to-blood"></view>
+
+        <!-- 左上方 HUD 引出数据框：双肺呼吸系统 (精准指向左侧胸腔肺叶) -->
+        <view class="hud-card hud-card-tl {{ activeOrgan === 'lungs' ? 'is-active' : '' }}" bindtap="onSelectOrgan" data-organ="lungs">
+          <view class="hud-card-header">
+            <text class="hud-card-title">双肺自愈</text>
+            <text class="hud-card-en">Pulmonary Lungs</text>
+          </view>
+          <view class="hud-card-body">
+            <view class="hud-metric-row">
+              <text class="hud-metric-label">纤毛活力</text>
+              <text class="hud-metric-val cyan">{{ lungPercent }}%</text>
+            </view>
+            <view class="hud-progress-track">
+              <view class="hud-progress-bar cyan-bar" style="width: {{ lungPercent }}%;"></view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 右上方 HUD 引出数据框：心血管系统 (精准指向右侧胸腔心脏) -->
+        <view class="hud-card hud-card-tr {{ activeOrgan === 'heart' ? 'is-active' : '' }}" bindtap="onSelectOrgan" data-organ="heart">
+          <view class="hud-card-header">
+            <text class="hud-card-title">心血管系统</text>
+            <text class="hud-card-en">Cardiovascular</text>
+          </view>
+          <view class="hud-card-body">
+            <view class="hud-metric-row">
+              <text class="hud-metric-label">心肌供氧</text>
+              <text class="hud-metric-val orange">{{ heartPercent }}%</text>
+            </view>
+            <view class="hud-progress-track">
+              <view class="hud-progress-bar orange-bar" style="width: {{ heartPercent }}%;"></view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 左下方 HUD 引出数据框：中枢神经与脑部多巴胺 (精准指向腹脑/神经中枢) -->
+        <view class="hud-card hud-card-bl {{ activeOrgan === 'brain' ? 'is-active' : '' }}" bindtap="onSelectOrgan" data-organ="brain">
+          <view class="hud-card-header">
+            <text class="hud-card-title">神经中枢</text>
+            <text class="hud-card-en">Neural Dopamine</text>
+          </view>
+          <view class="hud-card-body">
+            <view class="hud-metric-row">
+              <text class="hud-metric-label">受体脱敏</text>
+              <text class="hud-metric-val purple">{{ brainPercent }}%</text>
+            </view>
+            <view class="hud-progress-track">
+              <view class="hud-progress-bar purple-bar" style="width: {{ brainPercent }}%;"></view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 右下方 HUD 引出数据框：血液循环网络 (精准指向全身微血管与携氧循环) -->
+        <view class="hud-card hud-card-br {{ activeOrgan === 'blood' ? 'is-active' : '' }}" bindtap="onSelectOrgan" data-organ="blood">
+          <view class="hud-card-header">
+            <text class="hud-card-title">血液循环</text>
+            <text class="hud-card-en">Blood Circulation</text>
+          </view>
+          <view class="hud-card-body">
+            <view class="hud-metric-row">
+              <text class="hud-metric-label">血氧饱满</text>
+              <text class="hud-metric-val green">{{ bloodPercent }}%</text>
+            </view>
+            <view class="hud-progress-track">
+              <view class="hud-progress-bar green-bar" style="width: {{ bloodPercent }}%;"></view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 交互触控热区 -->
+        <view class="body-touch-layer">
+          <view class="organ-hotspot spot-brain" bindtap="onSelectOrgan" data-organ="brain"></view>
+          <view class="organ-hotspot spot-lungs" bindtap="onSelectOrgan" data-organ="lungs"></view>
+          <view class="organ-hotspot spot-heart" bindtap="onSelectOrgan" data-organ="heart"></view>
+          <view class="organ-hotspot spot-blood" bindtap="onSelectOrgan" data-organ="blood"></view>
+        </view>
+
+      </view>
+
+      <!-- 选中器官医学临床深度分析卡片 -->
+      <view class="twin-detail-card">
+        <view class="detail-header-row">
+          <view class="dh-left">
+            <image class="dh-svg-icon" src="{{ organInfo.iconUri }}" mode="aspectFit" />
+            <view class="dh-titles">
+              <text class="dh-organ-name">{{ organInfo.name }}</text>
+              <text class="dh-stage-title">{{ organInfo.stageTitle }}</text>
+            </view>
+          </view>
+          <view class="dh-badge" style="background: {{ organInfo.accentBg }}; color: {{ organInfo.color }};">
+            {{ organInfo.statusBadge }} · {{ organInfo.percent }}%
+          </view>
+        </view>
+
+        <!-- 动态三项指标矩阵 -->
+        <view class="detail-metrics-grid">
+          <view class="dm-item" wx:for="{{ organInfo.statMetrics }}" wx:key="label">
+            <text class="dm-val {{ item.highlight ? 'is-highlight' : '' }}" style="{{ item.highlight ? ('color: ' + organInfo.color) : '' }}">{{ item.val }}</text>
+            <text class="dm-label">{{ item.label }}</text>
+          </view>
+        </view>
+
+        <!-- WHO 临床病理自愈解读 -->
+        <view class="detail-clinical-box">
+          <text class="cb-icon">📋</text>
+          <text class="cb-text">{{ organInfo.clinicalDesc }}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 3. 钱包 (一张纸币是一元 × 金额，腾讯风格调皮搞笑 1 元纸币) -->
+    <view class="wallet-section-card">
+      <view class="section-top-header wallet-top-header">
+        <view class="section-name-wrap">
+          <text class="sec-dot green"></text>
+          <text class="sec-heading">钱包</text>
+          <text class="sec-pill-tag">自律存钱罐</text>
+        </view>
+      </view>
+
+      <!-- 核心算式展台：[调皮1元小纸币] × 金额 = 累计省下 -->
+      <view class="wallet-formula-stage">
+        
+        <!-- 调皮搞笑 1 元微缩纸币 (支持轻触弹跳互动) -->
+        <view class="funny-mini-bill-wrap" bindtap="onTapBanknote">
+          <!-- 3D 叠纸堆叠背板效果 (厚度与立体感) -->
+          <view class="bill-stack-back layer-2"></view>
+          <view class="bill-stack-back layer-1"></view>
+
+          <!-- 真实绘制的调皮1元钞票图片 (狗狗币墨镜+赛博戒烟银行+真香印章) -->
+          <view class="bill-img-container">
+            <image 
+              class="funny-banknote-img" 
+              src="/images/banknote_1yuan.jpg" 
+              mode="aspectFill" 
+            />
+          </view>
+        </view>
+
+        <!-- 乘号 -->
+        <view class="formula-operator formula-multiply">×</view>
+
+        <!-- 乘数金额 (例如: 10) -->
+        <view class="formula-multiplier-box">
+          <text class="multiplier-num">{{ totalSavedYuan }}</text>
+          <text class="multiplier-label">自律钞票 (张)</text>
+        </view>
+
+        <!-- 等号 -->
+        <view class="formula-operator formula-equal">=</view>
+
+        <!-- 累计省下 -->
+        <view class="formula-result-box">
+          <view class="result-val-row">
+            <text class="result-yen">¥</text>
+            <text class="result-val">{{ totalSavedMoney }}</text>
+          </view>
+          <text class="result-label">累计省下</text>
+        </view>
+
+      </view>
+
+      <!-- 科学省钱算法说明条 -->
+      <view class="wallet-humor-footer">
+        <text class="whf-icon">💰</text>
+        <text class="whf-text">按每包 ¥{{ profile.packPrice || 25 }}（每支 ¥{{ singleStickPrice || '1.25' }}）计算 · 累计少抽 {{ totalSubstituted }} 支真烟</text>
+      </view>
+    </view>
+
+    <!-- 3.5 🏆 荣耀勋章殿堂 · 赛博成就展柜 (Tencent Games 曜石展柜标准) -->
+    <view class="honor-wall-card">
+      <view class="section-top-header honor-top-header">
+        <view class="section-name-wrap">
+          <text class="sec-dot gold"></text>
+          <text class="sec-heading">荣耀勋章殿堂</text>
+          <text class="sec-pill-tag gold-pill">战功墙</text>
+        </view>
+        <view class="honor-header-rate">
+          <text class="hhr-text">已达成 {{ unlockedAchievementsCount }}/{{ achievementsList.length }}</text>
+          <text class="hhr-percent">({{ achievementsCompletionRate }}%)</text>
+        </view>
+      </view>
+
+      <!-- 顶部全域发光进度条 -->
+      <view class="honor-progress-track">
+        <view class="honor-progress-fill" style="width: {{ achievementsCompletionRate }}%;"></view>
+      </view>
+
+      <!-- 4 列流式曜石勋章橱窗网格 -->
+      <view class="honor-grid">
+        <view 
+          class="honor-badge-item {{ item.unlocked ? ('is-unlocked tier-' + item.tier) : 'is-locked' }}"
+          wx:for="{{ achievementsList }}"
+          wx:key="id"
+          bindtap="onSelectAchievement"
+          data-item="{{ item }}"
+        >
+          <!-- 徽章本体外壳 (带品阶动态微光与曜石底座) -->
+          <view 
+            class="badge-emblem-shell" 
+            style="{{ item.unlocked ? ('box-shadow: 0 4rpx 16rpx ' + item.glowColor + '; border-color: ' + item.borderColor + ';') : '' }}"
+          >
+            <!-- 锁头标记 (未解锁状态) -->
+            <view class="badge-lock-tag" wx:if="{{ !item.unlocked }}">
+              <text class="lock-icon">🔒</text>
+            </view>
+            <!-- 品阶标签 (已解锁状态) -->
+            <view class="badge-tier-tag" wx:else style="background: {{ item.badgeBg }}; color: {{ item.tagColor }};">
+              {{ item.tierTag }}
+            </view>
+
+            <!-- 勋章立体图标 (未解锁时半透明灰度) -->
+            <text class="badge-icon-emoji {{ !item.unlocked ? 'locked-emoji' : '' }}">{{ item.icon }}</text>
+          </view>
+
+          <!-- 勋章四字定名 -->
+          <text class="badge-name">{{ item.name }}</text>
+
+          <!-- 简要进度或已达成标识 -->
+          <text class="badge-sub-progress {{ item.unlocked ? 'done-text' : '' }}">{{ item.unlocked ? '已达成 ✓' : item.progress.progressText }}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 4. 吸烟统计 (顶部显示 累计点燃、累计次数、抽完根数、替烟节省 + 抢回健康寿命纯文字 + 7天累计次数折线图) -->
+    <view class="system-stats-card">
+      <view class="section-top-header">
+        <view class="section-name-wrap">
+          <text class="sec-dot green"></text>
+          <text class="sec-heading">吸烟统计</text>
+        </view>
+        <text class="sec-sub-info">今日 {{ todayCount }} 支 · 近7天日均 {{ weeklyAvg }} 支</text>
+      </view>
+
+      <!-- 顶部 4 栏数据指标卡片 -->
+      <view class="stats-top-four-grid">
+        <view class="st-cell">
+          <text class="st-num">{{ totalIgnites !== undefined ? totalIgnites : totalSubstituted }}</text>
+          <text class="st-label">累计点燃</text>
+        </view>
+        <view class="st-cell">
+          <text class="st-num">{{ totalSubstituted }}</text>
+          <text class="st-label">累计次数</text>
+        </view>
+        <view class="st-cell">
+          <text class="st-num">{{ totalFinishedCigs || totalSubstituted }}</text>
+          <text class="st-label">抽完根数</text>
+        </view>
+        <view class="st-cell gold-cell">
+          <text class="st-num gold">¥{{ totalSavedMoney }}</text>
+          <text class="st-label">替烟节省</text>
+        </view>
+      </view>
+
+      <!-- 抢回健康寿命 (只显示字) -->
+      <view class="stats-life-text-row">
+        <text class="life-text-label">抢回健康寿命：</text>
+        <text class="life-text-val">{{ totalLifeRegained }} 分钟</text>
+        <text class="life-text-sub">（约 {{ lifeRegainedHours }} 小时）</text>
+      </view>
+
+      <!-- 7天累计次数折线图 -->
+      <view class="line-chart-box">
+        <image class="trend-line-chart-img" src="{{ lineChartSvgUri }}" mode="widthFix" />
+      </view>
+    </view>
+
+    <!-- 6. 无烟自律打卡日历 (标题居上，下方显示左右月份切换与小巧日历网格) -->
+    <view class="calendar-section-card mini-calendar">
+      <!-- 顶部卡片标题栏 (同其他模块标题尺寸与绿点完全一致) -->
+      <view class="section-top-header cal-top-header">
+        <view class="section-name-wrap">
+          <text class="sec-dot green"></text>
+          <text class="sec-heading">无烟自律打卡日历</text>
+        </view>
+      </view>
+
+      <!-- 标题下方的月份切换区：左右两边显示 < 和 >，中间显示当前年月 -->
+      <view class="compact-month-bar">
+        <view class="cal-arrow-btn left-arrow" bindtap="onPrevMonth">
+          <text class="cal-arrow-icon">‹</text>
+        </view>
+        <view class="cal-month-center">
+          <text class="cal-month-text">{{ calendarYear }}年{{ calendarMonth }}月</text>
+        </view>
+        <view class="cal-arrow-btn right-arrow" bindtap="onNextMonth">
+          <text class="cal-arrow-icon">›</text>
+        </view>
+      </view>
+
+      <!-- 紧凑星期表头 -->
+      <view class="compact-week-header">
+        <text class="c-week-lbl">日</text>
+        <text class="c-week-lbl">一</text>
+        <text class="c-week-lbl">二</text>
+        <text class="c-week-lbl">三</text>
+        <text class="c-week-lbl">四</text>
+        <text class="c-week-lbl">五</text>
+        <text class="c-week-lbl">六</text>
+      </view>
+
+      <!-- 紧凑日历网格 -->
+      <view class="compact-calendar-grid">
+        <view 
+          class="compact-cell-touch-area"
+          wx:for="{{ calendarDays }}"
+          wx:key="key"
+        >
+          <view 
+            class="compact-cell {{ item.empty ? 'is-empty' : '' }} {{ item.isToday ? 'is-today' : '' }} {{ item.isPunched ? 'is-punched' : '' }} {{ item.isFuture ? 'is-future' : '' }}"
+            wx:if="{{ !item.empty }}"
+          >
+            <text class="c-day-num">{{ item.day }}</text>
+            <view class="c-punch-mark" wx:if="{{ item.isPunched }}"></view>
+            <view class="c-today-dot" wx:elif="{{ item.isToday }}"></view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 紧凑底部统计栏 -->
+      <view class="compact-cal-footer">
+        <view class="cc-stat">
+          <text class="cc-num">{{ calendarStats.monthPunchedCount || 0 }}<text class="cc-unit">天</text></text>
+          <text class="cc-label">当月打卡</text>
+        </view>
+        <view class="cc-divider"></view>
+        <view class="cc-stat">
+          <text class="cc-num is-green">{{ calendarStats.totalPunchedDays || 1 }}<text class="cc-unit">天</text></text>
+          <text class="cc-label">持续无烟</text>
+        </view>
+        <view class="cc-divider"></view>
+        <view class="cc-stat">
+          <text class="cc-num">{{ calendarStats.punchRate || 100 }}<text class="cc-unit">%</text></text>
+          <text class="cc-label">月自律率</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 7. WHO 身体自愈临床里程碑 (20分钟到10年，图标，默认折叠隐藏) -->
+    <view class="who-section-card">
+      <view class="section-top-header">
+        <view class="section-name-wrap">
+          <text class="sec-dot green"></text>
+          <text class="sec-heading">身体自愈临床里程碑</text>
+        </view>
+        <view class="who-quick-toggle" bindtap="toggleWhoCollapse">
+          <text class="wqt-text">{{ isWhoCollapsed ? '展开全部 ▾' : '收起 ▴' }}</text>
+        </view>
+      </view>
+
+      <view class="who-medical-spine">
+        <view 
+          class="who-node-item {{ item.unlocked ? 'is-unlocked' : '' }}" 
+          wx:for="{{ displayedWhoStages }}" 
+          wx:key="id"
+        >
+          <view class="node-spine-axis">
+            <view class="node-milestone-dot">
+              <text class="node-dot-symbol" wx:if="{{ item.unlocked }}">✓</text>
+              <text class="node-dot-hollow" wx:else>○</text>
+            </view>
+            <view class="node-axis-line" wx:if="{{ index < displayedWhoStages.length - 1 }}"></view>
+          </view>
+          <view class="node-info-card">
+            <view class="node-header-row">
+              <view class="node-title-box">
+                <text class="node-icon-emoji">{{ item.icon || '✨' }}</text>
+                <text class="node-title">{{ item.title }}</text>
+              </view>
+              <view class="node-status-tag {{ item.unlocked ? 'tag-passed' : 'tag-progress' }}">
+                {{ item.unlocked ? '已达成 ✓' : '自愈中' }}
+              </view>
+            </view>
+            <text class="node-clinical-desc">{{ item.description }}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 展开/折叠长按钮 -->
+      <view class="who-expand-footer-btn" bindtap="toggleWhoCollapse">
+        <text class="wef-text">{{ isWhoCollapsed ? '展开查看完整 10 年自愈里程碑 (共' + (whoStages.length || 12) + '项) ▾' : '收起部分里程碑 ▴' }}</text>
+      </view>
+    </view>
+
+    <!-- 8. 意见反馈 (微信官方原生开放反馈通道) -->
+    <view class="feedback-section-card">
+      <button class="feedback-action-btn" open-type="feedback">
+        <view class="fb-content-left">
+          <view class="fb-icon-circle">📮</view>
+          <view class="fb-text-box">
+            <view class="fb-title-row">
+              <text class="fb-main-title">意见反馈</text>
+              <text class="fb-badge">官方通道</text>
+            </view>
+            <text class="fb-sub-title">提出您的建议与体验反馈，与我们一同打造更真实懂您的赛博替烟</text>
+          </view>
+        </view>
+        <view class="fb-arrow">›</view>
+      </button>
+    </view>
+
+    <!-- 9. 医生寄语与微循环卡片 -->
+    <view class="doctor-quote-card">
+      <view class="quote-header">
+        <text class="quote-icon">🩺</text>
+        <text class="quote-title">科学替瘾自愈寄语</text>
+      </view>
+      <text class="quote-body">“每一次使用【我抽一支】代替真烟，支气管纤毛就重新获得一次微循环清洁，血液含氧量也在稳步提升，为你多抢回 11 分钟生命。”</text>
+    </view>
+
+    <!-- 10. 官方免责说明与健康指引 -->
+    <view class="disclaimer-footer-card">
+      <view class="disclaimer-header">
+        <text class="disclaimer-icon">⚖️</text>
+        <text class="disclaimer-title">免责说明与健康指引</text>
+      </view>
+      <view class="disclaimer-body">
+        <text class="disclaimer-p">1. 【我抽一支】是一款旨在通过行为替代与心理暗示协助戒烟与减烟的数字化健康辅助工具，不具有任何医疗诊断、疾病治疗或处方戒烟功能。</text>
+        <text class="disclaimer-p">2. 本应用展示之健康数据、节余估算及身体机能自愈推演指标，均依据世界卫生组织（WHO）公共医学文献及戒烟统计模型推导得出，仅供参考，不作为个性化临床依据。</text>
+        <text class="disclaimer-p">3. 若您存在严重心脑血管疾病、严重呼吸系统病变或重度尼古丁戒断反应，请务必前往正规医疗机构戒烟门诊就诊并遵从执业医师指导。</text>
+      </view>
+      <view class="disclaimer-copy">
+        <text>© 2026 我抽一支 · 倡导健康纯净呼吸</text>
+      </view>
+    </view>
+
+  </view>
+</scroll-view>
+
+<!-- 荣耀勋章成就证书详情弹窗 (Tencent Games 沉浸式高奢海报卡) -->
+<view class="glass-modal-backdrop achievement-modal-backdrop" wx:if="{{ showAchievementModal }}" catchtouchmove="preventTouchMove">
+  <view class="achievement-cert-card {{ selectedAchievement.unlocked ? ('tier-' + selectedAchievement.tier) : 'cert-locked' }}">
+    <!-- 关闭按钮 -->
+    <view class="cert-close-btn" bindtap="closeAchievementModal">✕</view>
+
+    <!-- 顶部品阶徽标与光晕 -->
+    <view class="cert-halo-wrap">
+      <view 
+        class="cert-emblem-core" 
+        style="{{ selectedAchievement.unlocked ? ('box-shadow: 0 0 36rpx ' + selectedAchievement.glowColor + '; border-color: ' + selectedAchievement.borderColor + ';') : '' }}"
+      >
+        <text class="cert-icon-emoji {{ !selectedAchievement.unlocked ? 'locked-emoji' : '' }}">{{ selectedAchievement.icon }}</text>
+      </view>
+      <view class="cert-tier-pill" style="background: {{ selectedAchievement.badgeBg }}; color: {{ selectedAchievement.tagColor }}; border-color: {{ selectedAchievement.borderColor }};">
+        {{ selectedAchievement.category }} · {{ selectedAchievement.tierTag }}
+      </view>
+    </view>
+
+    <!-- 勋章全称与状态 -->
+    <text class="cert-title">{{ selectedAchievement.name }}</text>
+    <text class="cert-status-badge {{ selectedAchievement.unlocked ? 'badge-passed' : 'badge-progress' }}">
+      {{ selectedAchievement.unlocked ? '✨ 荣耀已解锁' : '🔒 努力达成中' }}
+    </text>
+
+    <!-- 成就详述与典故 -->
+    <text class="cert-desc">{{ selectedAchievement.description }}</text>
+
+    <!-- 达成目标与进度条 -->
+    <view class="cert-progress-box">
+      <view class="cp-row">
+        <text class="cp-label">解锁条件：{{ selectedAchievement.conditionDesc }}</text>
+        <text class="cp-val" style="color: {{ selectedAchievement.tagColor }};">{{ selectedAchievement.progress.progressText }}</text>
+      </view>
+      <view class="cp-track">
+        <view class="cp-bar" style="width: {{ selectedAchievement.progress.percent }}%; background: {{ selectedAchievement.tagColor }};"></view>
+      </view>
+    </view>
+
+    <!-- 激励箴言底栏 -->
+    <view class="cert-quote-box">
+      <text class="cq-icon">🎖️</text>
+      <text class="cq-text">{{ selectedAchievement.unlocked ? '每一枚自律勋章，都是你战胜心魔、重塑生命的坚毅见证。' : '微小的自律持续累积，终将汇聚成重获纯净新生的汪洋大海。' }}</text>
+    </view>
+
+    <button class="cert-confirm-btn" bindtap="closeAchievementModal">
+      {{ selectedAchievement.unlocked ? '心怀荣耀 · 继续前行' : '我知道了 · 立即行动' }}
+    </button>
+  </view>
+</view>
+
