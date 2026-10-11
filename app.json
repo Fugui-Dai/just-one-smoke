@@ -21,6 +21,7 @@
   "usingComponents": {
     "custom-toast": "/components/custom-toast/custom-toast"
   },
+  "lazyCodeLoading": "requiredComponents",
   "style": "v2",
   "sitemapLocation": "sitemap.json"
 }
