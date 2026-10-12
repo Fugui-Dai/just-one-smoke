@@ -99,7 +99,7 @@
           ></view>
           <view class="share-btn-inner">
             <text class="dock-icon">🤲</text>
-            <view class="dock-rem-badge" wx:if="{{ currentPackRemaining !== undefined }}">{{ currentPackRemaining }}</view>
+            <view class="pack-remain-dock-badge {{ currentPackRemaining <= 0 ? 'is-empty' : '' }}" wx:if="{{ currentPackRemaining !== undefined }}">{{ currentPackRemaining }}</view>
           </view>
         </view>
         <text class="dock-title emerald-title">递烟</text>

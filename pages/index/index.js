@@ -1772,7 +1772,7 @@ Page({
     if (cur <= 0) {
       audioManager.playSwitchSound();
       triggerHaptic('heavy');
-      toast.info('烟盒已空', '去商店拆新盒，或递好友一缕赛博仙气！');
+      toast.warn('烟盒已空', '去商店拆新盒');
       return;
     }
 
@@ -1782,7 +1782,11 @@ Page({
 
     audioManager.playSwitchSound();
     triggerHaptic('medium');
-    toast.success('🤝 已递出 1 支【' + curCig.name + '】', '功德+1 · 微信分享中...');
+    if (next === 0) {
+      toast.warn('🤝 递出最后一支！', '整盒已空，去商店拆新盒补满吧～');
+    } else {
+      toast.success('🤝 已递出 1 支【' + curCig.name + '】', `盒内剩余 ${next} 支 · 功德+1`);
+    }
   },
 
   onShareAppMessage(options) {
@@ -1792,14 +1796,19 @@ Page({
     const curCig = this.data.currentCigarette || DEFAULT_CIGARETTE;
     const profile = this.data.profile || {};
     const senderName = profile.nickname || '老哥';
+    const isPackEmpty = this.data.currentPackRemaining <= 0;
 
-    let title = `🤝 递你一支【${curCig.name}】！赛博替烟，少抽真烟多活好多年！`;
-    if (curCig.brand === '中华' || curCig.id.includes('chunghwa')) {
-      title = `🤝 老哥，递你一支软中华！赛博替烟，有面更有健康！`;
-    } else if (curCig.brand === '黄鹤楼' || curCig.id.includes('huanghelou')) {
-      title = `🤝 递你一支黄鹤楼！赛博替烟，登高望远，清肺自愈！`;
-    } else if (curCig.category === '雪茄' || curCig.id.includes('cohiba')) {
-      title = `🥂 递你一支古巴雪茄！赛博顶奢品吸，免除焦油侵害！`;
+    let title = isPackEmpty 
+      ? `💨 老哥，我这盒【${curCig.name}】抽空了！递你一缕赛博仙气，健康替烟！`
+      : `🤝 递你一支【${curCig.name}】！赛博替烟，少抽真烟多活好多年！`;
+    if (!isPackEmpty) {
+      if (curCig.brand === '中华' || curCig.id.includes('chunghwa')) {
+        title = `🤝 老哥，递你一支软中华！赛博替烟，有面更有健康！`;
+      } else if (curCig.brand === '黄鹤楼' || curCig.id.includes('huanghelou')) {
+        title = `🤝 递你一支黄鹤楼！赛博替烟，登高望远，清肺自愈！`;
+      } else if (curCig.category === '雪茄' || curCig.id.includes('cohiba')) {
+        title = `🥂 递你一支古巴雪茄！赛博顶奢品吸，免除焦油侵害！`;
+      }
     }
 
     return {
