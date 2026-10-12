@@ -43,8 +43,8 @@
         </view>
 
         <!-- 最右边打卡状态方卡 (已打卡 / 2天 / 连 2) -->
-        <view class="user-punch-card">
-          <text class="punch-card-title">已打卡</text>
+        <view class="user-punch-card active-punch-card" bindtap="onTapPunchCard">
+          <text class="punch-card-title">已打卡 ✓</text>
           <view class="punch-card-days-row">
             <text class="punch-card-num">{{ quitDays + 1 }}</text>
             <text class="punch-card-unit">天</text>
@@ -65,7 +65,7 @@
             <text class="vb-main">{{ vipInfo.isVip ? (vipInfo.isLifetime ? '至尊终身特权' : 'VIP 尊享特权') : 'VIP 尊享会员' }}</text>
             <text class="vb-black-gold-tag">{{ vipInfo.isVip ? '生效中' : '黑金特权' }}</text>
           </view>
-          <text class="vb-sub">{{ vipInfo.isVip ? (vipInfo.isLifetime ? '永久跳过广告 · 25款名烟全免解锁' : (vipInfo.formattedExpire + ' 到期 · 尊享全免特权')) : '全域免看广告 · 25款名烟全解锁 · 专属特权' }}</text>
+          <text class="vb-sub">{{ vipInfo.isVip ? (vipInfo.isLifetime ? '永久跳过广告 · 33款名烟全免解锁' : (vipInfo.formattedExpire + ' 到期 · 尊享全免特权')) : '全域免看广告 · 33款名烟全解锁 · 专属特权' }}</text>
         </view>
       </view>
       <!-- 右侧优雅丝滑胶囊按钮 -->
@@ -202,15 +202,15 @@
           </view>
         </view>
 
-        <!-- 左下方 HUD 引出数据框：中枢神经与脑部多巴胺 (精准指向腹脑/神经中枢) -->
+        <!-- 左下方 HUD 引出数据框：自律神经系统 (精准指向腹部植物神经中枢/肠脑轴) -->
         <view class="hud-card hud-card-bl {{ activeOrgan === 'brain' ? 'is-active' : '' }}" bindtap="onSelectOrgan" data-organ="brain">
           <view class="hud-card-header">
-            <text class="hud-card-title">神经中枢</text>
-            <text class="hud-card-en">Neural Dopamine</text>
+            <text class="hud-card-title">自律神经</text>
+            <text class="hud-card-en">Autonomic Nerves</text>
           </view>
           <view class="hud-card-body">
             <view class="hud-metric-row">
-              <text class="hud-metric-label">受体脱敏</text>
+              <text class="hud-metric-label">交感舒缓</text>
               <text class="hud-metric-val purple">{{ brainPercent }}%</text>
             </view>
             <view class="hud-progress-track">
@@ -474,6 +474,8 @@
           class="compact-cell-touch-area"
           wx:for="{{ calendarDays }}"
           wx:key="key"
+          bindtap="onTapCalendarDay"
+          data-day="{{ item }}"
         >
           <view 
             class="compact-cell {{ item.empty ? 'is-empty' : '' }} {{ item.isToday ? 'is-today' : '' }} {{ item.isPunched ? 'is-punched' : '' }} {{ item.isFuture ? 'is-future' : '' }}"
@@ -494,7 +496,7 @@
         </view>
         <view class="cc-divider"></view>
         <view class="cc-stat">
-          <text class="cc-num is-green">{{ calendarStats.totalPunchedDays || 1 }}<text class="cc-unit">天</text></text>
+          <text class="cc-num is-green">{{ quitDays + 1 }}<text class="cc-unit">天</text></text>
           <text class="cc-label">持续无烟</text>
         </view>
         <view class="cc-divider"></view>

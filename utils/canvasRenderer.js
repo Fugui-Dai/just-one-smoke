@@ -65,6 +65,7 @@ export class CanvasRenderer {
   constructor() {
     this.time = 0;
     this.beadFlowStartTime = null;
+    this.emberHeat = 0.0; // 仿生物理热惯性：0.0 静置阴燃 -> 1.0 猛吸炽热
   }
 
   resetBeadFlow() {
@@ -101,6 +102,17 @@ export class CanvasRenderer {
 
     const curState = fsm ? fsm.getState() : 'UNLIT';
     const isInhaling = curState === 'INHALING';
+
+    // 仿生物理热惯性 (Thermal Inertia & Cooling Curve):
+    // 吸入时火头供氧充足快速升温 (~0.16s 充盈)；松开吸烟后，余温遵循牛顿冷却定律平滑指数衰减 (~0.38s 渐冷至阴燃基线)
+    const targetHeat = isInhaling ? 1.0 : 0.0;
+    if (typeof this.emberHeat !== 'number') this.emberHeat = 0.0;
+    if (targetHeat > this.emberHeat) {
+      this.emberHeat += (targetHeat - this.emberHeat) * Math.min(1.0, delta * 8.5);
+    } else {
+      this.emberHeat += (targetHeat - this.emberHeat) * Math.min(1.0, delta * 3.8);
+    }
+
     const p = fsm ? fsm.getProgress() : 1.0;
     const progress = (typeof p === 'number' && !isNaN(p)) ? p : 1.0;
     const ashRatio = fsm ? (typeof fsm.getAshRatio === 'function' ? fsm.getAshRatio() : ((fsm.getAshLength() || 0) / 260)) : 0;
@@ -1343,7 +1355,9 @@ export class CanvasRenderer {
     // ==========================================
     if (isLit) {
       const pulse = Math.sin(time * 0.007);
-      const glowFactor = isInhaling ? 1.7 : (1.0 + 0.15 * pulse);
+      // 融合热惯性：微弱正弦阴燃脉冲 + 仿生物理热惯性平滑增益 (0.0 ~ 1.0 -> glow 1.0 ~ 1.7)
+      const heat = Math.max(0, Math.min(1.0, this.emberHeat || 0));
+      const glowFactor = 1.0 + 0.15 * pulse + 0.55 * heat;
 
       // 1. 锯齿炭化焦黑破损边缘 (Scalloped Charred Black Rim - 参考图焦黑不规则撕纸边)
       ctx.save();
@@ -1405,15 +1419,16 @@ export class CanvasRenderer {
         drawEllipse(ctx, cx, fireY, innerW / 2, innerCapH);
         ctx.fill();
 
-        // 2. 燃烧只有外层纸壁：薄薄一圈环形通红火圈 (Paper Rim Glow Ring)
-        ctx.strokeStyle = isInhaling ? 'rgba(255, 110, 0, 0.90)' : 'rgba(255, 65, 0, 0.60)';
-        ctx.lineWidth = 2.8 * (isInhaling ? 1.25 : 1.0);
+        // 2. 燃烧只有外层纸壁：薄薄一圈环形通红火圈 (Paper Rim Glow Ring - 热惯性平滑衰减)
+        const rimAlpha = 0.60 + 0.30 * heat;
+        ctx.strokeStyle = `rgba(255, ${Math.round(65 + 45 * heat)}, 0, ${rimAlpha.toFixed(2)})`;
+        ctx.lineWidth = 2.8 * (1.0 + 0.25 * heat);
         ctx.beginPath();
         drawEllipse(ctx, cx, fireY, (activeRimW - 1.8) / 2, capH * 0.92);
         ctx.stroke();
 
         // 纸壁炽白高光金芯线 (Incandescent White-Gold Core on Paper Rim)
-        ctx.strokeStyle = isInhaling ? '#ffffff' : '#fef08a';
+        ctx.strokeStyle = heat > 0.4 ? '#ffffff' : '#fef08a';
         ctx.lineWidth = 1.3;
         ctx.beginPath();
         drawEllipse(ctx, cx, fireY, (activeRimW - 1.8) / 2, capH * 0.92);
@@ -1425,7 +1440,7 @@ export class CanvasRenderer {
           const angle = (si / rimSpotsCount) * Math.PI * 2 + (time * 0.0035);
           const rx = cx + Math.cos(angle) * (activeRimW / 2 - 1.0);
           const ry = fireY + Math.sin(angle) * (capH * 0.85);
-          const rSize = (0.9 + Math.sin(time * 0.01 + si) * 0.4) * (isInhaling ? 1.5 : 1.0);
+          const rSize = (0.9 + Math.sin(time * 0.01 + si) * 0.4) * (1.0 + 0.5 * heat);
           ctx.fillStyle = '#ffffff';
           ctx.beginPath();
           ctx.arc(rx, ry, rSize, 0, Math.PI * 2);
@@ -1435,8 +1450,10 @@ export class CanvasRenderer {
       } else {
         const bloomR = (curTopW * 0.95) * glowFactor;
         const bloomGrad = ctx.createRadialGradient(cx, fireY, 2, cx, fireY, bloomR);
-        bloomGrad.addColorStop(0, isInhaling ? 'rgba(255, 130, 0, 0.92)' : 'rgba(255, 65, 0, 0.65)');
-        bloomGrad.addColorStop(0.35, isInhaling ? 'rgba(249, 115, 22, 0.65)' : 'rgba(239, 68, 68, 0.38)');
+        const coreAlpha = 0.65 + 0.27 * heat;
+        const midAlpha = 0.38 + 0.27 * heat;
+        bloomGrad.addColorStop(0, `rgba(255, ${Math.round(65 + 65 * heat)}, 0, ${coreAlpha.toFixed(2)})`);
+        bloomGrad.addColorStop(0.35, `rgba(${Math.round(239 + 10 * heat)}, ${Math.round(68 + 47 * heat)}, ${Math.round(68 - 46 * heat)}, ${midAlpha.toFixed(2)})`);
         bloomGrad.addColorStop(0.75, 'rgba(220, 38, 38, 0.12)');
         bloomGrad.addColorStop(1.0, 'rgba(0, 0, 0, 0)');
         ctx.fillStyle = bloomGrad;
@@ -1444,7 +1461,7 @@ export class CanvasRenderer {
         ctx.arc(cx, fireY, bloomR, 0, Math.PI * 2);
         ctx.fill();
 
-        // 3. 内部通红炽热火星隙斑 (Crust Ember Hotspots - 1:1对标参考图透红火星)
+        // 3. 内部通红炽热火星隙斑 (Crust Ember Hotspots - 热惯性平滑衰减)
         const spotScale = curTopW / 28;
         const hotspots = [
           { ox: -4.5 * spotScale, oy: 0.5, r: 3.2 * spotScale },
@@ -1457,11 +1474,11 @@ export class CanvasRenderer {
         for (const spot of hotspots) {
           const sx = cx + spot.ox;
           const sy = fireY + spot.oy;
-          const sr = spot.r * (isInhaling ? 1.4 : (0.9 + 0.15 * Math.sin(time * 0.009 + spot.ox)));
+          const sr = spot.r * ((0.9 + 0.15 * Math.sin(time * 0.009 + spot.ox)) + 0.45 * heat);
 
           const spotGrad = ctx.createRadialGradient(sx, sy, 0.5, sx, sy, sr);
           spotGrad.addColorStop(0, '#ffffff'); // 极白炽心
-          spotGrad.addColorStop(0.25, '#fef08a'); // 亮金
+          spotGrad.addColorStop(0.25, heat > 0.3 ? '#ffffff' : '#fef08a'); // 亮金至极白
           spotGrad.addColorStop(0.65, '#ea580c'); // 橙红
           spotGrad.addColorStop(1.0, 'rgba(220, 38, 38, 0.1)'); // 边缘暗红
           ctx.fillStyle = spotGrad;
@@ -1471,9 +1488,10 @@ export class CanvasRenderer {
         }
       }
 
-      // 纸身向下受热微光散射
+      // 纸身向下受热微光散射 (随热惯性平滑暗淡)
       const downLight = ctx.createLinearGradient(0, fireY, 0, fireY + 18);
-      downLight.addColorStop(0, isInhaling ? 'rgba(255, 69, 0, 0.5)' : 'rgba(255, 69, 0, 0.22)');
+      const downAlpha = 0.22 + 0.28 * heat;
+      downLight.addColorStop(0, `rgba(255, 69, 0, ${downAlpha.toFixed(2)})`);
       downLight.addColorStop(1, 'rgba(255, 69, 0, 0)');
       ctx.fillStyle = downLight;
       ctx.fillRect(cx - curTopW / 2, fireY, curTopW, 18);
@@ -1767,18 +1785,45 @@ export class PackFlightVfxRenderer {
   }
 
   /**
-   * 采样「九天游龙 · 御剑惊鸿 720° 全屏莫比乌斯大回环」轨迹 (u: 0.0 -> 1.0)
-   * 与 CSS ssrHeroArcFlight 关键帧严密同步：
-   * 段1 (0.00 ~ 0.28): 拔剑冲霄 -> 左上破云 -> 右上九天满月回旋
-   * 段2 (0.28 ~ 0.62): 右上满月 -> 对角线极速破空横斩穿过屏幕中心 -> 左下极近景挽剑花
-   * 段3 (0.62 ~ 0.86): 左下近景 -> 下方横掠至右下回环 -> 盘龙逆升
-   * 段4 (0.86 ~ 1.00): 720° 双周满旋归宗，精准定格于屏幕正中黄金焦点 (cx, cy - 0.04h)
+   * 采样抽取特效运动轨迹 (支持 vfx1 经典出鞘 360° / vfx2 九天游龙 720°)
    */
-  sampleSCurve(u, w, h, slotOffsetX = 0) {
+  sampleSCurve(u, w, h, slotOffsetX = 0, vfxType = 'vfx2') {
     const cx = w * 0.5;
     const cy = h * 0.45;
     const t = Math.max(0, Math.min(1, u));
 
+    // 特效 1: 经典宝刀出鞘 360° 单周掠空大回环
+    if (vfxType === 'vfx1') {
+      let p0, p1, p2, p3, localT;
+      if (t < 0.32) {
+        localT = t / 0.32;
+        p0 = { x: cx + slotOffsetX, y: cy + h * 0.08 };
+        p1 = { x: cx + slotOffsetX * 0.5, y: cy - h * 0.28 };
+        p2 = { x: cx + w * 0.18, y: cy - h * 0.30 };
+        p3 = { x: cx + w * 0.28, y: cy - h * 0.14 };
+      } else if (t < 0.72) {
+        localT = (t - 0.32) / 0.40;
+        p0 = { x: cx + w * 0.28, y: cy - h * 0.14 };
+        p1 = { x: cx + w * 0.38, y: cy + h * 0.06 };
+        p2 = { x: cx - w * 0.05, y: cy + h * 0.24 };
+        p3 = { x: cx - w * 0.28, y: cy + h * 0.10 };
+      } else {
+        localT = (t - 0.72) / 0.28;
+        p0 = { x: cx - w * 0.28, y: cy + h * 0.10 };
+        p1 = { x: cx - w * 0.38, y: cy - h * 0.08 };
+        p2 = { x: cx - w * 0.12, y: cy - h * 0.12 };
+        p3 = { x: cx, y: cy - h * 0.04 };
+      }
+      const mt = 1 - localT;
+      const x = mt * mt * mt * p0.x + 3 * mt * mt * localT * p1.x + 3 * mt * localT * localT * p2.x + localT * localT * localT * p3.x;
+      const y = mt * mt * mt * p0.y + 3 * mt * mt * localT * p1.y + 3 * mt * localT * localT * p2.y + localT * localT * localT * p3.y;
+      const dx = 3 * mt * mt * (p1.x - p0.x) + 6 * mt * localT * (p2.x - p1.x) + 3 * localT * localT * (p3.x - p2.x);
+      const dy = 3 * mt * mt * (p1.y - p0.y) + 6 * mt * localT * (p2.y - p1.y) + 3 * localT * localT * (p3.y - p2.y);
+      const len = Math.hypot(dx, dy) || 1;
+      return { x, y, tx: dx / len, ty: dy / len, nx: -dy / len, ny: dx / len };
+    }
+
+    // 特效 2: 九天游龙 720° 全屏莫比乌斯大回环
     let p0, p1, p2, p3, localT;
     if (t < 0.28) {
       localT = t / 0.28;
@@ -1829,6 +1874,7 @@ export class PackFlightVfxRenderer {
     const cx = w * 0.5;
     const cy = h * 0.45;
     const slotOffsetX = options.slotOffsetX || 0;
+    const vfxType = options.vfxType || 'vfx2';
 
     ctx.clearRect(0, 0, w, h);
     ctx.save();
@@ -1952,7 +1998,7 @@ export class PackFlightVfxRenderer {
           if (u < tailStartU || u > curveHeadU) continue;
           pts.push({
             u,
-            ...this.sampleSCurve(u, w, h, slotOffsetX)
+            ...this.sampleSCurve(u, w, h, slotOffsetX, vfxType)
           });
         }
 
@@ -2050,7 +2096,7 @@ export class PackFlightVfxRenderer {
           for (let i = 0; i < this.stardust.length; i++) {
             const sd = this.stardust[i];
             if (sd.u > curveHeadU) continue;
-            const sample = this.sampleSCurve(sd.u, w, h, slotOffsetX);
+            const sample = this.sampleSCurve(sd.u, w, h, slotOffsetX, vfxType);
             const spreadDist = sd.normalSpread * (16 + sd.u * 42);
             const drift = Math.sin(elapsedSec * 3.6 + sd.phase) * 6;
             const sx = sample.x + sample.nx * (spreadDist + drift);

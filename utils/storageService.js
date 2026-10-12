@@ -459,6 +459,19 @@ export const storageService = {
   },
 
   // ==========================================
+  // 名烟品鉴抽取动效偏好 (Pull VFX: 'vfx2' 九天游龙 720° 大回环 | 'vfx1' 经典出鞘 360°)
+  // ==========================================
+  getPullVfxType() {
+    return getItem('SMOKEFREE_PULL_VFX_TYPE') || 'vfx2';
+  },
+
+  setPullVfxType(vfxType) {
+    const type = (vfxType === 'vfx1') ? 'vfx1' : 'vfx2';
+    setItem('SMOKEFREE_PULL_VFX_TYPE', type);
+    return type;
+  },
+
+  // ==========================================
   // 烟雾特效工坊偏好与解锁 (Smoke Effects)
   // ==========================================
   getSelectedSmokeEffectId() {

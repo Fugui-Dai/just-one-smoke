@@ -307,7 +307,7 @@ export const SMOKE_EFFECTS = [
   }
 ];
 
-export const DEFAULT_SMOKE_EFFECT = SMOKE_EFFECTS.find(e => e.id === 'auspicious_river') || SMOKE_EFFECTS[0];
+export const DEFAULT_SMOKE_EFFECT = SMOKE_EFFECTS.find(e => e.id === 'ring_classic') || SMOKE_EFFECTS[0];
 
 export function getSmokeEffectById(id) {
   if (!id) return DEFAULT_SMOKE_EFFECT;

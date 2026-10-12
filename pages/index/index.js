@@ -609,7 +609,8 @@ Page({
   },
 
   // 配合烟雾特效执行真实拟真吐烟流程 (具备连击防卡顿节流与上一波延时清理)
-  performRealisticExhale() {
+  // 配合烟雾特效执行真实拟真吐烟流程 (支持根据吸入时长动态注入吸力强度 intensity，具备连击防卡顿节流与上一波延时清理)
+  performRealisticExhale(intensity = 1.0) {
     if (!this.particles) return;
 
     // 1. 疯点限流保护：350ms 内连续点击合并节流，杜绝海量并发定时器导致界面卡死
@@ -645,17 +646,23 @@ Page({
       }
     }
 
+    const isAirCig = Boolean(curCig.id === 'pure_oxygen_zen' || curCig.isAirCig);
+    if (isAirCig) {
+      smokeColor = 'rgba(224, 242, 254, '; // 纯氧自然极清微光
+    }
+
+    const effIntensity = Math.min(1.55, Math.max(0.75, intensity || 1.0));
     const effectId = currentEff.id;
 
     // 腾讯总监设计级：独占特效调度，清除异构大实体与多余旧烟雾，杜绝多特效交叉重叠
     this.particles.ensureExclusiveEffect(effectId);
 
-    if (effectId === 'ring_classic' || effectId === 'cloud_dense' || effectId === 'silk_pure') {
-      // 1. 经典空灵烟圈：第一圈领航冲出，第二圈追逐相伴，3D 俯仰透视环形涡流向前优雅滑行扩张并柔和羽化消散
-      this.particles.emitSmokeRing(mx, my - 20, smokeColor, 1.0);
+    if (effectId === 'ring_classic') {
+      // 1. 经典空灵烟圈：第一圈领航冲出，第二圈追逐相伴，3D 俯仰透视环形涡流向前优雅滑行扩张并柔和羽化消散 (随吸力动态调节初速度与尺寸)
+      this.particles.emitSmokeRing(mx, my - 20, smokeColor, 1.0 * effIntensity, { speedMul: Math.min(1.35, 0.82 + effIntensity * 0.28) });
       const timer = setTimeout(() => {
         if (!this.particles) return;
-        this.particles.emitSmokeRing(mx, my - 24, smokeColor, 0.75, { speedMul: 0.85, offsetX: 6 });
+        this.particles.emitSmokeRing(mx, my - 24, smokeColor, 0.75 * effIntensity, { speedMul: 0.85 * effIntensity, offsetX: 6 });
       }, 190);
       this.exhaleEffectTimers.push(timer);
     } else if (effectId === 'purple_zen') {
@@ -853,13 +860,17 @@ Page({
     audioManager.stopBurnSound();
 
     if (this.fsm.getState() === 'INHALING') {
+      const inhaleDurationSec = this.inhaleStartTime ? Math.max(0.2, (Date.now() - this.inhaleStartTime) / 1000) : 0.8;
+      // 腾讯总监级手感：根据真实深吸时长计算吸力强度 (0.75x ~ 1.55x 动态增益)
+      const inhaleIntensity = Math.min(1.55, Math.max(0.75, 0.75 + Math.min(2.5, inhaleDurationSec) * 0.32));
+
       this.fsm.stopInhale();
       const nextSt = this.fsm.getState();
       if (this.data.simulatorState !== nextSt) {
         this.setData({ simulatorState: nextSt });
       }
       audioManager.playExhaleSound();
-      triggerHaptic('medium');
+      triggerHaptic(inhaleDurationSec > 1.2 ? 'heavy' : 'medium');
 
       if (this.data.breathingMode) {
         this.setData({ breathingPhase: 'exhale' });
@@ -890,8 +901,8 @@ Page({
         }, 2500);
       }
 
-      // 真实口部呼气吐烟动作：从嘴部向上喷涌大团浓白烟气，并强力激发现装配的专属烟雾特效
-      this.performRealisticExhale();
+      // 真实口部呼气吐烟动作：从嘴部向上喷涌浓白烟气，并根据吸入时长动态注入烟雾物理初速度与体积
+      this.performRealisticExhale(inhaleIntensity);
     }
   },
 
@@ -1419,44 +1430,18 @@ Page({
     });
   },
 
-  // 数据刷新
+  // 数据刷新 (腾讯级性能瘦身：仅维护首页 WXML 真正需要的烟盒库存、单支烟资与特效解锁列表)
   refreshAllData() {
     const profile = storageService.getProfile();
     const records = storageService.getRecords();
     const totalSubs = records.length;
     const totalSaved = calculateSavings(totalSubs, profile.packPrice);
-    const totalTar = calculateTarAvoided(totalSubs);
-    const totalLife = calculateLifeRegained(totalSubs);
-    const quitDays = calculateQuitDays(profile.quitStartDate);
-    const dailyRaw = storageService.getRecentDailyStats(7);
 
-    const maxCount = Math.max(...dailyRaw.map(d => d.count), 5);
-    const dailyTrends = dailyRaw.map(d => ({
-      ...d,
-      percent: d.count > 0 ? Math.min(100, Math.round((d.count / maxCount) * 100)) : 6
-    }));
-
-    const sumDaily = dailyRaw.reduce((acc, curr) => acc + curr.count, 0);
-    const weeklyAvg = dailyRaw.length ? (sumDaily / dailyRaw.length).toFixed(1) : '0.0';
-
-    const todayStat = dailyRaw.find(d => d.label === '今天') || dailyRaw[dailyRaw.length - 1];
-    const todayCount = todayStat ? Number(todayStat.count) || 0 : 0;
-    const todaySavedMoney = calculateSavings(todayCount, profile.packPrice).toFixed(2);
-
-    const whoStages = getWhoStages(profile.quitStartDate);
-
-    // 图鉴列表状态
+    // 烟具图鉴选择抽屉状态
     const catalogList = CIGARETTE_CATALOG.map(c => ({
       ...c,
       unlocked: isCigaretteUnlocked(c.id, totalSubs),
       currentStock: storageService.getPackCount(c.id, c.packCapacity || (c.isCigar ? 5 : 20))
-    }));
-
-    // 成就列表状态
-    const unlockedAchievements = storageService.getUnlockedAchievements();
-    const achievementsList = ACHIEVEMENTS.map(a => ({
-      ...a,
-      unlocked: unlockedAchievements.includes(a.id)
     }));
 
     const packRemaining = storageService.getPackCount(this.data.currentCigarette.id, this.data.currentCigarette.packCapacity || 20);
@@ -1477,28 +1462,13 @@ Page({
 
     this.setData({
       profile,
-      todayCount,
-      todaySavedMoney,
       totalSubstituted: totalSubs,
-      totalPacksSaved: (totalSubs / 20).toFixed(1),
       totalSavedMoney: totalSaved.toFixed(2),
       singleStickSavedPrice: singleStickPrice,
-      totalTarAvoided: totalTar,
-      totalLifeRegained: totalLife,
-      lifeRegainedHours: (totalLife / 60).toFixed(1),
-      quitDays,
-      dailyTrends,
-      weeklyAvg,
-      whoStages,
       catalogList,
-      achievementsList,
-      unlockedAchievementsCount: unlockedAchievements.length,
-      editProfile: { ...profile },
       currentPackRemaining: packRemaining,
       smokeEffectsList
     });
-
-    this.refreshLeaderboard();
   },
 
   // ================= 实机同款主控与快捷操作 =================

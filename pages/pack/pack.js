@@ -99,10 +99,11 @@ Page({
     packCount: 20, // 盒内剩余烟支数量
     slotArray: [], // 槽位索引数组 [0..19] 或 [0..4]
     slotStates: [], // 每个槽位是否有烟状态数组 [true, false, ...]
+    pullVfxType: 'vfx2', // 'vfx1' (经典出鞘 360°) | 'vfx2' (九天游龙 720°)
     flightStyles: computeFlightStyles(DEFAULT_CIGARETTE),
 
     // 3D 动画交互状态
-    isLidOpen: true, // 盒盖默认状态
+    isLidOpen: false, // 盒盖默认状态（非当前装备烟默认严格闭合，绝不多余动作）
     isPulling: false, // 正在抽出一支烟的动画
     isSlotEjected: false, // 烟支是否已拔出槽位进入空中轨迹
     slotOffsetX: 0, // 选中烟支相对于烟盒中心的水平偏移 (rpx)
@@ -134,6 +135,7 @@ Page({
     // 读取真实剩余槽位状态与剩余数量（绝不强制重置未抽完的烟盒，保留被抽走后的空槽位置）
     const slotStates = storageService.getPackSlots(curCig.id, capacity);
     const count = slotStates.filter(Boolean).length;
+    const pullVfxType = storageService.getPullVfxType();
 
     const records = storageService.getRecords();
     const totalSubs = records.length;
@@ -161,6 +163,7 @@ Page({
       packCount: count,
       slotArray,
       slotStates,
+      pullVfxType,
       flightStyles,
       isLidOpen: shouldOpenLid,
       isPulling: false,
@@ -217,11 +220,27 @@ Page({
     } catch (e) {}
   },
 
+  // 切换抽烟特效 (特效1: 经典出鞘 360° | 特效2: 九天游龙 720°)
+  onSwitchPullVfx(e) {
+    const vfx = e.currentTarget.dataset.vfx;
+    if (!vfx || vfx === this.data.pullVfxType) return;
+    audioManager.unlockAudio();
+    audioManager.playSwitchSound();
+    triggerHaptic('medium');
+    const savedType = storageService.setPullVfxType(vfx);
+    this.setData({
+      pullVfxType: savedType
+    });
+    const label = savedType === 'vfx1' ? '特效1：经典出鞘 360°' : '特效2：九天游龙 720°';
+    toast.info(`已切换至【${label}】`);
+  },
+
   startFlightVfxLoop(slotOffsetX = 0) {
     this.stopFlightVfxLoop();
     packFlightVfxRenderer.reset();
     this._flightStartTime = Date.now();
     const pxOffset = (slotOffsetX || 0) * 0.5;
+    const vfxType = this.data.pullVfxType || 'vfx2';
 
     const step = () => {
       if (!this._flightStartTime) return;
@@ -232,7 +251,7 @@ Page({
           this._flightCanvasW,
           this._flightCanvasH,
           elapsedSec,
-          { slotOffsetX: pxOffset }
+          { slotOffsetX: pxOffset, vfxType }
         );
       }
       if (this._flightStartTime) {
@@ -390,7 +409,7 @@ Page({
   },
 
   // 初始化或切换当前展示的烟盒
-  initCigarettePack(cig) {
+  initCigarettePack(cig, targetViewMode, callback) {
     const capacity = cig.packCapacity || (cig.isCigar ? 5 : 20);
     const slotStates = storageService.getPackSlots(cig.id, capacity);
     const count = slotStates.filter(Boolean).length;
@@ -398,7 +417,7 @@ Page({
     const totalSubs = records.length;
     const unlocked = isCigaretteUnlocked(cig.id, totalSubs);
     const currentSelectedId = storageService.getSelectedCigaretteId();
-    // 只有当前正在抽的烟才默认打开烟盖，其他的烟默认闭合烟盖
+    // 只有当前正在抽的烟才默认打开烟盖，其他的烟默认严格闭合烟盖
     const shouldOpenLid = Boolean(unlocked && (cig.id === currentSelectedId));
 
     const slotArray = [];
@@ -408,7 +427,7 @@ Page({
 
     const flightStyles = computeFlightStyles(cig);
 
-    this.setData({
+    const updatePayload = {
       currentCigarette: cig,
       isCurrentUnlocked: unlocked,
       packCapacity: capacity,
@@ -425,6 +444,16 @@ Page({
       slotOffsetX: 0,
       vfxStageLabel: '01 [竖壳静置] · 轻触烟支唤起星河',
       showDrawnModal: false
+    };
+
+    if (targetViewMode) {
+      updatePayload.viewMode = targetViewMode;
+    }
+
+    this.setData(updatePayload, () => {
+      if (typeof callback === 'function') {
+        callback();
+      }
     });
   },
 
@@ -454,10 +483,7 @@ Page({
     }
     triggerHaptic('medium');
 
-    this.initCigarettePack(item);
-    this.setData({
-      viewMode: '3d_pack'
-    }, () => {
+    this.initCigarettePack(item, '3d_pack', () => {
       this.initFlightCanvas();
     });
     this.refreshCatalogList();
@@ -510,10 +536,7 @@ Page({
     }
     triggerHaptic('medium');
 
-    this.initCigarettePack(item);
-    this.setData({
-      viewMode: '3d_pack'
-    }, () => {
+    this.initCigarettePack(item, '3d_pack', () => {
       this.initFlightCanvas();
     });
   },
@@ -671,14 +694,15 @@ Page({
       triggerHaptic('medium');
     }, 1120);
 
-    // 阶段 06 [屏幕呈现] (1.48s 起常驻定格)：未点燃东方流云金纹烟支 28° 悬停定格 + 等待用户点击屏幕跳转
+    // 阶段 06 [屏幕呈现]：未点燃东方流云金纹烟支 28° 悬停定格 + 等待用户点击屏幕跳转 (特效1: 1.28s定格, 特效2: 1.48s定格)
+    const settleDelay = this.data.pullVfxType === 'vfx1' ? 1280 : 1480;
     this._pullTimer4 = setTimeout(() => {
       triggerHaptic('heavy');
       this.setData({
         slotStates: updatedSlots,
         packCount: remaining
       });
-    }, 1480);
+    }, settleDelay);
   },
 
   // 用户在名烟呈现界面点击屏幕任意位置后，才执行跳转回首页品吸

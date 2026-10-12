@@ -211,12 +211,15 @@
   margin-top: 4rpx;
 }
 
-/* 烟盒余量胶囊行 */
+/* 烟盒余量胶囊行 (自适应窄屏与折叠屏包裹居中) */
 .pack-inventory-row {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 14rpx;
+  flex-wrap: wrap;
+  padding: 0 16rpx;
+  row-gap: 10rpx;
 }
 
 .pack-inventory-pill {
@@ -280,6 +283,48 @@
   font-weight: 800;
   color: #fef08a;
   letter-spacing: 1rpx;
+}
+
+/* 特效选择胶囊微切换器 (特效1 / 特效2) */
+.pack-vfx-selector-pill {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(251, 191, 36, 0.38);
+  border-radius: 999rpx;
+  padding: 3rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.45);
+  margin-left: 6rpx;
+}
+
+.vfx-pill-btn {
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+  transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vfx-pill-btn:active {
+  transform: scale(0.92);
+}
+
+.vfx-pill-btn.vfx-pill-active {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  box-shadow: 0 2rpx 8rpx rgba(245, 158, 11, 0.55);
+}
+
+.vfx-pill-text {
+  font-size: 19rpx;
+  font-weight: 800;
+  color: #94a3b8;
+  letter-spacing: 1rpx;
+}
+
+.vfx-pill-btn.vfx-pill-active .vfx-pill-text {
+  color: #0b0f19;
+  font-weight: 900;
 }
 
 
@@ -350,55 +395,37 @@
   height: calc(var(--lid-h, 168rpx) + 20rpx);
   box-sizing: border-box;
   overflow: visible;
-  z-index: 6;
-  transition: opacity 0.22s ease;
+  z-index: 10;
+  opacity: 1;
+  pointer-events: auto;
 }
 
-.pack-box-wrapper.lid-closed .pack-inner-chamber {
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* 烟支后方真实金属铝箔/金箔压纹衬底 (还原高档名烟原厂金箔/银箔质感，彻底消除黑洞断层) */
+/* 移除第二排背后的白卡纸内衬与金色锡箔衬底，保持烟盒仓内干净纯粹的暗调立体深景 */
 .foil-paper-liner {
-  position: absolute;
-  inset: 0;
-  background: var(--foil-color, #d97706);
-  border-radius: 8rpx 8rpx 0 0;
-  z-index: 1;
-  pointer-events: none;
-  background-image: repeating-linear-gradient(
-    45deg,
-    rgba(255, 255, 255, 0.22) 0px,
-    rgba(255, 255, 255, 0.22) 2px,
-    transparent 2px,
-    transparent 6px
-  ),
-  repeating-linear-gradient(
-    -45deg,
-    rgba(0, 0, 0, 0.1) 0px,
-    rgba(0, 0, 0, 0.1) 2px,
-    transparent 2px,
-    transparent 6px
-  );
-  box-shadow: inset 0 4rpx 14rpx rgba(0, 0, 0, 0.45);
+  display: none;
+}
+
+.inner-collar-frame {
+  display: none;
+}
+
+.collar-u-notch,
+.collar-card-rim {
+  display: none;
 }
 
 .foil-notch-cutout,
-.foil-texture-shimmer,
-.inner-collar-frame,
-.collar-u-notch,
-.collar-card-rim {
+.foil-texture-shimmer {
   display: none;
 }
 
 /* ==================== 盒内立体香烟真实双排阶梯式陈列 (第一排 0..9 + 第二排 10..19 两排独立网格同时清晰呈现) ==================== */
 .cigarettes-matrix {
   position: absolute;
-  top: 2rpx;
-  left: 10rpx;
-  right: 10rpx;
-  height: var(--lid-h, 168rpx);
+  top: 38rpx;
+  left: 8rpx;
+  right: 8rpx;
+  height: calc(var(--lid-h, 168rpx) + 2rpx);
   display: grid;
   align-items: start;
   justify-content: center;
@@ -406,41 +433,31 @@
   box-sizing: border-box;
 }
 
-/* 第二排前方的锡箔阶梯分隔金边（位于第一排与第二排交界处，一眼区分上下两排） */
+/* 移除生硬的人造金边分割线，还原真实前后排自然衔接 */
 .cigarettes-matrix.standard-matrix::after,
 .cigarettes-matrix.slender-matrix::after {
-  content: '';
-  position: absolute;
-  top: 76rpx;
-  left: -2rpx;
-  right: -2rpx;
-  height: 6rpx;
-  background: linear-gradient(90deg, rgba(251, 191, 36, 0.35) 0%, rgba(254, 240, 138, 0.92) 50%, rgba(251, 191, 36, 0.35) 100%);
-  box-shadow: 0 -3rpx 8rpx rgba(0, 0, 0, 0.72), 0 3rpx 8rpx rgba(0, 0, 0, 0.65);
-  border-radius: 4rpx;
-  z-index: 9;
-  pointer-events: none;
+  display: none;
 }
 
-/* 常规 20 支排列：真实 2 排 × 10 列双排独立网格，第 1 排在上方行 (74rpx)，第 2 排在下方行 (84rpx)，两排同时完整独立呈现，绝不叠成一排 */
+/* 常规 20 支排列：后排优雅微露 (50rpx)，前排主显 (78rpx)，真实舒适前后排层次 */
 .cigarettes-matrix.standard-matrix {
   grid-template-columns: repeat(10, 1fr);
-  grid-template-rows: 74rpx 84rpx;
+  grid-template-rows: 50rpx 78rpx;
   column-gap: 4rpx;
-  row-gap: 6rpx;
+  row-gap: 2rpx;
 }
 
-/* 细支 20 支排列：2 排 × 10 列双排独立网格 */
+/* 细支 20 支排列：后排优雅微露 (50rpx)，前排主显 (78rpx) */
 .cigarettes-matrix.slender-matrix {
   grid-template-columns: repeat(10, 1fr);
-  grid-template-rows: 74rpx 84rpx;
+  grid-template-rows: 50rpx 78rpx;
   column-gap: 5rpx;
-  row-gap: 6rpx;
+  row-gap: 2rpx;
 }
 
 /* 雪茄 5 支排列 (单排 5 支大雪茄) */
 .cigarettes-matrix.cigar-matrix {
-  top: 10rpx;
+  top: 18rpx;
   left: 18rpx;
   right: 18rpx;
   grid-template-columns: repeat(5, 1fr);
@@ -459,26 +476,26 @@
   box-sizing: border-box;
 }
 
-/* 第一排 10 支 (index 0..9)：独立居于第 1 行 (grid-row: 1)，完整露出圆烟嘴 + 滤嘴 + 金箍 + 白烟身，下方留出 6rpx 阶梯分界，100% 不被第二排遮挡 */
+/* 后排 10 支 (index 0..9)：位置自然下沉、不突兀上浮，微带深景环境阴影，烘托前后层次 */
 .standard-matrix .cig-filter-slot.back-row-slot,
 .slender-matrix .cig-filter-slot.back-row-slot {
   grid-row: 1;
   top: 0;
-  height: 74rpx;
+  height: 50rpx;
   z-index: 6;
   transform: none;
-  filter: brightness(0.95) contrast(1.05) drop-shadow(0 3rpx 5rpx rgba(0, 0, 0, 0.55));
+  filter: brightness(0.88) contrast(1.06) drop-shadow(0 2rpx 4rpx rgba(0, 0, 0, 0.45));
 }
 
-/* 第二排 10 支 (index 10..19)：独立居于第 2 行 (grid-row: 2)，排在第一排正下方，同样完整露出圆烟嘴 + 滤嘴 + 金箍 + 白烟身，两排上下同屏一目了然 */
+/* 前排 10 支 (index 10..19)：饱满突出，完整展示高光滤嘴、金箍与挺拔烟身 */
 .standard-matrix .cig-filter-slot.front-row-slot,
 .slender-matrix .cig-filter-slot.front-row-slot {
   grid-row: 2;
   top: 0;
-  height: 84rpx;
+  height: 78rpx;
   z-index: 12;
   transform: none;
-  filter: brightness(1.04) drop-shadow(0 -3rpx 6rpx rgba(0, 0, 0, 0.68));
+  filter: brightness(1.03) drop-shadow(0 -2rpx 5rpx rgba(0, 0, 0, 0.42)) drop-shadow(0 4rpx 8rpx rgba(0, 0, 0, 0.55));
 }
 
 /* 第二排 10 支列映射：10..19 分别对应第 1..10 列 */
@@ -505,32 +522,32 @@
 
 .standard-matrix .cig-filter-slot.back-row-slot .slot-cigarette-stick,
 .slender-matrix .cig-filter-slot.back-row-slot .slot-cigarette-stick {
-  height: 74rpx;
+  height: 50rpx;
 }
 
 .standard-matrix .cig-filter-slot.front-row-slot .slot-cigarette-stick,
 .slender-matrix .cig-filter-slot.front-row-slot .slot-cigarette-stick {
-  height: 84rpx;
+  height: 78rpx;
 }
 
 .standard-matrix .cig-filter-slot.back-row-slot .slot-filter-cylinder,
 .slender-matrix .cig-filter-slot.back-row-slot .slot-filter-cylinder {
-  height: 46rpx;
+  height: 38rpx;
 }
 
 .standard-matrix .cig-filter-slot.front-row-slot .slot-filter-cylinder,
 .slender-matrix .cig-filter-slot.front-row-slot .slot-filter-cylinder {
-  height: 48rpx;
+  height: 44rpx;
 }
 
 .standard-matrix .cig-filter-slot.back-row-slot .slot-paper-cylinder,
 .slender-matrix .cig-filter-slot.back-row-slot .slot-paper-cylinder {
-  height: 28rpx;
+  height: 12rpx;
 }
 
 .standard-matrix .cig-filter-slot.front-row-slot .slot-paper-cylinder,
 .slender-matrix .cig-filter-slot.front-row-slot .slot-paper-cylinder {
-  height: 36rpx;
+  height: 34rpx;
 }
 
 .standard-matrix .cig-filter-slot.back-row-slot:active,
@@ -566,20 +583,21 @@
   align-items: center;
 }
 
-/* 立体圆柱水松纸过滤嘴 */
+/* 立体圆柱水松纸过滤嘴 (高定物理光影：左右曲面深影、左偏中央高光流线) */
 .slot-filter-cylinder {
   width: 100%;
-  height: 48rpx;
-  border-radius: 7rpx 7rpx 0 0;
+  height: 50rpx;
+  border-radius: 6rpx 6rpx 0 0;
   position: relative;
   background-image: linear-gradient(
     90deg,
-    rgba(0, 0, 0, 0.34) 0%,
-    rgba(255, 255, 255, 0.28) 32%,
-    rgba(255, 255, 255, 0.06) 66%,
-    rgba(0, 0, 0, 0.4) 100%
+    rgba(0, 0, 0, 0.46) 0%,
+    rgba(255, 255, 255, 0.22) 24%,
+    rgba(255, 255, 255, 0.48) 36%,
+    rgba(255, 255, 255, 0.08) 62%,
+    rgba(0, 0, 0, 0.48) 100%
   );
-  box-shadow: 0 3rpx 8rpx rgba(0, 0, 0, 0.55);
+  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.6), inset 0 1rpx 2rpx rgba(255, 255, 255, 0.55);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -587,33 +605,36 @@
   z-index: 2;
 }
 
-/* 下方延伸白色烟身纸管 */
+/* 下方延伸白色烟身纸管（真烟罗纹水纹质感，两排上下错落露出真实烟身） */
 .slot-paper-cylinder {
   width: 100%;
   border-radius: 0;
   background-image: linear-gradient(
     90deg,
-    rgba(0, 0, 0, 0.22) 0%,
-    rgba(255, 255, 255, 0.45) 34%,
-    rgba(0, 0, 0, 0.05) 68%,
-    rgba(0, 0, 0, 0.28) 100%
+    rgba(0, 0, 0, 0.32) 0%,
+    rgba(255, 255, 255, 0.62) 24%,
+    rgba(255, 255, 255, 0.88) 36%,
+    rgba(255, 255, 255, 0.12) 64%,
+    rgba(0, 0, 0, 0.36) 100%
   );
   position: relative;
   top: 0;
   left: 0;
   right: 0;
   z-index: 1;
+  box-shadow: 0 3rpx 8rpx rgba(0, 0, 0, 0.5);
 }
 
+/* 真实卷烟纸防伪横纹罗纹 */
 .slot-paper-ribbing {
   position: absolute;
   inset: 0;
   background-image: repeating-linear-gradient(
     0deg,
-    rgba(0, 0, 0, 0.05) 0px,
-    rgba(0, 0, 0, 0.05) 1px,
-    transparent 1px,
-    transparent 5px
+    rgba(0, 0, 0, 0.08) 0px,
+    rgba(0, 0, 0, 0.08) 1.5px,
+    transparent 1.5px,
+    transparent 6px
   );
 }
 
@@ -648,33 +669,35 @@
   transform: rotate(20deg);
 }
 
-/* 顶部圆形烟嘴 3D 截面（外圈水松纸包边 + 内部纯白醋酸纤维滤芯圆截面，一眼还原真烟俯视切面） */
+/* 顶部圆形烟嘴 3D 截面（真实醋酸纤维棉芯同心圆纹理 + 外圈水松纸包边） */
 .filter-top-bevel {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 11rpx;
+  height: 8rpx;
   border-radius: 50%;
   background: radial-gradient(
-    ellipse at center,
+    ellipse at 50% 50%,
     #ffffff 0%,
-    #f1f5f9 54%,
-    #cbd5e1 72%,
-    rgba(0, 0, 0, 0.25) 100%
+    #f8fafc 38%,
+    #cbd5e1 70%,
+    #64748b 100%
   );
-  border: 2rpx solid rgba(255, 255, 255, 0.45);
-  box-shadow: inset 0 1rpx 2rpx rgba(0, 0, 0, 0.25);
+  border: 1rpx solid rgba(255, 255, 255, 0.65);
+  box-shadow: inset 0 1rpx 2rpx rgba(0, 0, 0, 0.35);
   box-sizing: border-box;
 }
 
+/* 滤嘴高定双道烫金箍环 */
 .filter-mini-band {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 8rpx;
-  box-shadow: 0 1rpx 3rpx rgba(0, 0, 0, 0.45);
+  height: 6rpx;
+  background: linear-gradient(90deg, #b45309 0%, #fef08a 32%, #fbbf24 64%, #92400e 100%);
+  box-shadow: 0 1rpx 3rpx rgba(0, 0, 0, 0.55), inset 0 1rpx 1rpx rgba(255, 255, 255, 0.7);
 }
 
 .filter-bead-spark {
@@ -737,19 +760,19 @@
   transform-origin: top center;
   transform-style: preserve-3d;
   -webkit-transform-style: preserve-3d;
-  transition: top 0.46s cubic-bezier(0.22, 1, 0.36, 1), height 0.46s cubic-bezier(0.22, 1, 0.36, 1), transform 0.46s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.46s ease;
+  transition: transform 0.72s cubic-bezier(0.22, 1, 0.36, 1), top 0.72s cubic-bezier(0.22, 1, 0.36, 1), height 0.72s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.72s ease, filter 0.72s ease;
   box-shadow: 0 8rpx 20rpx rgba(0, 0, 0, 0.45);
   box-sizing: border-box;
 }
 
-/* 盒盖打开状态：以烟盒背侧顶端为铰链，呈现鲜明的朝上后仰 3D 透视折角 (top: -108rpx, height: 96rpx)，完全立于第一排与第二排烟上方，100% 绝不挡烟 */
+/* 盒盖打开状态：以真实烟盒背侧折痕为铰链，慢速优雅揭盖后仰，呈现逼真的 3D 揭盖立体透视角 (46°)，高悬于第一排与第二排上方，100% 留出通透舞台绝不挡烟 */
 .pack-box-wrapper.lid-open .pack-flip-lid {
-  top: -108rpx;
-  height: 96rpx;
+  top: -120rpx;
+  height: 128rpx;
   z-index: 4;
   transform-origin: bottom center;
-  transform: perspective(260px) rotateX(38deg);
-  filter: drop-shadow(0 -8rpx 20rpx rgba(0, 0, 0, 0.72)) drop-shadow(0 0 18rpx rgba(254, 240, 138, 0.22));
+  transform: perspective(600px) rotateX(46deg);
+  filter: drop-shadow(0 -10rpx 24rpx rgba(0, 0, 0, 0.8)) drop-shadow(0 0 20rpx rgba(254, 240, 138, 0.18));
   box-shadow: none;
   pointer-events: auto;
   cursor: pointer;
@@ -781,7 +804,7 @@
   padding: 14rpx;
   overflow: hidden;
   box-shadow: inset 0 2rpx 6rpx rgba(255, 255, 255, 0.35);
-  transition: opacity 0.2s ease;
+  transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* 开盖时隐藏正面外盖，彻底杜绝外盖贴图倒置穿模 */
@@ -879,7 +902,7 @@
     inset 0 -26rpx 36rpx rgba(9, 13, 22, 0.78);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .pack-box-wrapper.lid-open .lid-face-inner {
@@ -978,7 +1001,7 @@
   right: 0;
   bottom: 0;
   width: 360rpx;
-  z-index: 15;
+  z-index: 20;
   border-radius: 0 0 12rpx 12rpx;
   box-sizing: border-box;
   overflow: hidden;
@@ -2317,6 +2340,31 @@
   border-color: #f59e0b;
   color: #fbbf24;
   font-weight: 700;
+}
+
+/* 控烟健康指引提示栏 (腾讯高雅克制微标) */
+.shelf-compliance-banner {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px dashed rgba(16, 185, 129, 0.25);
+  border-radius: 12rpx;
+  padding: 10rpx 18rpx;
+  margin: 4rpx 0 10rpx;
+}
+
+.compliance-icon {
+  font-size: 22rpx;
+  line-height: 1;
+}
+
+.compliance-text {
+  font-size: 20rpx;
+  color: #a7f3d0;
+  letter-spacing: 0.5rpx;
+  opacity: 0.88;
+  font-weight: 400;
 }
 
 /* 货架三列立体陈列网格 (3-Column Tobacco Showcase) */
@@ -5012,38 +5060,73 @@
   will-change: transform, opacity;
 }
 
-.ssr-awaken-overlay.ssr-active .ssr-hero-cigarette-stage {
-  animation: ssrHeroArcFlight 1.62s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+/* 特效 1: 经典宝刀出鞘 360° 单周掠空大回环 (1.42s) */
+.ssr-awaken-overlay.ssr-active.vfx-mode-1 .ssr-hero-cigarette-stage,
+.ssr-awaken-overlay.ssr-active .ssr-hero-cigarette-stage.vfx-mode-1 {
+  animation: ssrHeroArcFlightVfx1 1.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* 九天游龙 · 御剑惊鸿 720° 无尽星河莫比乌斯大回环关键帧：
-   拔剑冲霄 -> 右上九天满月回旋 -> 对角极速横斩贴镜掠至左下 -> 右下盘龙逆升 -> 720°双周挽剑花归宗定格 (742deg = 720° + 22°黄金斜角) */
-@keyframes ssrHeroArcFlight {
+/* 特效 2: 九天游龙 720° 全屏莫比乌斯大回环 (1.62s) - 默认 */
+.ssr-awaken-overlay.ssr-active .ssr-hero-cigarette-stage,
+.ssr-awaken-overlay.ssr-active.vfx-mode-2 .ssr-hero-cigarette-stage,
+.ssr-awaken-overlay.ssr-active .ssr-hero-cigarette-stage.vfx-mode-2 {
+  animation: ssrHeroArcFlightVfx2 1.62s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* 特效 1 关键帧：经典宝刀出鞘 · 游龙惊鸿 360° 挽剑花大回环 (382deg = 360° + 22°) */
+@keyframes ssrHeroArcFlightVfx1 {
+  0% {
+    opacity: 0.95;
+    transform: translate3d(var(--slot-offset-x, 0rpx), 100rpx, 0) scale(0.46) rotate(0deg);
+  }
+  15% {
+    opacity: 1;
+    transform: translate3d(calc(var(--slot-offset-x, 0rpx) * 0.35), -215rpx, 0) scale(0.66) rotate(-18deg);
+  }
+  35% {
+    opacity: 1;
+    transform: translate3d(205rpx, -120rpx, 0) scale(0.84) rotate(138deg);
+  }
+  58% {
+    opacity: 1;
+    transform: translate3d(-185rpx, 85rpx, 0) scale(1.36) rotate(286deg);
+  }
+  82% {
+    opacity: 1;
+    transform: translate3d(10rpx, -52rpx, 0) scale(1.24) rotate(388deg);
+  }
+  91% {
+    opacity: 1;
+    transform: translate3d(-4rpx, -42rpx, 0) scale(1.16) rotate(379deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0rpx, -44rpx, 0) scale(1.18) rotate(382deg);
+  }
+}
+
+/* 特效 2 关键帧：九天游龙 · 御剑惊鸿 720° 无尽星河莫比乌斯大回环 (742deg = 720° + 22°) */
+@keyframes ssrHeroArcFlightVfx2 {
   0% {
     opacity: 0.96;
     transform: translate3d(var(--slot-offset-x, 0rpx), 110rpx, 0) scale(0.44) rotate(0deg);
   }
-  /* 第一幕：破匣拔剑 · 冲霄直上左上星穹 */
   14% {
     opacity: 1;
     transform: translate3d(-110rpx, -245rpx, 0) scale(0.68) rotate(-42deg);
   }
-  /* 第二幕：九天揽月 · 右上天顶满月大回旋 */
   30% {
     opacity: 1;
     transform: translate3d(235rpx, -145rpx, 0) scale(0.88) rotate(165deg);
   }
-  /* 第三幕：御剑横空 · 对角极速斜劈横穿屏幕中心，直掠左下极近景贴镜放大 (1.48x 巨物感) */
   54% {
     opacity: 1;
     transform: translate3d(-225rpx, 115rpx, 0) scale(1.48) rotate(395deg);
   }
-  /* 第四幕：盘龙逆升 · 下方横掠至右下回环腾起 */
   74% {
     opacity: 1;
     transform: translate3d(165rpx, 42rpx, 0) scale(1.28) rotate(585deg);
   }
-  /* 第五幕：万剑归宗 · 720° 双周满旋冲入中央焦点并带物理弹性顿帧过冲 */
   88% {
     opacity: 1;
     transform: translate3d(-12rpx, -54rpx, 0) scale(1.26) rotate(750deg);
@@ -5056,6 +5139,12 @@
     opacity: 1;
     transform: translate3d(0rpx, -44rpx, 0) scale(1.18) rotate(742deg);
   }
+}
+
+/* 兼容别名 */
+@keyframes ssrHeroArcFlight {
+  0% { opacity: 0.96; transform: translate3d(var(--slot-offset-x, 0rpx), 110rpx, 0) scale(0.44) rotate(0deg); }
+  100% { opacity: 1; transform: translate3d(0rpx, -44rpx, 0) scale(1.18) rotate(742deg); }
 }
 
 /* 360° 黄金电光星芒爆发光环 */

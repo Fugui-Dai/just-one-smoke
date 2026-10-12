@@ -136,8 +136,7 @@ Component({
       const now = new Date();
       this.setData({
         calendarYear: now.getFullYear(),
-        calendarMonth: now.getMonth() + 1,
-        selectedCalendarDay: now.getDate()
+        calendarMonth: now.getMonth() + 1
       });
       this.refreshVipStatus();
       this._syncAllStats();
@@ -350,14 +349,16 @@ Component({
       const subs = Number(this.data.totalSubstituted) || 0;
       const tar = Number(this.data.totalTarAvoided) || 0;
 
-      // 1. 肺部自愈度
-      const lungPercent = Math.min(99, Math.max(16, Math.round(18 + days * 2.6 + subs * 0.45)));
-      // 2. 心血管自愈度
-      const heartPercent = Math.min(99, Math.max(38, Math.round(42 + days * 3.2 + subs * 0.5)));
-      // 3. 血液循环系统
-      const bloodPercent = Math.min(100, Math.max(45, Math.round(52 + days * 3.5 + subs * 0.55)));
-      // 4. 神经中枢与自律神经
-      const brainPercent = Math.min(96, Math.max(22, Math.round(25 + days * 2.8 + subs * 0.38)));
+      // 科学对数自愈饱和曲线 (Logarithmic Saturation Curve · 契合 WHO 临床戒烟周期):
+      // 前期排毒明显，中期深层代谢，后期细胞修复，避免首日过高与两周撞顶
+      // 1. 肺部自愈度 (纤毛排毒 -> 肺泡净化): 12% 起步，首周 ~36%，首月 ~68%，长期达 98%
+      const lungPercent = Math.min(99, Math.max(12, Math.round(12 + Math.log10(1 + days * 1.8 + subs * 0.35) * 42)));
+      // 2. 心血管自愈度 (血压回稳 -> 冠脉减负): 18% 起步，首周 ~45%，首月 ~72%，长期达 99%
+      const heartPercent = Math.min(99, Math.max(18, Math.round(18 + Math.log10(1 + days * 2.2 + subs * 0.40) * 40)));
+      // 3. 血液循环系统 (CO排空 -> 血氧饱满): 20% 起步，首周 ~50%，首月 ~76%，长期达 100%
+      const bloodPercent = Math.min(100, Math.max(20, Math.round(20 + Math.log10(1 + days * 2.5 + subs * 0.45) * 39)));
+      // 4. 自律植物神经系统 (交感平复 -> 受体脱敏): 15% 起步，首周 ~40%，首月 ~70%，长期达 96%
+      const brainPercent = Math.min(96, Math.max(15, Math.round(15 + Math.log10(1 + days * 2.0 + subs * 0.32) * 41)));
 
       const activeOrgan = this.data.activeOrgan || 'lungs';
       const organDictionary = {
@@ -414,20 +415,20 @@ Component({
         },
         brain: {
           id: 'brain',
-          name: '中枢多巴胺神经',
+          name: '自律植物神经系统',
           icon: '🧠',
           iconUri: BRAIN_ICON_SVG,
           percent: brainPercent,
           color: '#8b5cf6',
           accentBg: 'rgba(139, 92, 246, 0.12)',
-          stageTitle: brainPercent >= 70 ? '受体自主平衡 · 情绪自律' : '多巴胺重塑 · 焦虑退散',
-          statusBadge: '神经脱敏',
+          stageTitle: brainPercent >= 70 ? '植物神经平衡 · 情绪安宁' : '交感神经脱敏 · 焦躁消除',
+          statusBadge: '神经舒缓',
           statMetrics: [
-            { label: '受体脱敏率', val: `${brainPercent}%`, highlight: true },
+            { label: '自律平衡度', val: `${brainPercent}%`, highlight: true },
             { label: '深度睡眠改善', val: `+${Math.min(40, Math.round(brainPercent * 0.4))}%` },
-            { label: '心理依赖消除', val: `${Math.min(90, Math.round(brainPercent * 0.9))}%` }
+            { label: '烟瘾焦躁消除', val: `${Math.min(90, Math.round(brainPercent * 0.9))}%` }
           ],
-          clinicalDesc: '大脑乙酰胆碱尼古丁受体密度逐步下调至健康基准线，天然多巴胺分泌自律机制重建，告别烟瘾焦虑与心烦意乱，深睡眠脑电波显著增强。'
+          clinicalDesc: '交感神经与迷走神经受体逐步脱敏至健康基准线，天然副交感神经自律机制重建，肠胃神经痉挛消除，深睡眠脑电波显著增强。'
         }
       };
 
@@ -449,6 +450,31 @@ Component({
       this.setData({ activeOrgan: organ }, () => {
         this.updateOrganMetrics();
       });
+    },
+
+    onTapPunchCard() {
+      try {
+        if (wx.vibrateShort) wx.vibrateShort({ type: 'medium' });
+      } catch (err) {}
+      const days = (Number(this.data.quitDays) || 0) + 1;
+      toast.success(`今日自律打卡已达成 · 持续无烟第 ${days} 天`);
+    },
+
+    onTapCalendarDay(e) {
+      const item = e.currentTarget.dataset.day;
+      if (!item || item.empty) return;
+      try {
+        if (wx.vibrateShort) wx.vibrateShort({ type: 'light' });
+      } catch (err) {}
+      const y = this.data.calendarYear;
+      const m = this.data.calendarMonth;
+      if (item.isFuture) {
+        toast.info(`${y}年${m}月${item.day}日 · 未来自律可期`);
+      } else if (item.isPunched) {
+        toast.success(`${y}年${m}月${item.day}日 · 坚持无烟打卡达成 ✓`);
+      } else {
+        toast.info(`${y}年${m}月${item.day}日 · 保持自律节奏`);
+      }
     },
 
     onOpenProfileModal() {

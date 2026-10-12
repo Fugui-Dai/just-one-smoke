@@ -101,12 +101,10 @@ function drawGoldCoinParticle(ctx, p) {
   ctx.rotate(p.wobbleAngle || 0);
   ctx.scale(absFlip, 1.0);
 
-  // 1. 金光外晕
+  // 1. 金光外晕 (双层轻量光栅化辉光，替代 CPU 高斯模糊)
   ctx.beginPath();
-  ctx.arc(0, 0, r * 1.25, 0, Math.PI * 2);
-  ctx.fillStyle = `rgba(251, 191, 36, ${a * 0.35})`;
-  ctx.shadowColor = '#f59e0b';
-  ctx.shadowBlur = 8;
+  ctx.arc(0, 0, r * 1.35, 0, Math.PI * 2);
+  ctx.fillStyle = `rgba(251, 191, 36, ${a * 0.22})`;
   ctx.fill();
 
   // 2. 24K 纯金币主体
@@ -139,7 +137,7 @@ function drawGoldCoinParticle(ctx, p) {
   ctx.restore();
 }
 
-// 腾讯总监美学：丘比特爱神金箭流光轨迹 (破空穿心)
+// 腾讯总监美学：丘比特爱神金箭流光轨迹 (破空穿心 · 硬件光栅化版)
 function drawCupidArrow(ctx, p) {
   const len = p.length || 34;
   const a = p.alpha || 0.9;
@@ -147,24 +145,20 @@ function drawCupidArrow(ctx, p) {
   ctx.translate(p.x, p.y);
   ctx.rotate(p.angle || -0.4);
 
-  // 尾迹渐变流光
+  // 尾迹外晕流光
   ctx.beginPath();
   ctx.moveTo(-len, 0);
   ctx.lineTo(len * 0.3, 0);
-  ctx.strokeStyle = `rgba(251, 113, 133, ${a * 0.55})`;
-  ctx.lineWidth = 3.5;
-  ctx.shadowColor = '#ec4899';
-  ctx.shadowBlur = 10;
+  ctx.strokeStyle = `rgba(251, 113, 133, ${a * 0.35})`;
+  ctx.lineWidth = 6.0;
   ctx.stroke();
 
-  // 核心金色箭身
+  // 核心粉金箭身
   ctx.beginPath();
   ctx.moveTo(-len * 0.6, 0);
   ctx.lineTo(len * 0.4, 0);
   ctx.strokeStyle = `rgba(254, 240, 138, ${a * 0.95})`;
   ctx.lineWidth = 1.8;
-  ctx.shadowColor = '#fbbf24';
-  ctx.shadowBlur = 6;
   ctx.stroke();
 
   // 爱心形金色箭头
@@ -173,15 +167,13 @@ function drawCupidArrow(ctx, p) {
   ctx.rotate(Math.PI / 2);
   drawHeartPath(ctx, 0.28);
   ctx.fillStyle = `rgba(254, 240, 138, ${a * 0.95})`;
-  ctx.shadowColor = '#f59e0b';
-  ctx.shadowBlur = 6;
   ctx.fill();
   ctx.restore();
 
   ctx.restore();
 }
 
-// 腾讯总监美学：古雅篆金福印/祝福符文牌
+// 腾讯总监美学：古雅篆金福印/祝福符文牌 (硬件光栅化版)
 function drawBlessingToken(ctx, p) {
   const w = p.width || 34;
   const h = p.height || 34;
@@ -190,12 +182,10 @@ function drawBlessingToken(ctx, p) {
   ctx.translate(p.x, p.y);
   ctx.rotate(p.rotation || 0);
 
-  // 1. 暖金灵气光晕
+  // 1. 暖金灵气外晕 (双层轻量弥散)
   ctx.beginPath();
-  ctx.arc(0, 0, w * 0.72, 0, Math.PI * 2);
-  ctx.fillStyle = `rgba(245, 158, 11, ${p.alpha * 0.25})`;
-  ctx.shadowColor = '#f59e0b';
-  ctx.shadowBlur = 14;
+  ctx.arc(0, 0, w * 0.85, 0, Math.PI * 2);
+  ctx.fillStyle = `rgba(245, 158, 11, ${p.alpha * 0.18})`;
   ctx.fill();
 
   // 2. 朱砂红/帝王金福牌底座 (Rounded Rect)
@@ -212,15 +202,11 @@ function drawBlessingToken(ctx, p) {
   ctx.closePath();
 
   ctx.fillStyle = `rgba(185, 28, 28, ${p.alpha * 0.88})`;
-  ctx.shadowColor = '#b91c1c';
-  ctx.shadowBlur = 8;
   ctx.fill();
 
   // 3. 描金边框
   ctx.lineWidth = 1.8;
   ctx.strokeStyle = `rgba(254, 240, 138, ${p.alpha * 0.95})`;
-  ctx.shadowColor = '#fef08a';
-  ctx.shadowBlur = 6;
   ctx.stroke();
 
   // 4. 金色篆书祝福文案 (如 福、安、顺、吉、康、自在)
@@ -229,8 +215,6 @@ function drawBlessingToken(ctx, p) {
   ctx.font = `bold ${fontSize}px "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.shadowColor = '#f59e0b';
-  ctx.shadowBlur = 6;
   ctx.fillText(p.text || '福', 0, 1);
 
   ctx.restore();
@@ -2280,9 +2264,7 @@ export class ParticleSystem {
       } catch (e) {
         ctx.strokeStyle = stream.id === 'main' ? 'rgba(165, 205, 245, 0.20)' : 'rgba(150, 195, 235, 0.12)';
       }
-      ctx.lineWidth = stream.id === 'main' ? 10 : 7;
-      ctx.shadowColor = 'rgba(147, 197, 253, 0.45)';
-      ctx.shadowBlur = 8;
+      ctx.lineWidth = stream.id === 'main' ? 12 : 8;
       ctx.stroke();
 
       // 2. 中层：丝绢流线带 (Continuous Silk Ribbon Contour - 优雅闭合曲面)
@@ -2356,9 +2338,7 @@ export class ParticleSystem {
       } catch (e) {
         ctx.strokeStyle = stream.id === 'main' ? 'rgba(215, 238, 255, 0.55)' : 'rgba(195, 225, 255, 0.38)';
       }
-      ctx.lineWidth = stream.id === 'main' ? 1.5 : 1.1;
-      ctx.shadowColor = 'rgba(165, 210, 250, 0.5)';
-      ctx.shadowBlur = 4;
+      ctx.lineWidth = stream.id === 'main' ? 1.6 : 1.2;
       ctx.stroke();
 
       ctx.restore();
@@ -2378,13 +2358,11 @@ export class ParticleSystem {
 
       const colorPrefix = r.color || 'rgba(238, 246, 255, ';
 
-      // 1. 外层柔和高斯气晕光环 (Ambient Aura Glow - 打造真实烟气边缘的微羽化)
+      // 1. 外层柔和弥散气晕光环 (Dual-Pass 柔光微晕)
       ctx.beginPath();
       ctx.arc(0, 0, r.radius, 0, Math.PI * 2);
-      ctx.lineWidth = r.tubeThickness * 1.8 + 6;
-      ctx.strokeStyle = `${colorPrefix}${r.alpha * 0.25})`;
-      ctx.shadowColor = `${colorPrefix}${r.alpha * 0.55})`;
-      ctx.shadowBlur = 14;
+      ctx.lineWidth = r.tubeThickness * 2.2 + 8;
+      ctx.strokeStyle = `${colorPrefix}${r.alpha * 0.20})`;
       ctx.stroke();
 
       // 2. 中层致密环形涡管核心 (Toroidal Core - 烟圈核心管体)
@@ -2392,7 +2370,6 @@ export class ParticleSystem {
       ctx.arc(0, 0, r.radius, 0, Math.PI * 2);
       ctx.lineWidth = r.tubeThickness;
       ctx.strokeStyle = `${colorPrefix}${r.alpha * 0.85})`;
-      ctx.shadowBlur = 5;
       ctx.stroke();
 
       // 3. 迎风面 3D 高光微弧 (Specular Crescent Highlight)
@@ -2418,19 +2395,16 @@ export class ParticleSystem {
 
       const colorPrefix = h.color || 'rgba(244, 114, 182, ';
 
-      // 1. 外层柔光爱心气晕
+      // 1. 外层柔光爱心气晕 (Dual-Pass 柔光晕)
       drawHeartPath(ctx, h.scale);
-      ctx.lineWidth = h.lineWidth * 2.2 + 6;
-      ctx.strokeStyle = `${colorPrefix}${h.alpha * 0.28})`;
-      ctx.shadowColor = `${colorPrefix}${h.alpha * 0.75})`;
-      ctx.shadowBlur = 16;
+      ctx.lineWidth = h.lineWidth * 2.5 + 8;
+      ctx.strokeStyle = `${colorPrefix}${h.alpha * 0.22})`;
       ctx.stroke();
 
       // 2. 核心丝滑心形涡环
       drawHeartPath(ctx, h.scale);
       ctx.lineWidth = h.lineWidth;
       ctx.strokeStyle = `${colorPrefix}${h.alpha * 0.88})`;
-      ctx.shadowBlur = 6;
       ctx.stroke();
 
       // 3. 心形双凸瓣高光光斑
@@ -2493,15 +2467,19 @@ export class ParticleSystem {
       }
     }
 
-    // 3.7 渲染盛世华彩腾空火箭
+    // 3.7 渲染盛世华彩腾空火箭 (双层轻量光栅化高光)
     if (this.fireworkRockets && this.fireworkRockets.length) {
       for (const rk of this.fireworkRockets) {
         ctx.save();
+        // 外层耀金光晕
         ctx.beginPath();
-        ctx.arc(rk.x, rk.y, 2.8, 0, Math.PI * 2);
+        ctx.arc(rk.x, rk.y, 4.6, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(251, 191, 36, 0.35)';
+        ctx.fill();
+        // 核心亮点
+        ctx.beginPath();
+        ctx.arc(rk.x, rk.y, 2.2, 0, Math.PI * 2);
         ctx.fillStyle = rk.color || '#fbbf24';
-        ctx.shadowColor = rk.color || '#fbbf24';
-        ctx.shadowBlur = 10;
         ctx.fill();
         ctx.restore();
       }
@@ -2543,14 +2521,10 @@ export class ParticleSystem {
         ctx.globalAlpha = Math.min(0.68, p.alpha || 0.52);
       } else if (p.isSpark) {
         ctx.fillStyle = p.color || '#ff7700';
-        ctx.shadowColor = '#ff4500';
-        ctx.shadowBlur = 4;
         ctx.globalAlpha = p.alpha || 1.0;
       } else if (p.isEmberSpark) {
         // 抖灰迸发的高亮炽热火星
         ctx.fillStyle = p.color || '#ffffff';
-        ctx.shadowColor = '#f97316';
-        ctx.shadowBlur = 6;
         ctx.globalAlpha = p.alpha || 1.0;
       } else if (p.isAshClump) {
         // 成型断裂碳灰块：立体不规则灰白断茬
@@ -2576,46 +2550,41 @@ export class ParticleSystem {
         ctx.restore();
         continue;
       } else if (p.isCleanseWave) {
-        // 禅意净化灵光微波环 (环形通透渐变金圈)
+        // 禅意净化灵光微波环 (双层轻量弥散金圈)
         ctx.save();
+        // 外晕
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius * 1.08, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(245, 158, 11, ${(p.alpha || 0.8) * 0.28})`;
+        ctx.lineWidth = 3.6;
+        ctx.stroke();
+        // 主核
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.strokeStyle = `rgba(245, 158, 11, ${(p.alpha || 0.8) * 0.85})`;
+        ctx.strokeStyle = `rgba(254, 240, 138, ${(p.alpha || 0.8) * 0.95})`;
         ctx.lineWidth = 1.6;
-        ctx.shadowColor = '#f59e0b';
-        ctx.shadowBlur = 10;
         ctx.stroke();
         ctx.restore();
         ctx.restore();
         continue;
       } else if (p.isAshFlake) {
         ctx.fillStyle = p.color || '#6b7280';
-        ctx.shadowBlur = 0;
         ctx.globalAlpha = p.alpha || 0.8;
       } else if (p.isGold) {
         // 24K 金箔闪烁
         const shimmer = 0.6 + 0.4 * Math.sin(p.shimmerPhase || 0);
         ctx.fillStyle = p.color || '#ffd700';
-        if (hasShadow) {
-          ctx.shadowColor = '#f59e0b';
-          ctx.shadowBlur = 4;
-        }
+        
         ctx.globalAlpha = (p.alpha || 1.0) * shimmer;
       } else if (p.isHeart) {
         // 心形微光粉紫
         ctx.fillStyle = formatFillColor(p.color, 'rgba(244, 114, 182, 1.0)');
-        if (hasShadow) {
-          ctx.shadowColor = '#ec4899';
-          ctx.shadowBlur = 4;
-        }
+        
         ctx.globalAlpha = (p.alpha || 0.8) * 0.95;
       } else if (p.isDragon) {
         // 金龙炽火金晕
         ctx.fillStyle = formatFillColor(p.color, 'rgba(254, 240, 138, 1.0)');
-        if (hasShadow) {
-          ctx.shadowColor = '#eab308';
-          ctx.shadowBlur = 4;
-        }
+        
         ctx.globalAlpha = (p.alpha || 0.8) * 0.9;
       } else if (p.isNebula) {
         // 极光星云荧光 (柔和羽化渐变)
@@ -2654,10 +2623,8 @@ export class ParticleSystem {
         }
         ctx.globalAlpha = (p.alpha || 0.7) * 0.85;
       } else if (p.isStar) {
-        // 四芒璀璨钻石星钻
+        // 四芒璀璨钻石星钻 (纯矢量高性能绘制)
         ctx.fillStyle = p.color || '#ffffff';
-        ctx.shadowColor = p.color || '#38bdf8';
-        ctx.shadowBlur = 8;
         ctx.globalAlpha = p.alpha || 0.9;
         drawFourPointStar(ctx, p.x, p.y, p.outerRadius || 5, p.innerRadius || 1.5, p.rotation || 0);
         ctx.restore();
@@ -2666,8 +2633,6 @@ export class ParticleSystem {
         // 耀目流星划空
         ctx.strokeStyle = p.color || '#e0f2fe';
         ctx.lineWidth = 1.8;
-        ctx.shadowColor = '#38bdf8';
-        ctx.shadowBlur = 6;
         ctx.globalAlpha = p.alpha || 0.9;
         ctx.beginPath();
         const angle = Math.atan2(p.vy, p.vx);
@@ -2707,13 +2672,10 @@ export class ParticleSystem {
         // 烟花高空绽放彩星
         ctx.fillStyle = p.color || '#fbbf24';
         ctx.shadowColor = p.color || '#fbbf24';
-        ctx.shadowBlur = 6;
         ctx.globalAlpha = p.alpha || 1.0;
       } else if (p.isWillowRain) {
         // 垂落金雨
         ctx.fillStyle = p.color || '#fbbf24';
-        ctx.shadowColor = '#f59e0b';
-        ctx.shadowBlur = 4;
         ctx.globalAlpha = p.alpha || 0.9;
       } else if (p.isShellShard) {
         // 拟真爆珠四分五裂胶壳残片 (Shattered Gelatin Shard)
@@ -2741,10 +2703,7 @@ export class ParticleSystem {
         // 拟真微晶原液水滴 (Glistening Liquid Droplet)
         ctx.fillStyle = p.color || '#10b981';
         ctx.globalAlpha = p.alpha || 0.88;
-        if (hasShadow) {
-          ctx.shadowColor = p.color || '#10b981';
-          ctx.shadowBlur = 3;
-        }
+        
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius || 1.2, 0, Math.PI * 2);
         ctx.fill();
@@ -2752,10 +2711,7 @@ export class ParticleSystem {
         continue;
       } else {
         ctx.fillStyle = formatFillColor(p.color, 'rgba(230, 238, 252, 1.0)');
-        if (hasShadow) {
-          ctx.shadowColor = 'rgba(230, 240, 255, 0.25)';
-          ctx.shadowBlur = 4;
-        }
+        
         ctx.globalAlpha = Math.min(0.60, p.alpha || 0.6);
       }
 

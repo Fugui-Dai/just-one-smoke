@@ -41,7 +41,7 @@ export const VIP_TIERS = [
     themeName: '极光紫晶',
     accentColor: '#a855f7',
     heroTitle: '极光沉浸 · 30夜深情陪伴',
-    heroSlogan: '跳过全部激励视频 ｜ 25款名烟全图鉴免解锁 ｜ 极致性价比'
+    heroSlogan: '跳过全部激励视频 ｜ 33款名烟全图鉴免解锁 ｜ 极致性价比'
   },
   {
     id: 'lifetime',
@@ -76,7 +76,7 @@ export const VIP_PRIVILEGES = [
     id: 'all_packs',
     icon: '📦',
     title: '全套名烟畅吸',
-    subtitle: '软中华/炫赫门/高希霸雪茄全图鉴免解锁',
+    subtitle: '软中华/炫赫门/牛来/心动女神等33款名烟免解锁',
     color: '#38bdf8',
     bgGradient: 'linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(14, 165, 233, 0.05))'
   },

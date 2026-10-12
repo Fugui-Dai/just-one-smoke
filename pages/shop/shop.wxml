@@ -12,7 +12,7 @@
 
       <!-- 导航中心标题：固定高定东方雅称 -->
       <view class="nav-center-title-box">
-        <text class="nav-center-title-text">{{ viewMode === 'shelf' ? '商店' : '名烟品鉴' }}</text>
+        <text class="nav-center-title-text">{{ viewMode === 'shelf' ? '替烟艺术展柜' : '名烟品鉴' }}</text>
       </view>
 
       <!-- 右侧占位保持对称 (已移除喇叭) -->
@@ -89,6 +89,12 @@
         >
           岁月经典
         </view>
+      </view>
+
+      <!-- 2.5 纯净健康与控烟导向提示栏 (腾讯级合规精工微标：明确标价为参考基准，用于为您精确测算省下的烟资) -->
+      <view class="shelf-compliance-banner">
+        <text class="compliance-icon">🌿</text>
+        <text class="compliance-text">倡导健康呼吸 · 标价为真烟参考零售价，用于测算为您省下的烟资</text>
       </view>
 
       <!-- 3. 真实烟柜三列立体陈列架 (The Tobacco Display Shelf - 3-Column Grid) -->
@@ -380,6 +386,23 @@
         </view>
         <view class="pack-unwrap-mini-btn" wx:if="{{ isCurrentUnlocked && packCount < packCapacity }}" bindtap="onUnwrapNewPack">
           <text class="unwrap-mini-text">↻ 换新盒</text>
+        </view>
+        <!-- 特效选择胶囊 (特效1 经典出鞘 360° | 特效2 九天游龙 720°) -->
+        <view class="pack-vfx-selector-pill">
+          <view 
+            class="vfx-pill-btn {{ pullVfxType === 'vfx1' ? 'vfx-pill-active' : '' }}" 
+            catchtap="onSwitchPullVfx" 
+            data-vfx="vfx1"
+          >
+            <text class="vfx-pill-text">特效1</text>
+          </view>
+          <view 
+            class="vfx-pill-btn {{ pullVfxType === 'vfx2' ? 'vfx-pill-active' : '' }}" 
+            catchtap="onSwitchPullVfx" 
+            data-vfx="vfx2"
+          >
+            <text class="vfx-pill-text">特效2</text>
+          </view>
         </view>
       </view>
     </view>
@@ -801,7 +824,7 @@
 
     <!-- 3. 顶层 3D 主角烟 S 弧线破空盘旋与屏幕呈现舞台 -->
     <view 
-      class="ssr-awaken-overlay {{ isFlightActive ? 'ssr-active' : '' }}" 
+      class="ssr-awaken-overlay {{ isFlightActive ? 'ssr-active' : '' }} {{ pullVfxType === 'vfx1' ? 'vfx-mode-1' : 'vfx-mode-2' }}" 
       wx:if="{{ isFlightVisible }}"
       bindtap="onTapAwakenOverlay"
       catchtouchmove="preventTouchMove"
@@ -964,7 +987,7 @@
           <text class="btn-icon">🚬</text>
           <view class="btn-text-wrap">
             <text class="btn-main-title">{{ packCount > 0 ? '抽出一支' : '拆开新盒并抽出' }}</text>
-            <text class="btn-sub-note">{{ packCount > 0 ? '盒内余 ' + packCount + '/' + packCapacity + ' 支 · 点任意烟支可指定抽取' : '本盒已空 · 轻触立即换新盒' }}</text>
+            <text class="btn-sub-note">{{ packCount > 0 ? '点选盒内烟支 · 或轻触直接抽取' : '本盒已空 · 轻触立即换新盒' }}</text>
           </view>
         </view>
       </view>

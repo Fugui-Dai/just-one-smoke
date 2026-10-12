@@ -242,7 +242,7 @@
             <text class="cpl-lifetime-badge">👑 终身有效</text>
             <text class="cpl-lifetime-status">全量特权生效中</text>
           </view>
-          <text class="cpl-tip">已尊享：全域免广告 · 25款名烟全图鉴畅吸</text>
+          <text class="cpl-tip">已尊享：全域免广告 · 33款名烟全图鉴畅吸</text>
         </block>
         <block wx:else>
           <view class="cpl-amount-row">
@@ -289,7 +289,7 @@
 
       <view class="dialog-rights-list">
         <view class="drl-item"><text class="drl-tick">✓</text><text>已免除所有激励视频等待</text></view>
-        <view class="drl-item"><text class="drl-tick">✓</text><text>中华/炫赫门等25款名烟已全解锁</text></view>
+        <view class="drl-item"><text class="drl-tick">✓</text><text>中华/炫赫门/牛来/心动女神等33款名烟已全解锁</text></view>
         <view class="drl-item"><text class="drl-tick">✓</text><text>已点亮 VIP 专属荣耀金冠标识</text></view>
       </view>
 

@@ -348,7 +348,7 @@
         <text class="plaque-spec">焦油 {{ currentCigarette.packTheme.tar || '10mg' }}</text>
         <text class="plaque-ornament">✦</text>
       </view>
-      <!-- 盒内剩余数量实时铭牌胶囊 -->
+      <!-- 盒内剩余数量实时铭牌胶囊 + 特效1 / 特效2 切换胶囊 -->
       <view class="pack-inventory-row">
         <view class="pack-inventory-pill {{ packCount === 0 ? 'pill-empty' : (packCount <= 5 ? 'pill-low' : '') }}">
           <view class="inv-pulse-dot"></view>
@@ -356,6 +356,23 @@
         </view>
         <view class="pack-unwrap-mini-btn" wx:if="{{ isCurrentUnlocked && packCount < packCapacity }}" bindtap="onUnwrapNewPack">
           <text class="unwrap-mini-text">↻ 换新盒</text>
+        </view>
+        <!-- 特效选择胶囊 (特效1 经典出鞘 360° | 特效2 九天游龙 720°) -->
+        <view class="pack-vfx-selector-pill">
+          <view 
+            class="vfx-pill-btn {{ pullVfxType === 'vfx1' ? 'vfx-pill-active' : '' }}" 
+            catchtap="onSwitchPullVfx" 
+            data-vfx="vfx1"
+          >
+            <text class="vfx-pill-text">特效1</text>
+          </view>
+          <view 
+            class="vfx-pill-btn {{ pullVfxType === 'vfx2' ? 'vfx-pill-active' : '' }}" 
+            catchtap="onSwitchPullVfx" 
+            data-vfx="vfx2"
+          >
+            <text class="vfx-pill-text">特效2</text>
+          </view>
         </view>
       </view>
     </view>
@@ -791,7 +808,7 @@
 
     <!-- ==================== 腾讯游戏 CG / UE5 级：6阶名烟拔升与S型星河轨迹全屏舞台 (z-index: 310) ==================== -->
     <view 
-      class="ssr-awaken-overlay {{ isFlightActive ? 'ssr-active' : '' }}" 
+      class="ssr-awaken-overlay {{ isFlightActive ? 'ssr-active' : '' }} {{ pullVfxType === 'vfx1' ? 'vfx-mode-1' : 'vfx-mode-2' }}" 
       wx:if="{{ isFlightVisible }}"
       bindtap="onTapAwakenOverlay"
       catchtouchmove="preventTouchMove"

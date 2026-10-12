@@ -102,11 +102,12 @@ Page({
     flightStyles: computeFlightStyles(DEFAULT_CIGARETTE),
 
     // 3D 动画交互状态 (6 阶段腾讯 CG 级分镜)
-    isLidOpen: true, // 盒盖是否翻开
+    isLidOpen: false, // 盒盖是否翻开（默认严格关闭，仅当前使用烟开盖）
     isPulling: false, // 正在抽出一支烟的动画
     isFlightVisible: false, // 抽出烟支是否悬浮在空中
     isFlightActive: false, // SSR 华丽特效激活态
     pulledSlotIndex: -1, // 被抽出的烟支槽位
+    pullVfxType: 'vfx2', // 当前出烟演出特效 ('vfx1': 经典出鞘 360° | 'vfx2': 九天游龙 720°)
     isSlotEjected: false, // 盒内烟支是否已完成拔升出仓并交接给全屏S弧线
     slotOffsetX: 0, // 被点击槽位相对烟盒中心的水平偏移 (rpx)
     vfxStageLabel: '01 [竖壳静置]', // 当前赛博分镜阶段标签
@@ -136,12 +137,14 @@ Page({
 
     const savedCigId = storageService.getSelectedCigaretteId();
     const curCig = getCigaretteById(savedCigId) || DEFAULT_CIGARETTE;
+    const initialVfxType = storageService.getPullVfxType ? storageService.getPullVfxType() : 'vfx2';
 
     // 如果通过参数指定直接进入 3D 抽烟视图
     const mode = (query && query.mode === '3d') ? '3d_pack' : 'shelf';
 
     this.setData({
       viewMode: mode,
+      pullVfxType: initialVfxType,
       isMuted: audioManager.isMuted(),
       isVipUser: vipService.isVip(),
       vipTheme: vipService.getVipTheme(),
@@ -195,11 +198,27 @@ Page({
     }
   },
 
+  // 切换抽烟特效 (特效1: 经典出鞘 360° | 特效2: 九天游龙 720°)
+  onSwitchPullVfx(e) {
+    const vfx = e.currentTarget.dataset.vfx;
+    if (!vfx || vfx === this.data.pullVfxType) return;
+    audioManager.unlockAudio();
+    audioManager.playSwitchSound();
+    triggerHaptic('medium');
+    const savedType = storageService.setPullVfxType(vfx);
+    this.setData({
+      pullVfxType: savedType
+    });
+    const label = savedType === 'vfx1' ? '特效1：经典出鞘 360°' : '特效2：九天游龙 720°';
+    toast.info(`已切换至【${label}】`);
+  },
+
   startFlightVfxLoop(slotOffsetX = 0) {
     this.stopFlightVfxLoop();
     packFlightVfxRenderer.reset();
     this._flightStartTime = Date.now();
     const pxOffset = (slotOffsetX || 0) * 0.5;
+    const vfxType = this.data.pullVfxType || 'vfx2';
 
     const step = () => {
       if (!this._flightStartTime) return;
@@ -210,7 +229,7 @@ Page({
           this._flightCanvasW,
           this._flightCanvasH,
           elapsedSec,
-          { slotOffsetX: pxOffset }
+          { slotOffsetX: pxOffset, vfxType }
         );
       }
       if (this._flightStartTime) {
@@ -373,7 +392,7 @@ Page({
   },
 
   // 初始化或切换当前展示的烟盒
-  initCigarettePack(cig) {
+  initCigarettePack(cig, targetViewMode, callback) {
     const capacity = cig.packCapacity || (cig.isCigar ? 5 : 20);
     const slotStates = storageService.getPackSlots(cig.id, capacity);
     const count = slotStates.filter(Boolean).length;
@@ -381,7 +400,7 @@ Page({
     const totalSubs = records.length;
     const unlocked = isCigaretteUnlocked(cig.id, totalSubs);
     const currentSelectedId = storageService.getSelectedCigaretteId();
-    // 只有当前正在抽的烟才默认打开烟盖，其他的烟默认闭合烟盖
+    // 只有当前正在抽的烟才默认打开烟盖，其他的烟默认严格闭合烟盖
     const shouldOpenLid = Boolean(unlocked && (cig.id === currentSelectedId));
 
     const slotArray = [];
@@ -391,7 +410,7 @@ Page({
 
     const flightStyles = computeFlightStyles(cig);
 
-    this.setData({
+    const updatePayload = {
       currentCigarette: cig,
       isCurrentUnlocked: unlocked,
       packCapacity: capacity,
@@ -408,6 +427,16 @@ Page({
       slotOffsetX: 0,
       vfxStageLabel: '01 [竖壳静置] · 轻触烟支唤起星河',
       showDrawnModal: false
+    };
+
+    if (targetViewMode) {
+      updatePayload.viewMode = targetViewMode;
+    }
+
+    this.setData(updatePayload, () => {
+      if (typeof callback === 'function') {
+        callback();
+      }
     });
   },
 
@@ -685,14 +714,15 @@ Page({
       triggerHaptic('medium');
     }, 1120);
 
-    // 阶段 06 [屏幕呈现] (1.48s 起常驻定格，等待用户点击屏幕跳转)
+    // 阶段 06 [屏幕呈现] (特效1: 1.28s定格, 特效2: 1.48s定格，等待用户点击屏幕跳转)
+    const settleDelay = this.data.pullVfxType === 'vfx1' ? 1280 : 1480;
     this._pullTimer4 = setTimeout(() => {
       triggerHaptic('heavy');
       this.setData({
         slotStates: updatedSlots,
         packCount: remaining
       });
-    }, 1480);
+    }, settleDelay);
   },
 
   // 用户在名烟呈现界面点击屏幕任意位置后，才执行跳转回首页品吸

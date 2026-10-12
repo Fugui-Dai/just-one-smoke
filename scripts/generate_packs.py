@@ -99,35 +99,42 @@ def add_crease_and_seal(im, seal_color=(245, 158, 11, 230), seal_text="原厂封
     # 外框高光描边
     draw.rounded_rectangle(BOX, radius=24, outline=(255, 255, 255, 55), width=2)
 
+# 【视觉铁律】所有烟盒底部警示区严禁添加黑色/半透明背景色块，warn_bg 默认恒为 None，底色完全通透一体
 def add_warning(
     im,
     warn_title="本公司提示",
     warn_main="吸烟有害健康",
     warn_sub="请勿在禁烟场所吸烟",
     warn_extra="劝阻青少年吸烟 · 禁止中小学生吸烟",
-    divider_color=(245, 190, 70, 230)
+    divider_color=(245, 190, 70, 230),
+    warn_bg=None,
+    text_color_hdr=(254, 240, 138, 235),
+    text_color_main=(255, 255, 255, 255),
+    text_color_sub=(226, 232, 240, 240),
+    text_color_extra=(148, 163, 184, 200)
 ):
     draw = ImageDraw.Draw(im)
     x0, y0, x1, y1 = BOX
     
     warn_y = 776
     # 1. 3D 黄金分割双重警示区分割线 (Y=776 分割上部品牌艺术与下部 35% 国标警语区)
-    draw.line([(x0 + 16, warn_y), (x1 - 16, warn_y)], fill=(15, 15, 20, 200), width=3)
+    draw.line([(x0 + 16, warn_y), (x1 - 16, warn_y)], fill=(15, 15, 20, 160), width=2)
     draw.line([(x0 + 16, warn_y + 2), (x1 - 16, warn_y + 2)], fill=divider_color, width=2)
     
-    # 2. 底部 35% 国家标准面积警示区微光底板 (符合国家烟草专卖局 GB5606 标准)
+    # 2. 底部 35% 国家标准面积警示区微光底板 (若 warn_bg 为 None 则彻底去除黑色背景块，底色完全通透一体)
     wb_box = (x0 + 16, warn_y + 10, x1 - 16, y1 - 20)
-    draw.rounded_rectangle(wb_box, radius=18, fill=(0, 0, 0, 115), outline=(255, 255, 255, 45), width=1)
+    if warn_bg:
+        draw.rounded_rectangle(wb_box, radius=18, fill=warn_bg, outline=(255, 255, 255, 45), width=1)
     
     # 3. 四级阶梯标准权威排版 (80% 拟真中国及国际名烟质感)
-    # 3.1 抬头 (本公司提示 / 香港特區政府忠告市民)
-    draw.text((W // 2, 832), warn_title, fill=(254, 240, 138, 235), font=f_warn_hdr, anchor="mm")
-    # 3.2 核心灵魂大字：吸烟有害健康 (50px 粗体白字，震撼视觉重心)
-    draw.text((W // 2, 908), warn_main, fill=(255, 255, 255, 255), font=f_warn_main, anchor="mm")
-    # 3.3 行为倡导：请勿在禁烟场所吸烟 / 尽早戒烟有益健康
-    draw.text((W // 2, 982), warn_sub, fill=(226, 232, 240, 240), font=f_warn_sub, anchor="mm")
+    # 3.1 抬头 (本公司提示 / 恋爱专属提示)
+    draw.text((W // 2, 832), warn_title, fill=text_color_hdr, font=f_warn_hdr, anchor="mm")
+    # 3.2 核心灵魂大字：吸烟有害健康 / 一笑倾城百媚生 (50px 粗体，震撼视觉重心)
+    draw.text((W // 2, 908), warn_main, fill=text_color_main, font=f_warn_main, anchor="mm")
+    # 3.3 行为倡导：请勿在禁烟场所吸烟 / 少抽香烟多宠她
+    draw.text((W // 2, 982), warn_sub, fill=text_color_sub, font=f_warn_sub, anchor="mm")
     # 3.4 法规细则：劝阻青少年吸烟 / 戒烟热线
-    draw.text((W // 2, 1056), warn_extra, fill=(148, 163, 184, 200), font=f_warn_extra, anchor="mm")
+    draw.text((W // 2, 1056), warn_extra, fill=text_color_extra, font=f_warn_extra, anchor="mm")
 
 def draw_badge_frame(draw, center_y, width, height, fill_color, border_color):
     cx = W // 2
@@ -1139,7 +1146,12 @@ def gen_niulai_cinema():
         warn_main="吸烟有害健康",
         warn_sub="请勿在禁烟场所吸烟",
         warn_extra="一卷光影一声牛来 · 愿君早日无烟一身轻",
-        divider_color=(245, 158, 11, 230)
+        divider_color=(245, 158, 11, 230),
+        warn_bg=None,
+        text_color_hdr=(254, 240, 138, 240),
+        text_color_main=(255, 255, 255, 255),
+        text_color_sub=(253, 224, 71, 230),
+        text_color_extra=(217, 119, 6, 210)
     )
     save_pack(im, "niulai_cinema.png")
 
@@ -1264,7 +1276,12 @@ def gen_ultraman_tiga():
         warn_main="吸烟有害健康",
         warn_sub="请勿在禁烟场所吸烟",
         warn_extra="相信光的人终将战胜烟瘾 · 拥抱纯净新生",
-        divider_color=(56, 189, 248, 230)
+        divider_color=(56, 189, 248, 230),
+        warn_bg=None,
+        text_color_hdr=(254, 240, 138, 240),
+        text_color_main=(255, 255, 255, 255),
+        text_color_sub=(186, 230, 253, 240),
+        text_color_extra=(125, 211, 252, 200)
     )
     save_pack(im, "ultraman_tiga.png")
 
@@ -1284,12 +1301,34 @@ def draw_sparkle_star(draw, cx, cy, r=10, color=(254, 240, 138, 255)):
     draw.polygon(pts, fill=color)
 
 
+def draw_bilateral_warnings(draw, left_text="吸烟有害健康", right_text="戒烟有益健康", color=(254, 240, 138, 235)):
+    """在烟盒两侧边缘绘制高定立式对称健康警示语（左右呼应，6字对称，不占用上下核心区域）"""
+    font_vert = get_font(21, True)
+    cy_start = 442
+    spacing = 40
+
+    # 左侧立式警示语 (x = 88)
+    draw_sparkle_star(draw, 88, cy_start - 24, r=6, color=color)
+    for i, ch in enumerate(left_text):
+        draw.text((88, cy_start + i * spacing), ch, fill=color, font=font_vert, anchor="mm")
+    draw_sparkle_star(draw, 88, cy_start + (len(left_text) - 1) * spacing + 24, r=6, color=color)
+
+    # 右侧立式警示语 (x = 632)
+    draw_sparkle_star(draw, 632, cy_start - 24, r=6, color=color)
+    for i, ch in enumerate(right_text):
+        draw.text((632, cy_start + i * spacing), ch, fill=color, font=font_vert, anchor="mm")
+    draw_sparkle_star(draw, 632, cy_start + (len(right_text) - 1) * spacing + 24, r=6, color=color)
+
+
 def gen_gf_happy_smile():
     """生成女友专属恶搞宠爱款 1：【倾城一笑·开心果】（截取图1生动面部表情特写 + 皇家玫瑰金浮雕宝相框）"""
     from PIL import ImageEnhance
     im = create_base((136, 19, 55), (76, 5, 25))  # 皇家丝绒绯红渐变底
     draw = ImageDraw.Draw(im)
     add_crease_and_seal(im, (225, 29, 72, 245), "欢喜冤家")
+
+    # 两侧高定立式对称健康警示语（吸烟有害健康 · 戒烟有益健康，不改动上下核心文案）
+    draw_bilateral_warnings(draw, color=(254, 240, 138, 235))
 
     cx, cy = W // 2, 554
     # 与全馆名烟一致的鎏金大徽章框 (高度420，上下留白充裕)
@@ -1366,7 +1405,12 @@ def gen_gf_happy_smile():
         warn_main="一笑倾城百媚生",
         warn_sub="少抽香烟多宠她",
         warn_extra="看一眼开心果表情包 · 烦恼烟瘾统统消散",
-        divider_color=(251, 113, 133, 235)
+        divider_color=(254, 240, 138, 240),
+        warn_bg=None,
+        text_color_hdr=(254, 240, 138, 240),
+        text_color_main=(255, 255, 255, 255),
+        text_color_sub=(253, 164, 175, 240),
+        text_color_extra=(244, 114, 182, 200)
     )
     out_path = os.path.join(OUTPUT_DIR, "gf_happy_smile.png")
     im.quantize(colors=256, method=Image.FASTOCTREE, dither=Image.Dither.FLOYDSTEINBERG).save(out_path, optimize=True)
@@ -1379,6 +1423,9 @@ def gen_gf_moonlight_muse():
     im = create_base((255, 250, 252), (252, 231, 243))
     draw = ImageDraw.Draw(im)
     add_crease_and_seal(im, (219, 39, 119, 245), "一生挚爱")
+
+    # 两侧高定立式对称健康警示语（吸烟有害健康 · 戒烟有益健康，不改动上下核心文案）
+    draw_bilateral_warnings(draw, color=(157, 23, 77, 245))
 
     cx, cy = W // 2, 554
     # 纯白珠光内衬大徽章框 + 玫瑰金双线描边
@@ -1432,17 +1479,19 @@ def gen_gf_moonlight_muse():
     draw.rounded_rectangle((cx - stamp_w // 2, stamp_y, cx + stamp_w // 2, stamp_y + stamp_h), radius=6, fill=(219, 39, 119, 255), outline=(245, 158, 11, 255), width=1)
     draw.text((cx, stamp_y + stamp_h // 2), "初恋玫瑰爆珠", fill=(255, 255, 255, 255), font=get_font(19, True), anchor="mm")
 
-    # 底部警示区采用深邃玫瑰紫晶底，确保白字警示语 100% 清晰高对比
-    x0, y0, x1, y1 = BOX
-    warn_y = 776
-    draw.rounded_rectangle((x0 + 16, warn_y + 10, x1 - 16, y1 - 20), radius=18, fill=(80, 7, 36, 235), outline=(219, 39, 119, 180), width=1)
+    # 底部警示区去除深色方块底色，使珠光月白渐变底色自然贯通到底部，文字采用高反差勃艮第红与深灰
     add_warning(
         im,
         warn_title="浪漫挚爱提示",
         warn_main="仙女颜值超标",
         warn_sub="戒烟省钱宠女神",
         warn_extra="抽烟只抽心动女神 · 一生只宠一个人",
-        divider_color=(219, 39, 119, 235)
+        divider_color=(219, 39, 119, 235),
+        warn_bg=None,
+        text_color_hdr=(157, 23, 77, 245),
+        text_color_main=(190, 18, 60, 255),
+        text_color_sub=(157, 23, 77, 235),
+        text_color_extra=(100, 116, 139, 220)
     )
     out_path = os.path.join(OUTPUT_DIR, "gf_moonlight_muse.png")
     im.quantize(colors=256, method=Image.FASTOCTREE, dither=Image.Dither.FLOYDSTEINBERG).save(out_path, optimize=True)
