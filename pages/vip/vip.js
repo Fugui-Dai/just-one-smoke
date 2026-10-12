@@ -60,7 +60,18 @@ Page({
 
   refreshVipStatus() {
     const vipInfo = vipService.getVipInfo();
-    this.setData({ vipInfo });
+    const isLifetime = !!(vipInfo && vipInfo.isVip && vipInfo.isLifetime);
+    if (isLifetime) {
+      const lifetimeTier = this.data.tiers.find(t => t.id === 'lifetime') || this.data.tiers[2];
+      this.setData({
+        vipInfo,
+        selectedTierId: 'lifetime',
+        selectedTier: lifetimeTier,
+        currentTheme: 'lifetime'
+      });
+    } else {
+      this.setData({ vipInfo });
+    }
   },
 
   // 选择会员套餐档位（腾讯级视听与情绪场域联动）
@@ -95,8 +106,14 @@ Page({
     });
   },
 
-  // 立即开通
+  // 立即开通 / 永久会员去品吸名烟
   onSubscribe() {
+    if (this.data.vipInfo && this.data.vipInfo.isLifetime) {
+      triggerHaptic('medium');
+      this.onNavigateBack();
+      return;
+    }
+
     if (!this.data.isAgreed) {
       triggerHaptic('medium');
       toast.warn('请勾选同意服务协议');
@@ -129,6 +146,8 @@ Page({
   closeSuccessModal() {
     triggerHaptic('light');
     this.setData({ showSuccessModal: false });
+    // 立即返回展柜品吸体验 (优先 navigateBack 回展柜或主页，栈底则 reLaunch)
+    this.onNavigateBack();
   },
 
   openProtocolModal() {

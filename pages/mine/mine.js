@@ -4,6 +4,7 @@ import { triggerHaptic } from '../../utils/haptics.js';
 import { toast } from '../../utils/toastService.js';
 import { storageService } from '../../utils/storageService.js';
 import { leaderboardService } from '../../utils/leaderboardService.js';
+import { vipService } from '../../utils/vipService.js';
 import {
   calculateSavings,
   calculateTarAvoided,
@@ -139,6 +140,7 @@ Page({
   onShow() {
     if (this._skipFirstShowRefresh) {
       this._skipFirstShowRefresh = false;
+      this.setData({ vipTheme: vipService.getVipTheme() });
       return;
     }
     this.refreshAllData();
@@ -150,7 +152,10 @@ Page({
   },
 
   refreshAllData() {
-    this.setData(computeMineStatsPayload());
+    this.setData({
+      ...computeMineStatsPayload(),
+      vipTheme: vipService.getVipTheme()
+    });
   },
 
   // 微信头像选择与同步

@@ -45,6 +45,67 @@ page {
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+.theme-day .custom-navbar {
+  background: rgba(4, 20, 16, 0.88) !important;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.28) !important;
+  box-shadow: 0 4rpx 24rpx rgba(16, 185, 129, 0.12) !important;
+}
+.theme-day .nav-center-title-text {
+  background: linear-gradient(135deg, #a7f3d0 0%, #34d399 60%, #059669 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: 0 0 16rpx rgba(16, 185, 129, 0.40);
+}
+.theme-day .nav-back-btn {
+  background: rgba(16, 185, 129, 0.12) !important;
+  border-color: rgba(16, 185, 129, 0.30) !important;
+}
+.theme-day .back-chevron-arrow {
+  border-left-color: #34d399 !important;
+  border-bottom-color: #34d399 !important;
+}
+
+.theme-month .custom-navbar {
+  background: rgba(16, 8, 29, 0.88) !important;
+  border-bottom: 1px solid rgba(168, 85, 247, 0.30) !important;
+  box-shadow: 0 4rpx 24rpx rgba(168, 85, 247, 0.14) !important;
+}
+.theme-month .nav-center-title-text {
+  background: linear-gradient(135deg, #f5d0fe 0%, #c084fc 60%, #9333ea 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: 0 0 16rpx rgba(168, 85, 247, 0.45);
+}
+.theme-month .nav-back-btn {
+  background: rgba(168, 85, 247, 0.12) !important;
+  border-color: rgba(168, 85, 247, 0.30) !important;
+}
+.theme-month .back-chevron-arrow {
+  border-left-color: #c084fc !important;
+  border-bottom-color: #c084fc !important;
+}
+
+.theme-lifetime .custom-navbar {
+  background: rgba(22, 14, 3, 0.90) !important;
+  border-bottom: 1px solid rgba(251, 191, 36, 0.34) !important;
+  box-shadow: 0 4rpx 28rpx rgba(245, 158, 11, 0.16) !important;
+}
+.theme-lifetime .nav-center-title-text {
+  background: linear-gradient(135deg, #fef08a 0%, #fbbf24 55%, #d97706 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: 0 0 18rpx rgba(251, 191, 36, 0.50);
+}
+.theme-lifetime .nav-back-btn {
+  background: rgba(251, 191, 36, 0.14) !important;
+  border-color: rgba(251, 191, 36, 0.35) !important;
+}
+.theme-lifetime .back-chevron-arrow {
+  border-left-color: #fbbf24 !important;
+  border-bottom-color: #fbbf24 !important;
+}
+
+
 .navbar-content {
   position: relative;
   width: 100%;
@@ -116,7 +177,7 @@ page {
 .vip-scroll-content {
   width: 100%;
   padding: 24rpx;
-  padding-bottom: calc(340rpx + env(safe-area-inset-bottom, 28px));
+  padding-bottom: calc(200rpx + env(safe-area-inset-bottom, 20px));
   display: flex;
   flex-direction: column;
   gap: 26rpx;
@@ -734,7 +795,8 @@ page {
 }
 
 .bottom-safe-spacer {
-  height: 140rpx;
+  height: 0;
+  display: none;
 }
 
 /* ==================== 底部固定高规格收银台 (Sticky Checkout Bar) ==================== */
@@ -952,6 +1014,161 @@ page {
   color: #1e1305;
   letter-spacing: 2rpx;
   white-space: nowrap;
+}
+
+/* ==================== 终身至尊会员专属荣耀展台与交互样式 (全彩微晶·绝无灰色) ==================== */
+.tier-card.tier-card-day {
+  background: linear-gradient(165deg, rgba(6, 78, 59, 0.45) 0%, rgba(4, 28, 22, 0.92) 100%);
+  border: 1.5px solid rgba(16, 185, 129, 0.32);
+}
+
+.tier-card.tier-card-day.is-selected {
+  background: linear-gradient(165deg, rgba(6, 95, 70, 0.60) 0%, rgba(4, 38, 28, 0.96) 100%);
+  border-color: #34d399;
+  box-shadow: 0 10rpx 32rpx rgba(16, 185, 129, 0.38);
+  transform: translateY(-4rpx);
+}
+
+.tier-card.tier-card-month {
+  background: linear-gradient(165deg, rgba(88, 28, 135, 0.45) 0%, rgba(28, 10, 48, 0.92) 100%);
+  border: 1.5px solid rgba(168, 85, 247, 0.35);
+}
+
+.tier-card.tier-card-month.is-selected {
+  background: linear-gradient(165deg, rgba(107, 33, 168, 0.60) 0%, rgba(35, 12, 60, 0.96) 100%);
+  border-color: #c084fc;
+  box-shadow: 0 10rpx 32rpx rgba(168, 85, 247, 0.42);
+  transform: translateY(-4rpx);
+}
+
+.tier-card.tier-card-lifetime {
+  background: linear-gradient(165deg, rgba(120, 53, 15, 0.45) 0%, rgba(35, 18, 5, 0.92) 100%);
+  border: 1.5px solid rgba(251, 191, 36, 0.38);
+}
+
+.tier-card.tier-card-lifetime.is-selected,
+.tier-card.is-lifetime-owned {
+  background: linear-gradient(165deg, rgba(146, 64, 14, 0.60) 0%, rgba(55, 25, 7, 0.96) 100%);
+  border: 2px solid #fbbf24;
+  box-shadow: 0 12rpx 36rpx rgba(245, 158, 11, 0.48);
+  transform: translateY(-4rpx);
+}
+
+.tier-tag-ribbon.ribbon-owned {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  color: #1e1305;
+  font-weight: 800;
+}
+
+.tier-tag-ribbon.ribbon-day.ribbon-included {
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.tier-tag-ribbon.ribbon-month.ribbon-included {
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.tier-owned-price-row,
+.tier-included-price-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 6rpx;
+  margin-bottom: 4rpx;
+}
+
+.price-owned-text {
+  font-size: 34rpx;
+  font-weight: 900;
+  color: #fbbf24;
+  letter-spacing: 1rpx;
+}
+
+.price-included-text {
+  font-size: 32rpx;
+  font-weight: 900;
+  letter-spacing: 1rpx;
+}
+
+.tier-included-day .price-included-text {
+  color: #34d399;
+  text-shadow: 0 0 12rpx rgba(52, 211, 153, 0.45);
+}
+
+.tier-included-month .price-included-text {
+  color: #c084fc;
+  text-shadow: 0 0 12rpx rgba(192, 132, 252, 0.45);
+}
+
+.tier-original-price.owned {
+  text-decoration: none;
+  color: #34d399;
+  font-weight: 600;
+}
+
+.tier-original-price.included {
+  text-decoration: none;
+  color: #94a3b8;
+  font-size: 20rpx;
+}
+
+.daily-label.included-label {
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.agreement-lifetime-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.lifetime-cert-badge {
+  padding: 2rpx 14rpx;
+  border-radius: 20rpx;
+  background: rgba(251, 191, 36, 0.18);
+  border: 1px solid rgba(251, 191, 36, 0.45);
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #fbbf24;
+  letter-spacing: 1rpx;
+}
+
+.agreement-lifetime-text {
+  font-size: 22rpx;
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+.cpl-lifetime-badge {
+  padding: 2rpx 12rpx;
+  border-radius: 10rpx;
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  color: #1e1305;
+  font-size: 22rpx;
+  font-weight: 800;
+}
+
+.cpl-lifetime-status {
+  font-size: 30rpx;
+  font-weight: 900;
+  color: #fbbf24;
+  letter-spacing: 1rpx;
+}
+
+.btn-lifetime-active {
+  background: linear-gradient(135deg, #fef08a 0%, #f59e0b 50%, #b45309 100%);
+  box-shadow: 0 8rpx 32rpx rgba(245, 158, 11, 0.55);
+  animation: lifetimePulse 2.5s infinite ease-in-out;
+}
+
+@keyframes lifetimePulse {
+  0%, 100% { box-shadow: 0 8rpx 28rpx rgba(245, 158, 11, 0.45); }
+  50% { box-shadow: 0 10rpx 40rpx rgba(251, 191, 36, 0.75); }
 }
 
 /* ==================== 模态弹窗公共基础 ==================== */

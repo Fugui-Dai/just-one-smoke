@@ -491,6 +491,14 @@ class AudioManager {
       this.connectToMaster(this.burnGain);
       this.burnSource.start(t);
 
+      // 智能伴吸侧链闪避 (Smart Sidechain Ducking)：吸烟时自动轻柔压低环境声床，让烟丝燃烧微爆声纯净凸显
+      if (this.ambientGain && this.ctx && this.ambientBaseGain) {
+        try {
+          this.ambientGain.gain.setValueAtTime(this.ambientGain.gain.value, t);
+          this.ambientGain.gain.linearRampToValueAtTime(this.ambientBaseGain * 0.42, t + 0.15);
+        } catch {}
+      }
+
       // 烟丝微火星随机爆裂脉冲
       const triggerCrackle = () => {
         if (!this.burnSource || this.muted) return;
@@ -537,6 +545,14 @@ class AudioManager {
       clearTimeout(this.crackleTimer);
       this.crackleTimer = null;
     }
+    // 恢复环境声床温润呼吸音量
+    if (this.ambientGain && this.ctx && this.ambientBaseGain) {
+      try {
+        const now = this.ctx.currentTime;
+        this.ambientGain.gain.setValueAtTime(this.ambientGain.gain.value, now);
+        this.ambientGain.gain.linearRampToValueAtTime(this.ambientBaseGain, now + 0.65);
+      } catch {}
+    }
     if (this.burnSource) {
       try {
         if (this.ctx && this.burnGain) {
@@ -566,6 +582,12 @@ class AudioManager {
       }
     }
   }
+
+  stopInhaleSound() {
+    this.stopBurnSound();
+  }
+
+  stopExhaleSound() {}
 
   // 3. 吐烟呼气微风声
   playExhaleSound() {
@@ -716,58 +738,109 @@ class AudioManager {
     } catch {}
   }
 
-  // 8. 捏爆珠清脆破壳与多汁微爆喷音 (Tactile Snap & Juicy Liquid Pop)
+  // 8. 捏爆珠真实物理破壳声 (5阶物理声学建模：滤嘴捏压摩擦 -> 明胶脆壳咔啪双裂瞬态 -> 内部高压香精爆浆 -> 残壳微碎 -> 海绵毛细吸纳微滋声)
   playPopBeadSound() {
+    if (this.muted) return;
+    this.playLocalAudio('/audio/bead_pop.wav', () => {
+      this.playPopBeadSynth();
+    });
+  }
+
+  playPopBeadSynth() {
     if (this.muted) return;
     try {
       const ctx = this.getContext();
       if (!ctx) return;
       const t = ctx.currentTime;
 
-      // 1. 外层明胶脆壳破裂脆响 (Gelatin Snap Click - 0~22ms 高频脆裂断奏)
+      // 8.1 指尖捏压醋酸纤维海绵烟嘴的紧实微摩擦 (0 ~ 32ms)
+      const squeezeBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.032), ctx.sampleRate);
+      const squeezeData = squeezeBuf.getChannelData(0);
+      for (let i = 0; i < squeezeData.length; i++) {
+        squeezeData[i] = (Math.random() * 2 - 1) * Math.sin((i / squeezeData.length) * Math.PI);
+      }
+      const squeezeSrc = ctx.createBufferSource();
+      squeezeSrc.buffer = squeezeBuf;
+      const squeezeFilter = ctx.createBiquadFilter();
+      squeezeFilter.type = 'bandpass';
+      squeezeFilter.frequency.setValueAtTime(1650, t);
+      squeezeFilter.Q.setValueAtTime(1.8, t);
+      const squeezeGain = ctx.createGain();
+      squeezeGain.gain.setValueAtTime(0.22, t);
+      squeezeGain.gain.exponentialRampToValueAtTime(0.01, t + 0.032);
+      squeezeSrc.connect(squeezeFilter);
+      squeezeFilter.connect(squeezeGain);
+      this.connectToMaster(squeezeGain);
+      squeezeSrc.start(t);
+
+      // 8.2 外层硬脆明胶珠壳崩裂“咔-啪！”双瞬态脉冲 (30ms 初裂 + 38ms 主爆破)
+      const snapBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.045), ctx.sampleRate);
+      const snapData = snapBuf.getChannelData(0);
+      for (let i = 0; i < snapData.length; i++) {
+        const dtSec = i / ctx.sampleRate;
+        const env1 = dtSec < 0.008 ? Math.exp(-dtSec / 0.0018) * 0.75 : 0;
+        const env2 = dtSec >= 0.007 ? Math.exp(-(dtSec - 0.007) / 0.0028) * 1.0 : 0;
+        snapData[i] = (Math.random() * 2 - 1) * (env1 + env2);
+      }
+      const snapNoise = ctx.createBufferSource();
+      snapNoise.buffer = snapBuf;
+      const snapFilter = ctx.createBiquadFilter();
+      snapFilter.type = 'bandpass';
+      snapFilter.frequency.setValueAtTime(3600, t + 0.028);
+      snapFilter.Q.setValueAtTime(2.6, t + 0.028);
+      const snapNoiseGain = ctx.createGain();
+      snapNoiseGain.gain.setValueAtTime(0.92, t + 0.028);
+      snapNoiseGain.gain.exponentialRampToValueAtTime(0.005, t + 0.072);
+      snapNoise.connect(snapFilter);
+      snapFilter.connect(snapNoiseGain);
+      this.connectToMaster(snapNoiseGain);
+      snapNoise.start(t + 0.028);
+
+      // 脆壳高频弹性断裂音体 (2400Hz -> 320Hz 极速俯冲)
       const oscSnap = ctx.createOscillator();
       oscSnap.type = 'triangle';
-      oscSnap.frequency.setValueAtTime(3200, t);
-      oscSnap.frequency.exponentialRampToValueAtTime(1050, t + 0.022);
-
+      oscSnap.frequency.setValueAtTime(2400, t + 0.035);
+      oscSnap.frequency.exponentialRampToValueAtTime(320, t + 0.056);
       const gainSnap = ctx.createGain();
-      gainSnap.gain.setValueAtTime(0.65, t);
-      gainSnap.gain.exponentialRampToValueAtTime(0.001, t + 0.022);
-
+      gainSnap.gain.setValueAtTime(0.85, t + 0.035);
+      gainSnap.gain.exponentialRampToValueAtTime(0.001, t + 0.058);
       oscSnap.connect(gainSnap);
       this.connectToMaster(gainSnap);
-      oscSnap.start(t);
-      oscSnap.stop(t + 0.022);
+      oscSnap.start(t + 0.035);
+      oscSnap.stop(t + 0.058);
 
-      // 2. 内部精油微正压喷涌与空腔爆鸣 (Juicy Liquid Pop / Squish Discharge - 6~55ms 丰盈共鸣)
+      // 8.3 指腹发力低频敦实震感与内部精油爆浆“啵”声共鸣 (40ms ~ 105ms)
       const oscJuice = ctx.createOscillator();
       oscJuice.type = 'sine';
-      oscJuice.frequency.setValueAtTime(920, t + 0.006);
-      oscJuice.frequency.exponentialRampToValueAtTime(240, t + 0.055);
-
+      oscJuice.frequency.setValueAtTime(880, t + 0.040);
+      oscJuice.frequency.exponentialRampToValueAtTime(165, t + 0.098);
       const gainJuice = ctx.createGain();
-      gainJuice.gain.setValueAtTime(0.48, t + 0.006);
-      gainJuice.gain.exponentialRampToValueAtTime(0.001, t + 0.055);
-
+      gainJuice.gain.setValueAtTime(0.68, t + 0.040);
+      gainJuice.gain.exponentialRampToValueAtTime(0.001, t + 0.102);
       oscJuice.connect(gainJuice);
       this.connectToMaster(gainJuice);
-      oscJuice.start(t + 0.006);
-      oscJuice.stop(t + 0.055);
+      oscJuice.start(t + 0.040);
+      oscJuice.stop(t + 0.102);
 
-      // 3. 海绵微孔纤维吸纳湿润微回响 (Capillary Absorption Wet Tail - 20~85ms 湿润尾韵)
-      const oscAbsorb = ctx.createOscillator();
-      oscAbsorb.type = 'sine';
-      oscAbsorb.frequency.setValueAtTime(460, t + 0.02);
-      oscAbsorb.frequency.exponentialRampToValueAtTime(160, t + 0.085);
-
-      const gainAbsorb = ctx.createGain();
-      gainAbsorb.gain.setValueAtTime(0.22, t + 0.02);
-      gainAbsorb.gain.exponentialRampToValueAtTime(0.001, t + 0.085);
-
-      oscAbsorb.connect(gainAbsorb);
-      this.connectToMaster(gainAbsorb);
-      oscAbsorb.start(t + 0.02);
-      oscAbsorb.stop(t + 0.085);
+      // 8.4 香精原液顺海绵微孔毛细渗透的微弱湿润“滋——”尾韵 (55ms ~ 240ms)
+      const fizzBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.18), ctx.sampleRate);
+      const fizzData = fizzBuf.getChannelData(0);
+      for (let i = 0; i < fizzData.length; i++) {
+        const p = i / fizzData.length;
+        fizzData[i] = (Math.random() * 2 - 1) * Math.sin(Math.min(1, p * 6) * Math.PI * 0.5) * Math.exp(-p * 3.2);
+      }
+      const fizzSrc = ctx.createBufferSource();
+      fizzSrc.buffer = fizzBuf;
+      const fizzFilter = ctx.createBiquadFilter();
+      fizzFilter.type = 'highpass';
+      fizzFilter.frequency.setValueAtTime(3800, t + 0.055);
+      const fizzGain = ctx.createGain();
+      fizzGain.gain.setValueAtTime(0.24, t + 0.055);
+      fizzGain.gain.exponentialRampToValueAtTime(0.001, t + 0.235);
+      fizzSrc.connect(fizzFilter);
+      fizzFilter.connect(fizzGain);
+      this.connectToMaster(fizzGain);
+      fizzSrc.start(t + 0.055);
     } catch {}
   }
 
@@ -867,7 +940,7 @@ class AudioManager {
     } catch {}
   }
 
-  // 12. 抽出一支烟的纸质摩擦声 (Pull Out Cigarette Slide Sound)
+  // 12. 腾讯武侠/国潮神话级 · 【宝刀出鞘·龙吟剑鸣】全流程视听交响
   playPullCigaretteSound() {
     if (this.muted) return;
     try {
@@ -875,43 +948,130 @@ class AudioManager {
       if (!ctx) return;
       const t = ctx.currentTime;
 
-      // 紧密纸张抽出滑音
-      const osc = ctx.createOscillator();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(420, t);
-      osc.frequency.exponentialRampToValueAtTime(980, t + 0.12);
+      // [第一幕 0.00s~0.35s 寒芒破鞘]：清脆冷冽的金属刀锋出鞘“铮——！”泛音共鸣 + 刀鞘摩擦声
+      const bladeFreqs = [2349.32, 3520.0, 4978.03]; // D7, A7, D#8 寒铁剑鸣高频泛音簇
+      bladeFreqs.forEach((bf, bIdx) => {
+        const bOsc = ctx.createOscillator();
+        bOsc.type = bIdx === 0 ? 'triangle' : 'sine';
+        bOsc.frequency.setValueAtTime(bf * 0.92, t);
+        bOsc.frequency.exponentialRampToValueAtTime(bf * 1.04, t + 0.06);
+        bOsc.frequency.exponentialRampToValueAtTime(bf, t + 0.34);
 
-      const gain = ctx.createGain();
-      gain.gain.setValueAtTime(0.001, t);
-      gain.gain.linearRampToValueAtTime(0.3, t + 0.04);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
+        const bGain = ctx.createGain();
+        bGain.gain.setValueAtTime(0.001, t);
+        bGain.gain.linearRampToValueAtTime(0.18 / (bIdx + 1), t + 0.015);
+        bGain.gain.exponentialRampToValueAtTime(0.001, t + 0.36);
 
-      osc.connect(gain);
-      this.connectToMaster(gain);
-      osc.start(t);
-      osc.stop(t + 0.14);
+        bOsc.connect(bGain);
+        this.connectToMaster(bGain);
+        bOsc.start(t);
+        bOsc.stop(t + 0.38);
+      });
 
-      // 纸身微摩擦白噪
-      const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.12), ctx.sampleRate);
-      const data = buf.getChannelData(0);
-      for (let i = 0; i < data.length; i++) {
-        data[i] = (Math.random() * 2 - 1) * Math.sin((i / data.length) * Math.PI);
+      // 刀锋滑出剑鞘的高频金属丝滑摩擦包络
+      const scrapeLen = Math.floor(ctx.sampleRate * 0.18);
+      const scrapeBuf = ctx.createBuffer(1, scrapeLen, ctx.sampleRate);
+      const scrapeData = scrapeBuf.getChannelData(0);
+      for (let i = 0; i < scrapeLen; i++) {
+        const p = i / scrapeLen;
+        scrapeData[i] = (Math.random() * 2 - 1) * Math.sin(p * Math.PI) * Math.exp(-p * 1.8);
       }
-      const noise = ctx.createBufferSource();
-      noise.buffer = buf;
+      const scrapeSrc = ctx.createBufferSource();
+      scrapeSrc.buffer = scrapeBuf;
+      const scrapeFilter = ctx.createBiquadFilter();
+      scrapeFilter.type = 'bandpass';
+      scrapeFilter.frequency.setValueAtTime(3400, t);
+      scrapeFilter.frequency.exponentialRampToValueAtTime(6200, t + 0.16);
+      scrapeFilter.Q.value = 3.5;
+      const scrapeGain = ctx.createGain();
+      scrapeGain.gain.setValueAtTime(0.28, t);
+      scrapeGain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+      scrapeSrc.connect(scrapeFilter);
+      scrapeFilter.connect(scrapeGain);
+      this.connectToMaster(scrapeGain);
+      scrapeSrc.start(t);
 
-      const filter = ctx.createBiquadFilter();
-      filter.type = 'bandpass';
-      filter.frequency.setValueAtTime(2400, t);
+      // [第二幕 0.18s~0.62s 拔剑冲霄]：凌厉破空剑气音障呼啸 (Sword-Qi Sonic Whoosh)
+      const whooshLen = Math.floor(ctx.sampleRate * 0.44);
+      const whooshBuf = ctx.createBuffer(1, whooshLen, ctx.sampleRate);
+      const whooshData = whooshBuf.getChannelData(0);
+      for (let i = 0; i < whooshLen; i++) {
+        const p = i / whooshLen;
+        whooshData[i] = (Math.random() * 2 - 1) * Math.sin(p * Math.PI) * (0.75 + 0.25 * Math.sin(i * 0.05));
+      }
+      const whooshSrc = ctx.createBufferSource();
+      whooshSrc.buffer = whooshBuf;
 
-      const nGain = ctx.createGain();
-      nGain.gain.setValueAtTime(0.18, t);
-      nGain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+      const whooshFilter = ctx.createBiquadFilter();
+      whooshFilter.type = 'bandpass';
+      whooshFilter.frequency.setValueAtTime(720, t + 0.18);
+      whooshFilter.frequency.exponentialRampToValueAtTime(3400, t + 0.54);
+      whooshFilter.Q.value = 2.0;
 
-      noise.connect(filter);
-      filter.connect(nGain);
-      this.connectToMaster(nGain);
-      noise.start(t);
+      const whooshGain = ctx.createGain();
+      whooshGain.gain.setValueAtTime(0.001, t + 0.18);
+      whooshGain.gain.linearRampToValueAtTime(0.26, t + 0.30);
+      whooshGain.gain.exponentialRampToValueAtTime(0.001, t + 0.62);
+
+      whooshSrc.connect(whooshFilter);
+      whooshFilter.connect(whooshGain);
+      this.connectToMaster(whooshGain);
+      whooshSrc.start(t + 0.18);
+
+      // [第三幕 0.44s~1.26s 游龙挽剑花]：东方五声宫商仙侠剑意泛音流
+      const ribbonNotes = [587.33, 659.25, 783.99, 880.0, 1174.66, 1318.51, 1567.98, 2349.32];
+      ribbonNotes.forEach((freq, idx) => {
+        const noteT = t + 0.44 + idx * 0.095;
+        const nOsc = ctx.createOscillator();
+        nOsc.type = idx % 2 === 0 ? 'triangle' : 'sine';
+        nOsc.frequency.setValueAtTime(freq, noteT);
+        nOsc.frequency.exponentialRampToValueAtTime(freq * 1.012, noteT + 0.30);
+
+        const nGain = ctx.createGain();
+        nGain.gain.setValueAtTime(0.001, noteT);
+        nGain.gain.linearRampToValueAtTime(0.14 - idx * 0.008, noteT + 0.02);
+        nGain.gain.exponentialRampToValueAtTime(0.001, noteT + 0.36);
+
+        nOsc.connect(nGain);
+        this.connectToMaster(nGain);
+        nOsc.start(noteT);
+        nOsc.stop(noteT + 0.38);
+      });
+
+      // [第四幕 1.24s~2.05s 神兵归宗定格]：低频龙吟震地重音 + 剑归天枢璀璨泛音和弦
+      const impactT = t + 1.24;
+      const subOsc = ctx.createOscillator();
+      subOsc.type = 'sine';
+      subOsc.frequency.setValueAtTime(145, impactT);
+      subOsc.frequency.exponentialRampToValueAtTime(44, impactT + 0.42);
+
+      const subGain = ctx.createGain();
+      subGain.gain.setValueAtTime(0.001, impactT);
+      subGain.gain.linearRampToValueAtTime(0.36, impactT + 0.02);
+      subGain.gain.exponentialRampToValueAtTime(0.001, impactT + 0.45);
+
+      subOsc.connect(subGain);
+      this.connectToMaster(subGain);
+      subOsc.start(impactT);
+      subOsc.stop(impactT + 0.46);
+
+      const finaleChord = [1174.66, 1760.0, 2349.32, 2637.02, 3520.0];
+      finaleChord.forEach((freq, idx) => {
+        const cStart = impactT + idx * 0.016;
+        const cOsc = ctx.createOscillator();
+        cOsc.type = 'sine';
+        cOsc.frequency.setValueAtTime(freq, cStart);
+
+        const cGain = ctx.createGain();
+        cGain.gain.setValueAtTime(0.001, cStart);
+        cGain.gain.linearRampToValueAtTime(0.15 - idx * 0.016, cStart + 0.025);
+        cGain.gain.exponentialRampToValueAtTime(0.001, cStart + 0.68);
+
+        cOsc.connect(cGain);
+        this.connectToMaster(cGain);
+        cOsc.start(cStart);
+        cOsc.stop(cStart + 0.70);
+      });
     } catch {}
   }
 
@@ -950,7 +1110,12 @@ class AudioManager {
   }
 
   // ==========================================
-  // 14. 沉浸生活场景环境白噪音 (Ambient Life Sound Engine)
+  // 14. 腾讯白噪音大师级 · 沉浸自然呼吸声床引擎 (Master Velvet Ambient Soundscape Engine)
+  // 核心声学准则：
+  // 1) 摒弃刺耳高频白噪 (White Noise) 与恼人正弦单音蜂鸣 (Sine Hum)，全系采用双阶布朗/丝绒暖粉积分滤波 (-12dB/Octave)；
+  // 2) 6.0 秒超长无缝余弦交叉淡化缓冲 (Seamless Cosine Crossfade Loop)，彻底根除 3 秒硬切循环接缝；
+  // 3) 契合人体静息副交感神经节律的 6 秒慢呼吸包络 (10次/分自然微风起伏) + -26dB 微阈丝绒增益 (0.042~0.064) + 2.0s 柔滑渐入；
+  // 4) 配合吸烟动作智能侧链闪避 (Sidechain Ducking)，润物无声，久听不累。
   // ==========================================
   startAmbientSound(sceneType) {
     if (this.muted || this.ambientEnabled === false || !sceneType) {
@@ -973,243 +1138,105 @@ class AudioManager {
       const t = ctx.currentTime;
       const sampleRate = (ctx && ctx.sampleRate && ctx.sampleRate > 0) ? ctx.sampleRate : 44100;
 
-      // 生成长白噪音缓冲 (3秒平滑循环)
-      const bufferLength = Math.floor(sampleRate * 3.0);
+      // 生成 6.0 秒超长平滑声床缓冲 + 0.5 秒首尾无缝余弦交叉融接
+      const loopDur = 6.0;
+      const fadeSamples = Math.floor(sampleRate * 0.5);
+      const bufferLength = Math.floor(sampleRate * loopDur);
+      const totalGen = bufferLength + fadeSamples;
+      const raw = new Float32Array(totalGen);
+
+      let cutoffFreq = 280;
+      let targetGain = 0.048;
+
+      if (sceneType === 'rainy_car' || sceneType === 'rainy_camp') {
+        // 隔窗微雨 / 天幕细雨：豪车双层夹胶玻璃外的温润绵密细雨，滤除一切刺耳高频沙沙声
+        let b0 = 0, b1 = 0;
+        for (let i = 0; i < totalGen; i++) {
+          const white = Math.random() * 2 - 1;
+          b0 = 0.994 * b0 + white * 0.032;
+          b1 = 0.982 * b1 + b0 * 0.18;
+          const breath = 0.78 + 0.22 * Math.sin((i / bufferLength) * Math.PI * 2);
+          raw[i] = b1 * 0.48 * breath;
+        }
+        cutoffFreq = 380;
+        targetGain = 0.060;
+      } else if (sceneType === 'campfire') {
+        // 森林篝火：温暖壁炉低频暖流 + 极偶发温润松木微暖共鸣（彻底剔除高频刺耳电流爆音）
+        let b0 = 0, b1 = 0;
+        for (let i = 0; i < totalGen; i++) {
+          const white = Math.random() * 2 - 1;
+          b0 = 0.996 * b0 + white * 0.026;
+          b1 = 0.988 * b1 + b0 * 0.16;
+          const breath = 0.80 + 0.20 * Math.sin((i / bufferLength) * Math.PI * 2);
+          raw[i] = b1 * 0.52 * breath;
+        }
+        cutoffFreq = 310;
+        targetGain = 0.054;
+      } else if (sceneType === 'midnight_balcony' || sceneType === 'midnight_rooftop' || sceneType === 'ocean') {
+        // 楼顶晚风 / 蔚蓝深海：6秒一呼一吸的慢周期远方海浪潮汐与松林晚风
+        let b0 = 0, b1 = 0;
+        for (let i = 0; i < totalGen; i++) {
+          const white = Math.random() * 2 - 1;
+          b0 = 0.9965 * b0 + white * 0.022;
+          b1 = 0.990 * b1 + b0 * 0.15;
+          const tideLFO = 0.62 + 0.38 * Math.sin((i / bufferLength) * Math.PI * 2);
+          raw[i] = b1 * 0.55 * tideLFO;
+        }
+        cutoffFreq = 290;
+        targetGain = 0.056;
+      } else {
+        // 极简黑曜 / 宇宙深空 / 街角便利店 / 车库 / 楼道：深宵书房级微阈丝绒空气声床（无任何正弦单音蜂鸣）
+        let b0 = 0, b1 = 0;
+        for (let i = 0; i < totalGen; i++) {
+          const white = Math.random() * 2 - 1;
+          b0 = 0.997 * b0 + white * 0.018;
+          b1 = 0.991 * b1 + b0 * 0.14;
+          const zenBreath = 0.82 + 0.18 * Math.sin((i / bufferLength) * Math.PI * 2);
+          raw[i] = b1 * 0.50 * zenBreath;
+        }
+        cutoffFreq = 250;
+        targetGain = 0.044;
+      }
+
+      // 首尾 0.5s 余弦平滑交叉融接 (Seamless Crossfade Loop)，保证循环点 100% 连续无咔哒声
       const buffer = ctx.createBuffer(1, bufferLength, sampleRate);
       const data = buffer.getChannelData(0);
-
-      if (sceneType === 'rainy_car') {
-        // 雨夜车窗：柔和粉红/低通沙沙细雨声
-        let b0 = 0, b1 = 0, b2 = 0;
-        for (let i = 0; i < bufferLength; i++) {
-          const white = Math.random() * 2 - 1;
-          b0 = 0.99886 * b0 + white * 0.0555179;
-          b1 = 0.99332 * b1 + white * 0.0750759;
-          b2 = 0.96900 * b2 + white * 0.1538520;
-          data[i] = (b0 + b1 + b2) * 0.22;
+      for (let i = 0; i < bufferLength; i++) {
+        if (i < fadeSamples) {
+          const alpha = 0.5 * (1 - Math.cos((i / fadeSamples) * Math.PI));
+          data[i] = raw[i] * alpha + raw[bufferLength + i] * (1 - alpha);
+        } else {
+          data[i] = raw[i];
         }
-
-        const source = ctx.createBufferSource();
-        source.buffer = buffer;
-        source.loop = true;
-
-        const filter = ctx.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(1600, t);
-
-        const gain = ctx.createGain();
-        gain.gain.setValueAtTime(0.38, t);
-
-        source.connect(filter);
-        filter.connect(gain);
-        this.connectToMaster(gain);
-        source.start(t);
-
-        this.ambientSource = source;
-        this.ambientGain = gain;
-        this.ambientType = sceneType;
-      } else if (sceneType === 'campfire') {
-        // 森林篝火：低频温暖余音 + 柴火轻微摩擦
-        for (let i = 0; i < bufferLength; i++) {
-          data[i] = (Math.random() * 2 - 1) * (Math.random() > 0.985 ? 0.9 : 0.12);
-        }
-
-        const source = ctx.createBufferSource();
-        source.buffer = buffer;
-        source.loop = true;
-
-        const filter = ctx.createBiquadFilter();
-        filter.type = 'bandpass';
-        filter.frequency.setValueAtTime(750, t);
-        filter.Q.value = 1.2;
-
-        const gain = ctx.createGain();
-        gain.gain.setValueAtTime(0.35, t);
-
-        source.connect(filter);
-        filter.connect(gain);
-        this.connectToMaster(gain);
-        source.start(t);
-
-        this.ambientSource = source;
-        this.ambientGain = gain;
-        this.ambientType = sceneType;
-      } else if (sceneType === 'midnight_balcony' || sceneType === 'midnight_rooftop') {
-        // 深夜阳台与楼顶天台：极低频夜风微风吹拂空气感
-        let lastOut = 0.0;
-        for (let i = 0; i < bufferLength; i++) {
-          const white = Math.random() * 2 - 1;
-          data[i] = (lastOut + (0.02 * white)) / 1.02;
-          lastOut = data[i];
-          data[i] *= 1.6;
-        }
-
-        const source = ctx.createBufferSource();
-        source.buffer = buffer;
-        source.loop = true;
-
-        const filter = ctx.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(480, t);
-
-        const gain = ctx.createGain();
-        gain.gain.setValueAtTime(0.32, t);
-
-        source.connect(filter);
-        filter.connect(gain);
-        this.connectToMaster(gain);
-        source.start(t);
-
-        this.ambientSource = source;
-        this.ambientGain = gain;
-        this.ambientType = sceneType;
-      } else if (sceneType === 'solar_system' || sceneType === 'deep_cosmos' || sceneType === 'lunar_planet') {
-        // 宇宙与星球奇观：深空引力波空灵冥想低频共振
-        for (let i = 0; i < bufferLength; i++) {
-          const s = Math.sin((i / sampleRate) * Math.PI * 2 * 68) * 0.4 +
-                    Math.sin((i / sampleRate) * Math.PI * 2 * 136) * 0.2;
-          const noise = (Math.random() * 2 - 1) * 0.06;
-          data[i] = s + noise;
-        }
-
-        const source = ctx.createBufferSource();
-        source.buffer = buffer;
-        source.loop = true;
-
-        const filter = ctx.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(280, t);
-
-        const gain = ctx.createGain();
-        gain.gain.setValueAtTime(0.30, t);
-
-        source.connect(filter);
-        filter.connect(gain);
-        this.connectToMaster(gain);
-        source.start(t);
-
-        this.ambientSource = source;
-        this.ambientGain = gain;
-        this.ambientType = sceneType;
-      } else if (sceneType === 'convenience_store' || sceneType === 'stairwell' || sceneType === 'underground_garage') {
-        // 真实生活高频场景：静谧室内通风/街角微暖低噪
-        let b0 = 0;
-        for (let i = 0; i < bufferLength; i++) {
-          const white = Math.random() * 2 - 1;
-          b0 = 0.992 * b0 + white * 0.08;
-          data[i] = b0 * 0.26;
-        }
-
-        const source = ctx.createBufferSource();
-        source.buffer = buffer;
-        source.loop = true;
-
-        const filter = ctx.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(360, t);
-
-        const gain = ctx.createGain();
-        gain.gain.setValueAtTime(0.30, t);
-
-        source.connect(filter);
-        filter.connect(gain);
-        this.connectToMaster(gain);
-        source.start(t);
-
-        this.ambientSource = source;
-        this.ambientGain = gain;
-        this.ambientType = sceneType;
-      } else if (sceneType === 'ocean') {
-        // 蔚蓝海洋：舒缓潮汐浪涌与轻柔海风白噪音
-        let b0 = 0, b1 = 0;
-        for (let i = 0; i < bufferLength; i++) {
-          const white = Math.random() * 2 - 1;
-          b0 = 0.993 * b0 + white * 0.055;
-          b1 = 0.985 * b1 + white * 0.040;
-          // 潮汐波浪慢周期起伏调制
-          const waveLFO = 0.5 + 0.5 * Math.sin((i / ctx.sampleRate) * Math.PI * 0.45);
-          data[i] = (b0 * 0.65 + b1 * 0.35) * (0.35 + 0.65 * waveLFO);
-        }
-
-        const source = ctx.createBufferSource();
-        source.buffer = buffer;
-        source.loop = true;
-
-        const filter = ctx.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(380, t);
-
-        const gain = ctx.createGain();
-        gain.gain.setValueAtTime(0.001, t);
-        gain.gain.linearRampToValueAtTime(0.32, t + 0.8);
-
-        source.connect(filter);
-        filter.connect(gain);
-        this.connectToMaster(gain);
-        source.start(t);
-
-        this.ambientSource = source;
-        this.ambientGain = gain;
-        this.ambientType = sceneType;
-      } else if (sceneType === 'golden_amber') {
-        // 赛博暖金：柔和温润琥珀共鸣白噪音
-        let b0 = 0;
-        for (let i = 0; i < bufferLength; i++) {
-          const white = Math.random() * 2 - 1;
-          b0 = 0.990 * b0 + white * 0.06;
-          data[i] = b0 * 0.40 + Math.sin((i / ctx.sampleRate) * Math.PI * 2 * 216) * 0.025;
-        }
-
-        const source = ctx.createBufferSource();
-        source.buffer = buffer;
-        source.loop = true;
-
-        const filter = ctx.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(450, t);
-
-        const gain = ctx.createGain();
-        gain.gain.setValueAtTime(0.001, t);
-        gain.gain.linearRampToValueAtTime(0.32, t + 0.8);
-
-        source.connect(filter);
-        filter.connect(gain);
-        this.connectToMaster(gain);
-        source.start(t);
-
-        this.ambientSource = source;
-        this.ambientGain = gain;
-        this.ambientType = sceneType;
-      } else {
-        // 极简黑曜 (默认) 或通用场景：432Hz 侘寂静心微柔禅境白噪音 (柔和低频空气感)
-        let b0 = 0;
-        for (let i = 0; i < bufferLength; i++) {
-          const white = Math.random() * 2 - 1;
-          b0 = 0.994 * b0 + white * 0.05;
-          data[i] = b0 * 0.38 + Math.sin((i / ctx.sampleRate) * Math.PI * 2 * 432) * 0.02;
-        }
-
-        const source = ctx.createBufferSource();
-        source.buffer = buffer;
-        source.loop = true;
-
-        const filter = ctx.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(360, t);
-
-        const gain = ctx.createGain();
-        gain.gain.setValueAtTime(0.001, t);
-        gain.gain.linearRampToValueAtTime(0.32, t + 0.8);
-
-        source.connect(filter);
-        filter.connect(gain);
-        this.connectToMaster(gain);
-        source.start(t);
-
-        this.ambientSource = source;
-        this.ambientGain = gain;
-        this.ambientType = sceneType;
       }
+
+      const source = ctx.createBufferSource();
+      source.buffer = buffer;
+      source.loop = true;
+
+      // 高通滤除 85Hz 以下手机扬声器浑浊低频共振，低通保留丝绒暖感
+      const hpFilter = ctx.createBiquadFilter();
+      hpFilter.type = 'highpass';
+      hpFilter.frequency.setValueAtTime(85, t);
+
+      const lpFilter = ctx.createBiquadFilter();
+      lpFilter.type = 'lowpass';
+      lpFilter.frequency.setValueAtTime(cutoffFreq, t);
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.linearRampToValueAtTime(targetGain, t + 2.0);
+
+      source.connect(hpFilter);
+      hpFilter.connect(lpFilter);
+      lpFilter.connect(gain);
+      this.connectToMaster(gain);
+      source.start(t);
+
+      this.ambientSource = source;
+      this.ambientGain = gain;
+      this.ambientBaseGain = targetGain;
+      this.ambientType = sceneType;
     } catch {}
   }
 
@@ -1222,6 +1249,7 @@ class AudioManager {
     const oldGain = this.ambientGain;
     this.ambientSource = null;
     this.ambientGain = null;
+    this.ambientBaseGain = 0;
     this.ambientType = null;
 
     if (!oldSource) return;
@@ -1239,7 +1267,7 @@ class AudioManager {
         try {
           const t = this.ctx.currentTime;
           oldGain.gain.setValueAtTime(oldGain.gain.value, t);
-          oldGain.gain.linearRampToValueAtTime(0.001, t + 0.3);
+          oldGain.gain.linearRampToValueAtTime(0.0001, t + 0.45);
         } catch {}
       }
       this.ambientStopTimer = setTimeout(() => {
@@ -1251,7 +1279,7 @@ class AudioManager {
           try { oldGain.disconnect(); } catch {}
         }
         this.ambientStopTimer = null;
-      }, 350);
+      }, 480);
     }
   }
 

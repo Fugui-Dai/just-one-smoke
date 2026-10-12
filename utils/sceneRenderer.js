@@ -101,6 +101,15 @@ export const ATMOSPHERE_SCENES = [
 
   // 3. 经典治愈与纯享系列 (Classic & Zen)
   {
+    id: 'rainy_camp',
+    name: '雨夜露营',
+    subtitle: '天幕听雨 · 暖光马灯与远山',
+    icon: '⛺',
+    soundType: 'rain',
+    ambientDesc: '天幕轻柔雨声与微风',
+    badge: '旷野松弛'
+  },
+  {
     id: 'rainy_car',
     name: '雨夜车窗',
     subtitle: '成年人的私密避风港 · 细雨霓虹',
@@ -119,24 +128,6 @@ export const ATMOSPHERE_SCENES = [
     badge: '温暖'
   },
   {
-    id: 'midnight_balcony',
-    name: '深夜阳台',
-    subtitle: '俯瞰万家灯火 · 晚风微凉',
-    icon: '🏙️',
-    soundType: 'wind',
-    ambientDesc: '夜幕城市晚风声',
-    badge: '静心'
-  },
-  {
-    id: 'golden_amber',
-    name: '赛博暖金',
-    subtitle: '静谧琥珀雅境 · 浮光星芒',
-    icon: '✨',
-    soundType: 'amber',
-    ambientDesc: '暖金温润环境白噪音',
-    badge: '实机同款'
-  },
-  {
     id: 'obsidian',
     name: '极简黑曜',
     subtitle: '专注一呼一吸 · 侘寂纯境',
@@ -148,6 +139,8 @@ export const ATMOSPHERE_SCENES = [
 ];
 
 export function getSceneById(id) {
+  if (id === 'midnight_balcony') id = 'midnight_rooftop';
+  if (id === 'golden_amber') id = 'obsidian';
   return ATMOSPHERE_SCENES.find(s => s.id === id) || ATMOSPHERE_SCENES[0];
 }
 
@@ -286,7 +279,7 @@ export class SceneRenderer {
     this.initialized = true;
   }
 
-  render(ctx, w, h, sceneType, dt, totalTime) {
+  render(ctx, w, h, sceneType, dt, totalTime, vipTheme = '') {
     if (!this.initialized) {
       this.init(w, h);
     }
@@ -324,6 +317,9 @@ export class SceneRenderer {
       case 'rainy_car':
         this.renderRainyCar(ctx, w, h, dt, totalTime);
         break;
+      case 'rainy_camp':
+        this.renderRainyCamp(ctx, w, h, dt, totalTime);
+        break;
       case 'midnight_balcony':
         this.renderMidnightBalcony(ctx, w, h, dt, totalTime);
         break;
@@ -336,6 +332,44 @@ export class SceneRenderer {
         break;
     }
 
+    // 腾讯游戏设计级：VIP专属沉浸环境天幕光晕 (Dynamic VIP Atmospheric Aura)
+    // 会员未开通或已到期时完全静默不绘制，保证普通用户纯净原景；会员期内注入专属情绪高光
+    if (vipTheme) {
+      this.renderVipAtmosphereAura(ctx, w, h, vipTheme, totalTime);
+    }
+
+    ctx.restore();
+  }
+
+  // 腾讯游戏设计级 VIP 专属天幕环境流光 (到期自动静默消失)
+  renderVipAtmosphereAura(ctx, w, h, theme, t) {
+    ctx.save();
+    const pulse = 1.0 + 0.08 * Math.sin((t || 0) * 1.5);
+    const auraH = h * 0.42;
+    const auraGrad = ctx.createRadialGradient(w / 2, -10, 10, w / 2, auraH * 0.35, w * 0.85);
+
+    if (theme === 'day') {
+      // 翡翠晨曦：灵动青玉微光
+      auraGrad.addColorStop(0, `rgba(16, 185, 129, ${0.16 * pulse})`);
+      auraGrad.addColorStop(0.5, `rgba(5, 150, 105, ${0.06 * pulse})`);
+      auraGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    } else if (theme === 'month') {
+      // 极光紫晶：星云紫晶极光
+      auraGrad.addColorStop(0, `rgba(168, 85, 247, ${0.18 * pulse})`);
+      auraGrad.addColorStop(0.5, `rgba(124, 58, 237, ${0.07 * pulse})`);
+      auraGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    } else if (theme === 'lifetime') {
+      // 曜世黑金：帝王曜石赤金
+      auraGrad.addColorStop(0, `rgba(251, 191, 36, ${0.20 * pulse})`);
+      auraGrad.addColorStop(0.5, `rgba(180, 83, 9, ${0.08 * pulse})`);
+      auraGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    } else {
+      ctx.restore();
+      return;
+    }
+
+    ctx.fillStyle = auraGrad;
+    ctx.fillRect(0, 0, w, auraH);
     ctx.restore();
   }
 
@@ -1229,6 +1263,157 @@ export class SceneRenderer {
         ctx.stroke();
       }
     });
+    ctx.restore();
+  }
+
+  // ==========================================
+  // 14. 雨夜露营：旷野天幕听雨 · 暖光马灯与墨青远山 (Rainy Camp Under Tarp)
+  // ==========================================
+  renderRainyCamp(ctx, w, h, dt, t) {
+    // 1. 苍茫墨青雨夜天幕背景
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, h);
+    skyGrad.addColorStop(0, '#040914');
+    skyGrad.addColorStop(0.4, '#071220');
+    skyGrad.addColorStop(0.75, '#050c18');
+    skyGrad.addColorStop(1.0, '#03070d');
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    // 2. 远山剪影 (Far Mountain Silhouettes)
+    ctx.save();
+    const mtnGrad1 = ctx.createLinearGradient(0, h * 0.35, 0, h * 0.65);
+    mtnGrad1.addColorStop(0, 'rgba(8, 20, 36, 0.7)');
+    mtnGrad1.addColorStop(1, 'rgba(4, 10, 20, 0.9)');
+    ctx.fillStyle = mtnGrad1;
+    ctx.beginPath();
+    ctx.moveTo(0, h * 0.52);
+    ctx.quadraticCurveTo(w * 0.3, h * 0.42, w * 0.65, h * 0.48);
+    ctx.quadraticCurveTo(w * 0.85, h * 0.52, w, h * 0.45);
+    ctx.lineTo(w, h * 0.75);
+    ctx.lineTo(0, h * 0.75);
+    ctx.closePath();
+    ctx.fill();
+
+    // 山间雾霭层 (Mountain Fog Layer)
+    const fogGrad = ctx.createLinearGradient(0, h * 0.46, 0, h * 0.58);
+    fogGrad.addColorStop(0, 'rgba(30, 58, 88, 0)');
+    fogGrad.addColorStop(0.5, 'rgba(56, 189, 248, 0.08)');
+    fogGrad.addColorStop(1, 'rgba(30, 58, 88, 0)');
+    ctx.fillStyle = fogGrad;
+    ctx.fillRect(0, h * 0.46, w, h * 0.12);
+    ctx.restore();
+
+    // 3. 斜织细雨 (Diagonal Rain Streamers)
+    ctx.save();
+    ctx.lineWidth = 1.1;
+    this.raindrops.forEach((drop) => {
+      drop.y += drop.speed * dt * 0.85;
+      drop.x += (drop.wind * (drop.speed * 0.18) - 15) * dt;
+
+      if (drop.y > h + drop.length) {
+        drop.y = -drop.length - Math.random() * 30;
+        drop.x = Math.random() * (w + 100);
+      }
+
+      const grad = ctx.createLinearGradient(drop.x, drop.y, drop.x - 6, drop.y + drop.length);
+      grad.addColorStop(0, 'rgba(186, 230, 253, 0)');
+      grad.addColorStop(0.6, `rgba(186, 230, 253, ${drop.alpha * 0.45})`);
+      grad.addColorStop(1, 'rgba(186, 230, 253, 0)');
+      ctx.strokeStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(drop.x, drop.y);
+      ctx.lineTo(drop.x - 6, drop.y + drop.length);
+      ctx.stroke();
+    });
+    ctx.restore();
+
+    // 4. 露营防雨天幕三角斜檐 (Camp Shelter Tarp Canopy)
+    ctx.save();
+    ctx.fillStyle = '#060a12';
+    ctx.beginPath();
+    ctx.moveTo(-20, -10);
+    ctx.lineTo(w * 0.52, h * 0.18);
+    ctx.lineTo(w + 20, -10);
+    ctx.lineTo(w + 20, -20);
+    ctx.lineTo(-20, -20);
+    ctx.closePath();
+    ctx.fill();
+
+    // 天幕深黑边框压条
+    ctx.strokeStyle = 'rgba(15, 23, 42, 0.95)';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    // 天幕挂绳 (Tarp Suspension Cord)
+    const lanternSway = Math.sin(t * 1.6) * 3.5;
+    const ropeTopX = w * 0.52;
+    const ropeTopY = h * 0.18;
+    const lanternX = ropeTopX + lanternSway;
+    const lanternY = ropeTopY + 44;
+
+    ctx.strokeStyle = 'rgba(100, 116, 139, 0.65)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(ropeTopX, ropeTopY);
+    ctx.lineTo(lanternX, lanternY);
+    ctx.stroke();
+
+    // 5. 暖黄钨丝复古马灯 (Vintage Amber Camp Lantern)
+    const glowPulse = Math.sin(t * 3.0) * 6;
+    const glowR = 110 + glowPulse;
+    const glowGrad = ctx.createRadialGradient(lanternX, lanternY + 12, 4, lanternX, lanternY + 12, glowR);
+    glowGrad.addColorStop(0, 'rgba(251, 191, 36, 0.38)');
+    glowGrad.addColorStop(0.35, 'rgba(245, 158, 11, 0.16)');
+    glowGrad.addColorStop(0.7, 'rgba(217, 119, 6, 0.05)');
+    glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = glowGrad;
+    ctx.beginPath();
+    ctx.arc(lanternX, lanternY + 12, glowR, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 马灯金属顶盖
+    ctx.fillStyle = '#1e293b';
+    ctx.beginPath();
+    ctx.arc(lanternX, lanternY + 2, 9, Math.PI, 0);
+    ctx.fill();
+
+    // 马灯玻璃灯罩
+    ctx.fillStyle = 'rgba(254, 240, 138, 0.85)';
+    ctx.beginPath();
+    ctx.rect(lanternX - 6, lanternY + 2, 12, 16);
+    ctx.fill();
+
+    // 核心钨丝亮点
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(lanternX, lanternY + 10, 2.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 马灯底座
+    ctx.fillStyle = '#0f172a';
+    ctx.beginPath();
+    ctx.rect(lanternX - 8, lanternY + 18, 16, 4);
+    ctx.fill();
+
+    // 6. 热咖啡丝缕升腾白汽 (Steaming Coffee Thermos Mug on Side)
+    const mugX = w * 0.82;
+    const mugY = h * 0.74;
+    ctx.fillStyle = '#090d16';
+    ctx.beginPath();
+    ctx.rect(mugX - 8, mugY, 16, 22);
+    ctx.fill();
+
+    for (let i = 0; i < 3; i++) {
+      const steamProg = ((t * 0.5 + i * 0.33) % 1.0);
+      const sy = mugY - steamProg * 36;
+      const sx = mugX + Math.sin(t * 2.2 + i * 1.8) * 3;
+      const sAlpha = Math.sin(steamProg * Math.PI) * 0.20;
+      ctx.fillStyle = `rgba(255, 255, 255, ${sAlpha})`;
+      ctx.beginPath();
+      ctx.arc(sx, sy, 2.5 + steamProg * 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
     ctx.restore();
   }
 }

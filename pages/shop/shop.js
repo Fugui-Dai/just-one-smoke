@@ -4,11 +4,13 @@ import { audioManager } from '../../utils/audioManager.js';
 import { triggerHaptic } from '../../utils/haptics.js';
 import { toast } from '../../utils/toastService.js';
 import { vipService } from '../../utils/vipService.js';
+import { packFlightVfxRenderer } from '../../utils/canvasRenderer.js';
 import {
   CIGARETTE_CATALOG,
   DEFAULT_CIGARETTE,
   getCigaretteById,
-  isCigaretteUnlocked
+  isCigaretteUnlocked,
+  computeFlightStyles
 } from '../../utils/catalog.js';
 
 function resolveCigaretteCategory(item) {
@@ -93,14 +95,21 @@ Page({
     // 当前选中的名烟与烟盒
     currentCigarette: DEFAULT_CIGARETTE,
     isCurrentUnlocked: true,
+    packCapacity: 20, // 盒内总容量
     packCount: 20, // 盒内剩余烟支数量
     slotArray: [], // 槽位索引数组 [0..19] 或 [0..4]
+    slotStates: [], // 每个槽位是否有烟状态数组 [true, false, ...]
+    flightStyles: computeFlightStyles(DEFAULT_CIGARETTE),
 
-    // 3D 动画交互状态
-    isLidOpen: false, // 盒盖是否翻开
+    // 3D 动画交互状态 (6 阶段腾讯 CG 级分镜)
+    isLidOpen: true, // 盒盖是否翻开
     isPulling: false, // 正在抽出一支烟的动画
     isFlightVisible: false, // 抽出烟支是否悬浮在空中
+    isFlightActive: false, // SSR 华丽特效激活态
     pulledSlotIndex: -1, // 被抽出的烟支槽位
+    isSlotEjected: false, // 盒内烟支是否已完成拔升出仓并交接给全屏S弧线
+    slotOffsetX: 0, // 被点击槽位相对烟盒中心的水平偏移 (rpx)
+    vfxStageLabel: '01 [竖壳静置]', // 当前赛博分镜阶段标签
 
     // VIP 状态
     isVipUser: false,
@@ -135,6 +144,7 @@ Page({
       viewMode: mode,
       isMuted: audioManager.isMuted(),
       isVipUser: vipService.isVip(),
+      vipTheme: vipService.getVipTheme(),
       enableSheen: false
     });
 
@@ -143,6 +153,9 @@ Page({
   },
 
   onReady() {
+    if (this.data.viewMode === '3d_pack') {
+      this.initFlightCanvas();
+    }
     // 腾讯游戏商城设计规范：进店先保持静帧陈列，让视线从容聚焦商品细节，静置后再开启低频流光
     if (this.sheenTimer) clearTimeout(this.sheenTimer);
     this.sheenTimer = setTimeout(() => {
@@ -150,14 +163,109 @@ Page({
     }, 2600);
   },
 
+  initFlightCanvas(onInitialized) {
+    try {
+      const query = wx.createSelectorQuery().in(this);
+      query.select('#packFlightCanvas')
+        .fields({ node: true, size: true })
+        .exec((res) => {
+          if (!res || !res[0] || !res[0].node) {
+            if (typeof onInitialized === 'function') onInitialized(false);
+            return;
+          }
+          const canvas = res[0].node;
+          const ctx = canvas.getContext('2d');
+          const sysInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
+          const dpr = Math.min(sysInfo.pixelRatio || 2, 2.5);
+          const width = res[0].width || sysInfo.windowWidth || 375;
+          const height = res[0].height || sysInfo.windowHeight || 812;
+
+          canvas.width = width * dpr;
+          canvas.height = height * dpr;
+          ctx.scale(dpr, dpr);
+
+          this._flightCanvas = canvas;
+          this._flightCtx = ctx;
+          this._flightCanvasW = width;
+          this._flightCanvasH = height;
+          if (typeof onInitialized === 'function') onInitialized(true);
+        });
+    } catch (e) {
+      if (typeof onInitialized === 'function') onInitialized(false);
+    }
+  },
+
+  startFlightVfxLoop(slotOffsetX = 0) {
+    this.stopFlightVfxLoop();
+    packFlightVfxRenderer.reset();
+    this._flightStartTime = Date.now();
+    const pxOffset = (slotOffsetX || 0) * 0.5;
+
+    const step = () => {
+      if (!this._flightStartTime) return;
+      const elapsedSec = (Date.now() - this._flightStartTime) / 1000;
+      if (this._flightCtx && this._flightCanvasW && this._flightCanvasH) {
+        packFlightVfxRenderer.render(
+          this._flightCtx,
+          this._flightCanvasW,
+          this._flightCanvasH,
+          elapsedSec,
+          { slotOffsetX: pxOffset }
+        );
+      }
+      if (this._flightStartTime) {
+        if (this._flightCanvas && typeof this._flightCanvas.requestAnimationFrame === 'function') {
+          this._flightRafId = this._flightCanvas.requestAnimationFrame(step);
+        } else {
+          this._flightRafTimer = setTimeout(step, 16);
+        }
+      }
+    };
+
+    if (this._flightCtx) {
+      step();
+    } else {
+      this.initFlightCanvas(() => {
+        step();
+      });
+    }
+  },
+
+  stopFlightVfxLoop() {
+    this._flightStartTime = 0;
+    if (this._flightRafId && this._flightCanvas && typeof this._flightCanvas.cancelAnimationFrame === 'function') {
+      try { this._flightCanvas.cancelAnimationFrame(this._flightRafId); } catch (e) {}
+    }
+    this._flightRafId = null;
+    if (this._flightRafTimer) {
+      clearTimeout(this._flightRafTimer);
+      this._flightRafTimer = null;
+    }
+    if (this._flightCtx && this._flightCanvasW && this._flightCanvasH) {
+      try {
+        this._flightCtx.clearRect(0, 0, this._flightCanvasW, this._flightCanvasH);
+      } catch (e) {}
+    }
+  },
+
   onShow() {
+    this._isNavigatingToPack = false;
+    this._lastCigaretteTapTime = 0;
+    this._isPullingInProgress = false;
+    this._isNavigatingBack = false;
+    this._isNavigatingToVip = false;
+
     if (this._skipFirstShowRefresh) {
       this._skipFirstShowRefresh = false;
+      this.setData({
+        vipTheme: vipService.getVipTheme()
+      });
       return;
     }
     this.setData({
       isMuted: audioManager.isMuted(),
       isVipUser: vipService.isVip(),
+      vipTheme: vipService.getVipTheme(),
       enableSheen: false
     });
     this.refreshCatalogList();
@@ -168,14 +276,29 @@ Page({
     }, 3000);
   },
 
+  clearPullTimers() {
+    if (this._pullTimer1) { clearTimeout(this._pullTimer1); this._pullTimer1 = null; }
+    if (this._pullTimer2) { clearTimeout(this._pullTimer2); this._pullTimer2 = null; }
+    if (this._pullTimer3) { clearTimeout(this._pullTimer3); this._pullTimer3 = null; }
+    if (this._pullTimer4) { clearTimeout(this._pullTimer4); this._pullTimer4 = null; }
+    if (this._pullTimer5) { clearTimeout(this._pullTimer5); this._pullTimer5 = null; }
+    this.stopFlightVfxLoop();
+  },
+
   onHide() {
     if (this.sheenTimer) clearTimeout(this.sheenTimer);
+    this.clearPullTimers();
     this.setData({ enableSheen: false });
+    this._isNavigatingToPack = false;
+    this._isPullingInProgress = false;
   },
 
   onUnload() {
     if (this.sheenTimer) clearTimeout(this.sheenTimer);
+    this.clearPullTimers();
     this.setData({ enableSheen: false });
+    this._isNavigatingToPack = false;
+    this._isPullingInProgress = false;
   },
 
   measureSafeArea() {
@@ -237,7 +360,11 @@ Page({
     audioManager.unlockAudio();
     audioManager.playSwitchSound();
     triggerHaptic('medium');
-    this.setData({ viewMode: mode });
+    this.setData({ viewMode: mode }, () => {
+      if (mode === '3d_pack') {
+        this.initFlightCanvas();
+      }
+    });
   },
 
   toggleViewModeBtn() {
@@ -248,41 +375,63 @@ Page({
   // 初始化或切换当前展示的烟盒
   initCigarettePack(cig) {
     const capacity = cig.packCapacity || (cig.isCigar ? 5 : 20);
-    const count = storageService.getPackCount(cig.id, capacity);
+    const slotStates = storageService.getPackSlots(cig.id, capacity);
+    const count = slotStates.filter(Boolean).length;
     const records = storageService.getRecords();
     const totalSubs = records.length;
     const unlocked = isCigaretteUnlocked(cig.id, totalSubs);
     const currentSelectedId = storageService.getSelectedCigaretteId();
-    // 只有当前正在抽这支烟时，进入 3D 才默认打开盒盖；未抽这支烟时默认合上
-    const shouldOpenLid = cig.id === currentSelectedId;
+    // 只有当前正在抽的烟才默认打开烟盖，其他的烟默认闭合烟盖
+    const shouldOpenLid = Boolean(unlocked && (cig.id === currentSelectedId));
 
     const slotArray = [];
     for (let i = 0; i < capacity; i++) {
       slotArray.push(i);
     }
 
+    const flightStyles = computeFlightStyles(cig);
+
     this.setData({
       currentCigarette: cig,
       isCurrentUnlocked: unlocked,
+      packCapacity: capacity,
       packCount: count,
       slotArray,
+      slotStates,
+      flightStyles,
       isLidOpen: shouldOpenLid,
       isPulling: false,
       isFlightVisible: false,
+      isFlightActive: false,
       pulledSlotIndex: -1,
+      isSlotEjected: false,
+      slotOffsetX: 0,
+      vfxStageLabel: '01 [竖壳静置] · 轻触烟支唤起星河',
       showDrawnModal: false
     });
   },
 
   // 在货架上点击某个烟盒卡片：进入新的烟盒开盒页面 (仅做 3D 展台预览，若正在抽则默认开盖，否则合盖)
   onTapShelfPack(e) {
+    // 腾讯游戏防重规范：首触独占生效 (Leading-Edge Throttle Lock)
+    // 快速重复点击同一个烟或不同的烟时，只按第一下算数，其余快速点击全部静默丢弃
+    const now = Date.now();
+    if (this._isNavigatingToPack || (this._lastCigaretteTapTime && (now - this._lastCigaretteTapTime < 800))) {
+      return;
+    }
+    this._lastCigaretteTapTime = now;
+
     const item = e.currentTarget.dataset.item;
+    if (!item) return;
+
     audioManager.unlockAudio();
 
     if (!item.unlocked) {
       this.openUnlockDialog(item);
       return;
     }
+
+    this._isNavigatingToPack = true;
 
     const isCurrent = item.id === storageService.getSelectedCigaretteId();
     if (isCurrent) {
@@ -301,13 +450,28 @@ Page({
     }
 
     wx.navigateTo({
-      url: `/pages/pack/pack?id=${item.id}&from=shop`
+      url: `/pages/pack/pack?id=${item.id}&from=shop`,
+      fail: () => {
+        this._isNavigatingToPack = false;
+      },
+      complete: () => {
+        setTimeout(() => {
+          this._isNavigatingToPack = false;
+        }, 600);
+      }
     });
   },
 
   // 从货架卡片直接装配该烟
   onEquipFromShelf(e) {
+    const now = Date.now();
+    if (this._isNavigatingToPack || (this._lastCigaretteTapTime && (now - this._lastCigaretteTapTime < 800))) {
+      return;
+    }
+    this._lastCigaretteTapTime = now;
+
     const item = e.currentTarget.dataset.item;
+    if (!item) return;
     audioManager.unlockAudio();
 
     if (!item.unlocked) {
@@ -327,13 +491,22 @@ Page({
 
   // 从货架直接进入该烟的开盒页面
   onInspect3DFromShelf(e) {
+    const now = Date.now();
+    if (this._isNavigatingToPack || (this._lastCigaretteTapTime && (now - this._lastCigaretteTapTime < 800))) {
+      return;
+    }
+    this._lastCigaretteTapTime = now;
+
     const item = e.currentTarget.dataset.item;
+    if (!item) return;
     audioManager.unlockAudio();
 
     if (!item.unlocked) {
       this.openUnlockDialog(item);
       return;
     }
+
+    this._isNavigatingToPack = true;
 
     const isCurrent = item.id === storageService.getSelectedCigaretteId();
     if (isCurrent) {
@@ -352,7 +525,15 @@ Page({
     }
 
     wx.navigateTo({
-      url: `/pages/pack/pack?id=${item.id}&from=shop`
+      url: `/pages/pack/pack?id=${item.id}&from=shop`,
+      fail: () => {
+        this._isNavigatingToPack = false;
+      },
+      complete: () => {
+        setTimeout(() => {
+          this._isNavigatingToPack = false;
+        }, 600);
+      }
     });
   },
 
@@ -370,7 +551,7 @@ Page({
     this.setData({ isLidOpen: next });
   },
 
-  // 点击盒内某支烟直接抽取
+  // 点击盒内某支烟直接抽取（点到谁谁就出来，然后该位置空着）
   onTapCigaretteSlot(e) {
     const index = Number(e.currentTarget.dataset.index);
     if (!this.data.isCurrentUnlocked) {
@@ -378,18 +559,26 @@ Page({
       toast.warn(this.data.currentCigarette.unlockDesc);
       return;
     }
+    const curCig = this.data.currentCigarette;
+    const capacity = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
+
     if (this.data.packCount <= 0) {
-      const curCig = this.data.currentCigarette;
-      const capacity = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
       const count = storageService.resetPackCount(curCig.id, capacity);
-      this.setData({ packCount: count });
-      this.executePullCigarette(count - 1);
+      const freshSlots = storageService.getPackSlots(curCig.id, capacity);
+      this.setData({
+        packCount: count,
+        slotStates: freshSlots
+      });
+      this.executePullCigarette(index);
       return;
     }
-    if (index >= this.data.packCount) {
-      toast.info('这支已被抽走，轻触旁边的烟支');
+
+    if (Array.isArray(this.data.slotStates) && !this.data.slotStates[index]) {
+      triggerHaptic('light');
+      toast.info('该位置烟支已取出，请点选其他烟支');
       return;
     }
+
     this.executePullCigarette(index);
   },
 
@@ -400,19 +589,38 @@ Page({
       toast.warn(this.data.currentCigarette.unlockDesc);
       return;
     }
-    if (this.data.packCount <= 0) {
-      const curCig = this.data.currentCigarette;
-      const capacity = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
+    const curCig = this.data.currentCigarette;
+    const capacity = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
+    let slots = Array.isArray(this.data.slotStates) && this.data.slotStates.length === capacity
+      ? this.data.slotStates
+      : storageService.getPackSlots(curCig.id, capacity);
+
+    if (this.data.packCount <= 0 || !slots.some(Boolean)) {
       const count = storageService.resetPackCount(curCig.id, capacity);
-      this.setData({ packCount: count });
+      slots = storageService.getPackSlots(curCig.id, capacity);
+      this.setData({
+        packCount: count,
+        slotStates: slots
+      });
     }
-    const targetIndex = this.data.packCount - 1;
+
+    let targetIndex = -1;
+    for (let i = capacity - 1; i >= 0; i--) {
+      if (slots[i]) {
+        targetIndex = i;
+        break;
+      }
+    }
+    if (targetIndex === -1) targetIndex = 0;
     this.executePullCigarette(targetIndex);
   },
 
-  // 执行核心拟真抽烟动画
+  // 执行腾讯 CG / UE5 级 6 阶段星河 S 弧线抽烟觉醒演出，点到谁谁就出来，原位置留空
   executePullCigarette(slotIndex) {
+    if (this._isPullingInProgress || this.data.isPulling) return;
+    this._isPullingInProgress = true;
     audioManager.unlockAudio();
+    this.clearPullTimers();
 
     if (!this.data.isLidOpen) {
       audioManager.playPackOpenSound();
@@ -423,20 +631,82 @@ Page({
     triggerHaptic('heavy');
 
     const curCig = this.data.currentCigarette;
-    const remaining = storageService.decrementPackCount(curCig.id, curCig.packCapacity || 20);
+    const capacity = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
+    const { slots: updatedSlots, remaining, consumedIndex } = storageService.consumePackSlot(curCig.id, slotIndex, capacity);
+    const activeSlot = consumedIndex >= 0 ? consumedIndex : slotIndex;
+    const flightStyles = computeFlightStyles(curCig);
     storageService.setSelectedCigaretteId(curCig.id);
+    storageService.setHomeStickDigested(true);
 
+    this._pendingPackCount = remaining;
+    this._pendingSlotStates = updatedSlots;
+    this._canTapToConfirm = false;
+
+    const isCigar = !!curCig.isCigar;
+    const col = isCigar ? (activeSlot % 5) : (activeSlot % 10);
+    const rowShift = isCigar ? 0 : (activeSlot < 10 ? 4 : -4);
+    const slotOffsetX = isCigar
+      ? Math.round((col - 2) * 32)
+      : Math.round((col - 4.5) * 28 + rowShift);
+
+    // 阶段 02 [点击触发] (0.00s ~ 0.24s)
     this.setData({
       isPulling: true,
-      pulledSlotIndex: slotIndex,
+      pulledSlotIndex: activeSlot,
+      isSlotEjected: false,
+      slotOffsetX,
+      vfxStageLabel: '',
+      flightStyles,
       isFlightVisible: true,
-      packCount: remaining
+      isFlightActive: false
     });
 
-    setTimeout(() => {
-      // 0.8s 优雅飞升至顶点后，自动装配并丝滑返回首页点燃，零阻断无二次弹窗
-      this.onConfirmAndSmoke();
-    }, 850);
+    this.startFlightVfxLoop(slotOffsetX);
+
+    // 阶段 03 [拔升腾空] (0.24s ~ 0.58s)
+    this._pullTimer1 = setTimeout(() => {
+      this._canTapToConfirm = true;
+      triggerHaptic('medium');
+      this.setData({
+        isSlotEjected: true,
+        isFlightActive: true,
+        slotStates: updatedSlots,
+        packCount: remaining
+      });
+    }, 240);
+
+    // 阶段 04 [破空盘旋] (0.58s ~ 1.12s)
+    this._pullTimer2 = setTimeout(() => {
+      triggerHaptic('light');
+    }, 580);
+
+    // 阶段 05 [弧线放大] (1.12s ~ 1.48s)
+    this._pullTimer3 = setTimeout(() => {
+      triggerHaptic('medium');
+    }, 1120);
+
+    // 阶段 06 [屏幕呈现] (1.48s 起常驻定格，等待用户点击屏幕跳转)
+    this._pullTimer4 = setTimeout(() => {
+      triggerHaptic('heavy');
+      this.setData({
+        slotStates: updatedSlots,
+        packCount: remaining
+      });
+    }, 1480);
+  },
+
+  // 用户在名烟呈现界面点击屏幕任意位置后，才执行跳转回首页品吸
+  onTapAwakenOverlay() {
+    if (!this.data.isFlightVisible || !this._canTapToConfirm) return;
+    this._canTapToConfirm = false;
+    this.clearPullTimers();
+    if (typeof this._pendingPackCount === 'number') {
+      this.setData({
+        packCount: this._pendingPackCount,
+        slotStates: this._pendingSlotStates || this.data.slotStates
+      });
+    }
+    this.onConfirmAndSmoke();
   },
 
   // 拆封全新一盒 (复位20支)
@@ -444,17 +714,24 @@ Page({
     audioManager.unlockAudio();
     audioManager.playUnwrapSound();
     triggerHaptic('heavy');
+    this.clearPullTimers();
 
     const curCig = this.data.currentCigarette;
     const capacity = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
     const count = storageService.resetPackCount(curCig.id, capacity);
+    const slotStates = storageService.getPackSlots(curCig.id, capacity);
 
     this.setData({
+      packCapacity: capacity,
       packCount: count,
+      slotStates,
       isLidOpen: true,
       isPulling: false,
       isFlightVisible: false,
-      pulledSlotIndex: -1
+      isFlightActive: false,
+      pulledSlotIndex: -1,
+      isSlotEjected: false,
+      vfxStageLabel: '01 [竖壳静置] · 轻触烟支唤起星河'
     });
 
     toast.success(`拆封全新一盒【${curCig.name}】`);
@@ -464,25 +741,37 @@ Page({
 
   // 确认并携带这支烟返回主页品吸
   onConfirmAndSmoke() {
+    if (this._isNavigatingBack) return;
+    this._isNavigatingBack = true;
     audioManager.unlockAudio();
     audioManager.playSwitchSound();
     triggerHaptic('medium');
 
     storageService.setSelectedCigaretteId(this.data.currentCigarette.id);
+    storageService.setHomeStickDigested(true);
     try {
       wx.setStorageSync('SMOKEFREE_NEEDS_RESTART', true);
     } catch (e) {}
-    wx.navigateBack({
-      delta: 1
-    });
+    const pages = getCurrentPages();
+    const indexPageIndex = pages.findIndex(p => p.route === 'pages/index/index');
+    if (indexPageIndex !== -1) {
+      const delta = pages.length - 1 - indexPageIndex;
+      wx.navigateBack({ delta });
+    } else {
+      wx.reLaunch({ url: '/pages/index/index' });
+    }
   },
 
   closeDrawnModal() {
+    this._isPullingInProgress = false;
+    this.clearPullTimers();
     this.setData({
       showDrawnModal: false,
       isFlightVisible: false,
+      isFlightActive: false,
       isPulling: false,
-      pulledSlotIndex: -1
+      pulledSlotIndex: -1,
+      isSlotEjected: false
     });
   },
 
@@ -508,6 +797,7 @@ Page({
 
   // 开启双路径解锁决策弹窗 (Tencent Games Conversion Modal)
   openUnlockDialog(item) {
+    if (this.data.showUnlockDialog) return;
     audioManager.unlockAudio();
     audioManager.playSwitchSound();
     triggerHaptic('medium');
@@ -531,12 +821,16 @@ Page({
   closeUnlockDialog() {
     audioManager.playSwitchSound();
     triggerHaptic('light');
+    this._isNavigatingToPack = false;
+    this._lastCigaretteTapTime = 0;
     this.setData({
       showUnlockDialog: false
     });
   },
 
   onGoToVipFromDialog() {
+    if (this._isNavigatingToVip) return;
+    this._isNavigatingToVip = true;
     audioManager.unlockAudio();
     audioManager.playSwitchSound();
     triggerHaptic('medium');
@@ -544,11 +838,21 @@ Page({
       showUnlockDialog: false
     });
     wx.navigateTo({
-      url: '/pages/vip/vip'
+      url: '/pages/vip/vip',
+      fail: () => {
+        this._isNavigatingToVip = false;
+      },
+      complete: () => {
+        setTimeout(() => {
+          this._isNavigatingToVip = false;
+        }, 600);
+      }
     });
   },
 
   onTrialSmokeFromDialog() {
+    if (this._isNavigatingToPack) return;
+    this._isNavigatingToPack = true;
     audioManager.unlockAudio();
     audioManager.playSwitchSound();
     triggerHaptic('heavy');
@@ -556,6 +860,7 @@ Page({
     const cig = this.data.dialogCigarette;
     if (!cig) {
       this.setData({ showUnlockDialog: false });
+      this._isNavigatingToPack = false;
       return;
     }
 
@@ -571,16 +876,34 @@ Page({
 
     // 导航至 3D 深度开盒页面尝鲜抽取体验
     wx.navigateTo({
-      url: `/pages/pack/pack?id=${cig.id}&from=trial`
+      url: `/pages/pack/pack?id=${cig.id}&from=trial`,
+      fail: () => {
+        this._isNavigatingToPack = false;
+      },
+      complete: () => {
+        setTimeout(() => {
+          this._isNavigatingToPack = false;
+        }, 600);
+      }
     });
   },
 
   onTapVipBanner() {
+    if (this._isNavigatingToVip) return;
+    this._isNavigatingToVip = true;
     audioManager.unlockAudio();
     audioManager.playSwitchSound();
     triggerHaptic('light');
     wx.navigateTo({
-      url: '/pages/vip/vip'
+      url: '/pages/vip/vip',
+      fail: () => {
+        this._isNavigatingToVip = false;
+      },
+      complete: () => {
+        setTimeout(() => {
+          this._isNavigatingToVip = false;
+        }, 600);
+      }
     });
   },
 

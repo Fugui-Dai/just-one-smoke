@@ -73,20 +73,26 @@
       <view class="pricing-section">
         <view class="section-badge-bar">
           <text class="sb-dot"></text>
-          <text class="sb-title">精选会员方案</text>
-          <text class="sb-note">随时开通 · 立即生效</text>
+          <text class="sb-title">{{ vipInfo.isLifetime ? '我的终身特权方案' : '精选会员方案' }}</text>
+          <text class="sb-note">{{ vipInfo.isLifetime ? '至高规格 · 永久尊享' : '随时开通 · 立即生效' }}</text>
         </view>
 
         <view class="pricing-cards-row">
           
           <block wx:for="{{ tiers }}" wx:key="id">
             <view 
-              class="tier-card tier-card-{{ item.id }} {{ selectedTierId === item.id ? 'is-selected' : '' }} {{ item.highlight ? 'is-highlight' : '' }}"
+              class="tier-card tier-card-{{ item.id }} {{ selectedTierId === item.id ? 'is-selected' : '' }} {{ item.highlight ? 'is-highlight' : '' }} {{ (vipInfo.isLifetime && item.id !== 'lifetime') ? 'is-tier-included' : '' }} {{ (vipInfo.isLifetime && item.id === 'lifetime') ? 'is-lifetime-owned' : '' }}"
               bindtap="onSelectTier"
               data-id="{{ item.id }}"
             >
-              <!-- 推荐角标 -->
-              <view class="tier-tag-ribbon ribbon-{{ item.id }} {{ item.highlight ? 'ribbon-hot' : '' }}" wx:if="{{ item.badge }}">
+              <!-- 推荐角标 / 当前尊享 / 终身已含角标 -->
+              <view class="tier-tag-ribbon ribbon-lifetime ribbon-owned" wx:if="{{ vipInfo.isLifetime && item.id === 'lifetime' }}">
+                <text class="ribbon-text">👑 当前尊享</text>
+              </view>
+              <view class="tier-tag-ribbon ribbon-{{ item.id }} ribbon-included" wx:elif="{{ vipInfo.isLifetime && item.id !== 'lifetime' }}">
+                <text class="ribbon-text">终身已含</text>
+              </view>
+              <view class="tier-tag-ribbon ribbon-{{ item.id }} {{ item.highlight ? 'ribbon-hot' : '' }}" wx:elif="{{ item.badge }}">
                 <text class="ribbon-text">{{ item.badge }}</text>
               </view>
 
@@ -96,21 +102,32 @@
                 <text class="tier-period">{{ item.period }}</text>
               </view>
 
-              <!-- 价格主体 -->
-              <view class="tier-price-row">
+              <!-- 价格主体 (永久会员态下展示终身已含/永久尊享，未开通态展示价格) -->
+              <view class="tier-price-row" wx:if="{{ !vipInfo.isLifetime }}">
                 <text class="price-currency">¥</text>
                 <text class="price-integer">{{ item.price }}</text>
                 <text class="price-unit">{{ item.id === 'day' ? '/天' : (item.id === 'month' ? '/月' : '') }}</text>
               </view>
-
-              <!-- 折合日均 / 划算标签 -->
-              <view class="tier-daily-box">
-                <text class="daily-label" wx:if="{{ item.id !== 'lifetime' }}">低至 ¥{{ item.dailyCost }}/天</text>
-                <text class="daily-label gold" wx:else>{{ item.dailyCost }}</text>
+              <view class="tier-price-row tier-owned-price-row" wx:elif="{{ item.id === 'lifetime' }}">
+                <text class="price-owned-text">永久尊享</text>
+              </view>
+              <view class="tier-price-row tier-included-price-row tier-included-{{ item.id }}" wx:else>
+                <text class="price-included-text">终身已含</text>
               </view>
 
-              <!-- 原价对比划线 -->
-              <text class="tier-original-price">原价 ¥{{ item.originalPrice }}</text>
+              <!-- 折合日均 / 权益标签 -->
+              <view class="tier-daily-box">
+                <text class="daily-label" wx:if="{{ !vipInfo.isLifetime && item.id !== 'lifetime' }}">低至 ¥{{ item.dailyCost }}/天</text>
+                <text class="daily-label gold" wx:elif="{{ !vipInfo.isLifetime && item.id === 'lifetime' }}">{{ item.dailyCost }}</text>
+                <text class="daily-label gold" wx:elif="{{ vipInfo.isLifetime && item.id === 'lifetime' }}">终身永久有效</text>
+                <text class="daily-label included-label" wx:else>已享终身权益</text>
+              </view>
+
+              <!-- 原价对比划线 / 终身说明 -->
+              <text class="tier-original-price" wx:if="{{ !vipInfo.isLifetime }}">原价 ¥{{ item.originalPrice }}</text>
+              <text class="tier-original-price owned" wx:elif="{{ vipInfo.isLifetime && item.id === 'lifetime' }}">已永久解锁</text>
+              <text class="tier-original-price included" wx:elif="{{ item.id === 'day' }}">无需单独开通</text>
+              <text class="tier-original-price included" wx:else>无需按月续订</text>
 
               <!-- 选中标记圆圈 -->
               <view class="tier-select-circle {{ selectedTierId === item.id ? 'circle-active' : '' }}">
@@ -196,39 +213,67 @@
   <!-- ==================== 底部固定高规格收银台 (Tencent Sticky Checkout Bar) ==================== -->
   <view class="sticky-checkout-dock">
     
-    <!-- 协议勾选行 -->
-    <view class="agreement-row" bindtap="toggleAgreement">
-      <view class="custom-checkbox {{ isAgreed ? 'is-checked' : '' }}">
-        <text class="checkbox-tick" wx:if="{{ isAgreed }}">✓</text>
+    <!-- 协议勾选行 / 终身会员官方凭证 -->
+    <block wx:if="{{ vipInfo.isLifetime }}">
+      <view class="agreement-row agreement-lifetime-row">
+        <text class="lifetime-cert-badge">💎 官方认证</text>
+        <text class="agreement-lifetime-text">至尊终身特权已永久绑定 · 尊享全域无限权益</text>
       </view>
-      <view class="agreement-text">
-        <text class="agreement-prefix">我已阅读并同意</text>
-        <text class="agreement-link" catchtap="openProtocolModal">《VIP会员服务协议》</text>
+    </block>
+    <block wx:else>
+      <view class="agreement-row" bindtap="toggleAgreement">
+        <view class="custom-checkbox {{ isAgreed ? 'is-checked' : '' }}">
+          <text class="checkbox-tick" wx:if="{{ isAgreed }}">✓</text>
+        </view>
+        <view class="agreement-text">
+          <text class="agreement-prefix">我已阅读并同意</text>
+          <text class="agreement-link" catchtap="openProtocolModal">《VIP会员服务协议》</text>
+        </view>
       </view>
-    </view>
+    </block>
 
     <!-- 结算操作主栏 -->
     <view class="checkout-main-bar">
       
-      <!-- 左侧价格展示 -->
+      <!-- 左侧价格展示 / 终身尊贵状态 -->
       <view class="checkout-price-left">
-        <view class="cpl-amount-row">
-          <text class="cpl-label">应付</text>
-          <text class="cpl-sym">¥</text>
-          <text class="cpl-price">{{ selectedTier.price }}</text>
-          <text class="cpl-orig">¥{{ selectedTier.originalPrice }}</text>
-        </view>
-        <text class="cpl-tip">已选：{{ selectedTier.name }}（{{ selectedTier.shortDesc || selectedTier.desc }}）</text>
+        <block wx:if="{{ vipInfo.isLifetime }}">
+          <view class="cpl-amount-row">
+            <text class="cpl-lifetime-badge">👑 终身有效</text>
+            <text class="cpl-lifetime-status">全量特权生效中</text>
+          </view>
+          <text class="cpl-tip">已尊享：全域免广告 · 25款名烟全图鉴畅吸</text>
+        </block>
+        <block wx:else>
+          <view class="cpl-amount-row">
+            <text class="cpl-label">应付</text>
+            <text class="cpl-sym">¥</text>
+            <text class="cpl-price">{{ selectedTier.price }}</text>
+            <text class="cpl-orig">¥{{ selectedTier.originalPrice }}</text>
+          </view>
+          <text class="cpl-tip">已选：{{ selectedTier.name }}（{{ selectedTier.shortDesc || selectedTier.desc }}）</text>
+        </block>
       </view>
 
-      <!-- 右侧恒定高奢曜金开通按键 (定宽定高居右稳固，内嵌呼吸流光扫光) -->
-      <button 
-        class="checkout-cta-btn {{ !isAgreed ? 'btn-disabled' : '' }}" 
-        bindtap="onSubscribe"
-      >
-        <view class="btn-shine-sweep"></view>
-        <text class="btn-cta-text">立即开通</text>
-      </button>
+      <!-- 右侧恒定高奢曜金按键 (未开通显示立即开通，已是永久会员则显示去品吸名烟) -->
+      <block wx:if="{{ vipInfo.isLifetime }}">
+        <button 
+          class="checkout-cta-btn btn-lifetime-active" 
+          bindtap="onNavigateBack"
+        >
+          <view class="btn-shine-sweep"></view>
+          <text class="btn-cta-text">去品吸名烟 →</text>
+        </button>
+      </block>
+      <block wx:else>
+        <button 
+          class="checkout-cta-btn {{ !isAgreed ? 'btn-disabled' : '' }}" 
+          bindtap="onSubscribe"
+        >
+          <view class="btn-shine-sweep"></view>
+          <text class="btn-cta-text">立即开通</text>
+        </button>
+      </block>
 
     </view>
 

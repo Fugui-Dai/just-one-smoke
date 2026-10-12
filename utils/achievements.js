@@ -287,7 +287,7 @@ export const ACHIEVEMENTS = [
     conditionDesc: '体验或装配龙腾九天或凤舞九天',
     targetType: 'mythic_vfx',
     targetVal: 1,
-    check: (stats) => !!stats.hasSummonedMythic || (Array.isArray(stats.unlockedEffects) && (stats.unlockedEffects.includes('dragon_breath') || stats.unlockedEffects.includes('phoenix_nirvana')))
+    check: (stats) => !!stats.hasSummonedMythic || (Array.isArray(stats.unlockedEffects) && (stats.unlockedEffects.includes('dragon_breath') || stats.unlockedEffects.includes('phoenix_nirvana') || stats.unlockedEffects.includes('buddha_light') || stats.unlockedEffects.includes('bagua_taichi')))
   }
 ];
 

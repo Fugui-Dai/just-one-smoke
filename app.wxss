@@ -5,6 +5,9 @@ page {
   background-color: #080a0f;
   color: #f3f4f6;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  text-rendering: optimizeLegibility;
   box-sizing: border-box;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
@@ -40,4 +43,110 @@ button::after {
   transform: rotate(45deg);
   margin-left: 6rpx;
   box-sizing: border-box;
+}
+
+/* ==================== 腾讯游戏级 VIP 全局沉浸式光场主题 (Tencent VIP Ambient Mood Themes) ==================== */
+/* 1. 翡翠晨曦 (Emerald Dawn - 日卡专属清新治愈绿) */
+.app-container.vip-theme-day,
+.pack-page-container.vip-theme-day,
+.mine-page-container.vip-theme-day,
+.leaderboard-page-container.vip-theme-day {
+  background: radial-gradient(circle at 50% -12%, rgba(16, 185, 129, 0.28) 0%, rgba(5, 150, 105, 0.12) 35%, #051410 70%, #020b08 100%) !important;
+  transition: background 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* 2. 极光紫晶 (Cosmic Amethyst - 月卡专属深邃星云紫) */
+.app-container.vip-theme-month,
+.pack-page-container.vip-theme-month,
+.mine-page-container.vip-theme-month,
+.leaderboard-page-container.vip-theme-month {
+  background: radial-gradient(circle at 50% -12%, rgba(168, 85, 247, 0.28) 0%, rgba(124, 58, 237, 0.14) 35%, #10081d 70%, #07030e 100%) !important;
+  transition: background 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* 3. 曜世黑金 (Imperial Obsidian Gold - 终身卡专属帝王赤金) */
+.app-container.vip-theme-lifetime,
+.pack-page-container.vip-theme-lifetime,
+.mine-page-container.vip-theme-lifetime,
+.leaderboard-page-container.vip-theme-lifetime {
+  background: radial-gradient(circle at 50% -12%, rgba(251, 191, 36, 0.32) 0%, rgba(180, 83, 9, 0.16) 35%, #160e03 70%, #080501 100%) !important;
+  transition: background 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* ==================== VIP 沉浸式顶栏高定微光系统 (Tencent VIP Dynamic Navbar System) ==================== */
+
+/* 1. 翡翠晨曦 (Emerald Dawn - 日卡专属) */
+.vip-theme-day .custom-navbar {
+  background: rgba(4, 20, 16, 0.88) !important;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.28) !important;
+  box-shadow: 0 4rpx 24rpx rgba(16, 185, 129, 0.12) !important;
+}
+.vip-theme-day .nav-center-title-text,
+.vip-theme-day .nav-title-text {
+  background: linear-gradient(135deg, #a7f3d0 0%, #34d399 60%, #059669 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: 0 0 16rpx rgba(16, 185, 129, 0.40);
+  font-weight: 800;
+}
+.vip-theme-day .nav-back-btn {
+  background: rgba(16, 185, 129, 0.12) !important;
+  border-color: rgba(16, 185, 129, 0.30) !important;
+}
+.vip-theme-day .back-chevron-arrow {
+  border-left-color: #34d399 !important;
+  border-bottom-color: #34d399 !important;
+}
+
+/* 2. 极光紫晶 (Cosmic Amethyst - 月卡专属) */
+.vip-theme-month .custom-navbar {
+  background: rgba(16, 8, 29, 0.88) !important;
+  border-bottom: 1px solid rgba(168, 85, 247, 0.30) !important;
+  box-shadow: 0 4rpx 24rpx rgba(168, 85, 247, 0.14) !important;
+}
+.vip-theme-month .nav-center-title-text,
+.vip-theme-month .nav-title-text {
+  background: linear-gradient(135deg, #f5d0fe 0%, #c084fc 60%, #9333ea 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: 0 0 16rpx rgba(168, 85, 247, 0.45);
+  font-weight: 800;
+}
+.vip-theme-month .nav-back-btn {
+  background: rgba(168, 85, 247, 0.12) !important;
+  border-color: rgba(168, 85, 247, 0.30) !important;
+}
+.vip-theme-month .back-chevron-arrow {
+  border-left-color: #c084fc !important;
+  border-bottom-color: #c084fc !important;
+}
+
+/* 3. 曜世黑金 (Imperial Obsidian Gold - 终身卡专属) */
+.vip-theme-lifetime .custom-navbar {
+  background: rgba(22, 14, 3, 0.90) !important;
+  border-bottom: 1px solid rgba(251, 191, 36, 0.34) !important;
+  box-shadow: 0 4rpx 28rpx rgba(245, 158, 11, 0.16) !important;
+}
+.vip-theme-lifetime .nav-center-title-text,
+.vip-theme-lifetime .nav-title-text {
+  background: linear-gradient(135deg, #fef08a 0%, #fbbf24 55%, #d97706 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  text-shadow: 0 0 18rpx rgba(251, 191, 36, 0.50);
+  font-weight: 800;
+}
+.vip-theme-lifetime .nav-back-btn {
+  background: rgba(251, 191, 36, 0.14) !important;
+  border-color: rgba(251, 191, 36, 0.35) !important;
+}
+.vip-theme-lifetime .back-chevron-arrow {
+  border-left-color: #fbbf24 !important;
+  border-bottom-color: #fbbf24 !important;
+}
+
+/* 保持主页 index 3D 渲染画布全屏沉浸，顶栏保持纯透 */
+.app-container .custom-navbar {
+  background: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
 }

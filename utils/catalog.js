@@ -8,9 +8,16 @@ export const CIGARETTE_CATALOG = [
   // 1. [¥0] 纯净自然·终极空气卷 (无烟境界)
   {
     id: 'pure_oxygen_zen',
+    isAirCig: true,
+    lengthMm: 84,
+    filterMm: 25,
+    diameterMm: 7.7,
+    specDesc: '84mm 经典标准支 · 25mm纯净嘴',
     slogan: '告别焦油毒素，拥抱大自然纯净呼吸',
     name: '纯净自然·终极空气卷',
-    brand: 'Zen (无烟境界)',
+    brand: 'Zen 无烟境界',
+    stampText: '纯净自然',
+    filterBrandText: 'ZEN无烟境界',
     description: '告别一切焦油与尼古丁，拥抱大自然最纯净清冽的呼吸空气',
     filterColor: '#38bdf8',
     paperColor: '#ffffff',
@@ -44,10 +51,15 @@ export const CIGARETTE_CATALOG = [
   // 2. [¥2] 老辈·白纸手卷旱烟 (岁月记忆)
   {
     id: 'hand_rolled_hanyan',
+    lengthMm: 62,
+    filterMm: 14,
+    diameterMm: 5.5,
+    specDesc: '62mm 经典短款手卷 · 锐角圆锥尾 · 外溢金黄烟丝',
+    topDiameterMm: 12.0,
     slogan: '一捧黄烟丝，一张白纸卷，岁月生香',
     name: '老辈·白纸手卷旱烟',
     brand: '老辈手卷 (Hand-Rolled)',
-    description: '老一辈人亲手用薄白纸紧紧包卷的金黄碎烟丝，纯手搓经典喇叭筒，无工业过滤嘴，天然原叶本草本味，满载岁月情怀',
+    description: '90年代老一辈亲手用薄白纸紧紧搓卷的黄碎烟丝，短款经典大锥度喇叭筒，尾部圆锥尖锐扭卷咬嘴，火口自然蓬松外溢原叶烟丝，满载岁月记忆',
     filterColor: '#faf8f2', // 纯白纸卷端，无海绵滤嘴
     paperColor: '#faf8f2',  // 天然透光薄白纸
     bandColor: 'transparent',   // 无现代工业金圈
@@ -82,6 +94,10 @@ export const CIGARETTE_CATALOG = [
   // 3. [¥10] 白沙·软白经典
   {
     id: 'baisha_white',
+    lengthMm: 84,
+    filterMm: 25,
+    diameterMm: 7.7,
+    specDesc: '84mm 经典标准支 · 25mm白沙嘴',
     slogan: '鹤舞白沙，我心飞翔',
     name: '白沙·软白经典',
     brand: '白沙 (Baisha)',
@@ -120,6 +136,10 @@ export const CIGARETTE_CATALOG = [
   // 4. [¥11] 红塔山·经典1956
   {
     id: 'hongtashan_100',
+    lengthMm: 84,
+    filterMm: 25,
+    diameterMm: 7.7,
+    specDesc: '84mm 经典标准支 · 25mm经典黄嘴',
     slogan: '山高人为峰，红塔见英雄',
     name: '红塔山·经典1956',
     brand: '红塔山 (Hongtashan)',
@@ -158,6 +178,10 @@ export const CIGARETTE_CATALOG = [
   // 5. [¥11] 红双喜·经典软红
   {
     id: 'shuangxi_classic',
+    lengthMm: 84,
+    filterMm: 25,
+    diameterMm: 7.7,
+    specDesc: '84mm 经典标准支 · 25mm金黄嘴',
     slogan: '好事成双，红双喜临门',
     name: '红双喜·经典软红',
     brand: '红双喜 (Shuangxi)',
@@ -196,6 +220,10 @@ export const CIGARETTE_CATALOG = [
   // 6. [¥12] 中南海·经典8mg
   {
     id: 'zhongnanhai_8mg',
+    lengthMm: 84,
+    filterMm: 25,
+    diameterMm: 7.7,
+    specDesc: '84mm 经典标准支 · 25mm纯白滤嘴',
     slogan: '科技混合型低焦，清爽纯净回甘',
     name: '中南海·经典8mg',
     brand: '中南海 (Zhongnanhai)',
@@ -234,6 +262,10 @@ export const CIGARETTE_CATALOG = [
   // 7. [¥12] 南京·特醇红南京
   {
     id: 'nanjing_red',
+    lengthMm: 84,
+    filterMm: 25,
+    diameterMm: 7.7,
+    specDesc: '84mm 经典标准支 · 25mm红南京金嘴',
     slogan: '江南佳丽地，金陵帝王州',
     name: '南京·特醇经典 (红南京)',
     brand: '南京 (Nanjing)',
@@ -272,6 +304,10 @@ export const CIGARETTE_CATALOG = [
   // 8. [¥15] 朝天门·金樽经典
   {
     id: 'chaotianmen_gold',
+    lengthMm: 84,
+    filterMm: 25,
+    diameterMm: 7.7,
+    specDesc: '84mm 经典标准支 · 25mm金樽嘴',
     slogan: '巴渝两江汇，金樽朝天门',
     name: '朝天门·金樽经典',
     brand: '朝天门 (Chaotianmen)',
@@ -310,6 +346,10 @@ export const CIGARETTE_CATALOG = [
   // 9. [¥15] 南洋兄弟·红双喜 (港版经典)
   {
     id: 'nanyang_shuangxi',
+    lengthMm: 84,
+    filterMm: 25,
+    diameterMm: 7.7,
+    specDesc: '84mm 经典标准支 · 25mm港版金嘴',
     slogan: '南洋百年匠心，香港经典铁罐韵味',
     name: '南洋兄弟·红双喜 (港版)',
     brand: '南洋兄弟 (Nanyang)',
@@ -348,6 +388,10 @@ export const CIGARETTE_CATALOG = [
   // 10. [¥16] 利群·新版经典
   {
     id: 'liqun_classic',
+    lengthMm: 84,
+    filterMm: 25,
+    diameterMm: 7.7,
+    specDesc: '84mm 经典标准支 · 25mm利群琥珀嘴',
     slogan: '永远的利群，永远的醇香',
     name: '利群·新版经典',
     brand: '利群 (Liqun)',
@@ -386,6 +430,10 @@ export const CIGARETTE_CATALOG = [
   // 11. [¥18] 南京·炫赫门
   {
     id: 'xuanhemen_slender',
+    lengthMm: 97,
+    filterMm: 30,
+    diameterMm: 5.4,
+    specDesc: '97mm 优雅细支 · 30mm甜润长滤嘴',
     slogan: '抽烟只抽炫赫门，一生只爱一个人',
     name: '南京·炫赫门',
     brand: '南京 (Nanjing)',
@@ -398,8 +446,8 @@ export const CIGARETTE_CATALOG = [
     smokeColor: 'rgba(215, 240, 245, ',
     widthType: 'slender',
     hasBead: true,
-    beadName: '金陵甜润爆珠',
-    beadColor: '#38bdf8',
+    beadName: '金陵朱砂甜润爆珠',
+    beadColor: '#f43f5e',
     price: 18,
     packImage: '/images/packs/xuanhemen.png',
     requiredCount: 0,
@@ -427,6 +475,10 @@ export const CIGARETTE_CATALOG = [
   // 12. [¥19] 黄鹤楼·软蓝经典
   {
     id: 'huanghelou_ruanlan',
+    lengthMm: 84,
+    filterMm: 25,
+    diameterMm: 7.7,
+    specDesc: '84mm 经典标准支 · 25mm深蓝雅嘴',
     slogan: '昔人已乘黄鹤去，此地空余黄鹤楼',
     name: '黄鹤楼·软蓝经典',
     brand: '黄鹤楼 (Huanghelou)',
@@ -465,6 +517,10 @@ export const CIGARETTE_CATALOG = [
   // 13. [¥23] 玉溪·经典软玉溪
   {
     id: 'yuxi_soft',
+    lengthMm: 84,
+    filterMm: 25,
+    diameterMm: 7.7,
+    specDesc: '84mm 经典标准支 · 25mm清香金嘴',
     slogan: '上善若水，德行天下',
     name: '玉溪·经典软玉溪',
     brand: '玉溪 (Yuxi)',
@@ -503,6 +559,10 @@ export const CIGARETTE_CATALOG = [
   // 14. [¥23] 贵烟·跨越 (陈皮爆珠)
   {
     id: 'guiyan_kuayue',
+    lengthMm: 100,
+    filterMm: 32,
+    diameterMm: 5.4,
+    specDesc: '100mm 纤长细支 · 32mm陈皮爆珠长嘴',
     slogan: '一缕陈皮香，跨越黑夜与黎明',
     name: '贵烟·跨越 (陈皮爆珠)',
     brand: '贵烟 (Guiyan)',
@@ -516,7 +576,7 @@ export const CIGARETTE_CATALOG = [
     widthType: 'slender',
     hasBead: true,
     beadName: '十年新会陈皮爆珠',
-    beadColor: '#f59e0b',
+    beadColor: '#f97316',
     price: 23,
     packImage: '/images/packs/guiyan.png',
     requiredCount: 2,
@@ -544,6 +604,10 @@ export const CIGARETTE_CATALOG = [
   // 15. [¥25] 芙蓉王·硬黄经典
   {
     id: 'furongwang_gold',
+    lengthMm: 84,
+    filterMm: 25,
+    diameterMm: 7.7,
+    specDesc: '84mm 经典标准支 · 25mm王牌金嘴',
     slogan: '华夏名烟，王道之选',
     name: '芙蓉王·硬黄经典',
     brand: '芙蓉王 (Furongwang)',
@@ -582,11 +646,15 @@ export const CIGARETTE_CATALOG = [
   // 16. [¥26] 芙蓉王·硬细支
   {
     id: 'furongwang_slender',
+    lengthMm: 97,
+    filterMm: 30,
+    diameterMm: 5.4,
+    specDesc: '97mm 优雅细支 · 30mm金线长滤嘴',
     slogan: '王者风范，纤细生香',
     name: '芙蓉王·硬细支',
     brand: '芙蓉王 (Furongwang)',
     description: '芙蓉王王道气质与现代纤细优雅的融合，香槟金挺拔盒身，纯正香气丝滑细腻',
-    filterColor: '#eab308',
+    filterColor: '#d97706',
     paperColor: '#ffffff',
     bandColor: '#1e3a8a',
     stampText: '芙蓉王',
@@ -594,8 +662,8 @@ export const CIGARETTE_CATALOG = [
     smokeColor: 'rgba(230, 235, 245, ',
     widthType: 'slender',
     hasBead: true,
-    beadName: '本香金韵爆珠',
-    beadColor: '#fbbf24',
+    beadName: '皇家蓝晶本香爆珠',
+    beadColor: '#38bdf8',
     price: 26,
     packImage: '/images/packs/furongwang_slender.png',
     requiredCount: 2,
@@ -623,6 +691,10 @@ export const CIGARETTE_CATALOG = [
   // 17. [¥26] 利群·江南韵 (爆珠)
   {
     id: 'liqun_jiangnan',
+    lengthMm: 97,
+    filterMm: 30,
+    diameterMm: 5.4,
+    specDesc: '97mm 优雅细支 · 30mm桂花茶香长嘴',
     slogan: '烟雨江南，龙井茶香一缕清',
     name: '利群·江南韵 (茶香爆)',
     brand: '利群 (Liqun)',
@@ -664,6 +736,10 @@ export const CIGARETTE_CATALOG = [
   // 18. [¥28] 万宝路·深海冰蓝 (薄荷爆珠)
   {
     id: 'marlboro_ice',
+    lengthMm: 84,
+    filterMm: 25,
+    diameterMm: 7.7,
+    specDesc: '84mm 经典标准支 · 25mm极冰爆珠嘴',
     slogan: '极地深寒，双重极速冰川爆裂',
     name: '万宝路·深海冰蓝 (薄荷爆珠)',
     brand: '万宝路 (Marlboro)',
@@ -677,7 +753,7 @@ export const CIGARETTE_CATALOG = [
     widthType: 'standard',
     hasBead: true,
     beadName: '深海极地薄荷爆珠',
-    beadColor: '#06b6d4',
+    beadColor: '#38bdf8',
     price: 28,
     packImage: '/images/packs/marlboro.png',
     requiredCount: 4,
@@ -705,11 +781,15 @@ export const CIGARETTE_CATALOG = [
   // 19. [¥28] 七星·蓝莓双爆珠 (港免爆款)
   {
     id: 'mevius_blueberry',
+    lengthMm: 84,
+    filterMm: 25,
+    diameterMm: 7.7,
+    specDesc: '84mm 经典标准支 · 25mm纯白蓝莓双爆嘴',
     slogan: '深邃极光蓝，果香晶球双爆裂',
     name: '七星·蓝莓双爆珠 (港免)',
     brand: '七星 (Mevius)',
-    description: '港澳免税店超高人气爆款，深邃星光包装，融合深海薄荷与饱满蓝莓果香双晶球，击喉感清甜凛冽',
-    filterColor: '#1e1b4b',
+    description: '港澳免税店超高人气爆款，深邃星光包装，纯白滤嘴内嵌深海薄荷与饱满蓝莓果香双晶球，击喉感清甜凛冽',
+    filterColor: '#f1f5f9',
     paperColor: '#ffffff',
     bandColor: '#a855f7',
     stampText: 'OPTION',
@@ -746,6 +826,10 @@ export const CIGARETTE_CATALOG = [
   // 20. [¥30] 嘉士德·卡斯特 5 号 (港澳奶香)
   {
     id: 'castor_vanilla',
+    lengthMm: 84,
+    filterMm: 25,
+    diameterMm: 7.7,
+    specDesc: '84mm 经典标准支 · 25mm奶香香草嘴',
     slogan: '烘焙香草甜，温柔治愈港澳慢时光',
     name: '嘉士德·卡斯特 5 号',
     brand: '嘉士德 (Castor)',
@@ -784,6 +868,10 @@ export const CIGARETTE_CATALOG = [
   // 21. [¥32] 钻石·荷花经典
   {
     id: 'diamond_hehua',
+    lengthMm: 88,
+    filterMm: 28,
+    diameterMm: 6.4,
+    specDesc: '88mm 清雅中支 · 28mm复古青莲中支嘴',
     slogan: '一品青莲，出淤泥而不染',
     name: '钻石·荷花经典',
     brand: '荷花 (Hehua)',
@@ -794,7 +882,7 @@ export const CIGARETTE_CATALOG = [
     stampText: '荷花',
     filterBrandText: 'HEHUA',
     smokeColor: 'rgba(240, 253, 244, ',
-    widthType: 'standard',
+    widthType: 'medium',
     price: 32,
     packImage: '/images/packs/hehua.png',
     requiredCount: 2,
@@ -822,6 +910,10 @@ export const CIGARETTE_CATALOG = [
   // 22. [¥32] 黄山·红方印经典
   {
     id: 'huangshan_hongfangyin',
+    lengthMm: 84,
+    filterMm: 25,
+    diameterMm: 7.7,
+    specDesc: '84mm 经典标准支 · 25mm红方印金嘴',
     slogan: '一品黄山，天高云淡，乾隆红方印',
     name: '黄山·红方印经典',
     brand: '黄山 (Huangshan)',
@@ -860,6 +952,10 @@ export const CIGARETTE_CATALOG = [
   // 23. [¥45] 寿百年·黑俄先锋 (潮玩尊享)
   {
     id: 'sobranie_black',
+    lengthMm: 84,
+    filterMm: 25,
+    diameterMm: 7.7,
+    specDesc: '84mm 经典标准支 · 25mm全黑金俄嘴',
     slogan: '伦敦沙皇御用，极致暗黑奢华先锋',
     name: '寿百年·黑俄先锋',
     brand: '寿百年 (Sobranie)',
@@ -898,6 +994,10 @@ export const CIGARETTE_CATALOG = [
   // 24. [¥60] 宽窄·五粮浓香 (国酒爆珠)
   {
     id: 'kuanzhai_wuliang',
+    lengthMm: 84,
+    filterMm: 25,
+    diameterMm: 7.7,
+    specDesc: '84mm 经典标准支 · 25mm五粮酒香嘴',
     slogan: '方寸之间见宽窄，五粮浓香醉天下',
     name: '宽窄·五粮浓香 (国酒爆珠)',
     brand: '宽窄 (Kuanzhai)',
@@ -911,7 +1011,7 @@ export const CIGARETTE_CATALOG = [
     widthType: 'standard',
     hasBead: true,
     beadName: '五粮浓香国酒爆珠',
-    beadColor: '#f59e0b',
+    beadColor: '#ef4444',
     price: 60,
     packImage: '/images/packs/kuanzhai.png',
     requiredCount: 5,
@@ -939,6 +1039,10 @@ export const CIGARETTE_CATALOG = [
   // 25. [¥65] 软中华·经典国烟
   {
     id: 'chunghwa_soft',
+    lengthMm: 84,
+    filterMm: 25,
+    diameterMm: 7.7,
+    specDesc: '84mm 国烟经典标准支 · 25mm天安门红嘴',
     slogan: '爱我中华，国烟传世经典',
     name: '软中华·经典国烟',
     brand: '中华 (Chunghwa)',
@@ -974,9 +1078,105 @@ export const CIGARETTE_CATALOG = [
     }
   },
 
-  // 26. [¥89] 中华·双中支
+  // 26. [¥68] 牛来·电影香烟 (银幕金犊)
+  {
+    id: 'niulai_cinema',
+    lengthMm: 84,
+    filterMm: 25,
+    diameterMm: 7.7,
+    specDesc: '84mm 经典标准支 · 25mm胶片黑金嘴 · 光影琥珀放映爆珠',
+    slogan: '一卷光影人生，一声牛来乾坤',
+    name: '牛来·电影香烟',
+    brand: '牛来电影 (Niulai Cinema)',
+    description: '“一卷光影人生，一声牛来乾坤”。原创动画风萌金小牛手绘插画与35mm流金电影胶卷相映成趣，黑金流光滤嘴内置【光影琥珀放映爆珠】，带来影院级微距视觉与感官代偿',
+    filterColor: '#18181b', // 胶片深邃黑金滤嘴
+    paperColor: '#fffdf5',  // 象牙胶片温润白纸
+    bandColor: '#f59e0b',   // 电影放映金圈
+    stampText: '牛来',
+    stampColor: '#d97706',
+    filterBrandText: 'NIU LAI',
+    smokeColor: 'rgba(252, 245, 230, ',
+    widthType: 'standard',
+    hasBead: true,
+    beadName: '光影琥珀放映爆珠',
+    beadColor: '#f59e0b',
+    price: 68,
+    packImage: '/images/packs/niulai_cinema.png',
+    requiredCount: 0,
+    unlockDesc: '初始默认解锁 · 银幕牛来',
+    packCapacity: 20,
+    packType: 'standard',
+    lidLine: 168,
+    packTheme: {
+      boxGradient: 'linear-gradient(180deg, #201c18 0%, #0c0a0a 55%, #181410 100%)',
+      lidGradient: 'linear-gradient(180deg, #2a241e 0%, #1a1612 100%)',
+      foilColor: '#f59e0b',
+      logoText: '牛 来',
+      subText: 'NIULAI · 电影香烟 · 银幕金犊',
+      accentColor: '#fbbf24',
+      sealText: '牛来光影',
+      warningText: '胶片定格流金岁月 愿君熄灭烟火牛气冲天',
+      tar: '8mg',
+      nicotine: '0.8mg',
+      co: '8mg',
+      patternType: 'niulai_cinema',
+      sealColor: '#b45309'
+    }
+  },
+
+  // 27. [¥88] 迪加·凹凸曼 (动画光之巨人)
+  {
+    id: 'ultraman_tiga',
+    lengthMm: 84,
+    filterMm: 25,
+    diameterMm: 7.7,
+    specDesc: '84mm 光之标准支 · 25mm复合紫金能量嘴 · 奇迹光粒子爆珠',
+    slogan: '那一年，我们都曾变成光',
+    name: '迪加·凹凸曼',
+    brand: '光之星云 (Diga Aotuman)',
+    description: '“那一年，我们都曾变成光”。原创动画手绘风【迪加·凹凸曼】光之英雄徽章，经典红紫银三色复合装甲配黄金V型胸甲与冰蓝能量灯，捏破【奇迹光粒子爆珠】，唤醒心底不灭的光芒',
+    filterColor: '#3b0764', // 复合紫装甲滤嘴
+    paperColor: '#f8fafc',  // 钛银高光卷纸
+    bandColor: '#fbbf24',   // 胸甲V型黄金护甲金圈
+    stampText: '迪加凹凸曼',
+    stampColor: '#0284c7',
+    filterBrandText: 'DIGA',
+    smokeColor: 'rgba(224, 242, 254, ',
+    widthType: 'standard',
+    hasBead: true,
+    beadName: '奇迹光粒子爆珠',
+    beadColor: '#38bdf8',
+    price: 88,
+    packImage: '/images/packs/ultraman_tiga.png',
+    requiredCount: 0,
+    unlockDesc: '初始默认解锁 · 化身为光',
+    packCapacity: 20,
+    packType: 'standard',
+    lidLine: 168,
+    packTheme: {
+      boxGradient: 'linear-gradient(180deg, #1e1040 0%, #3b0764 48%, #7f1d1d 100%)',
+      lidGradient: 'linear-gradient(180deg, #2e1065 0%, #1e1040 100%)',
+      foilColor: '#38bdf8',
+      logoText: '迪加·凹凸曼',
+      subText: 'DIGA AOTUMAN · 动画光之巨人',
+      accentColor: '#38bdf8',
+      sealText: '化身为光',
+      warningText: '相信光的人终将化身为光 愿君远离烟霾守护心底光芒',
+      tar: '7mg',
+      nicotine: '0.7mg',
+      co: '7mg',
+      patternType: 'ultraman_tiga',
+      sealColor: '#0284c7'
+    }
+  },
+
+  // 28. [¥89] 中华·双中支
   {
     id: 'chunghwa_double',
+    lengthMm: 89,
+    filterMm: 28,
+    diameterMm: 6.4,
+    specDesc: '89mm 尊荣中支 · 28mm双中支金红嘴',
     slogan: '双中支典范，经典中国红',
     name: '中华·双中支',
     brand: '中华 (Chunghwa)',
@@ -987,10 +1187,10 @@ export const CIGARETTE_CATALOG = [
     stampText: '中華',
     filterBrandText: 'CHUNGHWA',
     smokeColor: 'rgba(235, 225, 215, ',
-    widthType: 'slender',
+    widthType: 'medium',
     hasBead: true,
-    beadName: '国梅幽香爆珠',
-    beadColor: '#f43f5e',
+    beadName: '国梅鎏金爆珠',
+    beadColor: '#fbbf24',
     price: 89,
     packImage: '/images/packs/chunghwa_double.png',
     requiredCount: 10,
@@ -1015,9 +1215,59 @@ export const CIGARETTE_CATALOG = [
     }
   },
 
-  // 27. [¥100] 黄鹤楼·1916
+  // 29. [¥99] 倾城一笑·开心果 (女友特供·表情包典藏)
+  {
+    id: 'gf_happy_smile',
+    lengthMm: 84,
+    filterMm: 25,
+    diameterMm: 7.7,
+    specDesc: '84mm 宠爱标准支 · 25mm皇家绯红金嘴 · 蜜桃甜心爆珠',
+    slogan: '一笑倾城百媚生，少抽香烟多宠她',
+    name: '倾城一笑·开心果',
+    brand: '欢喜冤家 (Sweetheart)',
+    description: '“一笑倾城百媚生，少抽香烟多宠她”。皇家丝绒绯红鎏金礼盒镶嵌女友可爱灵动表情包特写，捏破【蜜桃甜心爆珠】，烦恼与烟瘾瞬间烟消云散',
+    filterColor: '#9f1239', // 皇家丝绒玫瑰红滤嘴
+    paperColor: '#fffdf5',  // 象牙温润卷纸
+    bandColor: '#fbbf24',   // 皇家金箍圈
+    stampText: '倾城一笑',
+    stampColor: '#e11d48',
+    filterBrandText: 'SWEET',
+    smokeColor: 'rgba(255, 228, 230, ',
+    widthType: 'standard',
+    hasBead: true,
+    beadName: '蜜桃甜心爆珠',
+    beadColor: '#fb7185',
+    price: 99,
+    packImage: '/images/packs/gf_happy_smile.png',
+    requiredCount: 0,
+    unlockDesc: '初始默认解锁 · 专属开心果',
+    packCapacity: 20,
+    packType: 'standard',
+    lidLine: 168,
+    packTheme: {
+      boxGradient: 'linear-gradient(180deg, #881337 0%, #4c0519 100%)',
+      lidGradient: 'linear-gradient(180deg, #9f1239 0%, #881337 100%)',
+      foilColor: '#fbbf24',
+      logoText: '倾城一笑',
+      subText: 'SWEETHEART · 专属开心果',
+      accentColor: '#fb7185',
+      sealText: '欢喜冤家',
+      warningText: '看一眼开心果表情包 烦恼烟瘾统统消散',
+      tar: '6mg',
+      nicotine: '0.6mg',
+      co: '6mg',
+      patternType: 'gf_happy_smile',
+      sealColor: '#e11d48'
+    }
+  },
+
+  // 30. [¥100] 黄鹤楼·1916
   {
     id: 'huanghelou_1916',
+    lengthMm: 74,
+    filterMm: 30,
+    diameterMm: 7.7,
+    specDesc: '74mm 传世短支 · 30mm高比例奢华长嘴',
     slogan: '千古江山，千年名楼，传世1916',
     name: '黄鹤楼·1916',
     brand: '黄鹤楼 (Huanghelou)',
@@ -1028,7 +1278,7 @@ export const CIGARETTE_CATALOG = [
     stampText: '1916',
     filterBrandText: 'VINTAGE',
     smokeColor: 'rgba(240, 235, 220, ',
-    widthType: 'standard',
+    widthType: 'short',
     price: 100,
     packImage: '/images/packs/hhl1916.png',
     requiredCount: 15,
@@ -1053,9 +1303,13 @@ export const CIGARETTE_CATALOG = [
     }
   },
 
-  // 28. [¥100] 白沙·和天下
+  // 31. [¥100] 白沙·和天下
   {
     id: 'baisha_hetianxia',
+    lengthMm: 84,
+    filterMm: 25,
+    diameterMm: 7.7,
+    specDesc: '84mm 极品国烤 · 25mm和天下紫金嘴',
     slogan: '和达天下，和者无界，润泽万物',
     name: '白沙·和天下',
     brand: '白沙 (Baisha)',
@@ -1091,9 +1345,59 @@ export const CIGARETTE_CATALOG = [
     }
   },
 
-  // 29. [¥680] 高希霸·世纪六号 (古巴雪茄)
+  // 32. [¥520] 心动女神·白月光 (女友高定·一生挚爱)
+  {
+    id: 'gf_moonlight_muse',
+    lengthMm: 97,
+    filterMm: 30,
+    diameterMm: 5.4,
+    specDesc: '97mm 仙女修长细支 · 30mm珠光玫瑰嘴 · 初恋玫瑰爆珠',
+    slogan: '抽烟只抽心动女神，一生只宠一个人',
+    name: '心动女神·白月光',
+    brand: '一生挚爱 (Moonlight Muse)',
+    description: '“抽烟只抽心动女神，一生只宠一个人”。珠光月白配香槟玫瑰金520限定礼盒，典藏甜美女神全身写真立绘，捏破【初恋玫瑰爆珠】，满口皆是心动回甘',
+    filterColor: '#db2777', // 玫瑰甜心粉红滤嘴
+    paperColor: '#fffdf5',  // 珠光纯白细支卷纸
+    bandColor: '#fbbf24',   // 香槟玫瑰金箍圈
+    stampText: '心动女神',
+    stampColor: '#db2777',
+    filterBrandText: 'LOVE 520',
+    smokeColor: 'rgba(252, 231, 243, ',
+    widthType: 'slender',
+    hasBead: true,
+    beadName: '初恋玫瑰爆珠',
+    beadColor: '#f472b6',
+    price: 520,
+    packImage: '/images/packs/gf_moonlight_muse.png',
+    requiredCount: 0,
+    unlockDesc: '初始默认解锁 · 520限定挚爱',
+    packCapacity: 20,
+    packType: 'slender',
+    lidLine: 168,
+    packTheme: {
+      boxGradient: 'linear-gradient(180deg, #fffafc 0%, #fce7f3 100%)',
+      lidGradient: 'linear-gradient(180deg, #ffffff 0%, #fdf2f8 100%)',
+      foilColor: '#f472b6',
+      logoText: '心动女神',
+      subText: 'MOONLIGHT · 独家白月光',
+      accentColor: '#ec4899',
+      sealText: '一生挚爱',
+      warningText: '仙女颜值超标 戒烟省钱宠女神',
+      tar: '5mg',
+      nicotine: '0.5mg',
+      co: '5mg',
+      patternType: 'gf_moonlight_muse',
+      sealColor: '#db2777'
+    }
+  },
+
+  // 33. [¥680] 高希霸·世纪六号 (古巴雪茄)
   {
     id: 'cohiba_siglo_vi',
+    lengthMm: 150,
+    filterMm: 28,
+    diameterMm: 20.6,
+    specDesc: '150mm 古巴大号雪茄 · 52环径全叶裹身',
     slogan: '哈瓦那雪茄之王，时间的慢享艺术',
     name: '高希霸·世纪六号 (古巴雪茄)',
     brand: 'Cohiba (高希霸)',
@@ -1164,3 +1468,105 @@ export function isCigaretteUnlocked(id, totalCount) {
   }
   return count >= item.requiredCount;
 }
+
+
+/**
+ * 核心微距真实物理尺寸映射引擎 (毫米 mm 映射到 Canvas 像素与 UI 比例)
+ */
+export function computeCigaretteDimensions(cig, canvasH) {
+  const item = cig || {};
+  const lenMm = item.lengthMm || 84;
+  const fltMm = item.filterMm || 25;
+  const diaMm = item.diameterMm || 7.7;
+  const topDiaMm = item.topDiameterMm || diaMm;
+
+  let calculatedH = lenMm * 4.226;
+  if (canvasH && typeof canvasH === "number") {
+    calculatedH = Math.min(calculatedH, canvasH * 0.58);
+  }
+
+  if (item.isCigar || item.widthType === "cigar") {
+    calculatedH = canvasH ? Math.min(345, canvasH * 0.51) : 345;
+  }
+
+  let cigW = 28;
+  let topW = 28;
+
+  if (item.isCigar || item.widthType === "cigar") {
+    cigW = 42;
+    topW = 42;
+  } else if (item.widthType === "hand_rolled") {
+    cigW = 16;
+    topW = 34;
+  } else if (item.widthType === "slender") {
+    cigW = 20;
+    topW = 20;
+  } else if (item.widthType === "medium" || diaMm <= 6.5) {
+    cigW = 24;
+    topW = 24;
+  } else if (item.widthType === "short") {
+    cigW = 28;
+    topW = 28;
+  }
+
+  const filterRatio = Math.max(0.08, Math.min(0.55, fltMm / lenMm));
+
+  return {
+    maxCigH: Math.round(calculatedH),
+    cigW,
+    topW,
+    filterRatio,
+    filterMm: fltMm,
+    lengthMm: lenMm,
+    diameterMm: diaMm
+  };
+}
+
+
+/**
+ * 计算抽出飞升动画的物理微缩样式 (UI rpx)
+ */
+export function computeFlightStyles(cig) {
+  const item = cig || {};
+  const lenMm = item.lengthMm || 84;
+  const fltMm = item.filterMm || 25;
+
+  let flightW = 26;
+  let heroW = 38;
+  if (item.isCigar || item.widthType === "cigar") {
+    flightW = 40;
+    heroW = 54;
+  } else if (item.widthType === "slender") {
+    flightW = 18;
+    heroW = 28;
+  } else if (item.widthType === "medium") {
+    flightW = 22;
+    heroW = 34;
+  } else if (item.widthType === "hand_rolled") {
+    flightW = 32;
+    heroW = 46;
+  }
+
+  let flightH = Math.round((lenMm / 84) * 380);
+  let heroH = Math.round((lenMm / 84) * 410);
+  if (item.isCigar || item.widthType === "cigar") {
+    flightH = 370;
+    heroH = 420;
+  } else if (item.widthType === "hand_rolled") {
+    heroH = 340;
+  }
+
+  const filterRatio = Math.max(0.1, Math.min(0.55, fltMm / lenMm));
+  const filterH = Math.round(flightH * filterRatio);
+  const heroFilterH = Math.round(heroH * filterRatio);
+
+  return {
+    flightW,
+    flightH,
+    filterH,
+    heroW,
+    heroH,
+    heroFilterH
+  };
+}
+

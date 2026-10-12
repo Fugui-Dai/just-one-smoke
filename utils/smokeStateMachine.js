@@ -83,23 +83,45 @@ export class SmokeStateMachine {
     return false;
   }
 
-  burn(deltaSec, isInhaling, isCigar = false) {
+  burn(deltaSec, isInhaling, cig = null) {
     if (this.state === 'UNLIT' || this.state === 'FINISHED') return { ashDropped: false };
 
     const dt = (typeof deltaSec === 'number' && !isNaN(deltaSec) && deltaSec > 0) ? deltaSec : 0.016;
 
-    // 吸烟时消耗速率加快（约 16-18 秒深吸燃尽）；不吸烟时极慢自然阴燃（普通烟约 5.5 分钟燃尽，雪茄约 9.2 分钟）
-    let burnRate;
+    // 适配入参兼容布尔值 isCigar 或香烟对象 cig
+    const isCigar = typeof cig === 'boolean' ? cig : !!(cig && (cig.isCigar || cig.widthType === 'cigar'));
+    const curCig = typeof cig === 'object' && cig ? cig : null;
+
+    // 烟支可燃烟丝物理净长度 (mm) = 总长度 - 过滤嘴长度
+    // 行业黄金基准：标准 84mm 烤烟 (84mm - 25mm = 59mm 烟丝段)
+    const lenMm = (curCig && curCig.lengthMm) ? curCig.lengthMm : (isCigar ? 150 : 84);
+    const fltMm = (curCig && curCig.filterMm) ? curCig.filterMm : (isCigar ? 28 : 25);
+    const tobaccoMm = Math.max(20, lenMm - fltMm);
+
+    // 烟丝长度决定抽烟时间：烟丝越长，每秒燃烧消耗的进度百分比越小（抽得越久）；短支则抽得更快
+    // 长度比例尺因子：标准 59mm 烟丝因子为 1.0
+    const durationScale = tobaccoMm / 59;
+
+    // 吸烟时消耗速率（标准烟约 17 秒深吸燃尽）；不吸烟时极慢自然阴燃（标准烟约 5.5 分钟燃尽，雪茄约 11 分钟）
+    let baseBurnRate;
     if (isInhaling) {
-      burnRate = isCigar ? 0.045 : 0.060;
+      baseBurnRate = isCigar ? 0.045 : 0.060;
     } else {
-      burnRate = isCigar ? 0.0018 : 0.0030;
+      baseBurnRate = isCigar ? 0.0018 : 0.0030;
     }
+
+    // 最小最优物理公式：burnRate = baseBurnRate / durationScale
+    const burnRate = baseBurnRate / durationScale;
     this.cigaretteProgress = Math.max(0, this.cigaretteProgress - burnRate * dt);
 
     // 烟灰不自动掉落，始终保留并累积，等于自上次抖灰以来的燃烧消耗量
     // 一整根烟整体的灰刚好就是一整个圆圈 (1.0)
-    this.ashRatio = Math.min(1.0, Math.max(0, this.lastTapProgress - this.cigaretteProgress));
+    const isAirCig = !!(cig && (cig.id === 'pure_oxygen_zen' || cig.isAirCig));
+    if (isAirCig) {
+      this.ashRatio = 0.0;
+    } else {
+      this.ashRatio = Math.min(1.0, Math.max(0, this.lastTapProgress - this.cigaretteProgress));
+    }
 
     if (isNaN(this.cigaretteProgress)) {
       this.cigaretteProgress = 1.0;

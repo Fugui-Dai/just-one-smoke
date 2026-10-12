@@ -1,5 +1,5 @@
 <!-- pages/leaderboard/leaderboard.wxml -->
-<view class="leaderboard-page-container">
+<view class="leaderboard-page-container {{ vipTheme ? 'vip-theme-' + vipTheme : '' }}">
 
   <!-- ==================== 顶部统一导航栏 (安全避让微信原生胶囊按钮) ==================== -->
   <view class="custom-navbar" style="padding-top: {{ statusBarHeight }}px; height: {{ statusBarHeight + navBarHeight }}px;">

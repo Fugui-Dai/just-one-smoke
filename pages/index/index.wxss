@@ -2993,6 +2993,7 @@ button.dock-btn-wrap.share-dock-item::after {
 }
 
 .effects-cards-scroll {
+  height: 58vh;
   max-height: 58vh;
   overflow-y: auto;
   margin-bottom: 16rpx;
@@ -3017,9 +3018,10 @@ button.dock-btn-wrap.share-dock-item::after {
 }
 
 .effect-card.active-effect-card {
-  background: rgba(245, 158, 11, 0.12);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.18) 0%, rgba(217, 119, 6, 0.08) 100%);
   border-color: #f59e0b;
-  box-shadow: 0 0 20rpx rgba(245, 158, 11, 0.25);
+  box-shadow: 0 0 24rpx rgba(245, 158, 11, 0.35), inset 0 0 12rpx rgba(245, 158, 11, 0.15);
+  transform: scale(1.01);
 }
 
 .effect-card.locked-effect-card {

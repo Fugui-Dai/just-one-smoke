@@ -1010,8 +1010,445 @@ def gen_hand_rolled_hanyan():
     )
     save_pack(im, "hand_rolled_hanyan.png")
 
+def draw_niulai_cartoon_vector(draw, cx, cy):
+    """绘制 80% 相似度 2D 动画版【牛来】萌金小牛矢量插画（与全馆烟盒统一手绘矢量风，合规不侵权）"""
+    gold_light = (254, 240, 138, 255)
+    amber_main = (245, 158, 11, 255)
+    amber_mid = (217, 119, 6, 255)
+    amber_dark = (180, 83, 9, 255)
+    brown_line = (69, 26, 3, 255)
+
+    # 0. 背部暗金光影圆盘底座 (实色高对比，避免256色量化色斑)
+    draw.ellipse((cx - 88, cy - 82, cx + 88, cy + 74), fill=(38, 28, 18, 255), outline=amber_mid, width=2)
+    draw.ellipse((cx - 78, cy - 72, cx + 78, cy + 64), outline=(254, 240, 138, 160), width=1)
+
+    # 1. 背景 35mm 电影双胶卷光环 (Cinema Dual Film Reels)
+    for rx_off in [-84, 84]:
+        rcx, rcy = cx + rx_off, cy - 16
+        draw.ellipse((rcx - 36, rcy - 36, rcx + 36, rcy + 36), fill=(20, 16, 12, 255), outline=gold_light, width=2)
+        draw.ellipse((rcx - 10, rcy - 10, rcx + 10, rcy + 10), fill=amber_main)
+        for deg in range(0, 360, 60):
+            rad = math.radians(deg)
+            hx = rcx + 22 * math.cos(rad)
+            hy = rcy + 22 * math.sin(rad)
+            draw.ellipse((hx - 5, hy - 5, hx + 5, hy + 5), fill=gold_light)
+
+    # 2. 动画版小牛身体与红金电影披风肚兜 (Cartoon Red Scarf & Gold Bell)
+    draw.polygon([
+        (cx - 52, cy + 68),
+        (cx - 36, cy + 26),
+        (cx + 36, cy + 26),
+        (cx + 52, cy + 68)
+    ], fill=(220, 38, 38, 255), outline=gold_light, width=2)
+    # 披风金边领口
+    draw.line([(cx - 36, cy + 30), (cx, cy + 42), (cx + 36, cy + 30)], fill=gold_light, width=3)
+    # 胸前小金铃铛
+    draw.ellipse((cx - 12, cy + 36, cx + 12, cy + 60), fill=gold_light, outline=brown_line, width=2)
+    draw.line([(cx - 7, cy + 50), (cx + 7, cy + 50)], fill=brown_line, width=2)
+    draw.ellipse((cx - 3, cy + 49, cx + 3, cy + 55), fill=brown_line)
+
+    # 3. 动画版萌牛双耳 (Cute Cartoon Calf Ears)
+    draw.polygon([(cx - 46, cy - 16), (cx - 88, cy - 28), (cx - 76, cy - 2), (cx - 44, cy - 2)], fill=amber_main, outline=brown_line, width=2)
+    draw.polygon([(cx - 50, cy - 13), (cx - 76, cy - 21), (cx - 70, cy - 6)], fill=(253, 186, 116, 255))
+    draw.polygon([(cx + 46, cy - 16), (cx + 88, cy - 28), (cx + 76, cy - 2), (cx + 44, cy - 2)], fill=amber_main, outline=brown_line, width=2)
+    draw.polygon([(cx + 50, cy - 13), (cx + 76, cy - 21), (cx + 70, cy - 6)], fill=(253, 186, 116, 255))
+
+    # 4. 动画版圆润新月小金角 (80% 相似度萌系弯角)
+    left_horn = [
+        (cx - 26, cy - 42),
+        (cx - 48, cy - 66),
+        (cx - 40, cy - 92),
+        (cx - 26, cy - 86),
+        (cx - 28, cy - 64),
+        (cx - 14, cy - 46)
+    ]
+    right_horn = [
+        (cx + 26, cy - 42),
+        (cx + 48, cy - 66),
+        (cx + 40, cy - 92),
+        (cx + 26, cy - 86),
+        (cx + 28, cy - 64),
+        (cx + 14, cy - 46)
+    ]
+    draw.polygon(left_horn, fill=gold_light, outline=brown_line, width=2)
+    draw.polygon(right_horn, fill=gold_light, outline=brown_line, width=2)
+
+    # 5. 动画版小金牛圆润脸庞 (Cute Golden Calf Head)
+    draw.rounded_rectangle((cx - 48, cy - 48, cx + 48, cy + 36), radius=34, fill=amber_main, outline=brown_line, width=3)
+    # 额头呆毛金毛簇 (Fluffy Forehead Tuft)
+    draw.polygon([
+        (cx - 16, cy - 44),
+        (cx - 6, cy - 60),
+        (cx, cy - 48),
+        (cx + 8, cy - 62),
+        (cx + 16, cy - 44)
+    ], fill=gold_light, outline=brown_line, width=2)
+
+    # 6. 灵动卡通大眼睛与红润脸颊 (Big Expressive Anime Eyes & Blush)
+    for ex in [cx - 21, cx + 21]:
+        ey = cy - 13
+        draw.ellipse((ex - 12, ey - 14, ex + 12, ey + 14), fill=(255, 255, 255, 255), outline=brown_line, width=2)
+        draw.ellipse((ex - 8, ey - 10, ex + 8, ey + 10), fill=(28, 25, 23, 255))
+        draw.ellipse((ex - 5, ey - 7, ex + 1, ey - 1), fill=(255, 255, 255, 255))
+        draw.ellipse((ex + 2, ey + 2, ex + 5, ey + 5), fill=gold_light)
+    # 腮红
+    draw.ellipse((cx - 40, cy - 2, cx - 28, cy + 6), fill=(239, 68, 68, 255))
+    draw.ellipse((cx + 28, cy - 2, cx + 40, cy + 6), fill=(239, 68, 68, 255))
+    # 精神小眉毛
+    draw.arc((cx - 34, cy - 35, cx - 8, cy - 21), start=200, end=340, fill=brown_line, width=3)
+    draw.arc((cx + 8, cy - 35, cx + 34, cy - 21), start=200, end=340, fill=brown_line, width=3)
+
+    # 7. 奶黄圆润鼻吻与开心笑容 (Cream Snout & Happy Smile)
+    draw.rounded_rectangle((cx - 32, cy + 2, cx + 32, cy + 38), radius=18, fill=(254, 243, 199, 255), outline=brown_line, width=2)
+    draw.ellipse((cx - 14, cy + 10, cx - 7, cy + 16), fill=brown_line)
+    draw.ellipse((cx + 7, cy + 10, cx + 14, cy + 16), fill=brown_line)
+    draw.arc((cx - 12, cy + 16, cx + 12, cy + 32), start=15, end=165, fill=(220, 38, 38, 255), width=3)
+
+
+def gen_niulai_cinema():
+    """生成原创非侵权【牛来·电影香烟】立面（统一手绘矢量动画风，80%相似度卡通金牛）"""
+    im = create_base((30, 24, 18), (16, 12, 10))
+    draw = ImageDraw.Draw(im)
+    add_crease_and_seal(im, (217, 119, 6, 240), "牛来光影")
+
+    cx, cy = W // 2, 556
+    # 与其他烟壳完全一致的徽章大画框 (底部留出充足边距，绝不触碰下方警示线)
+    draw_badge_frame(draw, cy, 430, 412, (24, 20, 16, 255), (245, 158, 11, 240))
+
+    # 框内两侧 35mm 胶片齿孔装饰条
+    for sy in range(cy - 182, cy + 165, 36):
+        draw.rounded_rectangle((cx - 198, sy, cx - 180, sy + 22), radius=3, fill=(10, 8, 6, 255), outline=(245, 158, 11, 180), width=1)
+        draw.rounded_rectangle((cx + 180, sy, cx + 198, sy + 22), radius=3, fill=(10, 8, 6, 255), outline=(245, 158, 11, 180), width=1)
+
+    # 1. 绘制 80% 相似度 2D 动画版【牛来】萌金小牛
+    draw_niulai_cartoon_vector(draw, cx, cy - 62)
+
+    # 2. 品牌大字与副标（与其他名烟排版风格完全统一）
+    draw.text((cx, cy + 64), "牛  来", fill=(254, 240, 138, 255), font=get_font(64, True), anchor="mm")
+    draw.text((cx, cy + 120), "NIULAI · 电影香烟 · 银幕金犊", fill=(245, 158, 11, 255), font=get_font(24, True), anchor="mm")
+
+    # 3. 底部流金印章
+    stamp_w, stamp_h = 144, 34
+    stamp_y = cy + 150
+    draw.rounded_rectangle((cx - stamp_w // 2, stamp_y, cx + stamp_w // 2, stamp_y + stamp_h), radius=6, fill=(180, 83, 9, 255), outline=(254, 240, 138, 255), width=1)
+    draw.text((cx, stamp_y + stamp_h // 2), "光影琥珀爆珠", fill=(255, 255, 255, 255), font=get_font(19, True), anchor="mm")
+
+    add_warning(
+        im,
+        warn_title="光影艺术提示",
+        warn_main="吸烟有害健康",
+        warn_sub="请勿在禁烟场所吸烟",
+        warn_extra="一卷光影一声牛来 · 愿君早日无烟一身轻",
+        divider_color=(245, 158, 11, 230)
+    )
+    save_pack(im, "niulai_cinema.png")
+
+
+def draw_diga_aotuman_cartoon_vector(draw, cx, cy):
+    """绘制 80% 相似度 2D 动画版【迪加·凹凸曼】光之英雄矢量插画（与全馆烟盒统一手绘卡通矢量风，合规不侵权）"""
+    silver_light = (241, 245, 249, 255)
+    silver_mid = (203, 213, 225, 255)
+    gold_color = (251, 191, 36, 255)
+    cyan_glow = (56, 189, 248, 255)
+    red_suit = (220, 38, 38, 255)
+    purple_suit = (109, 40, 217, 255)
+    dark_line = (15, 23, 42, 255)
+
+    # 1. 背部深邃星云圆盘与八芒星光束 (实色高对比，零量化色斑)
+    draw.ellipse((cx - 88, cy - 82, cx + 88, cy + 74), fill=(30, 27, 75, 255), outline=cyan_glow, width=2)
+    draw.ellipse((cx - 76, cy - 70, cx + 76, cy + 62), outline=gold_color, width=1)
+    for deg in range(0, 360, 45):
+        rad = math.radians(deg)
+        x1 = cx + 52 * math.cos(rad)
+        y1 = (cy - 4) + 52 * math.sin(rad)
+        x2 = cx + 72 * math.cos(rad)
+        y2 = (cy - 4) + 72 * math.sin(rad)
+        draw.line([(x1, y1), (x2, y2)], fill=gold_color if deg % 90 == 0 else cyan_glow, width=2)
+
+    # 2. 动画版红紫复合肩甲与半身躯干 (Cartoon Red-Purple Shoulders & Torso)
+    torso_pts = [
+        (cx - 74, cy + 28),
+        (cx - 54, cy + 68),
+        (cx + 54, cy + 68),
+        (cx + 74, cy + 28),
+        (cx + 46, cy + 12),
+        (cx - 46, cy + 12)
+    ]
+    draw.polygon(torso_pts, fill=red_suit, outline=dark_line, width=2)
+    # 紫色复合装甲条纹
+    draw.polygon([(cx - 48, cy + 44), (cx, cy + 68), (cx + 48, cy + 44), (cx + 36, cy + 68), (cx - 36, cy + 68)], fill=purple_suit)
+
+    # 3. 经典黄金 V 型卡通胸甲护翼 (Golden V Chest Protector)
+    v_chest = [
+        (cx - 68, cy + 20),
+        (cx, cy + 56),
+        (cx + 68, cy + 20),
+        (cx + 56, cy + 36),
+        (cx, cy + 68),
+        (cx - 56, cy + 36)
+    ]
+    draw.polygon(v_chest, fill=gold_color, outline=(254, 240, 138, 255), width=2)
+
+    # 4. 胸口冰蓝发光彩色能量灯 (Cyan Color Timer)
+    draw.ellipse((cx - 14, cy + 32, cx + 14, cy + 60), fill=cyan_glow, outline=(255, 255, 255, 255), width=3)
+    draw.ellipse((cx - 6, cy + 38, cx + 2, cy + 46), fill=(255, 255, 255, 255))
+
+    # 5. 2D 动画版凹凸曼银白头盔 (Cartoon Silver Helmet with Fin)
+    draw.rounded_rectangle((cx - 54, cy - 32, cx - 38, cy - 6), radius=5, fill=silver_mid, outline=dark_line, width=2)
+    draw.rounded_rectangle((cx + 38, cy - 32, cx + 54, cy - 6), radius=5, fill=silver_mid, outline=dark_line, width=2)
+
+    head_pts = [
+        (cx, cy - 84),
+        (cx - 38, cy - 64),
+        (cx - 46, cy - 24),
+        (cx - 32, cy + 12),
+        (cx, cy + 24),
+        (cx + 32, cy + 12),
+        (cx + 46, cy - 24),
+        (cx + 38, cy - 64)
+    ]
+    draw.polygon(head_pts, fill=silver_light, outline=dark_line, width=3)
+    # 右半脸 2D 赛璐璐立体阴影
+    right_shade = [
+        (cx, cy - 81),
+        (cx, cy + 21),
+        (cx + 30, cy + 11),
+        (cx + 43, cy - 24),
+        (cx + 36, cy - 62)
+    ]
+    draw.polygon(right_shade, fill=(226, 232, 240, 255))
+    draw.polygon(head_pts, outline=dark_line, width=3)
+
+    # 头顶中脊与冰蓝额头水晶 (Central Crest & Forehead Crystal)
+    draw.polygon([(cx, cy - 92), (cx - 8, cy - 52), (cx, cy - 42), (cx + 8, cy - 52)], fill=silver_mid, outline=dark_line, width=2)
+    draw.polygon([(cx, cy - 68), (cx - 6, cy - 54), (cx, cy - 44), (cx + 6, cy - 54)], fill=cyan_glow, outline=(255, 255, 255, 255), width=1)
+
+    # 6. 动画版大号发光鹅黄椭圆复眼 (Cute Big Glowing Yellow Cartoon Eyes)
+    left_eye = [(cx - 36, cy - 30), (cx - 10, cy - 22), (cx - 12, cy - 6), (cx - 34, cy - 12)]
+    right_eye = [(cx + 36, cy - 30), (cx + 10, cy - 22), (cx + 12, cy - 6), (cx + 34, cy - 12)]
+    draw.polygon(left_eye, fill=(254, 240, 138, 255), outline=(217, 119, 6, 255), width=2)
+    draw.polygon(right_eye, fill=(254, 240, 138, 255), outline=(217, 119, 6, 255), width=2)
+    draw.ellipse((cx - 28, cy - 24, cx - 20, cy - 16), fill=(255, 255, 255, 255))
+    draw.ellipse((cx + 18, cy - 24, cx + 26, cy - 16), fill=(255, 255, 255, 255))
+
+    # 简约卡通微笑下颌线
+    draw.line([(cx - 10, cy + 8), (cx + 10, cy + 8)], fill=(100, 116, 139, 255), width=2)
+
+
+def gen_ultraman_tiga():
+    """生成原创非侵权谐音版【迪加·凹凸曼】立面（统一手绘矢量动画风，80%相似度卡通光之英雄）"""
+    im = create_base((46, 16, 101), (15, 23, 42))
+    draw = ImageDraw.Draw(im)
+    add_crease_and_seal(im, (2, 132, 199, 240), "化身为光")
+
+    cx, cy = W // 2, 556
+    # 与其他烟壳完全一致的徽章大画框 (底部留出充足边距，绝不触碰下方警示线)
+    draw_badge_frame(draw, cy, 430, 412, (23, 15, 58, 255), (56, 189, 248, 240))
+
+    # 1. 绘制 80% 相似度 2D 动画版【迪加·凹凸曼】
+    draw_diga_aotuman_cartoon_vector(draw, cx, cy - 62)
+
+    # 2. 谐音品牌大字：“迪加·凹凸曼”
+    draw.text((cx, cy + 64), "迪加·凹凸曼", fill=(254, 240, 138, 255), font=get_font(56, True), anchor="mm")
+    draw.text((cx, cy + 120), "DIGA AOTUMAN · 动画光之巨人", fill=(56, 189, 248, 255), font=get_font(23, True), anchor="mm")
+
+    # 3. 底部能量印章
+    stamp_w, stamp_h = 144, 34
+    stamp_y = cy + 150
+    draw.rounded_rectangle((cx - stamp_w // 2, stamp_y, cx + stamp_w // 2, stamp_y + stamp_h), radius=6, fill=(2, 132, 199, 255), outline=(254, 240, 138, 255), width=1)
+    draw.text((cx, stamp_y + stamp_h // 2), "奇迹光粒子珠", fill=(255, 255, 255, 255), font=get_font(19, True), anchor="mm")
+
+    add_warning(
+        im,
+        warn_title="光之星云提示",
+        warn_main="吸烟有害健康",
+        warn_sub="请勿在禁烟场所吸烟",
+        warn_extra="相信光的人终将战胜烟瘾 · 拥抱纯净新生",
+        divider_color=(56, 189, 248, 230)
+    )
+    save_pack(im, "ultraman_tiga.png")
+
+
+def draw_sparkle_star(draw, cx, cy, r=10, color=(254, 240, 138, 255)):
+    """绘制四角星芒矢量装饰（替代字库缺失的特殊符号，杜绝 □ 方框）"""
+    pts = [
+        (cx, cy - r),
+        (cx + r * 0.28, cy - r * 0.28),
+        (cx + r, cy),
+        (cx + r * 0.28, cy + r * 0.28),
+        (cx, cy + r),
+        (cx - r * 0.28, cy + r * 0.28),
+        (cx - r, cy),
+        (cx - r * 0.28, cy - r * 0.28)
+    ]
+    draw.polygon(pts, fill=color)
+
+
+def gen_gf_happy_smile():
+    """生成女友专属恶搞宠爱款 1：【倾城一笑·开心果】（截取图1生动面部表情特写 + 皇家玫瑰金浮雕宝相框）"""
+    from PIL import ImageEnhance
+    im = create_base((136, 19, 55), (76, 5, 25))  # 皇家丝绒绯红渐变底
+    draw = ImageDraw.Draw(im)
+    add_crease_and_seal(im, (225, 29, 72, 245), "欢喜冤家")
+
+    cx, cy = W // 2, 554
+    # 与全馆名烟一致的鎏金大徽章框 (高度420，上下留白充裕)
+    draw_badge_frame(draw, cy, 436, 420, (88, 12, 36, 255), (254, 240, 138, 245))
+
+    # 翻盖区浪漫星芒与恶搞宠溺副标（使用纯矢量四角星，0方框乱码）
+    draw_sparkle_star(draw, cx - 196, 155, r=11, color=(254, 240, 138, 245))
+    draw_sparkle_star(draw, cx + 196, 155, r=11, color=(254, 240, 138, 245))
+    draw.text((cx, 155), "专 属 开 心 果 · 荣 耀 典 藏", fill=(254, 240, 138, 245), font=get_font(26, True), anchor="mm")
+    draw.text((cx, 206), "SWEETHEART · 一笑解千愁", fill=(253, 164, 175, 230), font=get_font(20, True), anchor="mm")
+
+    # 1. 截取图1「纯面部表情」特写 (gf_face.jpg: 459x1024)
+    asset_path = os.path.join(os.path.dirname(__file__), "assets", "gf_face.jpg")
+    face_cy = 468
+    rx, ry = 98, 102  # 椭圆面部特写画幅，与下方大字保持36px呼吸间距
+    if os.path.exists(asset_path):
+        src = Image.open(asset_path).convert("RGBA")
+        sw, sh = src.size
+        # 精准居中锁定五官搞笑张嘴表情（紧贴脸庞轮廓，去除两侧多余黑发与背景）
+        crop_box = (int(sw * 0.335), int(sh * 0.285), int(sw * 0.795), int(sh * 0.575))
+        cropped = src.crop(crop_box)
+        cropped = ImageEnhance.Brightness(cropped).enhance(1.12)
+        cropped = ImageEnhance.Contrast(cropped).enhance(1.06)
+        resized = cropped.resize((rx * 2, ry * 2), Image.Resampling.LANCZOS)
+
+        # 椭圆宝相肖像遮罩
+        mask = Image.new("L", (rx * 2, ry * 2), 0)
+        m_draw = ImageDraw.Draw(mask)
+        m_draw.ellipse((0, 0, rx * 2 - 1, ry * 2 - 1), fill=255)
+
+        # 外圈皇家金光环与两侧星芒
+        for deg in range(0, 360, 30):
+            rad = math.radians(deg)
+            x1 = cx + (rx + 6) * math.cos(rad)
+            y1 = face_cy + (ry + 6) * math.sin(rad)
+            x2 = cx + (rx + 15) * math.cos(rad)
+            y2 = face_cy + (ry + 15) * math.sin(rad)
+            draw.line([(x1, y1), (x2, y2)], fill=(254, 240, 138, 220), width=2)
+        draw_sparkle_star(draw, cx - rx - 32, face_cy, r=12, color=(254, 240, 138, 245))
+        draw_sparkle_star(draw, cx + rx + 32, face_cy, r=12, color=(254, 240, 138, 245))
+
+        im.paste(resized, (cx - rx, face_cy - ry), mask)
+        draw = ImageDraw.Draw(im)
+        # 皇家玫瑰金双层精致椭圆画框
+        draw.ellipse((cx - rx - 3, face_cy - ry - 3, cx + rx + 3, face_cy + ry + 3), outline=(254, 240, 138, 255), width=4)
+        draw.ellipse((cx - rx - 8, face_cy - ry - 8, cx + rx + 8, face_cy + ry + 8), outline=(245, 158, 11, 220), width=2)
+
+        # 头顶俏皮小金皇冠
+        crown_y = face_cy - ry - 5
+        crown_pts = [
+            (cx - 26, crown_y),
+            (cx - 32, crown_y - 20),
+            (cx - 13, crown_y - 9),
+            (cx, crown_y - 25),
+            (cx + 13, crown_y - 9),
+            (cx + 32, crown_y - 20),
+            (cx + 26, crown_y)
+        ]
+        draw.polygon(crown_pts, fill=(254, 240, 138, 255), outline=(180, 83, 9, 255), width=2)
+
+    # 2. 品牌主打名与副标（与上方头像框留足间距，层次分明）
+    draw.text((cx, 624), "倾 城 一 笑", fill=(254, 240, 138, 255), font=get_font(54, True), anchor="mm")
+    draw.text((cx, 676), "SWEETHEART · 专属开心果", fill=(253, 164, 175, 255), font=get_font(22, True), anchor="mm")
+
+    # 3. 底部蜜桃甜心爆珠印章
+    stamp_w, stamp_h = 148, 34
+    stamp_y = 706
+    draw.rounded_rectangle((cx - stamp_w // 2, stamp_y, cx + stamp_w // 2, stamp_y + stamp_h), radius=6, fill=(225, 29, 72, 255), outline=(254, 240, 138, 255), width=1)
+    draw.text((cx, stamp_y + stamp_h // 2), "蜜桃甜心爆珠", fill=(255, 255, 255, 255), font=get_font(19, True), anchor="mm")
+
+    add_warning(
+        im,
+        warn_title="恋爱专属提示",
+        warn_main="一笑倾城百媚生",
+        warn_sub="少抽香烟多宠她",
+        warn_extra="看一眼开心果表情包 · 烦恼烟瘾统统消散",
+        divider_color=(251, 113, 133, 235)
+    )
+    out_path = os.path.join(OUTPUT_DIR, "gf_happy_smile.png")
+    im.quantize(colors=256, method=Image.FASTOCTREE, dither=Image.Dither.FLOYDSTEINBERG).save(out_path, optimize=True)
+
+
+def gen_gf_moonlight_muse():
+    """生成女友专属浪漫款 2：【心动女神·白月光】（珠光月白玫瑰金礼盒 + 图2甜美全身照无缝融合）"""
+    from PIL import ImageEnhance
+    # 采用珠光月白配香槟淡粉高定底色，让图2的纯白棚拍全身照 100% 自然融入画框！
+    im = create_base((255, 250, 252), (252, 231, 243))
+    draw = ImageDraw.Draw(im)
+    add_crease_and_seal(im, (219, 39, 119, 245), "一生挚爱")
+
+    cx, cy = W // 2, 554
+    # 纯白珠光内衬大徽章框 + 玫瑰金双线描边
+    draw_badge_frame(draw, cy, 436, 420, (255, 255, 255, 255), (219, 39, 119, 220))
+
+    # 翻盖区高定铭文（纯矢量星芒，杜绝 □ 方框）
+    draw_sparkle_star(draw, cx - 196, 155, r=11, color=(219, 39, 119, 235))
+    draw_sparkle_star(draw, cx + 196, 155, r=11, color=(219, 39, 119, 235))
+    draw.text((cx, 155), "心 动 女 神 · 岁 月 白 月 光", fill=(157, 23, 77, 255), font=get_font(26, True), anchor="mm")
+    draw.text((cx, 206), "MOONLIGHT MUSE · 520 LIMITED", fill=(219, 39, 119, 220), font=get_font(20, True), anchor="mm")
+
+    # 1. 镶嵌图2「全身照」立绘 (gf_full.jpg: 1024x576)
+    asset_path = os.path.join(os.path.dirname(__file__), "assets", "gf_full.jpg")
+    pw, ph = 248, 212  # 竖幅全身画框宽高 (等比裁切全身照，0变形，与下方文字留足间距)
+    px0, py0 = cx - pw // 2, 466 - ph // 2
+    px1, py1 = px0 + pw, py0 + ph
+    if os.path.exists(asset_path):
+        src = Image.open(asset_path).convert("RGBA")
+        sw, sh = src.size
+        # 按目标画框宽高比从原图中央等比裁切全身区域 (从头顶猪猪发夹到牛仔短裤全身完整呈现)
+        target_aspect = pw / float(ph)
+        crop_h = int(sh * 0.97)
+        crop_w = int(crop_h * target_aspect)
+        cx_src = int(sw * 0.515)
+        cx0 = max(0, cx_src - crop_w // 2)
+        cy0 = int(sh * 0.015)
+        cropped = src.crop((cx0, cy0, cx0 + crop_w, cy0 + crop_h))
+        cropped = ImageEnhance.Contrast(cropped).enhance(1.04)
+        resized = cropped.resize((pw, ph), Image.Resampling.LANCZOS)
+
+        # 圆角画框蒙版
+        mask = Image.new("L", (pw, ph), 0)
+        m_draw = ImageDraw.Draw(mask)
+        m_draw.rounded_rectangle((0, 0, pw - 1, ph - 1), radius=16, fill=255)
+        im.paste(resized, (px0, py0), mask)
+
+        draw = ImageDraw.Draw(im)
+        # 香槟金与玫瑰粉双层高定内画框 + 两侧星芒
+        draw.rounded_rectangle((px0 - 2, py0 - 2, px1 + 2, py1 + 2), radius=18, outline=(245, 158, 11, 240), width=3)
+        draw.rounded_rectangle((px0 - 7, py0 - 7, px1 + 7, py1 + 7), radius=22, outline=(244, 114, 182, 190), width=1)
+        draw_sparkle_star(draw, px0 - 24, 466, r=11, color=(245, 158, 11, 240))
+        draw_sparkle_star(draw, px1 + 24, 466, r=11, color=(245, 158, 11, 240))
+
+    # 2. 品牌主打名与副标（深玫红皇家烫金字体，在珠光白底上极度优雅醒目）
+    draw.text((cx, 624), "心 动 女 神", fill=(157, 23, 77, 255), font=get_font(54, True), anchor="mm")
+    draw.text((cx, 676), "MOONLIGHT · 独家白月光", fill=(219, 39, 119, 240), font=get_font(22, True), anchor="mm")
+
+    # 3. 底部初恋玫瑰爆珠印章
+    stamp_w, stamp_h = 148, 34
+    stamp_y = 706
+    draw.rounded_rectangle((cx - stamp_w // 2, stamp_y, cx + stamp_w // 2, stamp_y + stamp_h), radius=6, fill=(219, 39, 119, 255), outline=(245, 158, 11, 255), width=1)
+    draw.text((cx, stamp_y + stamp_h // 2), "初恋玫瑰爆珠", fill=(255, 255, 255, 255), font=get_font(19, True), anchor="mm")
+
+    # 底部警示区采用深邃玫瑰紫晶底，确保白字警示语 100% 清晰高对比
+    x0, y0, x1, y1 = BOX
+    warn_y = 776
+    draw.rounded_rectangle((x0 + 16, warn_y + 10, x1 - 16, y1 - 20), radius=18, fill=(80, 7, 36, 235), outline=(219, 39, 119, 180), width=1)
+    add_warning(
+        im,
+        warn_title="浪漫挚爱提示",
+        warn_main="仙女颜值超标",
+        warn_sub="戒烟省钱宠女神",
+        warn_extra="抽烟只抽心动女神 · 一生只宠一个人",
+        divider_color=(219, 39, 119, 235)
+    )
+    out_path = os.path.join(OUTPUT_DIR, "gf_moonlight_muse.png")
+    im.quantize(colors=256, method=Image.FASTOCTREE, dither=Image.Dither.FLOYDSTEINBERG).save(out_path, optimize=True)
+
 def run_all():
-    print("Generating all 29 pack images...")
+    print("Generating all 33 pack images...")
     gen_pure_zen()
     gen_baisha()
     gen_hongtashan()
@@ -1041,7 +1478,13 @@ def run_all():
     gen_sobranie_black()
     gen_cohiba()
     gen_hand_rolled_hanyan()
-    print("Completed 29 images generation!")
+    gen_niulai_cinema()
+    gen_ultraman_tiga()
+    gen_gf_happy_smile()
+    gen_gf_moonlight_muse()
+    print("Completed 33 images generation!")
 
 if __name__ == '__main__':
     run_all()
+
+

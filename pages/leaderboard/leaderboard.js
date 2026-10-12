@@ -4,6 +4,7 @@ import { triggerHaptic } from '../../utils/haptics.js';
 import { storageService } from '../../utils/storageService.js';
 import { leaderboardService } from '../../utils/leaderboardService.js';
 import { calculateSavings, calculateQuitDays } from '../../utils/healthCalculator.js';
+import { vipService } from '../../utils/vipService.js';
 
 function measureSafeAreaSync() {
   try {
@@ -80,6 +81,7 @@ Page({
   onShow() {
     if (this._skipFirstShowRefresh) {
       this._skipFirstShowRefresh = false;
+      this.setData({ vipTheme: vipService.getVipTheme() });
       return;
     }
     this.refreshLeaderboard();
@@ -109,7 +111,8 @@ Page({
       totalSavedMoney: totalSaved.toFixed(2),
       quitDays,
       leaderboardList: result.list,
-      myRankInfo: result.myRankInfo
+      myRankInfo: result.myRankInfo,
+      vipTheme: vipService.getVipTheme()
     });
   },
 

@@ -521,7 +521,7 @@ Component({
           quitDays,
           unlockedEffects,
           unlockedEffectsCount: unlockedEffects.length,
-          hasCustomEffect: unlockedEffects.some(id => !['cloud_dense', 'silk_pure', 'ring_classic'].includes(id)),
+          hasCustomEffect: unlockedEffects.some(id => id !== 'ring_classic'),
           hasSummonedMythic: unlockedEffects.includes('dragon_breath') || unlockedEffects.includes('phoenix_nirvana')
         };
 

@@ -2,10 +2,12 @@
 import { GoldenDragon } from './dragonRenderer.js';
 import { FirePhoenix } from './phoenixRenderer.js';
 import { AuspiciousRiver } from './wordRiverRenderer.js';
+import { BaguaMatrix } from './baguaRenderer.js';
+import { BuddhaLightAscension } from './buddhaRenderer.js';
 
 /**
  * 赛博拟真烟雾物理粒子引擎 (ParticleSystem)
- * 支持 12 种高保真烟雾特效：
+ * 支持 15 种高保真烟雾特效：
  * 1. 经典烟圈 (Toroidal Vortex Ring)
  * 2. 袅袅青烟 (Laminar-to-Turbulent Silk Stream)
  * 3. 舒缓白雾 (Volumetric Cloud Plume)
@@ -18,6 +20,9 @@ import { AuspiciousRiver } from './wordRiverRenderer.js';
  * 10. 盛世华彩 (Grand Fireworks & Willow Golden Rain)
  * 11. 福愿金墨 (Blessing Runes & Ancient Seals)
  * 12. 赤焰神凰 (Celestial Fire Phoenix & Feathers)
+ * 13. 步步高升 (Auspicious Word River)
+ * 14. 乾坤八卦 (Bagua Taichi Grand Matrix)
+ * 15. 佛光普照 (Buddha's Light & Celestial Thousand-Petal Golden Lotus)
  */
 function formatFillColor(color, defaultColor = '#ffffff') {
   if (!color || typeof color !== 'string') return defaultColor;
@@ -25,6 +30,32 @@ function formatFillColor(color, defaultColor = '#ffffff') {
     return color.endsWith(')') ? color.replace(/,\s*[\d.]+\)$/, ', 1.0)') : `${color}1.0)`;
   }
   return color;
+}
+
+// 腾讯总监美学：飘舞的 3D 宝相金莲花瓣粒子
+function drawLotusPetalParticle(ctx, p) {
+  const len = p.radius || 7.0;
+  const w = len * 0.52;
+  const a = p.alpha || 0.85;
+  ctx.save();
+  ctx.translate(p.x, p.y);
+  ctx.rotate(p.rotation || 0);
+
+  const isRose = p.color === '#fb7185';
+  ctx.fillStyle = isRose
+    ? `rgba(251, 113, 133, ${a * 0.88})`
+    : `rgba(253, 224, 71, ${a * 0.92})`;
+  ctx.beginPath();
+  ctx.moveTo(0, -len);
+  ctx.bezierCurveTo(w, -len * 0.35, w * 0.85, len * 0.45, 0, len);
+  ctx.bezierCurveTo(-w * 0.85, len * 0.45, -w, -len * 0.35, 0, -len);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.strokeStyle = `rgba(255, 251, 235, ${a * 0.95})`;
+  ctx.lineWidth = 0.9;
+  ctx.stroke();
+  ctx.restore();
 }
 
 // 腾讯总监美学：平滑对称心形贝塞尔曲线几何路径
@@ -54,6 +85,99 @@ function drawFourPointStar(ctx, x, y, outerR, innerR, rot = 0) {
   }
   ctx.closePath();
   ctx.fill();
+  ctx.restore();
+}
+
+// 腾讯总监美学：曜世 24K 暴富金币微粒 (3D 轴翻滚与微反光)
+function drawGoldCoinParticle(ctx, p) {
+  const r = p.radius || 6.5;
+  const a = p.alpha || 0.9;
+  const rot = p.rotAngle || 0;
+  const flip = Math.cos(rot); // 3D Y轴翻转透视
+  const absFlip = Math.max(0.18, Math.abs(flip));
+
+  ctx.save();
+  ctx.translate(p.x, p.y);
+  ctx.rotate(p.wobbleAngle || 0);
+  ctx.scale(absFlip, 1.0);
+
+  // 1. 金光外晕
+  ctx.beginPath();
+  ctx.arc(0, 0, r * 1.25, 0, Math.PI * 2);
+  ctx.fillStyle = `rgba(251, 191, 36, ${a * 0.35})`;
+  ctx.shadowColor = '#f59e0b';
+  ctx.shadowBlur = 8;
+  ctx.fill();
+
+  // 2. 24K 纯金币主体
+  ctx.beginPath();
+  ctx.arc(0, 0, r, 0, Math.PI * 2);
+  ctx.fillStyle = `rgba(245, 158, 11, ${a * 0.95})`;
+  ctx.fill();
+
+  // 3. 镀金外圈边缘
+  ctx.lineWidth = 1.2;
+  ctx.strokeStyle = `rgba(254, 240, 138, ${a * 0.98})`;
+  ctx.stroke();
+
+  // 4. 古钱币内嵌方孔 (招财进宝天圆地方)
+  const holeSize = r * 0.42;
+  ctx.fillStyle = `rgba(180, 83, 9, ${a * 0.92})`;
+  ctx.fillRect(-holeSize / 2, -holeSize / 2, holeSize, holeSize);
+  ctx.lineWidth = 0.8;
+  ctx.strokeStyle = `rgba(254, 240, 138, ${a * 0.85})`;
+  ctx.strokeRect(-holeSize / 2, -holeSize / 2, holeSize, holeSize);
+
+  // 5. 翻转至反光角时迸发的高光闪点
+  if (Math.abs(flip) > 0.75) {
+    ctx.beginPath();
+    ctx.arc(-r * 0.35, -r * 0.35, r * 0.22, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255, 255, 255, ${a * 0.95})`;
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+// 腾讯总监美学：丘比特爱神金箭流光轨迹 (破空穿心)
+function drawCupidArrow(ctx, p) {
+  const len = p.length || 34;
+  const a = p.alpha || 0.9;
+  ctx.save();
+  ctx.translate(p.x, p.y);
+  ctx.rotate(p.angle || -0.4);
+
+  // 尾迹渐变流光
+  ctx.beginPath();
+  ctx.moveTo(-len, 0);
+  ctx.lineTo(len * 0.3, 0);
+  ctx.strokeStyle = `rgba(251, 113, 133, ${a * 0.55})`;
+  ctx.lineWidth = 3.5;
+  ctx.shadowColor = '#ec4899';
+  ctx.shadowBlur = 10;
+  ctx.stroke();
+
+  // 核心金色箭身
+  ctx.beginPath();
+  ctx.moveTo(-len * 0.6, 0);
+  ctx.lineTo(len * 0.4, 0);
+  ctx.strokeStyle = `rgba(254, 240, 138, ${a * 0.95})`;
+  ctx.lineWidth = 1.8;
+  ctx.shadowColor = '#fbbf24';
+  ctx.shadowBlur = 6;
+  ctx.stroke();
+
+  // 爱心形金色箭头
+  ctx.save();
+  ctx.translate(len * 0.4, 0);
+  ctx.rotate(Math.PI / 2);
+  drawHeartPath(ctx, 0.28);
+  ctx.fillStyle = `rgba(254, 240, 138, ${a * 0.95})`;
+  ctx.shadowColor = '#f59e0b';
+  ctx.shadowBlur = 6;
+  ctx.fill();
+  ctx.restore();
+
   ctx.restore();
 }
 
@@ -130,6 +254,8 @@ export class ParticleSystem {
     this.phoenixes = [];
     // 步步高升祥瑞字河系统 (Auspicious Word Rivers)
     this.wordRivers = [];
+    this.baguaMatrices = [];
+    this.buddhaLights = [];
     // 盛世华彩烟花火箭系统 (Firework Rockets)
     this.fireworkRockets = [];
     // 真实“一缕青烟”流体双缕丝带 (主青缕 + 伴生缕) - 轻柔升腾、半路自然扩散淡出，不向屏幕顶部延伸
@@ -142,19 +268,13 @@ export class ParticleSystem {
     this.igniteStartTime = 0;
   }
 
-  // 重置青烟流体 (点火瞬间清空旧节点，并开启点火渐进生长计时)
+  // 重置青烟流体 (点火瞬间仅清空烟头旧节点，并开启点火渐进生长计时；绝不干涉空中正在飞行的烟雾特效)
   resetSilkStream(isIgniting = false) {
     if (this.silkStreams) {
       for (const stream of this.silkStreams) {
         stream.nodes = [];
       }
     }
-    this.smokeRings = [];
-    this.heartRings = [];
-    this.dragons = [];
-    this.phoenixes = [];
-    this.wordRivers = [];
-    this.fireworkRockets = [];
     this.streamNodeCounter = 0;
     this.igniteStartTime = isIgniting ? Date.now() : 0;
   }
@@ -192,6 +312,22 @@ export class ParticleSystem {
       }
     }
 
+    if (effectId !== 'bagua_taichi') {
+      this.baguaMatrices = [];
+    } else {
+      if (this.baguaMatrices.length >= 2) {
+        this.baguaMatrices = this.baguaMatrices.slice(-1);
+      }
+    }
+
+    if (effectId !== 'buddha_light') {
+      this.buddhaLights = [];
+    } else {
+      if (this.buddhaLights.length >= 2) {
+        this.buddhaLights = this.buddhaLights.slice(-1);
+      }
+    }
+
     if (effectId !== 'grand_fireworks') {
       this.fireworkRockets = [];
     } else if (this.fireworkRockets.length >= 2) {
@@ -224,6 +360,8 @@ export class ParticleSystem {
       this.dragons = [];
       this.phoenixes = [];
       this.wordRivers = [];
+      this.baguaMatrices = [];
+      this.buddhaLights = [];
       this.fireworkRockets = [];
       this.heartRings = [];
       this.smokeRings = [];
@@ -254,6 +392,8 @@ export class ParticleSystem {
     this.dragons = [];
     this.phoenixes = [];
     this.wordRivers = [];
+    this.baguaMatrices = [];
+    this.buddhaLights = [];
     this.fireworkRockets = [];
     this.smokeRings = [];
     this.heartRings = [];
@@ -493,22 +633,108 @@ export class ParticleSystem {
   }
 
   // 4.1 拟真重力下坠散落微细灰烬屑 (Falling Ash Crumbs - 纯净固体灰屑，无任何烟雾或火花)
-  emitAshDrop(x, y, count = 3) {
+  emitAshDrop(x, y, count = 3, spreadW = 6) {
     for (let i = 0; i < count; i++) {
       this._pushParticle({
-        x: x + (Math.random() - 0.5) * 4,
+        x: x + (Math.random() - 0.5) * spreadW,
         y: y + Math.random() * 2,
-        vx: (Math.random() - 0.5) * 0.6,
+        vx: (Math.random() - 0.5) * 0.8,
         vy: 2.2 + Math.random() * 1.8, // 垂直自然重力下坠
-        radius: 0.8 + Math.random() * 0.8, // 极小固体碎屑，绝非大团白灰/烟雾
+        radius: 0.8 + Math.random() * (spreadW > 12 ? 1.4 : 0.8), // 固体碎屑随烟口尺寸自然匹配
         alpha: 0.75,
         baseAlpha: 0.75,
         life: 0,
-        maxLife: 25 + Math.random() * 10,
+        maxLife: 25 + Math.random() * 12,
         color: Math.random() < 0.6 ? '#27272a' : '#4b5563', // 深炭黑灰固体屑
         isAshFlake: true
       });
     }
+  }
+
+  // 4.1.5 腾讯大师级 · 优雅阻尼抖灰复合特效管线 (Master Ash-Tap VFX Pipeline)
+  // 兼顾物理克制与艺术高级感：成型断裂碳灰块 + 炽热火星雨飞溅 + 灵光净化扩散微波
+  emitAshTapVfx(cx, cy, ashH = 10, isHandRolled = false, accentColor = '#f59e0b') {
+    const spreadW = isHandRolled ? 22 : 12;
+    // 1. 成型断裂碳灰残块 (3~5块不同大小的灰块，重力加速度加速飘落，伴随轻微空中自旋翻转)
+    const clumpCount = Math.max(3, Math.min(6, Math.floor(ashH / 8) + 3));
+    for (let i = 0; i < clumpCount; i++) {
+      const clumpW = 2.2 + Math.random() * (isHandRolled ? 3.2 : 2.5);
+      const clumpH = 1.8 + Math.random() * 2.2;
+      this._pushParticle({
+        x: cx + (Math.random() - 0.5) * spreadW,
+        y: cy - (Math.random() * Math.min(ashH, 20)),
+        vx: (Math.random() - 0.5) * 1.8,
+        vy: 1.5 + Math.random() * 2.5, // 初始下落速度
+        gravity: 0.18, // 下落重力加速度
+        w: clumpW,
+        h: clumpH,
+        radius: Math.max(clumpW, clumpH) * 0.6,
+        rotation: Math.random() * Math.PI * 2,
+        rotSpeed: (Math.random() - 0.5) * 0.18,
+        alpha: 0.88,
+        baseAlpha: 0.88,
+        life: 0,
+        maxLife: 38 + Math.random() * 20,
+        color: Math.random() < 0.45 ? '#18181b' : (Math.random() < 0.5 ? '#3f3f46' : '#71717a'),
+        isAshClump: true
+      });
+    }
+
+    // 2. 细微碳灰尘雾碎屑 (8~12 颗微小灰屑随气流轻扬散落)
+    const crumbCount = isHandRolled ? 12 : 8;
+    for (let i = 0; i < crumbCount; i++) {
+      this._pushParticle({
+        x: cx + (Math.random() - 0.5) * (spreadW * 1.1),
+        y: cy - Math.random() * Math.min(ashH, 15),
+        vx: (Math.random() - 0.5) * 1.2,
+        vy: 2.0 + Math.random() * 2.2,
+        radius: 0.7 + Math.random() * 1.1,
+        alpha: 0.75,
+        baseAlpha: 0.75,
+        life: 0,
+        maxLife: 30 + Math.random() * 15,
+        color: Math.random() < 0.5 ? '#27272a' : '#52525b',
+        isAshFlake: true
+      });
+    }
+
+    // 3. 弹指受力瞬间从火头迸溅出的炽热火星雨 (14~18 颗耀眼金红火星，向上抛物线飞溅后随重力下坠)
+    const sparkCount = isHandRolled ? 18 : 14;
+    for (let i = 0; i < sparkCount; i++) {
+      const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.8;
+      const speed = 2.4 + Math.random() * 3.6;
+      this._pushParticle({
+        x: cx + (Math.random() - 0.5) * 6,
+        y: cy + (Math.random() - 0.5) * 4,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        gravity: 0.14,
+        radius: 1.0 + Math.random() * 1.6,
+        alpha: 1.0,
+        baseAlpha: 1.0,
+        life: 0,
+        maxLife: 26 + Math.random() * 14,
+        color: Math.random() < 0.4 ? '#ffffff' : (Math.random() < 0.6 ? '#fef08a' : '#ea580c'),
+        isEmberSpark: true
+      });
+    }
+
+    // 4. 禅意净化灵光微波环 (1 圈通透纯净的金光微波环自火头轻柔扩散，象征杂念散尽、身心释怀)
+    this._pushParticle({
+      x: cx,
+      y: cy,
+      vx: 0,
+      vy: -0.4,
+      radius: 6,
+      maxRadius: 36,
+      growRate: 1.2,
+      alpha: 0.85,
+      baseAlpha: 0.85,
+      life: 0,
+      maxLife: 32,
+      color: accentColor || '#f59e0b',
+      isCleanseWave: true
+    });
   }
 
   // 4.2 微距写实散落碎屑与自然脱落灰烬 (Flaking Ash Crumbs & Falling Specks)
@@ -528,28 +754,29 @@ export class ParticleSystem {
     });
   }
 
-  // 4.3 起火处真实流体体积烟雾 (Volumetric Combustion Smoke from Cherry Ember)
+  // 4.3 起火处真实流体微烟羽 (Volumetric Combustion Smoke from Cherry Ember)
   emitVolumetricCombustionSmoke(emberX, emberY, color) {
     const activeCount = this.particles.filter(p => p.isVolumetricSmoke).length;
-    if (activeCount > 36) return;
+    if (activeCount > 14) return;
 
     const baseCol = color || (Math.random() < 0.65 ? 'rgba(240, 244, 252, ' : 'rgba(186, 230, 253, ');
     this._pushParticle({
       x: emberX + (Math.random() - 0.5) * 4,
       y: emberY - Math.random() * 2,
-      vx: (Math.random() - 0.5) * 0.5,
+      vx: (Math.random() - 0.5) * 0.4,
       vy: -(0.95 + Math.random() * 0.65), // 缓和轻盈浮力
-      radius: 3.5 + Math.random() * 2.5,
-      growRate: 0.22 + Math.random() * 0.14, // 上升中柔和展开成体积烟团
-      maxRadius: 28.0,
+      radius: 2.6 + Math.random() * 2.0,
+      growRate: 0.12 + Math.random() * 0.08, // 轻盈微扩，绝不形成庞大白雾团
+      maxRadius: 15.0,
       swirlPhase: Math.random() * Math.PI * 2,
-      swirlAmp: 0.45 + Math.random() * 0.45,
-      alpha: 0.42,
-      baseAlpha: 0.42,
+      swirlAmp: 0.35 + Math.random() * 0.35,
+      alpha: 0.22,
+      baseAlpha: 0.22,
       life: 0,
-      maxLife: 75 + Math.random() * 35,
+      maxLife: 60 + Math.random() * 25,
       color: baseCol,
-      isVolumetricSmoke: true
+      isVolumetricSmoke: true,
+      isTipCombustion: true
     });
   }
 
@@ -611,7 +838,7 @@ export class ParticleSystem {
     }
   }
 
-  // 8. 黑金流沙 (Gold Stardust) - 黑曜石基底大团横向扩散 + 24K 金箔漫天闪粉飞散
+  // 8. 曜世黑金 (Gold Stardust) - 黑曜石丝绒烟雾 + 24K 金箔漫天暴富金雨 + 3D 翻滚金币
   emitGoldStardust(x, y) {
     // 基础黑曜石烟雾：大团横向分散
     for (let i = 0; i < 14; i++) {
@@ -633,8 +860,8 @@ export class ParticleSystem {
       });
     }
     // 24K 金箔闪粉：广角散射向四周飞溅散开
-    for (let i = 0; i < 18; i++) {
-      const spread = (i / 17 - 0.5) * 2;
+    for (let i = 0; i < 22; i++) {
+      const spread = (i / 21 - 0.5) * 2;
       const rad = -Math.PI / 2 + spread * 0.9 + (Math.random() - 0.5) * 0.4;
       const spd = Math.random() * 1.6 + 0.6;
       this._pushParticle({
@@ -646,11 +873,30 @@ export class ParticleSystem {
         alpha: 0.95,
         baseAlpha: 0.95,
         life: 0,
-        maxLife: 105 + Math.random() * 30,
+        maxLife: 110 + Math.random() * 30,
         color: '#fbbf24',
         isGold: true,
         shimmerPhase: Math.random() * Math.PI * 2,
         shimmerSpeed: 0.12 + Math.random() * 0.08
+      });
+    }
+    // 腾讯总监设计级：曜世 24K 暴富金币雨 (3D 翻转物理下落)
+    for (let i = 0; i < 5; i++) {
+      const spread = (i / 4 - 0.5) * 2;
+      this._pushParticle({
+        x: x + spread * 26 + (Math.random() - 0.5) * 12,
+        y: y + (Math.random() - 0.5) * 8,
+        vx: spread * 1.3 + (Math.random() - 0.5) * 0.4,
+        vy: -(1.6 + Math.random() * 0.8),
+        radius: 6.2 + Math.random() * 2.2,
+        alpha: 0.95,
+        baseAlpha: 0.95,
+        life: 0,
+        maxLife: 135 + Math.random() * 25,
+        rotAngle: Math.random() * Math.PI * 2,
+        rotSpeed: 0.08 + Math.random() * 0.06,
+        wobbleAngle: (Math.random() - 0.5) * 0.4,
+        isGoldCoin: true
       });
     }
   }
@@ -745,6 +991,44 @@ export class ParticleSystem {
         isVolumetricSmoke: true
       });
     }
+
+    // 腾讯总监设计级：丘比特爱神金箭贯穿双心
+    this._pushParticle({
+      x: x - 35,
+      y: y + 20,
+      vx: 3.4,
+      vy: -2.7,
+      length: 36,
+      angle: -Math.PI * 0.22,
+      alpha: 0.95,
+      baseAlpha: 0.95,
+      life: 0,
+      maxLife: 75,
+      isCupidArrow: true
+    });
+
+    // 浪漫粉钻晶莹微星
+    for (let i = 0; i < 6; i++) {
+      const rad = Math.random() * Math.PI * 2;
+      this._pushParticle({
+        x: x + Math.cos(rad) * 16,
+        y: y + Math.sin(rad) * 12,
+        vx: Math.cos(rad) * 0.7,
+        vy: -1.7 + Math.sin(rad) * 0.4,
+        outerRadius: 3.2,
+        innerRadius: 1.0,
+        radius: 3.5,
+        alpha: 0.95,
+        baseAlpha: 0.95,
+        life: 0,
+        maxLife: 95 + Math.random() * 20,
+        color: '#fbcfe8',
+        rotation: Math.random() * Math.PI * 2,
+        rotSpeed: 0.05,
+        twinklePhase: Math.random() * Math.PI * 2,
+        isStar: true
+      });
+    }
   }
 
   // 11. 金龙吐息 (Dragon Breath) - 浓金祥云破雾而出，五爪金龙盘旋腾空九天
@@ -810,23 +1094,50 @@ export class ParticleSystem {
     }
   }
 
-  // 12. 爆珠捏破微渗：极克制微水珠（避免大面积烟雾/火花遮挡烟嘴真实渗液）
+  // 12. 爆珠捏爆物理拟真：明胶脆壳碎裂残片 + 一点点微小原液水滴四处分散并迅速被海绵吸收
   emitBeadPop(x, y, color = '#10b981') {
-    for (let i = 0; i < 3; i++) {
-      const rad = Math.random() * Math.PI * 2;
-      const spd = Math.random() * 0.8 + 0.3;
+    // 1. 碎裂的明胶脆壳残渣 (6 块不同切角的微小脆壳碎片，在爆珠周围微距崩裂嵌附)
+    const shardCount = 6;
+    for (let i = 0; i < shardCount; i++) {
+      const angle = (i / shardCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.35;
+      const speed = Math.random() * 0.85 + 0.35;
       this._pushParticle({
-        x: x + Math.cos(rad) * 2,
-        y: y + Math.sin(rad) * 2,
-        vx: Math.cos(rad) * spd,
-        vy: Math.sin(rad) * spd,
-        radius: 1.0 + Math.random() * 0.8,
-        alpha: 0.65,
-        baseAlpha: 0.65,
+        x: x + Math.cos(angle) * 2.2,
+        y: y + Math.sin(angle) * 2.2,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        w: 2.0 + Math.random() * 1.6,
+        h: 1.3 + Math.random() * 1.1,
+        rotation: Math.random() * Math.PI * 2,
+        rotSpeed: (Math.random() - 0.5) * 0.18,
+        alpha: 0.92,
+        baseAlpha: 0.92,
         life: 0,
-        maxLife: 16,
-        color: Math.random() < 0.5 ? '#ffffff' : color,
-        isSpark: false
+        maxLife: 38,
+        color: color,
+        isShellShard: true
+      });
+    }
+
+    // 2. 一点点四处分散的微液滴 (6 颗极细微水珠，短距离分散后迅速被滤嘴海绵吸住收干)
+    const dropCount = 6;
+    for (let i = 0; i < dropCount; i++) {
+      const angle = (i / dropCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.45;
+      const speed = Math.random() * 0.72 + 0.28;
+      const r = 0.75 + Math.random() * 0.55;
+      this._pushParticle({
+        x: x + Math.cos(angle) * 1.5,
+        y: y + Math.sin(angle) * 1.5,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        radius: r,
+        initialRadius: r,
+        alpha: 0.82,
+        baseAlpha: 0.82,
+        life: 0,
+        maxLife: 24,
+        color: Math.random() < 0.35 ? '#ffffff' : color,
+        isDroplet: true
       });
     }
   }
@@ -992,6 +1303,156 @@ export class ParticleSystem {
     }
   }
 
+  // 15.5 乾坤八卦 · 紫微天穹大阵 (Bagua Taichi Grand Matrix)
+  emitBaguaTaichi(x, y, spawnMatrix = true) {
+    if (spawnMatrix) {
+      if (this.baguaMatrices.length >= 2) {
+        this.baguaMatrices = this.baguaMatrices.slice(-1);
+      }
+      const newMatrix = new BaguaMatrix(x, y);
+      if (this.baguaMatrices.length === 1) {
+        newMatrix.vx = (this.baguaMatrices[0].vx > 0 ? -0.35 : 0.35);
+      }
+      this.baguaMatrices.push(newMatrix);
+    }
+
+    // 1. 广域昆仑青玉与紫微帝金祥云破雾 (横向大幅翻滚舒展，烘托巨幅天穹大阵)
+    const cloudCount = spawnMatrix ? 16 : 8;
+    const baguaCloudColors = [
+      'rgba(56, 189, 248, ',   // 昆仑天青
+      'rgba(251, 191, 36, ',   // 紫微帝金
+      'rgba(168, 85, 247, ',   // 鸿蒙紫气
+      'rgba(103, 232, 249, '   // 碧玉仙雾
+    ];
+    for (let i = 0; i < cloudCount; i++) {
+      const spread = (i / (cloudCount - 1 || 1) - 0.5) * 2;
+      const c = baguaCloudColors[i % baguaCloudColors.length];
+      const lateralPush = spread * (2.6 + Math.random() * 1.1);
+      this._pushParticle({
+        x: x + spread * 42 + (Math.random() - 0.5) * 18,
+        y: y + (Math.random() - 0.5) * 12,
+        vx: lateralPush,
+        vy: -(1.05 + Math.random() * 0.55),
+        radius: 10.0 + Math.random() * 9.0,
+        alpha: 0.68,
+        baseAlpha: 0.68,
+        life: 0,
+        maxLife: 135 + Math.random() * 28,
+        color: c,
+        growRate: 0.38,
+        isVolumetricSmoke: true
+      });
+    }
+
+    // 2. 漫天激荡的天罡金翠星屑
+    const sparkCount = spawnMatrix ? 18 : 8;
+    for (let i = 0; i < sparkCount; i++) {
+      const rad = Math.random() * Math.PI * 2;
+      const spd = Math.random() * 2.6 + 1.0;
+      this._pushParticle({
+        x: x + (Math.random() - 0.5) * 52,
+        y: y + (Math.random() - 0.5) * 14,
+        vx: Math.cos(rad) * spd,
+        vy: Math.sin(rad) * spd - 0.85,
+        radius: 1.6 + Math.random() * 1.6,
+        alpha: 0.96,
+        baseAlpha: 0.96,
+        life: 0,
+        maxLife: 95 + Math.random() * 25,
+        color: Math.random() < 0.55 ? '#fef08a' : '#67e8f9',
+        isGold: true,
+        shimmerPhase: Math.random() * Math.PI * 2,
+        shimmerSpeed: 0.20
+      });
+    }
+  }
+
+  // 15.8 佛光普照 · 梵天千叶金莲 (Buddha's Light & Celestial Thousand-Petal Golden Lotus)
+  emitBuddhaLight(x, y, spawnBuddha = true) {
+    if (spawnBuddha) {
+      if (this.buddhaLights.length >= 2) {
+        this.buddhaLights = this.buddhaLights.slice(-1);
+      }
+      const newBuddha = new BuddhaLightAscension(x, y);
+      if (this.buddhaLights.length === 1) {
+        newBuddha.vx = (this.buddhaLights[0].vx > 0 ? -0.32 : 0.32);
+      }
+      this.buddhaLights.push(newBuddha);
+    }
+
+    // 1. 广域旃檀暖金与红莲宝相祥云漫卷 (营造庄严璀璨的佛国金顶云海)
+    const cloudCount = spawnBuddha ? 18 : 8;
+    const buddhaCloudColors = [
+      'rgba(251, 191, 36, ',   // 旃檀帝金
+      'rgba(254, 240, 138, ',  // 峨眉佛光金
+      'rgba(244, 63, 94, ',    // 宝相红莲霞
+      'rgba(245, 158, 11, '    // 琉璃琥珀金
+    ];
+    for (let i = 0; i < cloudCount; i++) {
+      const spread = (i / (cloudCount - 1 || 1) - 0.5) * 2;
+      const c = buddhaCloudColors[i % buddhaCloudColors.length];
+      const lateralPush = spread * (2.6 + Math.random() * 1.1);
+      this._pushParticle({
+        x: x + spread * 44 + (Math.random() - 0.5) * 18,
+        y: y + (Math.random() - 0.5) * 12,
+        vx: lateralPush,
+        vy: -(1.05 + Math.random() * 0.55),
+        radius: 10.5 + Math.random() * 9.0,
+        alpha: 0.72,
+        baseAlpha: 0.72,
+        life: 0,
+        maxLife: 140 + Math.random() * 30,
+        color: c,
+        growRate: 0.38,
+        isVolumetricSmoke: true
+      });
+    }
+
+    // 2. 步步生莲：随呼气凌空绽放飘舞的 3D 宝相金莲花瓣
+    const petalCount = spawnBuddha ? 8 : 4;
+    for (let i = 0; i < petalCount; i++) {
+      const spread = (i / (petalCount - 1 || 1) - 0.5) * 2;
+      this._pushParticle({
+        x: x + spread * 48 + (Math.random() - 0.5) * 16,
+        y: y + (Math.random() - 0.5) * 14,
+        vx: spread * 1.2 + (Math.random() - 0.5) * 0.6,
+        vy: -(1.35 + Math.random() * 0.65),
+        radius: 6.2 + Math.random() * 3.2,
+        alpha: 0.95,
+        baseAlpha: 0.95,
+        life: 0,
+        maxLife: 115 + Math.random() * 30,
+        rotation: Math.random() * Math.PI * 2,
+        rotSpeed: (Math.random() - 0.5) * 0.06,
+        swayPhase: Math.random() * Math.PI * 2,
+        color: Math.random() < 0.68 ? '#fde047' : '#fb7185',
+        isLotusPetal: true
+      });
+    }
+
+    // 3. 漫天菩提舍利金雨星芒
+    const sparkCount = spawnBuddha ? 20 : 8;
+    for (let i = 0; i < sparkCount; i++) {
+      const rad = Math.random() * Math.PI * 2;
+      const spd = Math.random() * 2.6 + 1.0;
+      this._pushParticle({
+        x: x + (Math.random() - 0.5) * 54,
+        y: y + (Math.random() - 0.5) * 14,
+        vx: Math.cos(rad) * spd,
+        vy: Math.sin(rad) * spd - 0.85,
+        radius: 1.6 + Math.random() * 1.8,
+        alpha: 0.98,
+        baseAlpha: 0.98,
+        life: 0,
+        maxLife: 100 + Math.random() * 25,
+        color: Math.random() < 0.65 ? '#fef08a' : '#fbbf24',
+        isGold: true,
+        shimmerPhase: Math.random() * Math.PI * 2,
+        shimmerSpeed: 0.20
+      });
+    }
+  }
+
   // 15. 步步高升 · 祥瑞字河 (Auspicious Word River) - 纯正金红四字吉语星河螺旋腾飞 + 双轨回旋缎带 + 破晓神光 (绝无福印遮挡)
   emitAuspiciousRiver(x, y, spawnRiver = true) {
     if (spawnRiver) {
@@ -1080,10 +1541,10 @@ export class ParticleSystem {
       });
     }
 
-    // 凌空凝结的古雅篆金福印 (如 福、安、顺、吉、康、自在、长乐)
-    const blessingWords = ['福', '安', '顺', '吉', '康', '自在', '长乐'];
+    // 凌空凝结的古雅篆金福印 (如 福、财、暴富、顺、康、喜、大吉、发财、自在)
+    const blessingWords = ['福', '财', '暴富', '顺', '康', '喜', '大吉', '发财', '自在'];
     const shuffled = [...blessingWords].sort(() => 0.5 - Math.random());
-    const count = 3;
+    const count = 4;
     for (let i = 0; i < count; i++) {
       const spread = (i / (count - 1) - 0.5) * 2;
       const word = shuffled[i];
@@ -1223,6 +1684,12 @@ export class ParticleSystem {
         break;
       case 'auspicious_river':
         this.emitAuspiciousRiver(x, y);
+        break;
+      case 'bagua_taichi':
+        this.emitBaguaTaichi(x, y);
+        break;
+      case 'buddha_light':
+        this.emitBuddhaLight(x, y);
         break;
       case 'blessing_runes':
         this.emitBlessingRunes(x, y);
@@ -1465,6 +1932,28 @@ export class ParticleSystem {
       }
     }
 
+    // 3.68 更新乾坤八卦 · 紫微星盘 (Bagua Taichi Matrices)
+    if (this.baguaMatrices && this.baguaMatrices.length) {
+      for (let i = this.baguaMatrices.length - 1; i >= 0; i--) {
+        const matrix = this.baguaMatrices[i];
+        const isAlive = matrix.update(ch, ceilingY, (p) => this._pushParticle(p));
+        if (!isAlive) {
+          this.baguaMatrices.splice(i, 1);
+        }
+      }
+    }
+
+    // 3.69 更新佛光普照 · 梵天千叶金莲 (Buddha's Light & Golden Lotus)
+    if (this.buddhaLights && this.buddhaLights.length) {
+      for (let i = this.buddhaLights.length - 1; i >= 0; i--) {
+        const buddha = this.buddhaLights[i];
+        const isAlive = buddha.update(ch, ceilingY, (p) => this._pushParticle(p));
+        if (!isAlive) {
+          this.buddhaLights.splice(i, 1);
+        }
+      }
+    }
+
     // 3.7 更新盛世华彩烟花火箭 (Firework Rockets)
     if (this.fireworkRockets && this.fireworkRockets.length) {
       for (let i = this.fireworkRockets.length - 1; i >= 0; i--) {
@@ -1666,6 +2155,69 @@ export class ParticleSystem {
         p.vy = Math.min(-0.85, p.vy * 0.99 - 0.006);
         p.rotation = Math.sin(p.swayPhase * 0.6) * 0.08;
         p.alpha = (p.baseAlpha || 0.95) * fadeMultiplier;
+      } else if (p.isLotusPetal) {
+        // 宝相金莲花瓣随风摇曳升腾
+        p.swayPhase = (p.swayPhase || 0) + 0.055;
+        const petalSway = Math.sin(p.swayPhase) * 0.65;
+        p.x += p.vx + petalSway;
+        p.y += p.vy;
+        p.vx *= 0.985;
+        p.vy = Math.min(-0.75, p.vy * 0.992);
+        p.rotation = (p.rotation || 0) + (p.rotSpeed || 0.03);
+        p.alpha = (p.baseAlpha || 0.92) * fadeMultiplier;
+      } else if (p.isGoldCoin) {
+        // 曜世 24K 金币受自然微重力下落与 3D 轴翻滚
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.045;
+        p.vx *= 0.98;
+        p.rotAngle = (p.rotAngle || 0) + (p.rotSpeed || 0.08);
+        p.wobbleAngle = (p.wobbleAngle || 0) + 0.04;
+        p.alpha = (p.baseAlpha || 0.95) * fadeMultiplier;
+      } else if (p.isCupidArrow) {
+        // 丘比特爱神金箭疾速划破长空
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.985;
+        p.vy *= 0.985;
+        p.alpha = (p.baseAlpha || 0.95) * fadeMultiplier;
+      } else if (p.isAshClump) {
+        // 成型断裂碳灰块：自旋翻滚 + 重力加速下坠
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += (p.gravity || 0.18);
+        p.vx *= 0.98;
+        p.rotation = (p.rotation || 0) + (p.rotSpeed || 0.12);
+        p.alpha = Math.max(0, (p.baseAlpha || 0.88) * (1 - p.life / p.maxLife));
+      } else if (p.isEmberSpark) {
+        // 炽热火星雨：抛物线初速飞溅 + 重力加速下坠，闪烁微爆
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += (p.gravity || 0.14);
+        p.vx *= 0.97;
+        p.alpha = Math.max(0, (p.baseAlpha || 1.0) * (1 - p.life / p.maxLife));
+      } else if (p.isCleanseWave) {
+        // 禅意净化金光微波：自火头平滑向外膨胀扩散并柔和羽化
+        p.x += p.vx;
+        p.y += p.vy;
+        p.radius += (p.growRate || 1.2);
+        p.alpha = Math.max(0, (p.baseAlpha || 0.85) * (1 - Math.pow(p.life / p.maxLife, 1.8)));
+      } else if (p.isShellShard) {
+        // 爆珠撕裂四分五裂胶壳残片：受瞬间破裂初速飞溅，迅速在海绵中阻尼减速微旋
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.86;
+        p.vy *= 0.86;
+        p.rotation = (p.rotation || 0) + (p.rotSpeed || 0.05);
+        p.alpha = Math.max(0, (p.baseAlpha || 0.95) * (1 - p.life / p.maxLife));
+      } else if (p.isDroplet) {
+        // 拟真微晶原液水滴：向外溅射并迅速被滤嘴海绵吸收
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.88;
+        p.vy *= 0.88;
+        p.radius = Math.max(0.6, (p.initialRadius || 1.3) * (1 - (p.life / p.maxLife) * 0.35));
+        p.alpha = Math.max(0, (p.baseAlpha || 0.92) * (1 - p.life / p.maxLife));
       } else {
         p.x += p.vx;
         p.y += p.vy;
@@ -1927,6 +2479,20 @@ export class ParticleSystem {
       }
     }
 
+    // 3.68 渲染乾坤八卦 · 紫微星盘 (Bagua Taichi Matrices)
+    if (this.baguaMatrices && this.baguaMatrices.length) {
+      for (const matrix of this.baguaMatrices) {
+        matrix.render(ctx);
+      }
+    }
+
+    // 3.69 渲染佛光普照 · 梵天千叶金莲 (Buddha's Light & Golden Lotus)
+    if (this.buddhaLights && this.buddhaLights.length) {
+      for (const buddha of this.buddhaLights) {
+        buddha.render(ctx);
+      }
+    }
+
     // 3.7 渲染盛世华彩腾空火箭
     if (this.fireworkRockets && this.fireworkRockets.length) {
       for (const rk of this.fireworkRockets) {
@@ -1980,6 +2546,48 @@ export class ParticleSystem {
         ctx.shadowColor = '#ff4500';
         ctx.shadowBlur = 4;
         ctx.globalAlpha = p.alpha || 1.0;
+      } else if (p.isEmberSpark) {
+        // 抖灰迸发的高亮炽热火星
+        ctx.fillStyle = p.color || '#ffffff';
+        ctx.shadowColor = '#f97316';
+        ctx.shadowBlur = 6;
+        ctx.globalAlpha = p.alpha || 1.0;
+      } else if (p.isAshClump) {
+        // 成型断裂碳灰块：立体不规则灰白断茬
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotation || 0);
+        ctx.fillStyle = p.color || '#27272a';
+        ctx.globalAlpha = p.alpha || 0.85;
+        ctx.beginPath();
+        const cw = p.w || 3;
+        const ch = p.h || 2;
+        ctx.moveTo(-cw * 0.5, -ch * 0.5);
+        ctx.lineTo(cw * 0.55, -ch * 0.4);
+        ctx.lineTo(cw * 0.45, ch * 0.55);
+        ctx.lineTo(-cw * 0.5, ch * 0.4);
+        ctx.closePath();
+        ctx.fill();
+        // 灰块上沿微白断裂茬口
+        ctx.strokeStyle = `rgba(244, 244, 245, ${(p.alpha || 0.85) * 0.65})`;
+        ctx.lineWidth = 0.6;
+        ctx.stroke();
+        ctx.restore();
+        ctx.restore();
+        continue;
+      } else if (p.isCleanseWave) {
+        // 禅意净化灵光微波环 (环形通透渐变金圈)
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(245, 158, 11, ${(p.alpha || 0.8) * 0.85})`;
+        ctx.lineWidth = 1.6;
+        ctx.shadowColor = '#f59e0b';
+        ctx.shadowBlur = 10;
+        ctx.stroke();
+        ctx.restore();
+        ctx.restore();
+        continue;
       } else if (p.isAshFlake) {
         ctx.fillStyle = p.color || '#6b7280';
         ctx.shadowBlur = 0;
@@ -2080,6 +2688,21 @@ export class ParticleSystem {
         drawBlessingToken(ctx, p);
         ctx.restore();
         continue;
+      } else if (p.isLotusPetal) {
+        // 飘舞的 3D 宝相金莲花瓣
+        drawLotusPetalParticle(ctx, p);
+        ctx.restore();
+        continue;
+      } else if (p.isGoldCoin) {
+        // 曜世 24K 暴富金币微粒
+        drawGoldCoinParticle(ctx, p);
+        ctx.restore();
+        continue;
+      } else if (p.isCupidArrow) {
+        // 丘比特爱神金箭
+        drawCupidArrow(ctx, p);
+        ctx.restore();
+        continue;
       } else if (p.isFireworkBurst) {
         // 烟花高空绽放彩星
         ctx.fillStyle = p.color || '#fbbf24';
@@ -2092,6 +2715,41 @@ export class ParticleSystem {
         ctx.shadowColor = '#f59e0b';
         ctx.shadowBlur = 4;
         ctx.globalAlpha = p.alpha || 0.9;
+      } else if (p.isShellShard) {
+        // 拟真爆珠四分五裂胶壳残片 (Shattered Gelatin Shard)
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotation || 0);
+        ctx.beginPath();
+        const sw = p.w || 3;
+        const sh = p.h || 2;
+        ctx.moveTo(-sw, -sh * 0.5);
+        ctx.lineTo(sw * 0.7, -sh);
+        ctx.lineTo(sw, sh * 0.6);
+        ctx.lineTo(-sw * 0.3, sh);
+        ctx.closePath();
+        ctx.fillStyle = p.color || '#10b981';
+        ctx.globalAlpha = p.alpha || 0.9;
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, ' + ((p.alpha || 0.9) * 0.85) + ')';
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+        ctx.restore();
+        ctx.restore();
+        continue;
+      } else if (p.isDroplet) {
+        // 拟真微晶原液水滴 (Glistening Liquid Droplet)
+        ctx.fillStyle = p.color || '#10b981';
+        ctx.globalAlpha = p.alpha || 0.88;
+        if (hasShadow) {
+          ctx.shadowColor = p.color || '#10b981';
+          ctx.shadowBlur = 3;
+        }
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius || 1.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        continue;
       } else {
         ctx.fillStyle = formatFillColor(p.color, 'rgba(230, 238, 252, 1.0)');
         if (hasShadow) {
@@ -2120,12 +2778,52 @@ export class ParticleSystem {
     this.dragons = [];
     this.phoenixes = [];
     this.wordRivers = [];
+    this.baguaMatrices = [];
+    this.buddhaLights = [];
     this.fireworkRockets = [];
     if (this.silkStreams) {
       this.silkStreams.forEach(s => { s.nodes = []; });
     }
     this.streamNodeCounter = 0;
     this.igniteStartTime = 0;
+  }
+
+  /**
+   * 腾讯总监设计级：掐灭烟头专属降解 (Extinguish Tip Smoke Only)
+   * 严格按照用户需求：
+   * 1. 仅清除烟头点火阴燃发烟：清空烟头流体青烟(silkStreams)、微弱火星与烟灰碎屑；
+   * 2. 空中正在进行的所有专属烟雾特效（金龙、神凰、八卦、佛光、字河、烟花、烟圈、爱心、金币雨等）100% 完整保留，继续自然完成其生命周期！
+   */
+  extinguishTipSmoke(cx, cy) {
+    // 1. 彻底切断烟头流体青烟
+    if (this.silkStreams) {
+      this.silkStreams.forEach(s => { s.nodes = []; });
+    }
+    this.wispTrail = [];
+
+    // 2. 仅过滤清除烟头附近的点火阴燃微粒、火星和脱落灰屑，完全保留呼出的高光特效粒子
+    this.particles = this.particles.filter(p => !p.isSpark && !p.isTipCombustion && !p.isAshFlake);
+
+    // 3. 产生一缕微弱的掐灭冷灰残烟 (Sizzle Extinction Puff - 真实物理反馈)
+    if (typeof cx === 'number' && typeof cy === 'number') {
+      for (let i = 0; i < 4; i++) {
+        this._pushParticle({
+          x: cx + (Math.random() - 0.5) * 6,
+          y: cy - Math.random() * 2,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: -(0.55 + Math.random() * 0.45),
+          radius: 2.0 + Math.random() * 1.5,
+          growRate: 0.08,
+          maxRadius: 6.0,
+          alpha: 0.35,
+          baseAlpha: 0.35,
+          life: 0,
+          maxLife: 35 + Math.random() * 15,
+          color: 'rgba(161, 161, 170, ',
+          isVolumetricSmoke: true
+        });
+      }
+    }
   }
 
   clear() {

@@ -1,5 +1,5 @@
 <!-- pages/index/index.wxml -->
-<view class="app-container">
+<view class="app-container {{ vipTheme ? 'vip-theme-' + vipTheme : '' }}">
 
   <!-- ==================== 顶部统一导航栏 (安全避让微信原生胶囊按钮) ==================== -->
   <view class="custom-navbar" style="padding-top: {{ statusBarHeight }}px; height: {{ statusBarHeight + navBarHeight }}px;">
@@ -57,7 +57,7 @@
           wx:if="{{ showSmokeEffectGuide }}"
           catchtap="onTapSmokeGuideTooltip"
         >
-          <text class="sgt-text">💡 长按开启特效大厅</text>
+          <text class="sgt-text">💡 长按烟雾特效开启列表</text>
           <view class="sgt-arrow"></view>
         </view>
 
@@ -417,8 +417,8 @@
             <view class="sst-left">
               <text class="sst-icon">{{ isAmbientEnabled ? '🎧' : '🔇' }}</text>
               <view class="sst-info">
-                <text class="sst-title">真实自然声景伴吸</text>
-                <text class="sst-desc">{{ isAmbientEnabled ? '已开启窗外夜雨/林间柴火伴吸声景' : '已静音 · 纯享无声' }}</text>
+                <text class="sst-title">大师级柔绒微声景伴吸</text>
+                <text class="sst-desc">{{ isAmbientEnabled ? '已开启 -26dB 暖频呼吸柔音 · 久听静心不吵耳' : '已静音 · 纯享无声' }}</text>
               </view>
             </view>
             <switch checked="{{ isAmbientEnabled }}" color="#10b981" />
@@ -501,9 +501,10 @@
       </view>
 
       <!-- 特效卡片纵向滚动流 -->
-      <scroll-view class="effects-cards-scroll" scroll-y>
+      <scroll-view class="effects-cards-scroll" scroll-y scroll-into-view="{{ activeScrollEffectId }}" scroll-with-animation="false">
         <view class="effects-cards-list">
           <view 
+            id="effect_card_{{ item.id }}"
             class="effect-card {{ item.id === currentSmokeEffect.id ? 'active-effect-card' : '' }} {{ !item.unlocked ? 'locked-effect-card' : '' }}"
             wx:for="{{ smokeEffectsList }}"
             wx:key="id"

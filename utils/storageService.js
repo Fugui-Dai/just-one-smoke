@@ -8,6 +8,8 @@ const RECORDS_KEY = 'SMOKEFREE_RECORDS';
 const SELECTED_CIGARETTE_KEY = 'SMOKEFREE_SELECTED_CIGARETTE';
 const ACHIEVEMENTS_KEY = 'SMOKEFREE_UNLOCKED_ACHIEVEMENTS';
 const PACK_INVENTORY_KEY = 'SMOKEFREE_PACK_INVENTORY';
+const PACK_SLOTS_KEY = 'SMOKEFREE_PACK_SLOTS';
+const HOME_STICK_DIGESTED_KEY = 'SMOKEFREE_HOME_STICK_DIGESTED';
 const CHECKIN_DATES_KEY = 'SMOKEFREE_CHECKIN_DATES';
 const DEFAULT_CIGARETTE_ID = 'chaotianmen_gold';
 
@@ -280,10 +282,20 @@ export const storageService = {
   },
 
   // ==========================================
-  // 烟盒库存余量管理 (Pack Inventory)
+  // 烟盒库存余量与独立槽位状态管理 (Pack Inventory & Per-Slot States)
   // ==========================================
   getAllPackInventories() {
     const raw = getItem(PACK_INVENTORY_KEY);
+    if (!raw) return {};
+    try {
+      return typeof raw === 'string' ? JSON.parse(raw) : raw;
+    } catch {
+      return {};
+    }
+  },
+
+  getAllPackSlots() {
+    const raw = getItem(PACK_SLOTS_KEY);
     if (!raw) return {};
     try {
       return typeof raw === 'string' ? JSON.parse(raw) : raw;
@@ -308,15 +320,111 @@ export const storageService = {
     return inv[cigaretteId];
   },
 
+  getPackSlots(cigaretteId, defaultCapacity = 20) {
+    const cap = Math.max(1, Number(defaultCapacity) || 20);
+    const allSlots = this.getAllPackSlots();
+    const savedCount = Math.min(cap, Math.max(0, this.getPackCount(cigaretteId, cap)));
+
+    if (Array.isArray(allSlots[cigaretteId]) && allSlots[cigaretteId].length === cap) {
+      const slots = allSlots[cigaretteId].map(Boolean);
+      let activeCount = slots.filter(Boolean).length;
+      if (activeCount === savedCount) {
+        return slots;
+      }
+      // 若外部通过 setPackCount 修改了余量，同步修正槽位数组并保留已有空槽位置
+      if (activeCount > savedCount) {
+        for (let i = cap - 1; i >= 0 && activeCount > savedCount; i--) {
+          if (slots[i]) {
+            slots[i] = false;
+            activeCount--;
+          }
+        }
+      } else if (activeCount < savedCount) {
+        for (let i = 0; i < cap && activeCount < savedCount; i++) {
+          if (!slots[i]) {
+            slots[i] = true;
+            activeCount++;
+          }
+        }
+      }
+      allSlots[cigaretteId] = slots;
+      setItem(PACK_SLOTS_KEY, allSlots);
+      return slots;
+    }
+
+    const initialSlots = [];
+    for (let i = 0; i < cap; i++) {
+      initialSlots.push(i < savedCount);
+    }
+    allSlots[cigaretteId] = initialSlots;
+    setItem(PACK_SLOTS_KEY, allSlots);
+    return initialSlots;
+  },
+
+  setPackSlots(cigaretteId, slots) {
+    const allSlots = this.getAllPackSlots();
+    const normalized = Array.isArray(slots) ? slots.map(Boolean) : [];
+    allSlots[cigaretteId] = normalized;
+    setItem(PACK_SLOTS_KEY, allSlots);
+    const remaining = normalized.filter(Boolean).length;
+    this.setPackCount(cigaretteId, remaining);
+    return { slots: normalized, remaining };
+  },
+
+  consumePackSlot(cigaretteId, slotIndex = -1, defaultCapacity = 20) {
+    const cap = Math.max(1, Number(defaultCapacity) || 20);
+    const slots = [...this.getPackSlots(cigaretteId, cap)];
+    let consumedIndex = -1;
+
+    if (typeof slotIndex === 'number' && slotIndex >= 0 && slotIndex < cap && slots[slotIndex]) {
+      slots[slotIndex] = false;
+      consumedIndex = slotIndex;
+    } else {
+      // 未指定槽位或该槽已空时，优先从前排 (10..19) 或首个有烟槽位取出一支
+      for (let i = cap - 1; i >= 0; i--) {
+        if (slots[i]) {
+          slots[i] = false;
+          consumedIndex = i;
+          break;
+        }
+      }
+    }
+
+    const { remaining } = this.setPackSlots(cigaretteId, slots);
+    return {
+      slots,
+      remaining,
+      consumedIndex
+    };
+  },
+
   decrementPackCount(cigaretteId, defaultCapacity = 20) {
-    const current = this.getPackCount(cigaretteId, defaultCapacity);
-    const updated = Math.max(0, current - 1);
-    this.setPackCount(cigaretteId, updated);
-    return updated;
+    const res = this.consumePackSlot(cigaretteId, -1, defaultCapacity);
+    return res.remaining;
   },
 
   resetPackCount(cigaretteId, capacity = 20) {
-    return this.setPackCount(cigaretteId, capacity);
+    const cap = Math.max(1, Number(capacity) || 20);
+    const fullSlots = [];
+    for (let i = 0; i < cap; i++) {
+      fullSlots.push(true);
+    }
+    const allSlots = this.getAllPackSlots();
+    allSlots[cigaretteId] = fullSlots;
+    setItem(PACK_SLOTS_KEY, allSlots);
+    return this.setPackCount(cigaretteId, cap);
+  },
+
+  isHomeStickDigested() {
+    return !!getItem(HOME_STICK_DIGESTED_KEY);
+  },
+
+  setHomeStickDigested(digested) {
+    if (digested) {
+      setItem(HOME_STICK_DIGESTED_KEY, true);
+    } else {
+      removeItem(HOME_STICK_DIGESTED_KEY);
+    }
   },
 
   // ==========================================
@@ -355,7 +463,7 @@ export const storageService = {
   // ==========================================
   getSelectedSmokeEffectId() {
     const id = getItem('SMOKEFREE_SELECTED_SMOKE_EFFECT');
-    if (!id) return 'auspicious_river';
+    if (!id || id === 'cloud_dense' || id === 'silk_pure') return 'auspicious_river';
     return id;
   },
 
@@ -365,7 +473,7 @@ export const storageService = {
 
   getUnlockedSmokeEffects() {
     const raw = getItem('SMOKEFREE_UNLOCKED_SMOKE_EFFECTS');
-    const defaultList = ['silk_pure', 'cloud_dense', 'auspicious_river'];
+    const defaultList = ['ring_classic', 'auspicious_river'];
     if (!raw) return defaultList;
     try {
       let list = defaultList;
@@ -375,7 +483,7 @@ export const storageService = {
       } else if (Array.isArray(raw)) {
         list = raw;
       }
-      return list.filter(id => id !== 'cloud_dense');
+      return list.filter(id => id !== 'cloud_dense' && id !== 'silk_pure');
     } catch {
       return defaultList;
     }

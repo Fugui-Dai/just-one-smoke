@@ -25,6 +25,8 @@
 }
 
 .navbar-content {
+  position: relative;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -33,6 +35,8 @@
 }
 
 .nav-back-btn {
+  position: relative;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -52,20 +56,30 @@
 }
 
 .nav-center-title-box {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  margin: auto;
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: none;
+  z-index: 5;
 }
 
 .nav-center-title-text {
-  font-size: 30rpx;
-  font-weight: 700;
-  letter-spacing: 1rpx;
+  font-size: 34rpx;
+  font-weight: 800;
+  letter-spacing: 2rpx;
   background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  text-align: center;
 }
 
 .nav-placeholder {
-  width: 80rpx;
+  width: 60rpx;
+  height: 60rpx;
 }

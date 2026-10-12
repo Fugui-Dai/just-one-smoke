@@ -156,6 +156,14 @@ export const vipService = {
     return this.getVipInfo().isVip;
   },
 
+  getVipTheme() {
+    const info = this.getVipInfo();
+    if (!info || !info.isVip) {
+      return ''; // 会员未开通或已到期，返回空字符串，全应用立即恢复默认背景
+    }
+    return info.tierId || 'month';
+  },
+
   activateTier(tierId) {
     const tier = VIP_TIERS.find(t => t.id === tierId) || VIP_TIERS[1];
     const current = this.getVipInfo();
