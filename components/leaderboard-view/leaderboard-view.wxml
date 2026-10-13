@@ -26,7 +26,6 @@
             </view>
             <text class="my-rank-title">{{ myRankInfo.title || '无烟先锋' }}</text>
             <view class="my-rank-slogan-wrap" wx:if="{{ myRankInfo.quote || profile.customQuote }}">
-              <text class="mr-slogan-icon">❝</text>
               <text class="mr-slogan-text">{{ myRankInfo.quote || profile.customQuote }}</text>
             </view>
           </view>
@@ -104,7 +103,6 @@
             <text class="me-badge" wx:if="{{ item.isMe }}">我</text>
           </view>
           <view class="hero-slogan-wrap" wx:if="{{ item.quote }}">
-            <text class="slogan-icon">❝</text>
             <text class="hero-slogan-text">{{ item.quote }}</text>
           </view>
           <view class="hero-data-tags">
