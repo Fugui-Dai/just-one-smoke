@@ -8,30 +8,32 @@
 >
   <view class="stats-content" style="padding-top: {{ topPadding }}px;">
     
-    <!-- 0. 个人微信头像、昵称与打卡卡片 (左侧圆形头像，中间昵称与本地保存提示，右侧打卡方卡) -->
-    <view class="user-profile-header-card">
+    <!-- 0. 个人微信头像、昵称与打卡卡片 (VIP 尊享曜石黑金名片 + 皇冠铭牌) -->
+    <view class="user-profile-header-card {{ vipInfo.isVip ? 'is-vip-profile-card' : '' }}">
       <view class="user-profile-row">
         <!-- 左侧区域：头像严格靠左，名字紧随头像 -->
         <view class="user-profile-left">
-          <!-- 微信原生选择头像按钮 (严格靠左，尺寸锁定，防止微信默认button样式拉伸) -->
-          <button 
-            class="user-avatar-btn" 
-            open-type="chooseAvatar" 
-            bindchooseavatar="onChooseAvatar"
-            size="mini"
-            style="width: 96rpx; min-width: 96rpx; max-width: 96rpx; height: 96rpx; min-height: 96rpx; max-height: 96rpx; margin: 0; padding: 0; border: none; background: transparent; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"
-          >
-            <image 
-              class="user-avatar-img" 
-              src="{{ profile.avatarUrl || defaultAvatarSvg }}" 
-              mode="aspectFill" 
-            />
-          </button>
+          <view class="user-avatar-wrap">
+            <!-- 微信原生选择头像按钮 (严格靠左，尺寸锁定，防止微信默认button样式拉伸) -->
+            <button 
+              class="user-avatar-btn" 
+              open-type="chooseAvatar" 
+              bindchooseavatar="onChooseAvatar"
+              size="mini"
+              style="width: 96rpx; min-width: 96rpx; max-width: 96rpx; height: 96rpx; min-height: 96rpx; max-height: 96rpx; margin: 0; padding: 0; border: none; background: transparent; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"
+            >
+              <image 
+                class="user-avatar-img {{ vipInfo.isVip ? 'vip-avatar-img' : '' }}" 
+                src="{{ profile.avatarUrl || defaultAvatarSvg }}" 
+                mode="aspectFill" 
+              />
+            </button>
+          </view>
 
-          <!-- 昵称紧随头像：微信官方昵称选择控件 (光标全透明隐形，点击弹出微信昵称胶囊) -->
+          <!-- 昵称紧随头像：微信官方昵称选择控件 + VIP 荣耀身份铭牌 -->
           <view class="user-info-col">
             <input 
-              class="user-nickname-input" 
+              class="user-nickname-input {{ vipInfo.isVip ? 'vip-nickname-gold' : '' }}" 
               type="nickname" 
               value="{{ profile.nickName || '无烟觉醒者' }}" 
               bindinput="onNicknameChange"
@@ -39,38 +41,24 @@
               bindblur="onNicknameBlur" 
               cursor-color="transparent"
             />
+            <view class="user-meta-subrow" bindtap="onOpenProfileModal">
+              <view class="profile-vip-nameplate {{ vipInfo.isVip ? '' : 'is-vip-inactive' }}" catchtap="onGoToVip">
+                <text class="pvn-crown">👑</text>
+                <text class="pvn-text">{{ vipInfo.isVip ? (vipInfo.isLifetime ? '至尊永久VIP' : '尊贵VIP会员') : '尊贵VIP会员' }}</text>
+              </view>
+              <text class="user-meta-smoke-info">烟龄 {{ profile.smokeYears || 5 }}年 · 日均 {{ profile.cigsPerDay || 15 }}支 ✎</text>
+            </view>
           </view>
         </view>
 
-        <!-- 最右边打卡状态方卡 (已打卡 / 2天 / 连 2) -->
+        <!-- 最右边打卡状态方卡 (已打卡 / 连续打卡天数) -->
         <view class="user-punch-card active-punch-card" bindtap="onTapPunchCard">
           <text class="punch-card-title">已打卡 ✓</text>
           <view class="punch-card-days-row">
-            <text class="punch-card-num">{{ quitDays + 1 }}</text>
+            <text class="punch-card-num">{{ calendarStats.streakDays || (quitDays + 1) }}</text>
             <text class="punch-card-unit">天</text>
           </view>
         </view>
-      </view>
-    </view>
-
-    <!-- VIP 尊享特权入口横幅 (腾讯黑金曜石奢雅标准) -->
-    <view class="vip-entry-banner" bindtap="onGoToVip">
-      <view class="vip-banner-left">
-        <!-- 矢量 3D 曜石黑金极清微光皇冠 -->
-        <view class="vb-emblem-wrap">
-          <image class="vb-emblem-svg" src="{{ vipCrownSvg }}" mode="aspectFit" />
-        </view>
-        <view class="vip-banner-text">
-          <view class="vb-title-row">
-            <text class="vb-main">{{ vipInfo.isVip ? (vipInfo.isLifetime ? '至尊终身特权' : 'VIP 尊享特权') : 'VIP 尊享会员' }}</text>
-            <text class="vb-black-gold-tag">{{ vipInfo.isVip ? '生效中' : '黑金特权' }}</text>
-          </view>
-          <text class="vb-sub">{{ vipInfo.isVip ? (vipInfo.isLifetime ? '永久跳过广告 · 33款名烟全免解锁' : (vipInfo.formattedExpire + ' 到期 · 尊享全免特权')) : '全域免看广告 · 33款名烟全解锁 · 专属特权' }}</text>
-        </view>
-      </view>
-      <!-- 右侧优雅丝滑胶囊按钮 -->
-      <view class="vip-banner-btn">
-        <text class="vbb-text">{{ vipInfo.isVip ? '查看特权 ›' : '立即开通 ›' }}</text>
       </view>
     </view>
 
@@ -239,6 +227,7 @@
         <!-- 交互触控热区 -->
         <view class="body-touch-layer">
           <view class="organ-hotspot spot-brain" bindtap="onSelectOrgan" data-organ="brain"></view>
+          <view class="organ-hotspot spot-brain-plexus" catchtap="onSelectOrgan" data-organ="brain"></view>
           <view class="organ-hotspot spot-lungs" bindtap="onSelectOrgan" data-organ="lungs"></view>
           <view class="organ-hotspot spot-heart" bindtap="onSelectOrgan" data-organ="heart"></view>
           <view class="organ-hotspot spot-blood" bindtap="onSelectOrgan" data-organ="blood"></view>
@@ -391,33 +380,29 @@
       </view>
     </view>
 
-    <!-- 4. 吸烟统计 (顶部显示 累计点燃、累计次数、抽完根数、替烟节省 + 抢回健康寿命纯文字 + 7天累计次数折线图) -->
+    <!-- 4. 吸烟统计 (顶部显示 累计替烟(支)、点火次数(次)、近7天日均(支) + 抢回健康寿命纯文字 + 7天累计次数折线图) -->
     <view class="system-stats-card">
       <view class="section-top-header">
         <view class="section-name-wrap">
           <text class="sec-dot green"></text>
           <text class="sec-heading">吸烟统计</text>
         </view>
-        <text class="sec-sub-info">今日 {{ todayCount }} 支 · 近7天日均 {{ weeklyAvg }} 支</text>
+        <text class="sec-sub-info">今日 {{ todayCount }} 支 · 累计节省 ¥{{ totalSavedMoney }}</text>
       </view>
 
-      <!-- 顶部 4 栏数据指标卡片 -->
+      <!-- 顶部 3 栏数据指标卡片 -->
       <view class="stats-top-four-grid">
         <view class="st-cell">
-          <text class="st-num">{{ totalIgnites !== undefined ? totalIgnites : totalSubstituted }}</text>
-          <text class="st-label">累计点燃</text>
-        </view>
-        <view class="st-cell">
           <text class="st-num">{{ totalSubstituted }}</text>
-          <text class="st-label">累计次数</text>
+          <text class="st-label">累计替烟(支)</text>
         </view>
         <view class="st-cell">
-          <text class="st-num">{{ totalFinishedCigs || totalSubstituted }}</text>
-          <text class="st-label">抽完根数</text>
+          <text class="st-num">{{ igniteCount || totalIgnites || resolvedIgniteCount || totalSubstituted }}</text>
+          <text class="st-label">点火次数(次)</text>
         </view>
         <view class="st-cell gold-cell">
-          <text class="st-num gold">¥{{ totalSavedMoney }}</text>
-          <text class="st-label">替烟节省</text>
+          <text class="st-num gold">{{ weeklyAvg }}</text>
+          <text class="st-label">近7天日均(支)</text>
         </view>
       </view>
 
@@ -496,12 +481,12 @@
         </view>
         <view class="cc-divider"></view>
         <view class="cc-stat">
-          <text class="cc-num is-green">{{ quitDays + 1 }}<text class="cc-unit">天</text></text>
-          <text class="cc-label">持续无烟</text>
+          <text class="cc-num is-green">{{ calendarStats.streakDays || 1 }}<text class="cc-unit">天</text></text>
+          <text class="cc-label">连续打卡</text>
         </view>
         <view class="cc-divider"></view>
         <view class="cc-stat">
-          <text class="cc-num">{{ calendarStats.punchRate || 100 }}<text class="cc-unit">%</text></text>
+          <text class="cc-num">{{ calendarStats.punchRate !== undefined ? calendarStats.punchRate : 100 }}<text class="cc-unit">%</text></text>
           <text class="cc-label">月自律率</text>
         </view>
       </view>

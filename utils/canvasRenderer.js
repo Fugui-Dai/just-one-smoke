@@ -24,6 +24,7 @@ function hexToRgba(hex, alpha = 1.0) {
 }
 
 function drawEllipse(ctx, x, y, rx, ry) {
+  ctx.moveTo(x + rx, y);
   if (typeof ctx.ellipse === 'function') {
     ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
   } else {
@@ -95,11 +96,6 @@ export class CanvasRenderer {
     this.time += delta;
     const time = this.time * 1000;
 
-    // ==========================================
-    // 0. 绘制沉浸生活场景背景 (雨夜车窗 / 深夜阳台 / 森林篝火 / 极简黑曜)
-    // ==========================================
-    sceneRenderer.render(ctx, w, h, sceneType || 'rainy_car', delta, this.time, vipTheme);
-
     const curState = fsm ? fsm.getState() : 'UNLIT';
     const isInhaling = curState === 'INHALING';
 
@@ -112,6 +108,14 @@ export class CanvasRenderer {
     } else {
       this.emberHeat += (targetHeat - this.emberHeat) * Math.min(1.0, delta * 3.8);
     }
+
+    const isLit = curState !== 'UNLIT' && curState !== 'FINISHED';
+    const emberIntensity = isLit ? (0.22 + this.emberHeat * 0.78) : 0;
+
+    // ==========================================
+    // 0. 绘制沉浸生活场景背景 (雨夜车窗 / 威士忌吧 / 江湖夜钓 / 禅院听竹 / 浩瀚星宇，支持火光映境联动)
+    // ==========================================
+    sceneRenderer.render(ctx, w, h, sceneType || 'rainy_car', delta, this.time, vipTheme, emberIntensity);
 
     const p = fsm ? fsm.getProgress() : 1.0;
     const progress = (typeof p === 'number' && !isNaN(p)) ? p : 1.0;
@@ -151,9 +155,11 @@ export class CanvasRenderer {
     const curAsh = maxPaperH * Math.max(0, Math.min(1.0, ashRatio));
     const fireY = cy - paperH; // 燃烧端顶端Y坐标 (全局作用域安全可用)
 
-    // 当前燃烧口宽度 (喇叭筒手卷旱烟随燃烧下移逐渐收窄，机制烟恒定 cigW)
+    // 手卷旱烟底部锚点（烟嘴与烟身通体合一，从 fireY 一体延伸至 cy + filterH，绝无独立接缝烟嘴）
+    const hanyanBottomY = cy + filterH;
+    // 当前燃烧口宽度 (喇叭筒手卷旱烟沿通体一体锥度随燃烧下移平滑收窄，机制烟恒定 cigW)
     const curTopW = curCig.widthType === 'hand_rolled'
-      ? (cigW + (topW - cigW) * (paperH / Math.max(1, maxPaperH)))
+      ? (cigW + (topW - cigW) * ((hanyanBottomY - fireY) / Math.max(1, maxCigH)))
       : cigW;
 
     const filterBase = curCig.filterColor || '#991b1b';
@@ -174,20 +180,20 @@ export class CanvasRenderer {
     // ==========================================
     ctx.save();
     const isHandRolled = curCig.widthType === 'hand_rolled';
-    const shadowY = cy + filterH + (isHandRolled ? 8 : 18);
-    const shadowR = isHandRolled ? 12 : cigW * 1.8;
+    const shadowY = cy + filterH + (isHandRolled ? 10 : 18);
+    const shadowR = isHandRolled ? cigW * 1.4 : cigW * 1.8;
     const shadowGrad = ctx.createRadialGradient(cx, shadowY, 3, cx, shadowY, shadowR);
     shadowGrad.addColorStop(0, 'rgba(0, 0, 0, 0.75)');
     shadowGrad.addColorStop(0.5, 'rgba(0, 0, 0, 0.35)');
     shadowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
     ctx.fillStyle = shadowGrad;
     ctx.beginPath();
-    drawEllipse(ctx, cx, shadowY, isHandRolled ? 9 : cigW * 1.6, isHandRolled ? 5 : 9);
+    drawEllipse(ctx, cx, shadowY, isHandRolled ? cigW * 1.15 : cigW * 1.6, isHandRolled ? 6 : 9);
     ctx.fill();
     ctx.restore();
 
     // ==========================================
-    // 3. 过滤嘴 / 古巴雪茄标 3D 圆柱体微距写实渐变渲染
+    // 3. 过滤嘴 / 古巴雪茄标 3D 圆柱体微距写实渐变渲染 (手卷旱烟通体一体无独立过滤嘴)
     // ==========================================
     const fGrad = ctx.createLinearGradient(cx - cigW / 2, 0, cx + cigW / 2, 0);
     fGrad.addColorStop(0, 'rgba(0, 0, 0, 0.40)');
@@ -195,51 +201,7 @@ export class CanvasRenderer {
     fGrad.addColorStop(0.55, 'rgba(255, 255, 255, 0.06)');
     fGrad.addColorStop(1, 'rgba(0, 0, 0, 0.45)');
 
-    if (curCig.widthType === 'hand_rolled') {
-      // 老辈白纸卷旱烟（纯手工扭卷圆锥尖锐尾部）：
-      // 尾部从 cy 处宽 cigW (16px) 向下急剧收窄至 cy + filterH (仅 4px 尖端)，纯白纸褶皱扭结与微焦油浸润
-      ctx.save();
-      const sharpMouthY = cy + filterH;
-      const mouthTipW = 4.0; // 尖端锐角宽度
-
-      // 锐角圆锥底座梯形
-      ctx.beginPath();
-      ctx.moveTo(cx - cigW / 2, cy);
-      ctx.lineTo(cx + cigW / 2, cy);
-      ctx.lineTo(cx + mouthTipW / 2, sharpMouthY);
-      ctx.lineTo(cx - mouthTipW / 2, sharpMouthY);
-      ctx.closePath();
-      ctx.fillStyle = '#faf8f2';
-      ctx.fill();
-
-      // 3D 扭曲圆锥光影
-      const coneGrad = ctx.createLinearGradient(cx - cigW / 2, 0, cx + cigW / 2, 0);
-      coneGrad.addColorStop(0, 'rgba(0, 0, 0, 0.32)');
-      coneGrad.addColorStop(0.25, 'rgba(255, 255, 255, 0.75)');
-      coneGrad.addColorStop(0.6, 'rgba(0, 0, 0, 0.12)');
-      coneGrad.addColorStop(1, 'rgba(0, 0, 0, 0.40)');
-      ctx.fillStyle = coneGrad;
-      ctx.fill();
-
-      // 手工搓扭褶皱斜向螺旋纹理 (Twisted Paper Spiral Ridges)
-      ctx.strokeStyle = 'rgba(168, 162, 158, 0.65)';
-      ctx.lineWidth = 1.0;
-      ctx.beginPath();
-      ctx.moveTo(cx - cigW / 2 + 2, cy + 2);
-      ctx.lineTo(cx + 1, cy + filterH * 0.4);
-      ctx.moveTo(cx - 3, cy + 3);
-      ctx.lineTo(cx + mouthTipW / 2, cy + filterH * 0.75);
-      ctx.moveTo(cx + cigW / 2 - 2, cy + 1);
-      ctx.lineTo(cx - 1, cy + filterH * 0.55);
-      ctx.stroke();
-
-      // 尖尾捏合微凹口
-      ctx.fillStyle = '#78350f';
-      ctx.beginPath();
-      drawEllipse(ctx, cx, sharpMouthY, mouthTipW * 0.5, 1.2);
-      ctx.fill();
-      ctx.restore();
-    } else {
+    if (curCig.widthType !== 'hand_rolled') {
       // 工业过滤嘴 / 古巴雪茄标 3D 圆柱体微距写实渐变渲染
       ctx.fillStyle = filterBase;
       ctx.fillRect(cx - cigW / 2, cy, cigW, filterH);
@@ -249,6 +211,10 @@ export class CanvasRenderer {
       const lowerFilterColor = String(filterBase).toLowerCase();
       const isLightPearlFilter = lowerFilterColor === '#f1f5f9' || lowerFilterColor === '#f8fafc' || lowerFilterColor === '#ffffff';
       const isDarkModernFilter = lowerFilterColor === '#18181b' || lowerFilterColor === '#09090b' || lowerFilterColor === '#0f766e' || lowerFilterColor === '#1e1b4b';
+      const isClassicCorkFilter = !isLightPearlFilter && !isDarkModernFilter && (
+        curCig.filterStyle === 'classic_cork' ||
+        ['#d97706', '#b45309', '#e5a93c', '#c87d55', '#78350f', '#ca8a04', '#f59e0b'].includes(lowerFilterColor)
+      );
 
       // 金箍 / 雪茄专属标识圈 / 经典软木斑点
       if (curCig.isCigar) {
@@ -267,13 +233,13 @@ export class CanvasRenderer {
           ctx.fillRect(bx, cy + 8, 3, 5);
         }
       } else {
-        // 仅在经典软木/棕红/琥珀金烟嘴上绘制软木斑点；纯白珠光嘴与现代黑曜/蒂芙尼蓝细支嘴保持纯净哑光肌理，绝不混色
+        // 仅在经典软木/棕红/琥珀金烟嘴上绘制软木斑点；纯白珠光嘴与现代黑曜/时尚彩嘴保持丝绸哑光或微孔透气肌理，绝不混入木屑斑点
         ctx.save();
         ctx.beginPath();
         drawRect(ctx, cx - cigW / 2, cy, cigW, filterH);
         ctx.clip();
 
-        if (!isLightPearlFilter && !isDarkModernFilter) {
+        if (isClassicCorkFilter) {
           // 1) 浅金色软木木质微纤维斑点 (Light Golden Cork Spots)
           ctx.fillStyle = 'rgba(254, 240, 138, 0.32)';
           for (let sy = cy + 6; sy < cy + filterH - 4; sy += 5.2) {
@@ -292,11 +258,18 @@ export class CanvasRenderer {
             ctx.fillRect(cx - cigW / 2 + rx, sy, rw, rh);
           }
         } else {
-          // 现代细支/爆珠专属激光打孔透气环 (Laser Micro-Perforation Ring)
+          // 现代细支/时尚彩嘴/爆珠专属激光打孔透气环与丝缎微光泽 (Laser Micro-Perforation & Pearl Silk Sheen)
           const perfY = cy + 11.5;
-          ctx.fillStyle = isLightPearlFilter ? 'rgba(148, 163, 184, 0.45)' : 'rgba(255, 255, 255, 0.22)';
+          ctx.fillStyle = isLightPearlFilter ? 'rgba(148, 163, 184, 0.45)' : 'rgba(255, 255, 255, 0.25)';
           for (let px = cx - cigW / 2 + 2.5; px < cx + cigW / 2 - 2; px += 2.8) {
             ctx.fillRect(px, perfY, 1.0, 1.0);
+          }
+          if (!isLightPearlFilter && !isDarkModernFilter) {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+            for (let sy = cy + 8; sy < cy + filterH - 6; sy += 7.5) {
+              const rx = ((sy * 17 + 5) % Math.floor(cigW - 5)) + 2.5;
+              ctx.fillRect(cx - cigW / 2 + rx, sy, 1.2, 0.8);
+            }
           }
         }
         ctx.restore();
@@ -328,10 +301,11 @@ export class CanvasRenderer {
         // 竖向品牌字 (自动剔除括号与空格，完整保留文字，有爆珠时避开爆珠区域)
         const rawFilterBrand = curCig.filterBrandText || (curCig.brand ? curCig.brand.toUpperCase() : 'CHAOTIANMEN');
         const filterBrand = String(rawFilterBrand).replace(/[()（）\s]/g, '');
+        const useGoldFilterText = isDarkModernFilter || ['#3b0764', '#581c87', '#1e3a8a', '#9f1239', '#db2777', '#831843', '#7f1d1d'].includes(lowerFilterColor);
         ctx.font = 'bold 7px sans-serif';
         ctx.fillStyle = isLightPearlFilter
           ? 'rgba(71, 85, 105, 0.72)'
-          : (isDarkModernFilter ? 'rgba(253, 224, 71, 0.78)' : 'rgba(100, 40, 10, 0.75)');
+          : (useGoldFilterText ? 'rgba(253, 224, 71, 0.88)' : 'rgba(100, 40, 10, 0.75)');
         ctx.textAlign = 'center';
         const maxL = Math.min(filterBrand.length, Math.floor((filterH - 22) / 7.5));
         const beadCenterY = cy + filterH * 0.52;
@@ -762,63 +736,68 @@ export class CanvasRenderer {
     // ==========================================
     // 5. 卷纸烟身 / 雪茄深棕烟叶 3D 圆柱体微距写实渲染
     // ==========================================
-    if (paperH > 0) {
-      const curTopW = curCig.widthType === 'hand_rolled' 
-        ? (cigW + (topW - cigW) * (paperH / maxPaperH)) 
-        : cigW;
-
+    if (paperH > 0 || curCig.widthType === 'hand_rolled') {
       if (curCig.widthType === 'hand_rolled') {
-        // 老辈白纸手卷旱烟：短款经典大锥度白纸喇叭筒 (上端宽 curTopW，下端宽 cigW)
+        // 老辈白纸手卷旱烟：烟嘴与烟身 100% 通体合一的大锥度白纸喇叭筒 (上端宽 curTopW @ fireY，底端宽 cigW @ hanyanBottomY)
         ctx.save();
         ctx.beginPath();
-        ctx.moveTo(cx - curTopW / 2, cy - paperH);
-        ctx.lineTo(cx + curTopW / 2, cy - paperH);
-        ctx.lineTo(cx + cigW / 2, cy);
-        ctx.lineTo(cx - cigW / 2, cy);
+        ctx.moveTo(cx - curTopW / 2, fireY);
+        ctx.lineTo(cx + curTopW / 2, fireY);
+        ctx.lineTo(cx + cigW / 2, hanyanBottomY);
+        ctx.lineTo(cx - cigW / 2, hanyanBottomY);
         ctx.closePath();
         ctx.fillStyle = '#faf8f2';
         ctx.fill();
 
-        // 3D 锥面渐变立体光影 (洁白透光、微泛老纸米黄)
+        // 3D 一体式锥面渐变立体光影 (洁白透光、微泛老纸米黄，上下通体一气呵成零接缝)
         const pGrad = ctx.createLinearGradient(cx - curTopW / 2, 0, cx + curTopW / 2, 0);
         pGrad.addColorStop(0, 'rgba(0, 0, 0, 0.25)');
-        pGrad.addColorStop(0.22, 'rgba(255, 255, 255, 0.85)');
-        pGrad.addColorStop(0.55, 'rgba(255, 255, 255, 0.18)');
-        pGrad.addColorStop(1, 'rgba(0, 0, 0, 0.35)');
+        pGrad.addColorStop(0.24, 'rgba(255, 255, 255, 0.88)');
+        pGrad.addColorStop(0.54, 'rgba(255, 255, 255, 0.20)');
+        pGrad.addColorStop(1, 'rgba(0, 0, 0, 0.34)');
         ctx.fillStyle = pGrad;
         ctx.fill();
 
-        // 裁剪到锥体内绘制细节纹理
+        // 裁剪到通体锥筒内绘制细节纹理
         ctx.save();
         ctx.beginPath();
-        ctx.moveTo(cx - curTopW / 2, cy - paperH);
-        ctx.lineTo(cx + curTopW / 2, cy - paperH);
-        ctx.lineTo(cx + cigW / 2, cy);
-        ctx.lineTo(cx - cigW / 2, cy);
+        ctx.moveTo(cx - curTopW / 2, fireY);
+        ctx.lineTo(cx + curTopW / 2, fireY);
+        ctx.lineTo(cx + cigW / 2, hanyanBottomY);
+        ctx.lineTo(cx - cigW / 2, hanyanBottomY);
         ctx.closePath();
         ctx.clip();
 
-        // 1) 90年代手卷旱烟最具灵魂特征：作业本微蓝横横线 (Faint Notebook Ruling Lines，对标参考图)
+        // 1) 90年代手卷旱烟最具灵魂特征：作业本微蓝横线 (Faint Notebook Ruling Lines，从底端至顶端通体贯通)
         ctx.strokeStyle = 'rgba(59, 130, 246, 0.28)';
         ctx.lineWidth = 0.9;
-        const noteStep = 24;
-        for (let ny = cy - 14; ny >= cy - paperH; ny -= noteStep) {
+        const noteStep = 22;
+        for (let ny = hanyanBottomY - 12; ny >= fireY; ny -= noteStep) {
           ctx.beginPath();
           ctx.moveTo(cx - topW, ny);
-          ctx.lineTo(cx + topW, ny + 3);
+          ctx.lineTo(cx + topW, ny + 2.5);
           ctx.stroke();
         }
 
-        // 2) 手工白纸揉搓微褶与凹凸折痕阴影 (Crumpled Paper Creases)
-        ctx.strokeStyle = 'rgba(168, 162, 158, 0.45)';
-        ctx.lineWidth = 0.8;
-        const creaseStep = 18;
-        for (let cY = cy - 8; cY >= cy - paperH; cY -= creaseStep) {
-          const wAtC = cigW + (topW - cigW) * ((cy - cY) / Math.max(1, maxPaperH));
+        // 2) 手工斜向卷纸搭接缝与自然折痕 (Spiral Hand-Rolled Paper Seam & Creases，与名烟品鉴 1:1 呼应)
+        ctx.strokeStyle = 'rgba(168, 162, 158, 0.48)';
+        ctx.lineWidth = 0.9;
+        ctx.beginPath();
+        ctx.moveTo(cx - topW * 0.45, hanyanBottomY - maxCigH * 0.78);
+        ctx.lineTo(cx + topW * 0.42, hanyanBottomY - maxCigH * 0.48);
+        ctx.moveTo(cx - topW * 0.38, hanyanBottomY - maxCigH * 0.42);
+        ctx.lineTo(cx + topW * 0.35, hanyanBottomY - maxCigH * 0.14);
+        ctx.stroke();
+
+        const creaseStep = 20;
+        ctx.strokeStyle = 'rgba(168, 162, 158, 0.36)';
+        ctx.lineWidth = 0.75;
+        for (let cY = hanyanBottomY - 16; cY >= fireY; cY -= creaseStep) {
+          const wAtC = cigW + (topW - cigW) * ((hanyanBottomY - cY) / Math.max(1, maxCigH));
           ctx.beginPath();
-          ctx.moveTo(cx - wAtC * 0.45, cY - 4);
-          ctx.lineTo(cx + wAtC * 0.1, cY + 2);
-          ctx.lineTo(cx + wAtC * 0.45, cY - 2);
+          ctx.moveTo(cx - wAtC * 0.44, cY - 3);
+          ctx.lineTo(cx + wAtC * 0.12, cY + 1.5);
+          ctx.lineTo(cx + wAtC * 0.44, cY - 1.5);
           ctx.stroke();
         }
 
@@ -826,20 +805,39 @@ export class CanvasRenderer {
         ctx.fillStyle = 'rgba(180, 83, 9, 0.06)';
         ctx.fill();
 
-        // 4) 竖向传统红印章 (老辈旱烟) - 置于剩余白纸 clip 区域内，随火头向下逐像素自然烧蚀，绝不突兀提前隐藏
+        // 4) 抽吸过程中底端纸口自然微熏渐染 (无独立烟嘴分界线，仅底端柔和微染)
+        if (burntRatio > 0.02) {
+          const tailStainGrad = ctx.createLinearGradient(0, cy + filterH * 0.2, 0, hanyanBottomY);
+          tailStainGrad.addColorStop(0, 'rgba(180, 83, 9, 0)');
+          tailStainGrad.addColorStop(1, `rgba(146, 64, 14, ${Math.min(0.42, burntRatio * 0.45)})`);
+          ctx.fillStyle = tailStainGrad;
+          ctx.fillRect(cx - topW / 2, cy + filterH * 0.2, topW, filterH * 0.8);
+        }
+
+        // 5) 竖向传统红印章 (老辈旱烟) - 置于一体式白纸喇叭筒中下段，与名烟品鉴 1:1 对齐
         ctx.font = 'bold 8.5px sans-serif';
-        ctx.fillStyle = 'rgba(185, 28, 28, 0.78)';
+        ctx.fillStyle = 'rgba(185, 28, 28, 0.82)';
         ctx.textAlign = 'center';
-        const stampText = '老辈旱烟';
-        const stampBaseY = cy - 32;
+        const stampText = curCig.stampText || '老辈旱烟';
+        const stampBaseY = cy - 18;
         for (let si = 0; si < stampText.length; si++) {
           ctx.fillText(stampText[si], cx, stampBaseY + si * 9.5);
         }
 
         ctx.restore(); // 对应 clip() 的 save
+
+        // 底端一体式白纸卷口微弧收边
+        ctx.strokeStyle = 'rgba(214, 209, 196, 0.85)';
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(cx - cigW / 2, hanyanBottomY);
+        ctx.lineTo(cx + cigW / 2, hanyanBottomY);
+        ctx.stroke();
+
         ctx.restore(); // 对应手卷旱烟整体的 save
       } else {
-        ctx.fillStyle = curCig.isCigar ? '#382218' : '#fcfbf7';
+        const isDarkPaper = !curCig.isCigar && curCig.paperColor && ['#18181b', '#09090b', '#1e1b4b', '#111827'].includes(curCig.paperColor);
+        ctx.fillStyle = curCig.isCigar ? '#382218' : (curCig.paperColor || '#fcfbf7');
         ctx.fillRect(cx - cigW / 2, cy - paperH, cigW, paperH);
 
         const pGrad = ctx.createLinearGradient(cx - cigW / 2, 0, cx + cigW / 2, 0);
@@ -849,6 +847,12 @@ export class CanvasRenderer {
           pGrad.addColorStop(0.2, 'rgba(255, 255, 255, 0.22)');
           pGrad.addColorStop(0.6, 'rgba(0, 0, 0, 0.1)');
           pGrad.addColorStop(1, 'rgba(0, 0, 0, 0.55)');
+        } else if (isDarkPaper) {
+          // 黑俄寿百年等曜石黑高定卷纸 3D 丝光圆柱光影
+          pGrad.addColorStop(0, 'rgba(0, 0, 0, 0.5)');
+          pGrad.addColorStop(0.2, 'rgba(255, 255, 255, 0.16)');
+          pGrad.addColorStop(0.6, 'rgba(0, 0, 0, 0.15)');
+          pGrad.addColorStop(1, 'rgba(0, 0, 0, 0.6)');
         } else {
           // 卷纸白润透亮立体微距光影
           pGrad.addColorStop(0, 'rgba(0, 0, 0, 0.26)');
@@ -864,9 +868,9 @@ export class CanvasRenderer {
         if (!curCig.isCigar) {
           const ribStep = 4.2;
           for (let wy = cy - ribStep; wy >= cy - paperH; wy -= ribStep) {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+            ctx.fillStyle = isDarkPaper ? 'rgba(0, 0, 0, 0.35)' : 'rgba(0, 0, 0, 0.04)';
             ctx.fillRect(cx - cigW / 2, wy, cigW, 0.8);
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+            ctx.fillStyle = isDarkPaper ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.35)';
             ctx.fillRect(cx - cigW / 2, wy + 0.8, cigW, 0.6);
           }
         } else {
@@ -898,7 +902,7 @@ export class CanvasRenderer {
             ctx.fillText(stampText[si], cx, charY);
           }
 
-          // 【牛来·电影香烟】专属烟身金牛萌犊微雕图腾
+          // 【牛来】专属烟身金牛萌犊微雕图腾
           if (curCig.id === 'niulai_cinema') {
             const bullY = stampBaseY - 16;
             // 黄金弯角
@@ -1187,7 +1191,7 @@ export class CanvasRenderer {
         // 计算当前高度 Y 处烟身烧化前的物理基底宽度 (锥筒几何继承)
         let layerW;
         if (isHandRolled) {
-          const coneRatio = Math.max(0, (cy - curY) / Math.max(1, maxPaperH));
+          const coneRatio = Math.max(0, (hanyanBottomY - curY) / Math.max(1, maxCigH));
           const origW = cigW + (topW - cigW) * coneRatio;
           const fireDist = Math.max(0, fireY - curY);
           // 老辈旱烟散碎原叶天然蓬松：越远离火线越受热微发胀 (+6%)，而在火线处与 curTopW 严丝合缝
@@ -1226,70 +1230,97 @@ export class CanvasRenderer {
       ctx.fill();
 
       // -------------------------------------------------------------
-      // 2. 多层重叠有机鳞片集群 (Organic Flake Clusters - 宽度动态自适应)
+      // 2. 多层重叠有机鳞片集群 (Organic Flake Clusters - 批量合批极速渲染)
       // -------------------------------------------------------------
       const flakesCount = isHandRolled ? 6 : 4;
+      const fh = stepY * 1.25;
+      const cosRimStart = Math.cos(Math.PI * 1.1);
+      const sinRimStart = Math.sin(Math.PI * 1.1);
+
+      // A. 第 1 批：所有鳞片下缘深色孔隙阴影 (1 次 Draw Call)
+      ctx.fillStyle = 'rgba(24, 24, 27, 0.68)';
+      ctx.beginPath();
       for (let L = startLayer; L <= endLayer; L++) {
         const curY = L * stepY;
-        const distToFire = fireY - curY; // 距离火线的垂直距离
         const isTopZone = (curY - ashTopY) < 6.0;
-
         const layerIdx = L - startLayer;
         const curLayerW = (rightProfile[layerIdx] && leftProfile[layerIdx])
           ? (rightProfile[layerIdx].x - leftProfile[layerIdx].x)
           : (isHandRolled ? topW : cigW);
         const colW = curLayerW / flakesCount;
-
+        const fw = colW * 0.95;
         for (let col = 0; col < flakesCount; col++) {
           const flakeSeed = ((L * 17 + col * 37 + 11) % 1000) / 1000;
           const fx = cx - curLayerW / 2 + (col + 0.5) * colW + (isTopZone ? 0 : (flakeSeed - 0.5) * (isHandRolled ? 2.8 : 2.0));
           const fy = curY + (isTopZone ? 0 : Math.sin(flakeSeed * Math.PI * 4) * 1.0);
-          const fw = colW * 0.95;
-          const fh = stepY * 1.25;
-
-          // A. 鳞片下缘深色孔隙阴影
-          ctx.fillStyle = (distToFire < 8) ? 'rgba(15, 23, 42, 0.9)' : 'rgba(24, 24, 27, 0.65)';
-          ctx.beginPath();
           drawEllipse(ctx, fx, fy + 1.0, fw * 0.48, fh * 0.42);
-          ctx.fill();
-
-          // B. 灰白鳞片色彩 (手卷旱烟含老烟叶未烬焦斑，层次丰润)
-          let flakeColor;
-          if (isHandRolled && flakeSeed < 0.16) {
-            flakeColor = (distToFire < 8) ? '#451a03' : '#78350f'; // 旱烟碎叶原焦斑
-          } else if (col === 1 || (isHandRolled && col === 2)) {
-            flakeColor = '#ffffff'; // 高光带
-          } else if (col === 0) {
-            flakeColor = '#d4d4d8';
-          } else if (col === flakesCount - 2) {
-            flakeColor = '#e4e4e7';
-          } else {
-            flakeColor = '#a1a1aa';
-          }
-
-          if (distToFire < 7) {
-            flakeColor = (col === 1 || (isHandRolled && col === 2)) ? '#e4e4e7' : '#71717a';
-          }
-
-          ctx.fillStyle = flakeColor;
-          ctx.beginPath();
-          drawEllipse(ctx, fx, fy, fw * 0.46, fh * 0.38);
-          ctx.fill();
-
-          // C. 鳞片上沿极细纯白翻卷边缘
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
-          ctx.lineWidth = 0.8;
-          ctx.beginPath();
-          ctx.arc(fx, fy - 0.5, fw * 0.36, Math.PI * 1.1, Math.PI * 1.9);
-          ctx.stroke();
-
-          // D. 噪点
-          if (flakeSeed > 0.5) {
-            ctx.fillStyle = (flakeSeed > 0.75) ? '#ffffff' : '#27272a';
-            ctx.fillRect(fx + (flakeSeed - 0.5) * 3, fy - 0.6, 1.2, 1.2);
-          }
         }
       }
+      ctx.fill();
+
+      // B. 第 2 批：按主色调分组批量填充灰白鳞片 (3~4 次 Draw Call)
+      const colorGroups = isHandRolled
+        ? ['#ffffff', '#e4e4e7', '#a1a1aa', '#78350f']
+        : ['#ffffff', '#e4e4e7', '#a1a1aa'];
+      for (let g = 0; g < colorGroups.length; g++) {
+        const targetColor = colorGroups[g];
+        ctx.fillStyle = targetColor;
+        ctx.beginPath();
+        for (let L = startLayer; L <= endLayer; L++) {
+          const curY = L * stepY;
+          const distToFire = fireY - curY;
+          const isTopZone = (curY - ashTopY) < 6.0;
+          const layerIdx = L - startLayer;
+          const curLayerW = (rightProfile[layerIdx] && leftProfile[layerIdx])
+            ? (rightProfile[layerIdx].x - leftProfile[layerIdx].x)
+            : (isHandRolled ? topW : cigW);
+          const colW = curLayerW / flakesCount;
+          const fw = colW * 0.95;
+          for (let col = 0; col < flakesCount; col++) {
+            const flakeSeed = ((L * 17 + col * 37 + 11) % 1000) / 1000;
+            let flakeColor;
+            if (isHandRolled && flakeSeed < 0.16) {
+              flakeColor = '#78350f';
+            } else if (distToFire < 7) {
+              flakeColor = (col === 1 || (isHandRolled && col === 2)) ? '#e4e4e7' : '#a1a1aa';
+            } else if (col === 1 || (isHandRolled && col === 2)) {
+              flakeColor = '#ffffff';
+            } else if (col === 0 || col === flakesCount - 2) {
+              flakeColor = '#e4e4e7';
+            } else {
+              flakeColor = '#a1a1aa';
+            }
+            if (flakeColor !== targetColor) continue;
+            const fx = cx - curLayerW / 2 + (col + 0.5) * colW + (isTopZone ? 0 : (flakeSeed - 0.5) * (isHandRolled ? 2.8 : 2.0));
+            const fy = curY + (isTopZone ? 0 : Math.sin(flakeSeed * Math.PI * 4) * 1.0);
+            drawEllipse(ctx, fx, fy, fw * 0.46, fh * 0.38);
+          }
+        }
+        ctx.fill();
+      }
+
+      // C. 第 3 批：所有鳞片上沿极细纯白翻卷边缘 (1 次 Draw Call)
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.82)';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      for (let L = startLayer; L <= endLayer; L++) {
+        const curY = L * stepY;
+        const isTopZone = (curY - ashTopY) < 6.0;
+        const layerIdx = L - startLayer;
+        const curLayerW = (rightProfile[layerIdx] && leftProfile[layerIdx])
+          ? (rightProfile[layerIdx].x - leftProfile[layerIdx].x)
+          : (isHandRolled ? topW : cigW);
+        const colW = curLayerW / flakesCount;
+        const rimR = colW * 0.95 * 0.36;
+        for (let col = 0; col < flakesCount; col++) {
+          const flakeSeed = ((L * 17 + col * 37 + 11) % 1000) / 1000;
+          const fx = cx - curLayerW / 2 + (col + 0.5) * colW + (isTopZone ? 0 : (flakeSeed - 0.5) * (isHandRolled ? 2.8 : 2.0));
+          const fy = curY + (isTopZone ? 0 : Math.sin(flakeSeed * Math.PI * 4) * 1.0) - 0.5;
+          ctx.moveTo(fx + cosRimStart * rimR, fy + sinRimStart * rimR);
+          ctx.arc(fx, fy, rimR, Math.PI * 1.1, Math.PI * 1.9);
+        }
+      }
+      ctx.stroke();
 
       // -------------------------------------------------------------
       // 3. 顶端绝对水平端面与正立微弧透视火山口 (Orthogonal Upright Top Cap)
@@ -1515,8 +1546,12 @@ export class CanvasRenderer {
           activeSmokeColor = 'rgba(186, 230, 253, '; // 极境冰蓝薄荷
         } else if (curCig.beadColor === '#fbbf24') {
           activeSmokeColor = 'rgba(254, 240, 138, '; // 芙蓉王金韵本香金
-        } else if (curCig.beadColor === '#f43f5e') {
-          activeSmokeColor = 'rgba(254, 205, 211, '; // 中华国梅幽红
+        } else if (curCig.beadColor === '#f43f5e' || curCig.beadColor === '#ef4444') {
+          activeSmokeColor = 'rgba(254, 205, 211, '; // 中华国梅幽红 / 朱砂国红
+        } else if (curCig.beadColor === '#fb7185') {
+          activeSmokeColor = 'rgba(253, 164, 175, '; // 玫瑰蜜桃绯粉
+        } else if (curCig.beadColor === '#f472b6') {
+          activeSmokeColor = 'rgba(249, 168, 212, '; // 樱花甜润粉霞
         } else if (curCig.beadColor === '#a855f7') {
           activeSmokeColor = 'rgba(233, 213, 255, '; // 七星蓝莓幻紫
         }
@@ -1811,8 +1846,8 @@ export class PackFlightVfxRenderer {
         localT = (t - 0.72) / 0.28;
         p0 = { x: cx - w * 0.28, y: cy + h * 0.10 };
         p1 = { x: cx - w * 0.38, y: cy - h * 0.08 };
-        p2 = { x: cx - w * 0.12, y: cy - h * 0.12 };
-        p3 = { x: cx, y: cy - h * 0.04 };
+        p2 = { x: cx - w * 0.12, y: cy - h * 0.10 };
+        p3 = { x: cx, y: h * 0.43 };
       }
       const mt = 1 - localT;
       const x = mt * mt * mt * p0.x + 3 * mt * mt * localT * p1.x + 3 * mt * localT * localT * p2.x + localT * localT * localT * p3.x;
@@ -1846,9 +1881,9 @@ export class PackFlightVfxRenderer {
     } else {
       localT = (t - 0.86) / 0.14;
       p0 = { x: cx + w * 0.20, y: cy - h * 0.02 };
-      p1 = { x: cx + w * 0.08, y: cy - h * 0.14 };
-      p2 = { x: cx - w * 0.04, y: cy - h * 0.06 };
-      p3 = { x: cx, y: cy - h * 0.04 };
+      p1 = { x: cx + w * 0.08, y: cy - h * 0.12 };
+      p2 = { x: cx - w * 0.04, y: cy - h * 0.04 };
+      p3 = { x: cx, y: h * 0.43 };
     }
 
     const mt = 1 - localT;
@@ -2135,7 +2170,7 @@ export class PackFlightVfxRenderer {
     // =========================================================================
     if (elapsedSec >= 1.18) {
       const auraFadeIn = Math.min(1, (elapsedSec - 1.18) / 0.36);
-      const centerFocusY = cy - h * 0.04;
+      const centerFocusY = h * 0.43;
       const tiltRad = 22 * Math.PI / 180; // 与定格烟支 22° 黄金倾角严丝合缝对齐
       const cosT = Math.cos(tiltRad);
       const sinT = Math.sin(tiltRad);
@@ -2162,7 +2197,7 @@ export class PackFlightVfxRenderer {
         { phaseOffset: (Math.PI * 4) / 3, mainColor: '#f472b6', glowColor: 'rgba(244, 114, 182, ', headColor: '#fce7f3' }
       ];
 
-      const helixHalfH = Math.min(142, h * 0.18);
+      const helixHalfH = Math.min(148, h * 0.185);
       const helixRadiusX = Math.min(78, w * 0.20);
       const segCount = 48;
 
@@ -2257,7 +2292,7 @@ export class PackFlightVfxRenderer {
       const burstElapsed = elapsedSec - 1.32;
       const burstP = Math.min(1, burstElapsed / 0.78);
       const burstAlpha = Math.max(0, 1 - Math.pow(burstP, 1.72));
-      const centerFocusY = cy - h * 0.04;
+      const centerFocusY = h * 0.43;
 
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';

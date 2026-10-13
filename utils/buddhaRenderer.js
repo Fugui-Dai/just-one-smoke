@@ -501,17 +501,14 @@ export class BuddhaLightAscension {
     const outerCount = 12;
     const outerLen = lotusR * 1.12 * bloomOpen;
     const outerW = lotusR * 0.38;
+    const outerGrad = ctx.createLinearGradient(0, 0, 0, -outerLen);
+    outerGrad.addColorStop(0, `rgba(244, 63, 94, ${a * 0.52})`);
+    outerGrad.addColorStop(1, `rgba(245, 158, 11, ${a * 0.88})`);
+    const outerRimCol = `rgba(254, 240, 138, ${a * 0.92})`;
     for (let i = 0; i < outerCount; i++) {
       ctx.save();
       ctx.rotate((i * Math.PI * 2) / outerCount);
-      this._drawSingleLotusPetal(
-        ctx,
-        outerLen,
-        outerW,
-        `rgba(244, 63, 94, ${a * 0.52})`,
-        `rgba(245, 158, 11, ${a * 0.88})`,
-        `rgba(254, 240, 138, ${a * 0.92})`
-      );
+      this._drawSingleLotusPetal(ctx, outerLen, outerW, outerGrad, outerRimCol);
       ctx.restore();
     }
 
@@ -521,17 +518,14 @@ export class BuddhaLightAscension {
     const midCount = 12;
     const midLen = lotusR * 0.88 * bloomOpen;
     const midW = lotusR * 0.32;
+    const midGrad = ctx.createLinearGradient(0, 0, 0, -midLen);
+    midGrad.addColorStop(0, `rgba(217, 119, 6, ${a * 0.85})`);
+    midGrad.addColorStop(1, `rgba(251, 191, 36, ${a * 0.95})`);
+    const midRimCol = `rgba(255, 251, 235, ${a * 0.96})`;
     for (let i = 0; i < midCount; i++) {
       ctx.save();
       ctx.rotate(((i + 0.5) * Math.PI * 2) / midCount);
-      this._drawSingleLotusPetal(
-        ctx,
-        midLen,
-        midW,
-        `rgba(217, 119, 6, ${a * 0.85})`,
-        `rgba(251, 191, 36, ${a * 0.95})`,
-        `rgba(255, 251, 235, ${a * 0.96})`
-      );
+      this._drawSingleLotusPetal(ctx, midLen, midW, midGrad, midRimCol);
       ctx.restore();
     }
 
@@ -541,27 +535,20 @@ export class BuddhaLightAscension {
     const innerCount = 8;
     const innerLen = lotusR * 0.64;
     const innerW = lotusR * 0.25;
+    const innerGrad = ctx.createLinearGradient(0, 0, 0, -innerLen);
+    innerGrad.addColorStop(0, `rgba(251, 191, 36, ${a * 0.92})`);
+    innerGrad.addColorStop(1, `rgba(254, 240, 138, ${a * 0.98})`);
+    const innerRimCol = `rgba(255, 255, 255, ${a * 0.98})`;
     for (let i = 0; i < innerCount; i++) {
       ctx.save();
       ctx.rotate((i * Math.PI * 2) / innerCount);
-      this._drawSingleLotusPetal(
-        ctx,
-        innerLen,
-        innerW,
-        `rgba(251, 191, 36, ${a * 0.92})`,
-        `rgba(254, 240, 138, ${a * 0.98})`,
-        `rgba(255, 255, 255, ${a * 0.98})`
-      );
+      this._drawSingleLotusPetal(ctx, innerLen, innerW, innerGrad, innerRimCol);
       ctx.restore();
     }
   }
 
   // 绘制单瓣 3D 宝相花立体金莲瓣 (含渐变瓣肉、描金叶脉与尖端佛光)
-  _drawSingleLotusPetal(ctx, len, width, baseCol, tipCol, rimCol) {
-    const grad = ctx.createLinearGradient(0, 0, 0, -len);
-    grad.addColorStop(0, baseCol);
-    grad.addColorStop(1, tipCol);
-
+  _drawSingleLotusPetal(ctx, len, width, grad, rimCol) {
     ctx.fillStyle = grad;
     ctx.beginPath();
     ctx.moveTo(0, 0);

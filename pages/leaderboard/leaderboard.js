@@ -41,6 +41,8 @@ function buildInitialLeaderboardState(category = 'substituted') {
 
     return {
       ...safeArea,
+      isVip: vipService.isVip(),
+      vipTheme: vipService.getVipTheme(),
       leaderboardCategory: category,
       leaderboardList: result.list,
       myRankInfo: result.myRankInfo,
@@ -52,6 +54,8 @@ function buildInitialLeaderboardState(category = 'substituted') {
   } catch (e) {
     return {
       ...safeArea,
+      isVip: false,
+      vipTheme: '',
       leaderboardCategory: category,
       leaderboardList: [],
       myRankInfo: {
@@ -81,7 +85,10 @@ Page({
   onShow() {
     if (this._skipFirstShowRefresh) {
       this._skipFirstShowRefresh = false;
-      this.setData({ vipTheme: vipService.getVipTheme() });
+      this.setData({
+        isVip: vipService.isVip(),
+        vipTheme: vipService.getVipTheme()
+      });
       return;
     }
     this.refreshLeaderboard();
@@ -112,6 +119,7 @@ Page({
       quitDays,
       leaderboardList: result.list,
       myRankInfo: result.myRankInfo,
+      isVip: vipService.isVip(),
       vipTheme: vipService.getVipTheme()
     });
   },

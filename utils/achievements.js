@@ -147,7 +147,7 @@ export const ACHIEVEMENTS = [
     conditionDesc: '累计替烟达到 100 支',
     targetType: 'subs',
     targetVal: 100,
-    check: (stats) => (stats.totalSubstituted || 0) >= 100 || (stats.quitDays || 0) >= 7
+    check: (stats) => (stats.totalSubstituted || 0) >= 100
   },
   {
     id: 'subs_200',

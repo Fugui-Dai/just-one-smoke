@@ -12,6 +12,7 @@ import {
   calculateQuitDays,
   getWhoStages
 } from '../../utils/healthCalculator.js';
+import { checkAchievementsToUnlock } from '../../utils/achievements.js';
 
 function measureSafeAreaSync() {
   try {
@@ -64,7 +65,28 @@ function computeMineStatsPayload() {
     days: quitDays + 1
   }, profile);
 
-  const totalIgnites = storageService.getIgniteCount();
+  const igniteCount = storageService.getIgniteCount();
+
+  // 同步评估并解锁已达成的荣耀勋章
+  try {
+    const unlockedIds = storageService.getUnlockedAchievements() || [];
+    const unlockedEffects = storageService.getUnlockedSmokeEffects() || [];
+    const summonedEffects = storageService.getSummonedSmokeEffects() || [];
+    const allEffects = Array.from(new Set([...unlockedEffects, ...summonedEffects]));
+    const statsObj = {
+      totalSubstituted: totalSubs,
+      totalSavedMoney: totalSaved,
+      quitDays: quitDays + 1,
+      unlockedEffects: allEffects,
+      unlockedEffectsCount: allEffects.length,
+      hasCustomEffect: allEffects.some(id => id !== 'ring_classic' && id !== 'auspicious_river'),
+      hasSummonedMythic: allEffects.includes('dragon_breath') || allEffects.includes('phoenix_nirvana') || allEffects.includes('buddha_light') || allEffects.includes('bagua_taichi')
+    };
+    const newlyUnlocked = checkAchievementsToUnlock(statsObj, unlockedIds);
+    if (Array.isArray(newlyUnlocked) && newlyUnlocked.length > 0) {
+      newlyUnlocked.forEach(id => storageService.unlockAchievement(id));
+    }
+  } catch (err) {}
 
   return {
     profile,
@@ -75,7 +97,8 @@ function computeMineStatsPayload() {
     totalTarAvoided: totalTar,
     totalLifeRegained: totalLife,
     lifeRegainedHours: (totalLife / 60).toFixed(1),
-    totalIgnites,
+    igniteCount,
+    totalIgnites: igniteCount,
     totalFinishedCigs: totalSubs,
     quitDays,
     todayCount,
@@ -92,11 +115,13 @@ function buildInitialMineState() {
     return {
       ...safeArea,
       ...computeMineStatsPayload(),
+      vipTheme: vipService.getVipTheme(),
       showProfileModal: false
     };
   } catch (e) {
     return {
       ...safeArea,
+      vipTheme: '',
       profile: {},
       myRankInfo: {
         rank: 1,
@@ -112,6 +137,7 @@ function buildInitialMineState() {
       totalTarAvoided: 0,
       totalLifeRegained: 0,
       lifeRegainedHours: '0.0',
+      igniteCount: 0,
       totalIgnites: 0,
       totalFinishedCigs: 0,
       quitDays: 0,

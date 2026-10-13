@@ -79,12 +79,21 @@
   border-radius: 28rpx;
   padding: 22rpx 24rpx;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 16rpx;
   box-shadow: 0 12rpx 36rpx rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   box-sizing: border-box;
   width: 100%;
+  transition: all 0.35s ease;
+}
+
+/* VIP 会员专属顶部名片：曜世黑金底座 + 尊享流光边框 */
+.user-profile-header-card.is-vip-profile-card {
+  background: linear-gradient(135deg, rgba(44, 34, 18, 0.94) 0%, rgba(20, 16, 10, 0.98) 55%, rgba(36, 26, 12, 0.94) 100%);
+  border: 1px solid rgba(245, 208, 128, 0.45);
+  box-shadow: 0 14rpx 42rpx rgba(0, 0, 0, 0.65), 0 0 28rpx rgba(212, 175, 55, 0.16), inset 0 1px 0 rgba(255, 236, 179, 0.25);
 }
 
 .user-profile-row {
@@ -102,6 +111,13 @@
   flex: 1;
   min-width: 0;
   margin-right: 16rpx;
+}
+
+.user-avatar-wrap {
+  position: relative;
+  width: 96rpx;
+  height: 96rpx;
+  flex-shrink: 0;
 }
 
 /* 微信原生头像按钮：严格靠左对齐，彻底清除微信默认 button:not([size='mini']) 的 184px 宽度与 margin: auto */
@@ -148,11 +164,27 @@ button.user-avatar-btn::after,
   flex-shrink: 0;
 }
 
+.user-avatar-img.vip-avatar-img {
+  border: 3rpx solid #f5d080;
+  box-shadow: 0 4rpx 18rpx rgba(0, 0, 0, 0.65), 0 0 18rpx rgba(245, 208, 128, 0.42);
+}
+
+.profile-avatar-vip-crown {
+  position: absolute;
+  top: -10rpx;
+  right: -6rpx;
+  font-size: 26rpx;
+  line-height: 1;
+  filter: drop-shadow(0 2rpx 6rpx rgba(0, 0, 0, 0.85));
+  pointer-events: none;
+  z-index: 3;
+}
+
 /* 名字列：紧贴头像右侧 */
 .user-info-col {
   flex: 1;
   min-width: 0;
-  margin-left: 14rpx;
+  margin-left: 16rpx;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -163,9 +195,9 @@ button.user-avatar-btn::after,
   font-weight: 700;
   color: #ffffff;
   caret-color: transparent !important;
-  line-height: 48rpx;
-  height: 48rpx;
-  min-height: 48rpx;
+  line-height: 46rpx;
+  height: 46rpx;
+  min-height: 46rpx;
   letter-spacing: 0.5rpx;
   background: transparent;
   border: none;
@@ -175,7 +207,102 @@ button.user-avatar-btn::after,
   max-width: 380rpx;
 }
 
-/* 最右边打卡状态方卡 (已打卡 / X天 / 连 X) */
+.user-nickname-input.vip-nickname-gold {
+  color: #fde68a;
+  text-shadow: 0 2rpx 10rpx rgba(245, 208, 128, 0.25);
+}
+
+.user-meta-subrow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-top: 6rpx;
+  cursor: pointer;
+}
+
+.user-meta-smoke-info {
+  font-size: 21rpx;
+  color: #94a3b8;
+  line-height: 1.3;
+}
+
+.profile-vip-nameplate {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  padding: 3rpx 14rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, rgba(245, 208, 128, 0.22) 0%, rgba(212, 175, 55, 0.08) 100%);
+  border: 1px solid rgba(245, 208, 128, 0.45);
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #f5d080;
+  letter-spacing: 1rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.35);
+  transition: all 0.25s ease;
+}
+
+.profile-vip-nameplate.is-vip-inactive {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #94a3b8;
+  box-shadow: none;
+}
+
+.profile-vip-nameplate.is-vip-inactive .pvn-crown {
+  filter: grayscale(1);
+  opacity: 0.65;
+}
+
+.profile-action-pills-row {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  padding-top: 14rpx;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.profile-action-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10rpx 20rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.profile-action-pill:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.profile-action-pill.settings-pill {
+  flex: 1;
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.28);
+}
+
+.profile-action-pill.leaderboard-pill {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.16) 0%, rgba(217, 119, 6, 0.08) 100%);
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+.pap-text {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #e2e8f0;
+  line-height: 1.2;
+}
+
+.leaderboard-pill .pap-text {
+  color: #fbbf24;
+}
+
+/* 最右边打卡状态方卡 (已打卡 / X天) */
 .user-punch-card {
   flex-shrink: 0;
   margin-left: 16rpx;
@@ -225,13 +352,6 @@ button.user-avatar-btn::after,
   font-size: 22rpx;
   font-weight: 600;
   color: #a7f3d0;
-}
-
-.punch-card-streak {
-  font-size: 18rpx;
-  color: #10b981;
-  margin-top: 2rpx;
-  line-height: 1.1;
 }
 
 /* ==================== VIP 尊享特权入口横幅 (腾讯黑金曜石奢雅标准) ==================== */
@@ -355,123 +475,6 @@ button.user-avatar-btn::after,
   line-height: 1;
 }
 
-
-
-/* 四维健康收益矩阵 */
-.cards-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20rpx;
-}
-
-.stat-glass-card {
-  background: rgba(22, 28, 40, 0.78);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-radius: 24rpx;
-  padding: 22rpx;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.35);
-}
-
-.stat-glass-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 4rpx;
-}
-
-.card-glow-orange::before { background: linear-gradient(90deg, #ff6600, #f97316); }
-.card-glow-emerald::before { background: linear-gradient(90deg, #10b981, #059669); }
-.card-glow-cyan::before { background: linear-gradient(90deg, #06b6d4, #0284c7); }
-.card-glow-purple::before { background: linear-gradient(90deg, #8b5cf6, #7c3aed); }
-
-.card-meta-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12rpx;
-}
-
-.icon-circle {
-  width: 44rpx;
-  height: 44rpx;
-  border-radius: 12rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24rpx;
-}
-
-.icon-circle-svg {
-  width: 28rpx;
-  height: 28rpx;
-  display: block;
-}
-
-.icon-bg-orange { background: rgba(255, 102, 0, 0.18); }
-.icon-bg-emerald { background: rgba(16, 185, 129, 0.18); }
-.icon-bg-cyan { background: rgba(6, 182, 212, 0.18); }
-.icon-bg-purple { background: rgba(139, 92, 246, 0.18); }
-
-.card-tag-badge {
-  font-size: 18rpx;
-  padding: 2rpx 10rpx;
-  border-radius: 10rpx;
-  background: rgba(255, 255, 255, 0.06);
-  color: #9ca3af;
-}
-
-.card-numeric-row {
-  display: flex;
-  align-items: baseline;
-  gap: 4rpx;
-  margin-bottom: 4rpx;
-}
-
-.currency-prefix {
-  font-size: 26rpx;
-  font-weight: 700;
-  color: #10b981;
-}
-
-.card-big-number {
-  font-size: 42rpx;
-  font-weight: 800;
-  color: #ffffff;
-  letter-spacing: -0.5rpx;
-}
-
-.card-metric-unit {
-  font-size: 20rpx;
-  color: #9ca3af;
-  margin-left: 4rpx;
-}
-
-.card-field-name {
-  font-size: 22rpx;
-  color: #9ca3af;
-  margin-bottom: 10rpx;
-  display: block;
-}
-
-.card-divider {
-  height: 1px;
-  background: rgba(255, 255, 255, 0.06);
-  margin-bottom: 8rpx;
-}
-
-.card-bottom-insight {
-  font-size: 18rpx;
-  color: #6b7280;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block;
-}
-
 /* ==================== 3. 钱包 (一张纸币是一元 × 金额，调皮搞笑微缩纸币) ==================== */
 .wallet-section-card {
   background: linear-gradient(135deg, rgba(16, 36, 26, 0.92) 0%, rgba(9, 20, 15, 0.96) 100%);
@@ -497,25 +500,6 @@ button.user-avatar-btn::after,
   border-radius: 12rpx;
   font-weight: 600;
   margin-left: 10rpx;
-}
-
-.wallet-saved-badge {
-  display: flex;
-  align-items: baseline;
-  gap: 6rpx;
-}
-
-.wsb-label {
-  font-size: 20rpx;
-  color: #94a3b8;
-}
-
-.wsb-val {
-  font-size: 28rpx;
-  font-weight: 900;
-  color: #34d399;
-  font-family: monospace;
-  text-shadow: 0 0 10rpx rgba(52, 211, 153, 0.4);
 }
 
 /* 核心算式展台：[调皮1元小纸币] × 金额 = 累计省下 */
@@ -583,20 +567,6 @@ button.user-avatar-btn::after,
   width: 100%;
   height: 100%;
   display: block;
-}
-
-.bill-denom-pill {
-  position: absolute;
-  bottom: 5rpx;
-  right: 6rpx;
-  font-size: 15rpx;
-  font-weight: 800;
-  color: #064e3b;
-  background: #a7f3d0;
-  padding: 2rpx 8rpx;
-  border-radius: 8rpx;
-  line-height: 1.2;
-  box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.4);
 }
 
 /* 算式符号 */
@@ -696,7 +666,7 @@ button.user-avatar-btn::after,
   font-weight: 500;
 }
 
-/* ==================== 5. 系统统计 (4项关键数据 + 7天累计折线图) ==================== */
+/* ==================== 5. 系统统计 (3项关键数据 + 7天累计折线图) ==================== */
 .system-stats-card {
   background: rgba(22, 28, 40, 0.78);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -709,7 +679,7 @@ button.user-avatar-btn::after,
 
 .stats-top-four-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 12rpx;
   margin-bottom: 20rpx;
 }
@@ -1173,8 +1143,8 @@ button.user-avatar-btn::after,
 /* 1. 心脏真实生理节律泵核 (Cardiac Pulse Core · lub-dub 1.25s) */
 .cardiac-chamber-core {
   position: absolute;
-  left: 214rpx;
-  top: 230rpx;
+  left: 218rpx;
+  top: 206rpx;
   width: 36rpx;
   height: 46rpx;
   margin-left: -18rpx;
@@ -1198,8 +1168,8 @@ button.user-avatar-btn::after,
 
 .cardiac-aorta-wave {
   position: absolute;
-  left: 214rpx;
-  top: 230rpx;
+  left: 218rpx;
+  top: 206rpx;
   width: 72rpx;
   height: 72rpx;
   margin-left: -36rpx;
@@ -1483,9 +1453,9 @@ button.user-avatar-btn::after,
 /* 左上指向左肺叶 (胸腔左中部) */
 .hud-lead-line.to-lung {
   top: 104rpx;
-  left: 190rpx;
-  width: 72rpx;
-  height: 64rpx;
+  left: 186rpx;
+  width: 78rpx;
+  height: 92rpx;
   border-top: 2rpx solid rgba(56, 189, 248, 0.7);
   border-right: 2rpx solid rgba(56, 189, 248, 0.7);
 }
@@ -1504,9 +1474,9 @@ button.user-avatar-btn::after,
 /* 右上指向心脏 (正中偏左纵隔心区) */
 .hud-lead-line.to-heart {
   top: 104rpx;
-  right: 190rpx;
-  width: 72rpx;
-  height: 74rpx;
+  right: 186rpx;
+  width: 118rpx;
+  height: 112rpx;
   border-top: 2rpx solid rgba(245, 158, 11, 0.7);
   border-left: 2rpx solid rgba(245, 158, 11, 0.7);
 }
@@ -1522,12 +1492,12 @@ button.user-avatar-btn::after,
   box-shadow: 0 0 10rpx #f59e0b;
 }
 
-/* 左下指向腹部自主神经中枢与脏器 */
+/* 左下指向迷走神经/太阳神经丛中枢 */
 .hud-lead-line.to-visceral {
-  bottom: 140rpx;
-  left: 190rpx;
-  width: 68rpx;
-  height: 52rpx;
+  bottom: 245rpx;
+  left: 186rpx;
+  width: 120rpx;
+  height: 70rpx;
   border-bottom: 2rpx solid rgba(192, 132, 252, 0.7);
   border-right: 2rpx solid rgba(192, 132, 252, 0.7);
 }
@@ -1597,6 +1567,16 @@ button.user-avatar-btn::after,
   border-radius: 50% 50% 30% 30%;
 }
 
+/* 太阳神经丛/迷走神经靶点热区 (覆盖紫色锚点) */
+.organ-hotspot.spot-brain-plexus {
+  top: 42%;
+  left: 32%;
+  width: 22%;
+  height: 16%;
+  border-radius: 30rpx;
+  z-index: 9;
+}
+
 /* 双肺自愈热区 */
 .organ-hotspot.spot-lungs {
   top: 26%;
@@ -1618,10 +1598,10 @@ button.user-avatar-btn::after,
 
 /* 血液循环与微动脉热区 */
 .organ-hotspot.spot-blood {
-  top: 60%;
-  left: 26%;
-  width: 48%;
-  height: 24%;
+  top: 58%;
+  left: 36%;
+  width: 34%;
+  height: 22%;
   border-radius: 30rpx;
 }
 

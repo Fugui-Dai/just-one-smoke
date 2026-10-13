@@ -1,5 +1,14 @@
 <!-- pages/leaderboard/leaderboard.wxml -->
-<view class="leaderboard-page-container {{ vipTheme ? 'vip-theme-' + vipTheme : '' }}">
+<view class="leaderboard-page-container {{ vipTheme ? 'theme-' + vipTheme : '' }}">
+
+  <!-- VIP 尊享动态极光天幕与浮光星尘层 -->
+  <view wx:if="{{ vipTheme }}" class="vip-ambient-stage">
+    <view class="vip-aurora-orb orb-primary"></view>
+    <view class="vip-aurora-orb orb-secondary"></view>
+    <view class="vip-spark s1"></view>
+    <view class="vip-spark s2"></view>
+    <view class="vip-spark s3"></view>
+  </view>
 
   <!-- ==================== 顶部统一导航栏 (安全避让微信原生胶囊按钮) ==================== -->
   <view class="custom-navbar" style="padding-top: {{ statusBarHeight }}px; height: {{ statusBarHeight + navBarHeight }}px;">
@@ -26,6 +35,8 @@
     list="{{ leaderboardList }}"
     myRankInfo="{{ myRankInfo }}"
     profile="{{ profile }}"
+    isVip="{{ isVip }}"
+    vipTheme="{{ vipTheme }}"
     currentCategory="{{ leaderboardCategory }}"
     totalSubstituted="{{ totalSubstituted }}"
     totalSavedMoney="{{ totalSavedMoney }}"

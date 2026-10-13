@@ -152,8 +152,6 @@ export class FirePhoenix {
     ctx.beginPath();
     ctx.arc(0, 0, 36, 0, Math.PI * 2);
     ctx.fillStyle = `rgba(249, 115, 22, ${this.alpha * 0.22})`;
-    ctx.shadowColor = '#f97316';
-    ctx.shadowBlur = 24;
     ctx.fill();
 
     // 1.5 绘制周身烈焰回旋涡流环 (Swirling Flame Vortex Ring)
@@ -184,8 +182,6 @@ export class FirePhoenix {
     ctx.ellipse(0, 0, 42, 16, 0, 0, Math.PI * 2);
     ctx.lineWidth = 4.0;
     ctx.strokeStyle = `rgba(234, 88, 12, ${this.alpha * 0.45})`;
-    ctx.shadowColor = '#ea580c';
-    ctx.shadowBlur = 18;
     ctx.stroke();
 
     // 内层金赤螺旋光刃 (带旋转动感)
@@ -194,8 +190,6 @@ export class FirePhoenix {
     ctx.ellipse(0, 0, 38, 13, 0, rot, rot + Math.PI * 1.3);
     ctx.lineWidth = 2.4;
     ctx.strokeStyle = `rgba(254, 240, 138, ${this.alpha * 0.85})`;
-    ctx.shadowColor = '#fef08a';
-    ctx.shadowBlur = 12;
     ctx.stroke();
 
     ctx.restore();
@@ -215,8 +209,6 @@ export class FirePhoenix {
     ctx.bezierCurveTo(-46, 22, -24, 18, 0, 6);
     ctx.closePath();
     ctx.fillStyle = `rgba(220, 38, 38, ${this.alpha * 0.88})`;
-    ctx.shadowColor = '#ea580c';
-    ctx.shadowBlur = 14;
     ctx.fill();
 
     // 二阶：中层赤金飞羽
@@ -226,8 +218,6 @@ export class FirePhoenix {
     ctx.bezierCurveTo(-34, 16, -18, 12, 0, 4);
     ctx.closePath();
     ctx.fillStyle = `rgba(245, 158, 11, ${this.alpha * 0.95})`;
-    ctx.shadowColor = '#f59e0b';
-    ctx.shadowBlur = 10;
     ctx.fill();
 
     // 三阶：内层白金炽火羽
@@ -237,8 +227,6 @@ export class FirePhoenix {
     ctx.bezierCurveTo(-22, 10, -12, 8, 0, 3);
     ctx.closePath();
     ctx.fillStyle = `rgba(254, 240, 138, ${this.alpha * 0.98})`;
-    ctx.shadowColor = '#fef08a';
-    ctx.shadowBlur = 6;
     ctx.fill();
     ctx.restore();
 
@@ -254,8 +242,6 @@ export class FirePhoenix {
     ctx.bezierCurveTo(46, 22, 24, 18, 0, 6);
     ctx.closePath();
     ctx.fillStyle = `rgba(220, 38, 38, ${this.alpha * 0.88})`;
-    ctx.shadowColor = '#ea580c';
-    ctx.shadowBlur = 14;
     ctx.fill();
 
     // 二阶：中层赤金飞羽
@@ -265,8 +251,6 @@ export class FirePhoenix {
     ctx.bezierCurveTo(34, 16, 18, 12, 0, 4);
     ctx.closePath();
     ctx.fillStyle = `rgba(245, 158, 11, ${this.alpha * 0.95})`;
-    ctx.shadowColor = '#f59e0b';
-    ctx.shadowBlur = 10;
     ctx.fill();
 
     // 三阶：内层白金炽火羽
@@ -276,8 +260,6 @@ export class FirePhoenix {
     ctx.bezierCurveTo(22, 10, 12, 8, 0, 3);
     ctx.closePath();
     ctx.fillStyle = `rgba(254, 240, 138, ${this.alpha * 0.98})`;
-    ctx.shadowColor = '#fef08a';
-    ctx.shadowBlur = 6;
     ctx.fill();
     ctx.restore();
 
@@ -294,8 +276,6 @@ export class FirePhoenix {
     ctx.closePath();
 
     ctx.fillStyle = `rgba(245, 158, 11, ${this.alpha * 0.95})`;
-    ctx.shadowColor = '#f59e0b';
-    ctx.shadowBlur = 10;
     ctx.fill();
 
     // 胸前纯金护心羽鳞
@@ -379,8 +359,6 @@ export class FirePhoenix {
       ctx.strokeStyle = tail.color;
       ctx.globalAlpha = this.alpha * 0.85;
       ctx.lineWidth = tail.width * this.scale;
-      ctx.shadowColor = tail.color;
-      ctx.shadowBlur = 8;
       ctx.stroke();
 
       // 尾梢凤翎眼斑 (Peacock/Phoenix Eye Feather)
@@ -389,7 +367,6 @@ export class FirePhoenix {
         ctx.beginPath();
         ctx.arc(tipNode.x, tipNode.y, 4.5 * this.scale, 0, Math.PI * 2);
         ctx.fillStyle = tail.eyeColor;
-        ctx.shadowBlur = 10;
         ctx.fill();
 
         ctx.beginPath();

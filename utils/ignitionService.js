@@ -68,12 +68,6 @@ export const IGNITION_TOOLS = [
   }
 ];
 
-export const DEFAULT_IGNITION_TOOL_ID = 'flint_lighter';
-
-export function getIgnitionTools() {
-  return IGNITION_TOOLS;
-}
-
 export function getIgnitionToolById(id) {
   return IGNITION_TOOLS.find(t => t.id === id) || IGNITION_TOOLS[0];
 }

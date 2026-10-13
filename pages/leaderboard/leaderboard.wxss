@@ -2,12 +2,118 @@
 .leaderboard-page-container {
   width: 100vw;
   height: 100vh;
-  background: radial-gradient(circle at 50% 18%, #161b26 0%, #080a0f 75%);
+  background: 
+    radial-gradient(circle at 50% 6%, rgba(245, 158, 11, 0.14) 0%, rgba(217, 119, 6, 0.04) 40%, transparent 68%),
+    linear-gradient(180deg, #0c101b 0%, #070912 36%, #030407 100%);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   position: relative;
   box-sizing: border-box;
+}
+
+.leaderboard-page-container.theme-emerald,
+.leaderboard-page-container.theme-day {
+  background: 
+    radial-gradient(circle at 50% 6%, rgba(16, 185, 129, 0.22) 0%, rgba(5, 150, 105, 0.05) 40%, transparent 68%),
+    linear-gradient(180deg, #091a15 0%, #050e0b 38%, #020504 100%);
+}
+
+.leaderboard-page-container.theme-purple,
+.leaderboard-page-container.theme-month {
+  background: 
+    radial-gradient(circle at 50% 6%, rgba(168, 85, 247, 0.22) 0%, rgba(126, 34, 206, 0.05) 40%, transparent 68%),
+    linear-gradient(180deg, #170d28 0%, #0c0715 38%, #040208 100%);
+}
+
+.leaderboard-page-container.theme-glacier,
+.leaderboard-page-container.theme-lifetime {
+  background: 
+    radial-gradient(circle at 50% 6%, rgba(251, 191, 36, 0.25) 0%, rgba(180, 83, 9, 0.08) 42%, transparent 70%),
+    linear-gradient(180deg, #1f170b 0%, #110d06 38%, #050402 100%);
+}
+
+.leaderboard-page-container.theme-gold {
+  background: radial-gradient(circle at 50% 18%, #2a2011 0%, #080705 78%);
+}
+
+.vip-ambient-stage {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.vip-aurora-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(56rpx);
+  opacity: 0.55;
+  animation: lbVipOrbBreath 6s infinite alternate ease-in-out;
+}
+
+.vip-aurora-orb.orb-primary {
+  width: 520rpx;
+  height: 300rpx;
+  top: -50rpx;
+  left: 50%;
+  margin-left: -260rpx;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.38) 0%, transparent 72%);
+}
+
+.vip-aurora-orb.orb-secondary {
+  width: 400rpx;
+  height: 400rpx;
+  top: 40%;
+  right: -120rpx;
+  background: radial-gradient(circle, rgba(192, 132, 252, 0.20) 0%, transparent 70%);
+  animation-delay: -3s;
+}
+
+.theme-day .vip-aurora-orb.orb-primary,
+.theme-emerald .vip-aurora-orb.orb-primary {
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.38) 0%, transparent 72%);
+}
+.theme-day .vip-aurora-orb.orb-secondary,
+.theme-emerald .vip-aurora-orb.orb-secondary {
+  background: radial-gradient(circle, rgba(52, 211, 153, 0.20) 0%, transparent 70%);
+}
+
+.theme-lifetime .vip-aurora-orb.orb-primary,
+.theme-glacier .vip-aurora-orb.orb-primary {
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.42) 0%, transparent 72%);
+}
+.theme-lifetime .vip-aurora-orb.orb-secondary,
+.theme-glacier .vip-aurora-orb.orb-secondary {
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.22) 0%, transparent 70%);
+}
+
+@keyframes lbVipOrbBreath {
+  0% { transform: scale(0.92); opacity: 0.42; }
+  100% { transform: scale(1.12); opacity: 0.72; }
+}
+
+.vip-spark {
+  position: absolute;
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background: #f5d0fe;
+  box-shadow: 0 0 14rpx #c084fc;
+  opacity: 0.6;
+  animation: lbVipSparkFloat 5s infinite ease-in-out;
+}
+.theme-day .vip-spark { background: #a7f3d0; box-shadow: 0 0 14rpx #34d399; }
+.theme-lifetime .vip-spark { background: #fef08a; box-shadow: 0 0 16rpx #fbbf24; }
+
+.vip-spark.s1 { top: 18%; left: 14%; animation-delay: 0s; }
+.vip-spark.s2 { top: 34%; right: 16%; width: 6rpx; height: 6rpx; animation-delay: -1.7s; }
+.vip-spark.s3 { top: 64%; left: 18%; width: 6rpx; height: 6rpx; animation-delay: -3.3s; }
+
+@keyframes lbVipSparkFloat {
+  0%, 100% { transform: translateY(0) scale(0.8); opacity: 0.25; }
+  50% { transform: translateY(-24rpx) scale(1.2); opacity: 0.85; }
 }
 
 /* ==================== 顶部自定义导航栏 ==================== */
@@ -22,6 +128,19 @@
   background: rgba(8, 10, 15, 0.85);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   box-sizing: border-box;
+}
+
+.theme-day .custom-navbar {
+  background: rgba(5, 20, 16, 0.86);
+  border-bottom-color: rgba(16, 185, 129, 0.22);
+}
+.theme-month .custom-navbar {
+  background: rgba(16, 10, 28, 0.86);
+  border-bottom-color: rgba(168, 85, 247, 0.24);
+}
+.theme-lifetime .custom-navbar {
+  background: rgba(20, 14, 6, 0.88);
+  border-bottom-color: rgba(251, 191, 36, 0.26);
 }
 
 .navbar-content {

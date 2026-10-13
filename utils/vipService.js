@@ -130,12 +130,19 @@ function formatVipExpireDate(timestamp) {
   return `${year}.${month}.${day}`;
 }
 
+export const VIP_THEME_OPTIONS = [
+  { id: 'classic', name: '原色深曜', tag: '纯净黑', icon: '🌑', dotColor: '#64748b' },
+  { id: 'day', name: '翡翠晨曦', tag: '日卡色', icon: '🌿', dotColor: '#10b981' },
+  { id: 'month', name: '极光紫晶', tag: '月卡色', icon: '🔮', dotColor: '#a855f7' },
+  { id: 'lifetime', name: '曜世黑金', tag: '永久色', icon: '👑', dotColor: '#fbbf24' }
+];
+
 export const vipService = {
   getVipInfo() {
     try {
       const data = wx.getStorageSync(STORAGE_KEY_VIP);
       if (!data) {
-        return { isVip: false, expireTime: 0, tierId: '', isLifetime: false };
+        return { isVip: false, expireTime: 0, tierId: '', isLifetime: false, customTheme: '' };
       }
       const now = Date.now();
       const isLifetime = data.tierId === 'lifetime';
@@ -145,10 +152,11 @@ export const vipService = {
         expireTime: data.expireTime,
         tierId: data.tierId,
         isLifetime,
+        customTheme: data.customTheme || data.tierId || 'month',
         formattedExpire: isLifetime ? '终身尊享永久' : (data.expireTime ? formatVipExpireDate(data.expireTime) : '')
       };
     } catch (e) {
-      return { isVip: false, expireTime: 0, tierId: '', isLifetime: false };
+      return { isVip: false, expireTime: 0, tierId: '', isLifetime: false, customTheme: '' };
     }
   },
 
@@ -156,12 +164,55 @@ export const vipService = {
     return this.getVipInfo().isVip;
   },
 
+  isVipActive() {
+    return this.isVip();
+  },
+
+  isThemeAllowed(themeId, currentTierId, isLifetime) {
+    if (!themeId || themeId === 'classic') return true;
+    if (isLifetime || currentTierId === 'lifetime') {
+      return true; // 开通永久卡：所有的颜色都能选择
+    }
+    if (currentTierId === 'month') {
+      return themeId === 'day' || themeId === 'month'; // 开通月卡：可选择紫色与翡翠色
+    }
+    if (currentTierId === 'day') {
+      return themeId === 'day'; // 开通日卡：只能选择翡翠颜色（及原色）
+    }
+    return false;
+  },
+
   getVipTheme() {
     const info = this.getVipInfo();
     if (!info || !info.isVip) {
       return ''; // 会员未开通或已到期，返回空字符串，全应用立即恢复默认背景
     }
-    return info.tierId || 'month';
+    if (info.customTheme === 'classic') {
+      return ''; // VIP用户主动选择原色深曜纯黑背景，保留全部VIP特权但使用经典暗黑底色
+    }
+    const theme = info.customTheme || info.tierId || 'month';
+    if (!this.isThemeAllowed(theme, info.tierId, info.isLifetime)) {
+      return info.tierId === 'day' ? 'day' : 'month';
+    }
+    return theme;
+  },
+
+  setVipTheme(themeId) {
+    try {
+      const info = this.getVipInfo();
+      if (!info || !info.isVip) return false;
+      if (!this.isThemeAllowed(themeId, info.tierId, info.isLifetime)) {
+        return false;
+      }
+      const data = wx.getStorageSync(STORAGE_KEY_VIP);
+      if (!data) return false;
+      data.customTheme = themeId;
+      wx.setStorageSync(STORAGE_KEY_VIP, data);
+      return true;
+    } catch (e) {
+      console.error('Set VIP theme error', e);
+      return false;
+    }
   },
 
   activateTier(tierId) {
@@ -179,6 +230,7 @@ export const vipService = {
       isVip: true,
       tierId: tier.id,
       tierName: tier.name,
+      customTheme: tier.id,
       activatedAt: now,
       expireTime,
       isLifetime: tier.id === 'lifetime'

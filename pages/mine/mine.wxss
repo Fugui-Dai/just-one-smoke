@@ -8,6 +8,101 @@
   flex-direction: column;
   position: relative;
   box-sizing: border-box;
+  transition: background 0.35s ease;
+}
+
+.mine-page-container.theme-emerald,
+.mine-page-container.theme-day {
+  background: radial-gradient(circle at 50% 14%, rgba(16, 185, 129, 0.25) 0%, #0a1f19 48%, #060f0c 82%);
+}
+
+.mine-page-container.theme-purple,
+.mine-page-container.theme-month {
+  background: radial-gradient(circle at 50% 14%, rgba(168, 85, 247, 0.28) 0%, #1a0f2e 48%, #090612 82%);
+}
+
+.mine-page-container.theme-glacier,
+.mine-page-container.theme-lifetime {
+  background: radial-gradient(circle at 50% 14%, rgba(251, 191, 36, 0.28) 0%, rgba(180, 83, 9, 0.14) 38%, #141008 68%, #070604 88%);
+}
+
+.vip-ambient-stage {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.vip-aurora-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(56rpx);
+  opacity: 0.55;
+  animation: mineVipOrbBreath 6s infinite alternate ease-in-out;
+}
+
+.vip-aurora-orb.orb-primary {
+  width: 520rpx;
+  height: 300rpx;
+  top: -50rpx;
+  left: 50%;
+  margin-left: -260rpx;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.38) 0%, transparent 72%);
+}
+
+.vip-aurora-orb.orb-secondary {
+  width: 400rpx;
+  height: 400rpx;
+  top: 38%;
+  right: -120rpx;
+  background: radial-gradient(circle, rgba(192, 132, 252, 0.20) 0%, transparent 70%);
+  animation-delay: -3s;
+}
+
+.theme-day .vip-aurora-orb.orb-primary,
+.theme-emerald .vip-aurora-orb.orb-primary {
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.38) 0%, transparent 72%);
+}
+.theme-day .vip-aurora-orb.orb-secondary,
+.theme-emerald .vip-aurora-orb.orb-secondary {
+  background: radial-gradient(circle, rgba(52, 211, 153, 0.20) 0%, transparent 70%);
+}
+
+.theme-lifetime .vip-aurora-orb.orb-primary,
+.theme-glacier .vip-aurora-orb.orb-primary {
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.42) 0%, transparent 72%);
+}
+.theme-lifetime .vip-aurora-orb.orb-secondary,
+.theme-glacier .vip-aurora-orb.orb-secondary {
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.22) 0%, transparent 70%);
+}
+
+@keyframes mineVipOrbBreath {
+  0% { transform: scale(0.92); opacity: 0.42; }
+  100% { transform: scale(1.12); opacity: 0.72; }
+}
+
+.vip-spark {
+  position: absolute;
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background: #f5d0fe;
+  box-shadow: 0 0 14rpx #c084fc;
+  opacity: 0.6;
+  animation: mineVipSparkFloat 5s infinite ease-in-out;
+}
+.theme-day .vip-spark { background: #a7f3d0; box-shadow: 0 0 14rpx #34d399; }
+.theme-lifetime .vip-spark { background: #fef08a; box-shadow: 0 0 16rpx #fbbf24; }
+
+.vip-spark.s1 { top: 16%; left: 16%; animation-delay: 0s; }
+.vip-spark.s2 { top: 32%; right: 14%; width: 6rpx; height: 6rpx; animation-delay: -1.6s; }
+.vip-spark.s3 { top: 62%; left: 18%; width: 6rpx; height: 6rpx; animation-delay: -3.2s; }
+
+@keyframes mineVipSparkFloat {
+  0%, 100% { transform: translateY(0) scale(0.8); opacity: 0.25; }
+  50% { transform: translateY(-24rpx) scale(1.2); opacity: 0.85; }
 }
 
 /* ==================== 顶部自定义导航栏 ==================== */
@@ -22,6 +117,19 @@
   background: rgba(8, 10, 15, 0.85);
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   box-sizing: border-box;
+}
+
+.theme-day .custom-navbar {
+  background: rgba(5, 20, 16, 0.86);
+  border-bottom-color: rgba(16, 185, 129, 0.22);
+}
+.theme-month .custom-navbar {
+  background: rgba(16, 10, 28, 0.86);
+  border-bottom-color: rgba(168, 85, 247, 0.24);
+}
+.theme-lifetime .custom-navbar {
+  background: rgba(20, 14, 6, 0.88);
+  border-bottom-color: rgba(251, 191, 36, 0.26);
 }
 
 .navbar-content {
@@ -55,10 +163,13 @@
   background: rgba(255, 255, 255, 0.14);
 }
 
-.back-arrow {
-  font-size: 36rpx;
-  line-height: 1;
-  color: #fbbf24;
+.back-chevron-arrow {
+  width: 18rpx;
+  height: 18rpx;
+  border-left: 4rpx solid #e2e8f0;
+  border-bottom: 4rpx solid #e2e8f0;
+  transform: rotate(45deg);
+  margin-left: 6rpx;
 }
 
 .nav-center-title-box {
@@ -80,6 +191,9 @@
   font-weight: 800;
   letter-spacing: 2rpx;
   color: #f8fafc;
+  background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   text-align: center;
 }
 

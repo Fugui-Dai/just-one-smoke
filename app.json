@@ -1,12 +1,48 @@
 {
   "pages": [
-    "pages/index/index",
-    "pages/shop/shop",
-    "pages/leaderboard/leaderboard",
-    "pages/mine/mine",
-    "pages/pack/pack",
-    "pages/vip/vip"
+    "pages/index/index"
   ],
+  "subPackages": [
+    {
+      "root": "pages/shop",
+      "pages": [
+        "shop"
+      ]
+    },
+    {
+      "root": "pages/pack",
+      "pages": [
+        "pack"
+      ]
+    },
+    {
+      "root": "pages/vip",
+      "pages": [
+        "vip"
+      ]
+    },
+    {
+      "root": "pages/leaderboard",
+      "pages": [
+        "leaderboard"
+      ]
+    },
+    {
+      "root": "pages/mine",
+      "pages": [
+        "mine"
+      ]
+    }
+  ],
+  "preloadRule": {
+    "pages/index/index": {
+      "network": "all",
+      "packages": [
+        "pages/shop",
+        "pages/vip"
+      ]
+    }
+  },
   "window": {
     "navigationBarBackgroundColor": "#080a0f",
     "navigationBarTextStyle": "white",

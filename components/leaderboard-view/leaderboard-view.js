@@ -15,6 +15,14 @@ Component({
       type: Object,
       value: {}
     },
+    isVip: {
+      type: Boolean,
+      value: false
+    },
+    vipTheme: {
+      type: String,
+      value: ''
+    },
     currentCategory: {
       type: String,
       value: 'substituted'

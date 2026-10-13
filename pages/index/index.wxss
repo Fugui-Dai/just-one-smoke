@@ -551,21 +551,21 @@
 
 
 
-/* ==================== 6. 右侧半月弧形主控 DOCK 栏 (实机截图 1:1 像素级复刻) ==================== */
+/* ==================== 6. 右侧半月弧形主控 DOCK 栏 (黑曜琉璃毛玻璃高奢质感) ==================== */
 .right-arc-dock {
   position: absolute;
   right: 0;
   top: 50%;
   transform: translateY(-48%);
-  width: 126rpx;
-  background: rgba(18, 14, 10, 0.86);
-  border: 1.5rpx solid rgba(255, 235, 205, 0.16);
+  width: 128rpx;
+  background: rgba(12, 16, 26, 0.84);
+  border: 1.5rpx solid rgba(255, 255, 255, 0.14);
   border-right: none;
   border-top-left-radius: 70rpx;
   border-bottom-left-radius: 70rpx;
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
-  box-shadow: -10rpx 0 40rpx rgba(0, 0, 0, 0.7);
+  box-shadow: -10rpx 0 36rpx rgba(0, 0, 0, 0.65), inset 1rpx 1rpx 0 rgba(255, 255, 255, 0.12);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -583,7 +583,7 @@
   height: 24rpx;
   background: transparent;
   border-bottom-right-radius: 24rpx;
-  box-shadow: 8rpx 8rpx 0 0 rgba(18, 14, 10, 0.86);
+  box-shadow: 8rpx 8rpx 0 0 rgba(12, 16, 26, 0.84);
   pointer-events: none;
 }
 
@@ -596,7 +596,7 @@
   height: 24rpx;
   background: transparent;
   border-top-right-radius: 24rpx;
-  box-shadow: 8rpx -8rpx 0 0 rgba(18, 14, 10, 0.86);
+  box-shadow: 8rpx -8rpx 0 0 rgba(12, 16, 26, 0.84);
   pointer-events: none;
 }
 
@@ -670,6 +670,23 @@ button.dock-btn-wrap.share-dock-item::after {
   font-size: 32rpx;
 }
 
+.dock-circle-btn.my-btn-circle.is-vip-my-btn {
+  border-color: rgba(251, 191, 36, 0.78);
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.22) 0%, rgba(28, 22, 12, 0.90) 100%);
+  box-shadow: 0 0 18rpx rgba(251, 191, 36, 0.42), inset 0 0 10rpx rgba(254, 240, 138, 0.22);
+}
+
+.my-vip-crown-badge {
+  position: absolute;
+  top: -10rpx;
+  right: -8rpx;
+  font-size: 22rpx;
+  line-height: 1;
+  filter: drop-shadow(0 2rpx 6rpx rgba(0, 0, 0, 0.85));
+  pointer-events: none;
+  z-index: 6;
+}
+
 .dock-char-icon.ash-char {
   color: #b0a799;
   font-weight: 800;
@@ -678,11 +695,12 @@ button.dock-btn-wrap.share-dock-item::after {
 
 .dock-title {
   font-size: 20rpx;
-  font-weight: 700;
-  color: #e5ded3;
+  font-weight: 600;
+  color: #f1f5f9;
   margin-top: 5rpx;
   letter-spacing: 0.5rpx;
-  text-shadow: 0 1rpx 2rpx rgba(0, 0, 0, 0.6);
+  text-shadow: 0 1rpx 3rpx rgba(0, 0, 0, 0.85);
+  white-space: nowrap;
 }
 
 .dock-sub-title {
@@ -898,11 +916,11 @@ button.dock-btn-wrap.share-dock-item::after {
   background: #ef4444;
 }
 
-/* 6. 商店：质朴优雅微光 (无多余外部圆圈，纯净无24字样矢量图标) */
+/* 6. 商店：典雅金珀微光 (与全局黑曜琉璃底托谐调，克制高级，不喧宾夺主) */
 .dock-circle-btn.store-btn-circle {
-  border: 1.5px solid rgba(245, 158, 11, 0.4);
-  background: rgba(245, 158, 11, 0.16);
-  box-shadow: 0 0 16rpx rgba(245, 158, 11, 0.4);
+  border: 1px solid rgba(245, 158, 11, 0.32);
+  background: rgba(245, 158, 11, 0.08);
+  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.45), inset 0 1rpx 0 rgba(254, 240, 138, 0.15);
 }
 
 .dock-svg-icon.store-svg-icon {
@@ -914,11 +932,11 @@ button.dock-btn-wrap.share-dock-item::after {
   color: #fbbf24;
 }
 
-/* 7. 排行：曜金奖杯高光微晕 */
+/* 7. 排行榜：曜金奖杯高光微晕 (名流勋章，金芒微绽) */
 .dock-circle-btn.rank-btn-circle {
-  border: 1.5px solid rgba(245, 158, 11, 0.45);
-  background: rgba(245, 158, 11, 0.16);
-  box-shadow: 0 0 16rpx rgba(245, 158, 11, 0.42);
+  border: 1px solid rgba(251, 191, 36, 0.36);
+  background: rgba(251, 191, 36, 0.08);
+  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.45), 0 0 14rpx rgba(251, 191, 36, 0.22);
 }
 
 .dock-icon.rank-trophy-icon {
@@ -928,8 +946,9 @@ button.dock-btn-wrap.share-dock-item::after {
 
 /* 8. 我的 */
 .dock-circle-btn.my-btn-circle {
-  border-color: rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.45);
 }
 
 
@@ -2339,11 +2358,85 @@ button.dock-btn-wrap.share-dock-item::after {
   to { transform: translateY(0); }
 }
 
+.sheet-title-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.sheet-sub-title-tag {
+  font-size: 19rpx;
+  color: #fb923c;
+  font-weight: 500;
+}
+
+/* 场景分类快筛胶囊栏 */
+.scene-category-pills-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 20rpx;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.scene-cat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 28rpx;
+  padding: 10rpx 20rpx;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.scene-cat-pill:active {
+  transform: scale(0.96);
+}
+
+.scene-cat-pill.active-cat-pill {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: #f59e0b;
+  box-shadow: 0 0 16rpx rgba(245, 158, 11, 0.35);
+}
+
+.scp-icon {
+  font-size: 22rpx;
+}
+
+.scp-text {
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.scene-cat-pill.active-cat-pill .scp-text {
+  color: #fbbf24;
+}
+
 .skill-card-top-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
+}
+
+.scene-icon-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scene-accent-dot {
+  position: absolute;
+  top: -4rpx;
+  right: -8rpx;
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
 }
 
 .scene-item-badge {

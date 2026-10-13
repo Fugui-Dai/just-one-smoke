@@ -40,6 +40,10 @@
       },
       {
         "type": "file",
+        "value": "LICENSE"
+      },
+      {
+        "type": "file",
         "value": ".eslintrc.js"
       },
       {

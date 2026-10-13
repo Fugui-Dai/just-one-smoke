@@ -1,4 +1,5 @@
 // utils/smokeEffects.js
+import { vipService } from './vipService.js';
 
 /**
  * 赛博烟雾特效工坊元数据与解锁配置 (Tencent Games 顶级品质 · 情绪价值巅峰典藏)
@@ -82,6 +83,28 @@ export const SMOKE_EFFECTS = [
     glowColor: 'rgba(192, 132, 252, 0.75)',
     accentBorder: '#a855f7',
     renderType: 'purple_zen'
+  },
+
+  // ================= 东方禅意 · 宁心静气（翡翠青莲） =================
+  {
+    id: 'lotus_zen',
+    name: '青莲化境 · 步步生莲',
+    shortName: '步步生莲',
+    icon: '🪷',
+    category: '东方禅意',
+    categoryTag: '心静如水',
+    tagColor: '#34d399',
+    badgeBg: 'rgba(52, 211, 153, 0.18)',
+    badgeBorder: 'rgba(16, 185, 129, 0.45)',
+    price: 0,
+    priceDisplay: '免费尊享',
+    requiredCount: 0,
+    requiredSavings: 0,
+    description: '凝脂青碧宝莲破晓初绽，九瓣祥和花瓣自云烟中层层舒展，晨露甘霖与温润金蕊微光流转，烦恼随烟尽散',
+    themeColor: '#34d399',
+    glowColor: 'rgba(52, 211, 153, 0.85)',
+    accentBorder: '#10b981',
+    renderType: 'lotus_zen'
   },
 
   // ================= 4. 空灵治愈 · 梦幻星幕（蓝阶稀有） =================
@@ -315,6 +338,9 @@ export function getSmokeEffectById(id) {
 }
 
 export function isSmokeEffectUnlocked(id, totalSubstituted = 0, unlockedList = []) {
+  try {
+    if (vipService && vipService.isVip()) return true;
+  } catch (e) {}
   if (Array.isArray(unlockedList) && unlockedList.includes(id)) return true;
   const effect = getSmokeEffectById(id);
   if (!effect) return false;
@@ -322,8 +348,4 @@ export function isSmokeEffectUnlocked(id, totalSubstituted = 0, unlockedList = [
   if (effect.price === 0 || effect.requiredCount === 0) return true;
   // 达成累计替烟数量即可自动免费获得
   return totalSubstituted >= effect.requiredCount;
-}
-
-export function getAllSmokeEffects() {
-  return SMOKE_EFFECTS;
 }

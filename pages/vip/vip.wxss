@@ -32,6 +32,141 @@ page {
   background: radial-gradient(circle at 50% -10%, rgba(251, 191, 36, 0.35) 0%, rgba(180, 83, 9, 0.22) 35%, #160e03 70%, #080602 100%);
 }
 
+.vip-page-container.theme-classic {
+  background: radial-gradient(circle at 50% -10%, rgba(148, 163, 184, 0.14) 0%, #111318 45%, #07080b 100%);
+}
+
+/* VIP 专属流光主题衣橱 */
+.vip-theme-wardrobe-card {
+  width: 100%;
+  margin: 0;
+  padding: 20rpx 22rpx;
+  border-radius: 24rpx;
+  background: rgba(15, 18, 28, 0.72);
+  border: 1.5px solid rgba(255, 255, 255, 0.10);
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.45);
+  box-sizing: border-box;
+}
+
+.vtw-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+
+.vtw-title {
+  font-size: 24rpx;
+  font-weight: 800;
+  color: #f8fafc;
+  letter-spacing: 1rpx;
+}
+
+.vtw-current {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.vtw-pills-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12rpx;
+}
+
+.vtw-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+  padding: 14rpx 8rpx;
+  border-radius: 18rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5rpx solid rgba(255, 255, 255, 0.10);
+  transition: all 0.22s ease;
+}
+
+.vtw-pill:active {
+  transform: scale(0.95);
+}
+
+.vtw-pill-icon-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vtw-pill-icon {
+  font-size: 28rpx;
+  line-height: 1;
+}
+
+.vtw-lock-badge {
+  position: absolute;
+  top: -8rpx;
+  right: -14rpx;
+  font-size: 16rpx;
+  line-height: 1;
+}
+
+.vtw-pill-texts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rpx;
+}
+
+.vtw-pill-name {
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.vtw-pill-tag {
+  font-size: 18rpx;
+  color: #94a3b8;
+}
+
+.vtw-pill-tag.tag-locked {
+  color: #f59e0b;
+}
+
+.vtw-pill.vtw-pill-locked {
+  opacity: 0.62;
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.vtw-pill.vtw-pill-active.vtw-pill-month {
+  background: linear-gradient(145deg, rgba(168, 85, 247, 0.32), rgba(88, 28, 135, 0.28));
+  border-color: #c084fc;
+  box-shadow: 0 0 18rpx rgba(168, 85, 247, 0.38);
+}
+.vtw-pill.vtw-pill-active.vtw-pill-month .vtw-pill-name { color: #f5d0fe; }
+
+.vtw-pill.vtw-pill-active.vtw-pill-lifetime {
+  background: linear-gradient(145deg, rgba(251, 191, 36, 0.32), rgba(146, 64, 14, 0.28));
+  border-color: #fbbf24;
+  box-shadow: 0 0 18rpx rgba(251, 191, 36, 0.38);
+}
+.vtw-pill.vtw-pill-active.vtw-pill-lifetime .vtw-pill-name { color: #fef08a; }
+
+.vtw-pill.vtw-pill-active.vtw-pill-day {
+  background: linear-gradient(145deg, rgba(16, 185, 129, 0.32), rgba(6, 95, 70, 0.28));
+  border-color: #34d399;
+  box-shadow: 0 0 18rpx rgba(16, 185, 129, 0.38);
+}
+.vtw-pill.vtw-pill-active.vtw-pill-day .vtw-pill-name { color: #a7f3d0; }
+
+.vtw-pill.vtw-pill-active.vtw-pill-classic {
+  background: linear-gradient(145deg, rgba(148, 163, 184, 0.26), rgba(30, 41, 59, 0.45));
+  border-color: #cbd5e1;
+  box-shadow: 0 0 16rpx rgba(203, 213, 225, 0.24);
+}
+.vtw-pill.vtw-pill-active.vtw-pill-classic .vtw-pill-name { color: #ffffff; }
+
 /* ==================== 顶部极光沉浸导航栏 ==================== */
 .custom-navbar {
   position: fixed;
@@ -47,64 +182,21 @@ page {
 
 .theme-day .custom-navbar {
   background: rgba(4, 20, 16, 0.88) !important;
-  border-bottom: 1px solid rgba(16, 185, 129, 0.28) !important;
-  box-shadow: 0 4rpx 24rpx rgba(16, 185, 129, 0.12) !important;
-}
-.theme-day .nav-center-title-text {
-  background: linear-gradient(135deg, #a7f3d0 0%, #34d399 60%, #059669 100%) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  text-shadow: 0 0 16rpx rgba(16, 185, 129, 0.40);
-}
-.theme-day .nav-back-btn {
-  background: rgba(16, 185, 129, 0.12) !important;
-  border-color: rgba(16, 185, 129, 0.30) !important;
-}
-.theme-day .back-chevron-arrow {
-  border-left-color: #34d399 !important;
-  border-bottom-color: #34d399 !important;
+  border-bottom: 1px solid rgba(16, 185, 129, 0.24) !important;
+  box-shadow: 0 4rpx 24rpx rgba(16, 185, 129, 0.10) !important;
 }
 
 .theme-month .custom-navbar {
   background: rgba(16, 8, 29, 0.88) !important;
-  border-bottom: 1px solid rgba(168, 85, 247, 0.30) !important;
-  box-shadow: 0 4rpx 24rpx rgba(168, 85, 247, 0.14) !important;
-}
-.theme-month .nav-center-title-text {
-  background: linear-gradient(135deg, #f5d0fe 0%, #c084fc 60%, #9333ea 100%) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  text-shadow: 0 0 16rpx rgba(168, 85, 247, 0.45);
-}
-.theme-month .nav-back-btn {
-  background: rgba(168, 85, 247, 0.12) !important;
-  border-color: rgba(168, 85, 247, 0.30) !important;
-}
-.theme-month .back-chevron-arrow {
-  border-left-color: #c084fc !important;
-  border-bottom-color: #c084fc !important;
+  border-bottom: 1px solid rgba(168, 85, 247, 0.26) !important;
+  box-shadow: 0 4rpx 24rpx rgba(168, 85, 247, 0.12) !important;
 }
 
 .theme-lifetime .custom-navbar {
   background: rgba(22, 14, 3, 0.90) !important;
-  border-bottom: 1px solid rgba(251, 191, 36, 0.34) !important;
-  box-shadow: 0 4rpx 28rpx rgba(245, 158, 11, 0.16) !important;
+  border-bottom: 1px solid rgba(251, 191, 36, 0.28) !important;
+  box-shadow: 0 4rpx 28rpx rgba(245, 158, 11, 0.14) !important;
 }
-.theme-lifetime .nav-center-title-text {
-  background: linear-gradient(135deg, #fef08a 0%, #fbbf24 55%, #d97706 100%) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
-  text-shadow: 0 0 18rpx rgba(251, 191, 36, 0.50);
-}
-.theme-lifetime .nav-back-btn {
-  background: rgba(251, 191, 36, 0.14) !important;
-  border-color: rgba(251, 191, 36, 0.35) !important;
-}
-.theme-lifetime .back-chevron-arrow {
-  border-left-color: #fbbf24 !important;
-  border-bottom-color: #fbbf24 !important;
-}
-
 
 .navbar-content {
   position: relative;
@@ -157,10 +249,13 @@ page {
 }
 
 .nav-center-title-text {
-  font-size: 32rpx;
-  font-weight: 700;
+  font-size: 34rpx;
+  font-weight: 800;
   color: #f8fafc;
-  letter-spacing: 1rpx;
+  background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 2rpx;
   max-width: 420rpx;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -779,7 +874,7 @@ page {
 .gh-title {
   font-size: 22rpx;
   font-weight: 600;
-  color: #94a3b8;
+  color: #ffffff;
 }
 
 .guarantee-tips-list {
@@ -790,7 +885,7 @@ page {
 
 .gt-item {
   font-size: 22rpx;
-  color: #64748b;
+  color: #ffffff;
   line-height: 1.4;
 }
 
@@ -831,7 +926,7 @@ page {
   box-sizing: border-box;
   flex-shrink: 0;
   border-radius: 6rpx;
-  border: 2rpx solid #64748b;
+  border: 2rpx solid #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -855,7 +950,7 @@ page {
 .agreement-text {
   font-size: 24rpx;
   line-height: 28rpx;
-  color: #94a3b8;
+  color: #ffffff;
   display: flex;
   align-items: center;
 }
@@ -1260,49 +1355,91 @@ page {
 
 .protocol-dialog-card {
   width: 100%;
-  max-width: 620rpx;
-  background: #111827;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 28rpx;
-  padding: 32rpx;
+  max-width: 650rpx;
+  background: linear-gradient(165deg, #161f33 0%, #0d121f 100%);
+  border: 1px solid rgba(251, 191, 36, 0.28);
+  border-radius: 30rpx;
+  padding: 32rpx 30rpx;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 20rpx;
+  box-shadow: 0 24rpx 64rpx rgba(0, 0, 0, 0.72);
 }
 
 .protocol-top-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding-bottom: 12rpx;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .proto-title {
-  font-size: 28rpx;
-  font-weight: 700;
-  color: #f8fafc;
+  font-size: 30rpx;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 1rpx;
 }
 
 .proto-close-btn {
   font-size: 32rpx;
-  color: #94a3b8;
-  padding: 8rpx;
+  color: #ffffff;
+  padding: 6rpx 12rpx;
 }
 
 .proto-scroll {
-  max-height: 480rpx;
+  max-height: 680rpx;
+  padding-right: 6rpx;
+  box-sizing: border-box;
 }
 
 .proto-content {
   display: flex;
   flex-direction: column;
   gap: 14rpx;
+  padding-bottom: 12rpx;
+}
+
+.proto-date {
+  font-size: 22rpx;
+  color: #ffffff;
+}
+
+.proto-lead {
+  font-size: 24rpx;
+  color: #ffffff;
+  line-height: 1.65;
+  text-align: justify;
+}
+
+.proto-h2 {
+  font-size: 26rpx;
+  font-weight: 800;
+  color: #fbbf24;
+  margin-top: 10rpx;
+  letter-spacing: 0.5rpx;
 }
 
 .proto-p {
-  font-size: 22rpx;
-  color: #94a3b8;
-  line-height: 1.55;
+  font-size: 24rpx;
+  color: #ffffff;
+  line-height: 1.65;
+  text-align: justify;
+}
+
+.proto-li {
+  font-size: 23rpx;
+  color: #ffffff;
+  line-height: 1.6;
+  padding-left: 12rpx;
+  text-align: justify;
+}
+
+.proto-bold {
+  color: #ffffff;
+  font-weight: 800;
+  text-decoration: underline;
 }
 
 /* ==================== 腾讯游戏级 3 档情绪场域氛围系统 (Tencent Emotion Mood Theme) ==================== */

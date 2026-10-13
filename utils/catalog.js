@@ -54,12 +54,12 @@ export const CIGARETTE_CATALOG = [
     lengthMm: 62,
     filterMm: 14,
     diameterMm: 5.5,
-    specDesc: '62mm 经典短款手卷 · 锐角圆锥尾 · 外溢金黄烟丝',
+    specDesc: '62mm 经典短款手卷 · 一体式白纸喇叭筒 · 黄金原叶烟丝',
     topDiameterMm: 12.0,
     slogan: '一捧黄烟丝，一张白纸卷，岁月生香',
     name: '老辈·白纸手卷旱烟',
     brand: '老辈手卷 (Hand-Rolled)',
-    description: '90年代老一辈亲手用薄白纸紧紧搓卷的黄碎烟丝，短款经典大锥度喇叭筒，尾部圆锥尖锐扭卷咬嘴，火口自然蓬松外溢原叶烟丝，满载岁月记忆',
+    description: '90年代老一辈亲手用薄白纸紧紧搓卷的黄碎烟丝，短款经典通体一体式大锥度白纸喇叭筒，无独立过滤嘴，满载岁月记忆',
     filterColor: '#faf8f2', // 纯白纸卷端，无海绵滤嘴
     paperColor: '#faf8f2',  // 天然透光薄白纸
     bandColor: 'transparent',   // 无现代工业金圈
@@ -556,7 +556,7 @@ export const CIGARETTE_CATALOG = [
     }
   },
 
-  // 14. [¥23] 贵烟·跨越 (陈皮爆珠)
+  // 14. [¥23] 贵烟·跨越
   {
     id: 'guiyan_kuayue',
     lengthMm: 100,
@@ -564,7 +564,7 @@ export const CIGARETTE_CATALOG = [
     diameterMm: 5.4,
     specDesc: '100mm 纤长细支 · 32mm陈皮爆珠长嘴',
     slogan: '一缕陈皮香，跨越黑夜与黎明',
-    name: '贵烟·跨越 (陈皮爆珠)',
+    name: '贵烟·跨越',
     brand: '贵烟 (Guiyan)',
     description: '当代年轻人果香爆珠新宠，纯黑星空格调，捏破自然柑橘陈皮爆珠，清爽温润化痰润喉',
     filterColor: '#18181b',
@@ -591,7 +591,7 @@ export const CIGARETTE_CATALOG = [
       logoText: '貴 煙',
       subText: 'GUIYAN · 跨越细支',
       accentColor: '#f59e0b',
-      sealText: '陈皮爆珠',
+      sealText: '贵烟跨越',
       warningText: '柑香润肺 愿您跨越烟瘾拥抱健康',
       tar: '7mg',
       nicotine: '0.7mg',
@@ -733,7 +733,7 @@ export const CIGARETTE_CATALOG = [
     }
   },
 
-  // 18. [¥28] 万宝路·深海冰蓝 (薄荷爆珠)
+  // 18. [¥28] 万宝路·深海冰蓝
   {
     id: 'marlboro_ice',
     lengthMm: 84,
@@ -741,7 +741,7 @@ export const CIGARETTE_CATALOG = [
     diameterMm: 7.7,
     specDesc: '84mm 经典标准支 · 25mm极冰爆珠嘴',
     slogan: '极地深寒，双重极速冰川爆裂',
-    name: '万宝路·深海冰蓝 (薄荷爆珠)',
+    name: '万宝路·深海冰蓝',
     brand: '万宝路 (Marlboro)',
     description: '年轻潮玩与夜店首选，碳黑磨砂配深海蓝 V 槽，双重强效薄荷晶球捏碎后如深海冰暴呼啸',
     filterColor: '#09090b',
@@ -991,7 +991,7 @@ export const CIGARETTE_CATALOG = [
     }
   },
 
-  // 24. [¥60] 宽窄·五粮浓香 (国酒爆珠)
+  // 24. [¥60] 宽窄·五粮浓香
   {
     id: 'kuanzhai_wuliang',
     lengthMm: 84,
@@ -999,7 +999,7 @@ export const CIGARETTE_CATALOG = [
     diameterMm: 7.7,
     specDesc: '84mm 经典标准支 · 25mm五粮酒香嘴',
     slogan: '方寸之间见宽窄，五粮浓香醉天下',
-    name: '宽窄·五粮浓香 (国酒爆珠)',
+    name: '宽窄·五粮浓香',
     brand: '宽窄 (Kuanzhai)',
     description: '年轻人极为追捧的高端跨界神作，青砖灰瓦成都院落门头，捏破五粮浓香国酒爆珠，粮食酒香爆裂四溢',
     filterColor: '#ca8a04',
@@ -1026,7 +1026,7 @@ export const CIGARETTE_CATALOG = [
       logoText: '宽 窄',
       subText: 'KUANZHAI · 五粮浓香',
       accentColor: '#f59e0b',
-      sealText: '国酒爆珠',
+      sealText: '五粮浓香',
       warningText: '豁达宽窄 愿君品味清欢戒瘾泰然',
       tar: '10mg',
       nicotine: '1.0mg',
@@ -1078,32 +1078,32 @@ export const CIGARETTE_CATALOG = [
     }
   },
 
-  // 26. [¥68] 牛来·电影香烟 (银幕金犊)
+  // 26. [¥68] 牛来 (牛气冲天)
   {
     id: 'niulai_cinema',
     lengthMm: 84,
     filterMm: 25,
     diameterMm: 7.7,
-    specDesc: '84mm 经典标准支 · 25mm胶片黑金嘴 · 光影琥珀放映爆珠',
-    slogan: '一卷光影人生，一声牛来乾坤',
-    name: '牛来·电影香烟',
-    brand: '牛来电影 (Niulai Cinema)',
-    description: '“一卷光影人生，一声牛来乾坤”。原创动画风萌金小牛手绘插画与35mm流金电影胶卷相映成趣，黑金流光滤嘴内置【光影琥珀放映爆珠】，带来影院级微距视觉与感官代偿',
-    filterColor: '#18181b', // 胶片深邃黑金滤嘴
-    paperColor: '#fffdf5',  // 象牙胶片温润白纸
-    bandColor: '#f59e0b',   // 电影放映金圈
+    specDesc: '84mm 经典标准支 · 25mm曜黑金嘴 · 金樽琥珀醇香爆珠',
+    slogan: '一朝鸿运当头，一声牛来乾坤',
+    name: '牛来',
+    brand: '牛来鸿运 (Niulai Fortune)',
+    description: '“一朝鸿运当头，一声牛来乾坤”。原创动画风萌金小牛手绘插画与招财祥瑞金环相映成趣，黑金流光滤嘴内置【金樽琥珀醇香爆珠】，带来温润醇厚的视觉与感官代偿',
+    filterColor: '#18181b', // 深邃黑金滤嘴
+    paperColor: '#fffdf5',  // 象牙温润白纸
+    bandColor: '#f59e0b',   // 祥瑞金圈
     stampText: '牛来',
     stampColor: '#d97706',
     filterBrandText: 'NIU LAI',
     smokeColor: 'rgba(252, 245, 230, ',
     widthType: 'standard',
     hasBead: true,
-    beadName: '光影琥珀放映爆珠',
+    beadName: '金樽琥珀爆珠',
     beadColor: '#f59e0b',
     price: 68,
     packImage: '/images/packs/niulai_cinema.png',
     requiredCount: 0,
-    unlockDesc: '初始默认解锁 · 银幕牛来',
+    unlockDesc: '初始默认解锁 · 鸿运牛来',
     packCapacity: 20,
     packType: 'standard',
     lidLine: 168,
@@ -1112,10 +1112,10 @@ export const CIGARETTE_CATALOG = [
       lidGradient: 'linear-gradient(180deg, #2a241e 0%, #1a1612 100%)',
       foilColor: '#f59e0b',
       logoText: '牛 来',
-      subText: 'NIULAI · 电影香烟 · 银幕金犊',
+      subText: 'NIULAI · 鸿运金牛 · 牛气冲天',
       accentColor: '#fbbf24',
-      sealText: '牛来光影',
-      warningText: '胶片定格流金岁月 愿君熄灭烟火牛气冲天',
+      sealText: '牛气冲天',
+      warningText: '牛来鸿运步步高 愿君早日无烟一身轻',
       tar: '8mg',
       nicotine: '0.8mg',
       co: '8mg',

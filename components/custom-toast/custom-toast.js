@@ -46,7 +46,10 @@ Component({
         }
       }
 
-      let iconText = options.icon && options.icon.length > 2 ? options.icon : '';
+      const NATIVE_ICON_KEYWORDS = ['success', 'error', 'loading', 'none', 'warn', 'info'];
+      let iconText = (options.icon && typeof options.icon === 'string' && !NATIVE_ICON_KEYWORDS.includes(options.icon))
+        ? options.icon
+        : '';
       if (!iconText) {
         switch (type) {
           case 'flame':
@@ -124,5 +127,12 @@ Component({
     },
 
     preventTouchMove() {}
+  },
+
+  lifetimes: {
+    detached() {
+      if (this._hideTimer) clearTimeout(this._hideTimer);
+      if (this._exitTimer) clearTimeout(this._exitTimer);
+    }
   }
 });

@@ -4,16 +4,14 @@ import { ParticleSystem } from '../../utils/particleSystem.js';
 import { audioManager } from '../../utils/audioManager.js';
 import { triggerHaptic } from '../../utils/haptics.js';
 import { storageService } from '../../utils/storageService.js';
-import { leaderboardService } from '../../utils/leaderboardService.js';
 import { canvasRenderer } from '../../utils/canvasRenderer.js';
 import { toast } from '../../utils/toastService.js';
-import { ATMOSPHERE_SCENES, getSceneById } from '../../utils/sceneRenderer.js';
+import { ATMOSPHERE_SCENES, SCENE_CATEGORIES, getSceneById } from '../../utils/sceneRenderer.js';
 import {
   calculateSavings,
   calculateTarAvoided,
   calculateLifeRegained,
-  calculateQuitDays,
-  getWhoStages
+  calculateQuitDays
 } from '../../utils/healthCalculator.js';
 import {
   CIGARETTE_CATALOG,
@@ -22,11 +20,10 @@ import {
   isCigaretteUnlocked,
   computeCigaretteDimensions
 } from '../../utils/catalog.js';
-import { ACHIEVEMENTS, checkAchievementsToUnlock, getAchievementById } from '../../utils/achievements.js';
+import { checkAchievementsToUnlock, getAchievementById } from '../../utils/achievements.js';
 import {
   IGNITION_TOOLS,
-  getActiveIgnitionTool,
-  getIgnitionToolById
+  getActiveIgnitionTool
 } from '../../utils/ignitionService.js';
 import {
   SMOKE_EFFECTS,
@@ -39,6 +36,7 @@ import { vipService } from '../../utils/vipService.js';
 
 Page({
   data: {
+    isVipUser: false,
     vipTheme: '',
     extinguishIconUri: EXTINGUISH_ICON_SVG,
     storeIconUri: STORE_ICON_SVG,
@@ -50,32 +48,30 @@ Page({
     windowWidth: 375,
     windowHeight: 812,
 
-    currentTab: 'simulator', // simulator | leaderboard | stats
+    currentTab: 'simulator',
     currentCigarette: DEFAULT_CIGARETTE,
     simulatorState: 'UNLIT', // UNLIT | IDLE_BURNING | INHALING | EXHALING | FINISHED
-    smokeRingMode: false,
-    breathingMode: false,
-    breathingPhase: 'none', // none | inhale | hold | exhale
-    inhaleElapsedDisplay: '0.0',
     isMuted: false,
     ashLength: 0,
     ashProgress: 0,
     ashPercent: 0,
-    isExhalingPrompt: false,
     isSparking: false,
     isAshTapping: false, // 抖灰物理阻尼与特效执行中锁定状态
-    showDockMenu: false, // 右侧Dock菜单展开状态
 
     // 沉浸生活场景氛围 (默认微距纯黑摄影极简黑曜)
     currentScene: 'obsidian',
     currentSceneInfo: getSceneById('obsidian'),
     atmosphereScenes: ATMOSPHERE_SCENES,
+    filteredAtmosphereScenes: ATMOSPHERE_SCENES,
+    sceneCategories: SCENE_CATEGORIES,
+    activeSceneCategory: 'all',
+    activeScrollSceneId: '',
     isAmbientEnabled: true,
     showSceneModal: false,
 
     // 创新互动与状态参数
     currentPackRemaining: 20, // 烟盒余量
-    smokeEffectType: 'auspicious_river',
+    smokeEffectType: DEFAULT_SMOKE_EFFECT.id,
     smokeEffectsList: SMOKE_EFFECTS,
     currentSmokeEffect: DEFAULT_SMOKE_EFFECT,
     activeScrollEffectId: '', // 尊享展厅快速定位正在使用的特效卡片
@@ -84,54 +80,20 @@ Page({
     isGuideFading: false,
     isTrialActive: false, // 30秒尊享免费试抽
     trialSecondsLeft: 0,
-    showSkillModal: false, // ⊙ 特殊技能面板
-    showTipModal: false, // (?) 赛博替烟原理弹窗
     isBeadPopped: false, // 爆珠是否已捏碎
-    sosActive: false, // 3分钟烟瘾急救模式
-    sosSeconds: 180,
-    sosTimerDisplay: '03:00',
 
-    // 点火器具工坊 (火柴 / Zippo / 雪茄蓝焰 / 车载电热丝 / 经典打火机)
-    ignitionTools: IGNITION_TOOLS,
+    // 点火器具工坊
     currentIgnitionTool: IGNITION_TOOLS[0],
-    isCarLighterHeating: false,
-    isZippoOpen: false,
 
-    // 英雄排行榜数据
-    leaderboardCategory: 'substituted', // substituted | saved | days
-    leaderboardList: [],
-    myRankInfo: {
-      rank: 1,
-      title: '无烟觉醒者',
-      beatPercent: 50.0,
-      substituted: 0,
-      savedMoney: 0,
-      days: 1
-    },
-
-    // 统计看板数据
+    // 统计看板核心数据
     profile: {},
     totalSubstituted: 0,
-    totalPacksSaved: '0.0',
     totalSavedMoney: '0.00',
     singleStickSavedPrice: '1.25',
-    totalTarAvoided: 0,
-    totalLifeRegained: 0,
-    lifeRegainedHours: '0.0',
     quitDays: 0,
-    weeklyAvg: '0.0',
-    dailyTrends: [],
-    whoStages: [],
-
-    // 图鉴与成就
-    catalogList: [],
-    achievementsList: [],
-    unlockedAchievementsCount: 0,
 
     // 弹窗状态
     showRewardModal: false,
-    showProfileModal: false,
-    showPicker: false,
     showGiftModal: false,
     giftCigarette: null,
     giftSenderName: '老哥',
@@ -144,14 +106,7 @@ Page({
       inhaleCount: 0,
       durationSeconds: 0
     },
-    rewardPunchline: '尼古丁骂骂咧咧地退出了群聊！',
-
-    // 个人设置编辑数据
-    editProfile: {
-      packPrice: 25,
-      cigsPerDay: 15,
-      smokeYears: 5
-    }
+    rewardPunchline: '尼古丁骂骂咧咧地退出了群聊！'
   },
 
   onLoad(options) {
@@ -170,12 +125,16 @@ Page({
     this.sessionStartTime = 0;
     this.hapticInterval = null;
     this.exhaleTimer = null;
-    this.sosTimer = null;
     this.screenFogAlpha = 0;
     this.animId = 0;
     this.lastTime = 0;
     this.lastExhaleTime = 0;
     this.exhaleEffectTimers = [];
+    this._achToastTimers = [];
+    this._carLighterTimer = null;
+    this._sparkResetTimer = null;
+    this._guideTimer = null;
+    this._isCarLighterHeating = false;
 
     // 动态精确测算胶囊按钮与安全状态栏
     this.measureSafeArea();
@@ -204,7 +163,14 @@ Page({
 
     const activeTool = getActiveIgnitionTool();
     const savedEffectId = storageService.getSelectedSmokeEffectId();
-    const curSmokeEffect = getSmokeEffectById(savedEffectId) || DEFAULT_SMOKE_EFFECT;
+    const isEffUnlockedOnLoad = isSmokeEffectUnlocked(
+      savedEffectId,
+      storageService.getRecords().length,
+      storageService.getUnlockedSmokeEffects()
+    );
+    const curSmokeEffect = isEffUnlockedOnLoad
+      ? (getSmokeEffectById(savedEffectId) || DEFAULT_SMOKE_EFFECT)
+      : DEFAULT_SMOKE_EFFECT;
 
     this.setData({
       currentCigarette: curCig,
@@ -258,25 +224,42 @@ Page({
       // 腾讯总监设计级：时空流转与环境空气净空 (Atmospheric Air Cleansed & Living Ember)
       // 用户离开页面去商店（离开超过 400ms）后返回：
       // 1. 空中漂浮的旧呼出浓烟团、烟圈等自然扩散消解于空气中，视野重归通透高奢；
-      // 2. 香烟进度、状态（LIT）、烟灰 100% 保持，燃烧端下一帧即刻升起崭新轻柔青烟！
+      // 2. 香烟进度、状态、烟灰 100% 保持，燃烧端下一帧即刻升起崭新轻柔青烟！
       const elapsedSinceHide = this.hideTimestamp > 0 ? (Date.now() - this.hideTimestamp) : 0;
       this.hideTimestamp = 0;
       if (elapsedSinceHide >= 400 && this.particles) {
-        const isLit = this.fsm ? (this.fsm.getState() === 'LIT') : false;
+        const curState = this.fsm ? this.fsm.getState() : 'UNLIT';
+        const isLit = curState !== 'UNLIT' && curState !== 'FINISHED';
         this.particles.cleanseAir(isLit);
         this.screenFogAlpha = 0;
       }
     }
 
+    const isVipUser = vipService.isVip();
     const vipTheme = vipService.getVipTheme();
     if (this._skipFirstShowRefresh) {
       this._skipFirstShowRefresh = false;
-      this.setData({ vipTheme });
+      this.setData({ isVipUser, vipTheme });
     } else {
-      this.setData({
+      const updatePayload = {
         isMuted: audioManager.isMuted(),
+        isVipUser,
         vipTheme
-      });
+      };
+      if (!this.data.isTrialActive) {
+        const savedEffId = storageService.getSelectedSmokeEffectId();
+        const isEffUnlocked = isSmokeEffectUnlocked(
+          savedEffId,
+          storageService.getRecords().length,
+          storageService.getUnlockedSmokeEffects()
+        );
+        const activeEffect = isEffUnlocked
+          ? (getSmokeEffectById(savedEffId) || DEFAULT_SMOKE_EFFECT)
+          : DEFAULT_SMOKE_EFFECT;
+        updatePayload.currentSmokeEffect = activeEffect;
+        updatePayload.smokeEffectType = activeEffect.id;
+      }
+      this.setData(updatePayload);
       audioManager.startAmbientSound(this.data.currentScene);
       this.refreshAllData();
     }
@@ -319,19 +302,7 @@ Page({
     this.initCanvas();
   },
 
-  onHide() {
-    this.stopRenderLoop();
-    this.hideTimestamp = Date.now();
-
-    // 释放吸烟与呼气动作，杜绝切屏返回后吸烟状态卡死
-    if (this.isHoldingInhale || (this.fsm && this.fsm.getState() === 'INHALING')) {
-      this.isHoldingInhale = false;
-      if (this.fsm && this.fsm.getState() === 'INHALING') {
-        this.fsm.stopInhale();
-        this.setData({ simulatorState: this.fsm.getState() });
-      }
-    }
-
+  _clearTransientTimers() {
     if (this.autoInhaleTimer) {
       clearTimeout(this.autoInhaleTimer);
       this.autoInhaleTimer = null;
@@ -348,21 +319,71 @@ Page({
       this.exhaleEffectTimers.forEach(t => clearTimeout(t));
       this.exhaleEffectTimers = [];
     }
-
+    if (this.trialInterval) {
+      clearInterval(this.trialInterval);
+      this.trialInterval = null;
+    }
     if (this.smokeGuideTimer) {
       clearTimeout(this.smokeGuideTimer);
       this.smokeGuideTimer = null;
     }
+    if (this._guideTimer) {
+      clearTimeout(this._guideTimer);
+      this._guideTimer = null;
+    }
+    if (this._carLighterTimer) {
+      clearTimeout(this._carLighterTimer);
+      this._carLighterTimer = null;
+    }
+    if (this._sparkResetTimer) {
+      clearTimeout(this._sparkResetTimer);
+      this._sparkResetTimer = null;
+    }
+    if (this._achToastTimers && this._achToastTimers.length) {
+      this._achToastTimers.forEach(t => clearTimeout(t));
+      this._achToastTimers = [];
+    }
+    if (this.ashTapLockTimer) {
+      clearTimeout(this.ashTapLockTimer);
+      this.ashTapLockTimer = null;
+    }
+    this._isCarLighterHeating = false;
+  },
+
+  onHide() {
+    this.stopRenderLoop();
+    this.hideTimestamp = Date.now();
+
+    // 释放吸烟与呼气动作，杜绝切屏返回后吸烟状态卡死
+    if (this.isHoldingInhale || (this.fsm && this.fsm.getState() === 'INHALING')) {
+      this.isHoldingInhale = false;
+      if (this.fsm && this.fsm.getState() === 'INHALING') {
+        this.fsm.stopInhale();
+        this.setData({ simulatorState: this.fsm.getState() });
+      }
+    }
+
+    const wasTrial = this.data.isTrialActive;
+    const savedEffect = getSmokeEffectById(storageService.getSelectedSmokeEffectId()) || DEFAULT_SMOKE_EFFECT;
+    this._clearTransientTimers();
 
     this.screenFogAlpha = 0;
-    this.setData({
-      isExhalingPrompt: false,
-      breathingPhase: 'none'
-    });
+    const resetPatch = {
+      isSparking: false,
+      isAshTapping: false
+    };
+    if (wasTrial) {
+      resetPatch.isTrialActive = false;
+      resetPatch.trialSecondsLeft = 0;
+      resetPatch.currentSmokeEffect = savedEffect;
+      resetPatch.smokeEffectType = savedEffect.id;
+    }
+    this.setData(resetPatch);
 
     audioManager.stopBurnSound();
     audioManager.stopInhaleSound();
     audioManager.stopExhaleSound();
+    audioManager.stopAmbientSound();
   },
 
   onUnload() {
@@ -371,31 +392,10 @@ Page({
 
   destroyEngine() {
     this.stopRenderLoop();
-    if (this.smokeGuideTimer) {
-      clearTimeout(this.smokeGuideTimer);
-      this.smokeGuideTimer = null;
-    }
-    if (this.autoInhaleTimer) {
-      clearTimeout(this.autoInhaleTimer);
-      this.autoInhaleTimer = null;
-    }
-    if (this.hapticInterval) {
-      clearInterval(this.hapticInterval);
-      this.hapticInterval = null;
-    }
-    if (this.exhaleTimer) {
-      clearTimeout(this.exhaleTimer);
-      this.exhaleTimer = null;
-    }
-    if (this.sosTimer) {
-      clearInterval(this.sosTimer);
-      this.sosTimer = null;
-    }
-    if (this.ashTapLockTimer) {
-      clearTimeout(this.ashTapLockTimer);
-      this.ashTapLockTimer = null;
-    }
+    this._clearTransientTimers();
     audioManager.stopBurnSound();
+    audioManager.stopInhaleSound();
+    audioManager.stopExhaleSound();
     audioManager.stopAmbientSound();
   },
 
@@ -489,24 +489,6 @@ Page({
 
     const isInhaling = this.fsm.getState() === 'INHALING';
 
-    // 4-7-8 呼吸减压计时逻辑
-    if (isInhaling) {
-      const elapsed = Math.max(0, (Date.now() - this.inhaleStartTime) / 1000);
-      if (this.data.breathingMode) {
-        if (elapsed < 4.0) {
-          if (this.data.breathingPhase !== 'inhale') {
-            this.setData({ breathingPhase: 'inhale' });
-          }
-        } else {
-          if (this.data.breathingPhase !== 'hold') {
-            audioManager.playZenChimeSound(528);
-            this.setData({ breathingPhase: 'hold' });
-          }
-        }
-        this.setData({ inhaleElapsedDisplay: elapsed.toFixed(1) });
-      }
-    }
-
     const burnRes = this.fsm.burn(dt, isInhaling, this.data.currentCigarette);
     const curAsh = this.fsm.getAshLength();
     const curState = this.fsm.getState();
@@ -546,8 +528,8 @@ Page({
       particles: this.particles,
       currentCigarette: this.data.currentCigarette,
       isBeadPopped: this.data.isBeadPopped,
-      breathingMode: this.data.breathingMode,
-      breathingPhase: this.data.breathingPhase,
+      breathingMode: false,
+      breathingPhase: 'none',
       screenFogAlpha: this.screenFogAlpha,
       sceneType: this.data.currentScene,
       isSparking: this.data.isSparking,
@@ -568,7 +550,7 @@ Page({
     const ashPercent = Math.round(curAshRatio * 100);
     const curAshInt = Math.floor(curAsh);
 
-    if (ashPercent !== this.data.ashPercent || curAshInt !== this.data.ashLength || curState !== this.data.simulatorState) {
+    if (ashPercent !== this.data.ashPercent || curState !== this.data.simulatorState) {
       this.setData({
         ashLength: curAshInt,
         ashProgress: ashProgress,
@@ -608,7 +590,6 @@ Page({
     return { mx, my };
   },
 
-  // 配合烟雾特效执行真实拟真吐烟流程 (具备连击防卡顿节流与上一波延时清理)
   // 配合烟雾特效执行真实拟真吐烟流程 (支持根据吸入时长动态注入吸力强度 intensity，具备连击防卡顿节流与上一波延时清理)
   performRealisticExhale(intensity = 1.0) {
     if (!this.particles) return;
@@ -641,6 +622,10 @@ Page({
         smokeColor = 'rgba(254, 240, 138, '; // 芙蓉王金韵本香金
       } else if (curCig.beadColor === '#f43f5e' || curCig.beadColor === '#ef4444') {
         smokeColor = 'rgba(254, 205, 211, '; // 中华国梅幽红 / 五粮国窖丹红
+      } else if (curCig.beadColor === '#fb7185') {
+        smokeColor = 'rgba(253, 164, 175, '; // 蜜桃白茶仙女粉
+      } else if (curCig.beadColor === '#f472b6') {
+        smokeColor = 'rgba(249, 168, 212, '; // 玫瑰荔枝冰酿粉
       } else if (curCig.beadColor === '#a855f7') {
         smokeColor = 'rgba(233, 213, 255, '; // 七星蓝莓幻紫
       }
@@ -653,6 +638,7 @@ Page({
 
     const effIntensity = Math.min(1.55, Math.max(0.75, intensity || 1.0));
     const effectId = currentEff.id;
+    storageService.recordSmokeEffectSummoned(effectId);
 
     // 腾讯总监设计级：独占特效调度，清除异构大实体与多余旧烟雾，杜绝多特效交叉重叠
     this.particles.ensureExclusiveEffect(effectId);
@@ -812,7 +798,6 @@ Page({
       clearTimeout(this.exhaleTimer);
       this.exhaleTimer = null;
     }
-    this.setData({ isExhalingPrompt: false });
 
     if (this.fsm.startInhale()) {
       this.isHoldingInhale = true;
@@ -828,10 +813,6 @@ Page({
         this.particles.retireExhaleEntities(false);
       }
 
-      if (this.data.breathingMode) {
-        this.setData({ breathingPhase: 'inhale' });
-        audioManager.playZenChimeSound(432);
-      }
       this.setData({ simulatorState: this.fsm.getState() });
       audioManager.startBurnSound();
       triggerHaptic('light');
@@ -872,71 +853,20 @@ Page({
       audioManager.playExhaleSound();
       triggerHaptic(inhaleDurationSec > 1.2 ? 'heavy' : 'medium');
 
-      if (this.data.breathingMode) {
-        this.setData({ breathingPhase: 'exhale' });
-        audioManager.playZenChimeSound(396);
-        if (this.exhaleTimer) clearTimeout(this.exhaleTimer);
-        this.exhaleTimer = setTimeout(() => {
-          this.exhaleTimer = null;
-          if (this.fsm.finishExhale()) {
-            this.setData({ simulatorState: this.fsm.getState() });
-          }
-          if (this.data.breathingPhase === 'exhale') {
-            this.setData({ breathingPhase: 'none' });
-          }
-        }, 4500);
-      } else {
-        this.setData({ isExhalingPrompt: true });
-        if (this.exhaleTimer) clearTimeout(this.exhaleTimer);
-        this.exhaleTimer = setTimeout(() => {
-          this.exhaleTimer = null;
-          if (this.fsm.finishExhale()) {
-            this.setData({
-              isExhalingPrompt: false,
-              simulatorState: this.fsm.getState()
-            });
-          } else {
-            this.setData({ isExhalingPrompt: false });
-          }
-        }, 2500);
-      }
+      if (this.exhaleTimer) clearTimeout(this.exhaleTimer);
+      this.exhaleTimer = setTimeout(() => {
+        this.exhaleTimer = null;
+        if (this.fsm.finishExhale()) {
+          this.setData({
+            simulatorState: this.fsm.getState()
+          });
+        }
+      }, 2500);
 
       // 真实口部呼气吐烟动作：从嘴部向上喷涌浓白烟气，并根据吸入时长动态注入烟雾物理初速度与体积
       this.performRealisticExhale(inhaleIntensity);
     }
   },
-
-  // 切换点火器具
-  onSelectIgnitionTool(e) {
-    const toolId = e.currentTarget.dataset.id;
-    if (!toolId || toolId === this.data.currentIgnitionTool.id) return;
-
-    const tool = getIgnitionToolById(toolId);
-    storageService.setSelectedIgnitionTool(toolId);
-    audioManager.unlockAudio();
-    audioManager.playSwitchSound();
-    triggerHaptic('light');
-
-    this.setData({
-      currentIgnitionTool: tool,
-      isZippoOpen: false,
-      isCarLighterHeating: false
-    });
-
-    toast.flame(`换用【${tool.name}】`);
-  },
-
-  onIgniteTouchStart(e) {
-    audioManager.unlockAudio();
-    const tool = this.data.currentIgnitionTool;
-    if (tool.id === 'zippo_vintage' && !this.data.isZippoOpen) {
-      audioManager.playZippoOpenSound();
-      triggerHaptic('medium');
-      this.setData({ isZippoOpen: true });
-    }
-  },
-
-  onIgniteTouchEnd() {},
 
   // 掐灭香烟：点击掐灭立即灭掉火头，升起一缕微弱青灰余烟
   extinguishCigarette() {
@@ -972,9 +902,7 @@ Page({
       }
 
       this.setData({
-        simulatorState: this.fsm.getState(),
-        breathingPhase: 'none',
-        isExhalingPrompt: false
+        simulatorState: this.fsm.getState()
       });
       toast.info('已掐灭香烟');
     }
@@ -983,8 +911,24 @@ Page({
   // 点火与掐灭核心动作 (未点燃时点燃，燃烧中点击掐灭，抽完直接点燃新一支无重置步骤)
   triggerIgnite() {
     audioManager.unlockAudio();
+
+    // 校验 1 支尝鲜试抽凭证与名烟解锁状态，防止未解锁名烟无限白嫖连抽
+    let curCig = this.data.currentCigarette || DEFAULT_CIGARETTE;
+    const totalSubs = storageService.getRecords().length;
+    const trialInfo = storageService.getTrialCigaretteInfo();
+    if (!isCigaretteUnlocked(curCig.id, totalSubs) && !vipService.isVip() && (!trialInfo || trialInfo.id !== curCig.id)) {
+      const revertId = (trialInfo && trialInfo.prevId) ? trialInfo.prevId : 'chaotianmen_gold';
+      curCig = getCigaretteById(revertId) || DEFAULT_CIGARETTE;
+      storageService.setSelectedCigaretteId(curCig.id);
+      const revCap = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
+      this.setData({
+        currentCigarette: curCig,
+        currentPackRemaining: storageService.getPackCount(curCig.id, revCap),
+        isBeadPopped: false
+      });
+    }
+
     if (this.data.simulatorState === 'FINISHED') {
-      const curCig = this.data.currentCigarette || DEFAULT_CIGARETTE;
       const cap = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
       if (storageService.getPackCount(curCig.id, cap) <= 0) {
         storageService.resetPackCount(curCig.id, cap);
@@ -1004,16 +948,16 @@ Page({
     const tool = this.data.currentIgnitionTool;
 
     // 车载点烟器专属：按下加热 1s 后通红弹起点燃
-    if (tool.id === 'car_lighter' && !this.data.isCarLighterHeating) {
-      this.setData({ isCarLighterHeating: true });
+    if (tool.id === 'car_lighter' && !this._isCarLighterHeating) {
+      this._isCarLighterHeating = true;
       triggerHaptic('medium');
-      setTimeout(() => {
+      if (this._carLighterTimer) clearTimeout(this._carLighterTimer);
+      this._carLighterTimer = setTimeout(() => {
+        this._carLighterTimer = null;
+        this._isCarLighterHeating = false;
         audioManager.playCarLighterPopSound();
         triggerHaptic('heavy');
-        this.setData({
-          isCarLighterHeating: false,
-          isSparking: true
-        });
+        this.setData({ isSparking: true });
         audioManager.playSizzleSound();
         const { cx, cy } = this.getTipCoordinates();
         this.particles.emitSparks(cx, cy, 14);
@@ -1023,11 +967,14 @@ Page({
         }
 
         if (this.fsm.light()) {
+          storageService.incrementIgniteCount();
           this.sessionStartTime = Date.now();
           this.setData({ simulatorState: this.fsm.getState() });
         }
 
-        setTimeout(() => {
+        if (this._sparkResetTimer) clearTimeout(this._sparkResetTimer);
+        this._sparkResetTimer = setTimeout(() => {
+          this._sparkResetTimer = null;
           this.setData({ isSparking: false });
         }, 600);
       }, 1000);
@@ -1053,7 +1000,9 @@ Page({
       this.particles.emitSparks(cx, cy, 18);
     }
 
-    setTimeout(() => {
+    if (this._sparkResetTimer) clearTimeout(this._sparkResetTimer);
+    this._sparkResetTimer = setTimeout(() => {
+      this._sparkResetTimer = null;
       this.setData({ isSparking: false });
     }, 550);
 
@@ -1062,14 +1011,6 @@ Page({
       this.sessionStartTime = Date.now();
       this.setData({ simulatorState: this.fsm.getState() });
     }
-  },
-
-  onLighterTouchStart(e) {
-    this.onIgniteTouchStart(e);
-  },
-
-  onLighterTouchEnd() {
-    this.onIgniteTouchEnd();
   },
 
   // 捏爆珠专属交互：清脆爆破音效、双段拟真震动、真香原液像水一样注入并浸透烟嘴
@@ -1092,8 +1033,8 @@ Page({
       triggerHaptic('light');
     }, 32);
 
-    if (this.canvasRenderer && typeof this.canvasRenderer.resetBeadFlow === 'function') {
-      this.canvasRenderer.resetBeadFlow();
+    if (canvasRenderer && typeof canvasRenderer.resetBeadFlow === 'function') {
+      canvasRenderer.resetBeadFlow();
     }
 
     const beadColor = curCig.beadColor || '#10b981';
@@ -1108,59 +1049,6 @@ Page({
 
     this.setData({ isBeadPopped: true });
     toast.success(`咔啪！已捏爆【${curCig.beadName || '爆珠'}】`, '真香原液已浸润滤芯');
-  },
-
-  // 3分钟烟瘾急救冲浪模式
-  toggleSosMode() {
-    audioManager.unlockAudio();
-    const next = !this.data.sosActive;
-    if (next) {
-      audioManager.playZenChimeSound(528);
-      triggerHaptic('medium');
-      this.setData({
-        sosActive: true,
-        sosSeconds: 180,
-        sosTimerDisplay: '03:00'
-      });
-      if (this.sosTimer) clearInterval(this.sosTimer);
-      this.sosTimer = setInterval(() => {
-        let sec = this.data.sosSeconds - 1;
-        if (sec <= 0) {
-          clearInterval(this.sosTimer);
-          this.sosTimer = null;
-          audioManager.playSuccessSound();
-          triggerHaptic('heavy');
-          this.setData({
-            sosActive: false,
-            sosSeconds: 180,
-            sosTimerDisplay: '03:00'
-          });
-          wx.showModal({
-            title: '🎉 冲动冲浪成功！',
-            content: '你成功抵御了最危险的3分钟烟瘾冲动期！多巴胺渴求已回落。',
-            showCancel: false
-          });
-        } else {
-          const m = String(Math.floor(sec / 60)).padStart(2, '0');
-          const s = String(sec % 60).padStart(2, '0');
-          this.setData({
-            sosSeconds: sec,
-            sosTimerDisplay: `${m}:${s}`
-          });
-        }
-      }, 1000);
-    } else {
-      if (this.sosTimer) {
-        clearInterval(this.sosTimer);
-        this.sosTimer = null;
-      }
-      this.setData({
-        sosActive: false,
-        sosSeconds: 180,
-        sosTimerDisplay: '03:00'
-      });
-      triggerHaptic('light');
-    }
   },
 
   // 手动弹烟灰 (腾讯总监设计级：物理阻尼弹性轻弹微振、复合断裂火星光波特效、全局互斥锁定)
@@ -1234,6 +1122,42 @@ Page({
     }
   },
 
+  _checkAndUnlockAchievements() {
+    const profile = storageService.getProfile();
+    const records = storageService.getRecords();
+    const totalSubs = records.length;
+    const grossSaved = calculateSavings(totalSubs, profile.packPrice);
+    const quitDays = calculateQuitDays(profile.quitStartDate);
+    const unlockedEffects = storageService.getUnlockedSmokeEffects() || [];
+    const summonedEffects = storageService.getSummonedSmokeEffects() || [];
+    const allEffects = Array.from(new Set([...unlockedEffects, ...summonedEffects]));
+
+    const newly = checkAchievementsToUnlock({
+      totalSubstituted: totalSubs,
+      totalSavedMoney: grossSaved,
+      quitDays: quitDays + 1,
+      unlockedEffects: allEffects,
+      unlockedEffectsCount: unlockedEffects.length,
+      hasCustomEffect: allEffects.some(id => id !== 'ring_classic' && id !== 'auspicious_river') || (this.data.smokeEffectType !== 'ring_classic' && this.data.smokeEffectType !== 'auspicious_river'),
+      hasSummonedMythic: allEffects.includes('dragon_breath') || allEffects.includes('phoenix_nirvana') || allEffects.includes('buddha_light') || allEffects.includes('bagua_taichi')
+    }, storageService.getUnlockedAchievements());
+
+    if (newly && newly.length) {
+      if (!this._achToastTimers) this._achToastTimers = [];
+      newly.forEach((id, idx) => {
+        storageService.unlockAchievement(id);
+        const ach = getAchievementById(id);
+        if (ach) {
+          const timer = setTimeout(() => {
+            audioManager.playZenChimeSound(660);
+            toast.flame(`🏆 荣耀解锁！获得【${ach.name}】勋章！`);
+          }, 600 + idx * 1200);
+          this._achToastTimers.push(timer);
+        }
+      });
+    }
+  },
+
   // 抽完结算
   handleSmokingFinished() {
     const duration = this.sessionStartTime > 0 ? Math.round((Date.now() - this.sessionStartTime) / 1000) : 0;
@@ -1242,51 +1166,39 @@ Page({
     const saved = calculateSavings(1, profile.packPrice);
     const tar = calculateTarAvoided(1);
     const life = calculateLifeRegained(1);
+    const curCig = this.data.currentCigarette || DEFAULT_CIGARETTE;
+    const maxCap = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
 
     // 若该支烟在进入首页时已从烟盒消化扣减，则抽完结算时不再重复扣减烟盒余量
     if (storageService.isHomeStickDigested()) {
       storageService.setHomeStickDigested(false);
     } else {
-      storageService.consumePackSlot(this.data.currentCigarette.id, -1, this.data.currentCigarette.packCapacity || 20);
+      storageService.consumePackSlot(curCig.id, -1, maxCap);
     }
 
     storageService.addRecord({
       id: `sub_${Date.now()}`,
       timestamp: Date.now(),
-      cigaretteId: this.data.currentCigarette.id,
+      cigaretteId: curCig.id,
       durationSeconds: duration,
       inhaleCount: inhales
     });
 
-    // 荣耀成就判定与实时 HUD 广播 (Tencent Games 即时多巴胺激励)
-    const records = storageService.getRecords();
-    const totalSubs = records.length;
-    const totalSaved = calculateSavings(totalSubs, profile.packPrice);
-    const quitDays = calculateQuitDays(profile.quitStartDate);
-    const unlockedEffects = storageService.getUnlockedSmokeEffects() || [];
-
-    const newly = checkAchievementsToUnlock({
-      totalSubstituted: totalSubs,
-      totalSavedMoney: totalSaved,
-      quitDays: quitDays + 1,
-      unlockedEffects,
-      unlockedEffectsCount: unlockedEffects.length,
-      hasCustomEffect: unlockedEffects.some(id => id !== 'ring_classic'),
-      hasSummonedMythic: unlockedEffects.includes('dragon_breath') || unlockedEffects.includes('phoenix_nirvana') || unlockedEffects.includes('buddha_light') || unlockedEffects.includes('bagua_taichi')
-    }, storageService.getUnlockedAchievements());
-
-    if (newly && newly.length) {
-      newly.forEach((id, idx) => {
-        storageService.unlockAchievement(id);
-        const ach = getAchievementById(id);
-        if (ach) {
-          setTimeout(() => {
-            audioManager.playZenChimeSound(660);
-            toast.flame(`🏆 荣耀解锁！获得【${ach.name}】勋章！`);
-          }, 600 + idx * 1200);
-        }
+    // 若当前抽完的是 1 支尝鲜试抽名烟，抽完即销毁试抽凭证并切回原装配名烟
+    const trialInfo = storageService.getTrialCigaretteInfo();
+    if (trialInfo && trialInfo.id === curCig.id) {
+      storageService.clearTrialCigaretteInfo();
+      const revertId = trialInfo.prevId || 'chaotianmen_gold';
+      storageService.setSelectedCigaretteId(revertId);
+      const revertedCig = getCigaretteById(revertId) || DEFAULT_CIGARETTE;
+      this.setData({
+        currentCigarette: revertedCig,
+        isBeadPopped: false
       });
     }
+
+    // 荣耀成就判定与实时 HUD 广播 (Tencent Games 即时多巴胺激励)
+    this._checkAndUnlockAchievements();
 
     audioManager.playSuccessSound();
     triggerHaptic('heavy');
@@ -1333,7 +1245,6 @@ Page({
       ashLength: 0,
       ashProgress: 0,
       ashPercent: 0,
-      breathingPhase: 'none',
       isBeadPopped: false
     });
   },
@@ -1341,31 +1252,6 @@ Page({
   closeRewardModal() {
     this.setData({ showRewardModal: false });
     this.restartCigarette();
-  },
-
-  // 模式切换
-  toggleBreathingMode() {
-    audioManager.unlockAudio();
-    const next = !this.data.breathingMode;
-    this.setData({
-      breathingMode: next,
-      breathingPhase: 'none'
-    });
-    if (next) {
-      audioManager.playZenChimeSound(528);
-      triggerHaptic('medium');
-    } else {
-      audioManager.playSwitchSound();
-      triggerHaptic('light');
-    }
-  },
-
-  toggleSmokeRingMode() {
-    audioManager.unlockAudio();
-    const next = !this.data.smokeRingMode;
-    this.setData({ smokeRingMode: next });
-    audioManager.playSwitchSound();
-    triggerHaptic('light');
   },
 
   toggleMute() {
@@ -1378,79 +1264,24 @@ Page({
     }
   },
 
-  // Tab 切换 (3个Tab: simulator | leaderboard | stats)
-  switchTab(e) {
-    audioManager.unlockAudio();
-    const tab = e.currentTarget.dataset.tab;
-    if (this.data.currentTab !== tab) {
-      audioManager.playSwitchSound();
-      triggerHaptic('light');
-      this.setData({ currentTab: tab });
-      this.refreshAllData();
-    }
-  },
-
-  // 排行榜分类切换事件 (由 leaderboard-view 触发)
-  onLeaderboardCategoryChange(e) {
-    const category = e.detail.category;
-    audioManager.unlockAudio();
-    audioManager.playSwitchSound();
-    triggerHaptic('light');
-    this.setData({ leaderboardCategory: category });
-    this.refreshLeaderboard();
-  },
-
-  // 排行榜点赞事件 (由 leaderboard-view 触发)
-  onLeaderboardLike(e) {
-    const id = e.detail.id;
-    audioManager.unlockAudio();
-    leaderboardService.toggleLike(id);
-    audioManager.playLikeHeartSound();
-    triggerHaptic('medium');
-    this.refreshLeaderboard();
-  },
-
-  // 刷新排行榜
-  refreshLeaderboard() {
-    const profile = storageService.getProfile();
-    const records = storageService.getRecords();
-    const totalSubs = records.length;
-    const totalSaved = calculateSavings(totalSubs, profile.packPrice);
-    const quitDays = calculateQuitDays(profile.quitStartDate);
-
-    const result = leaderboardService.getLeaderboard(this.data.leaderboardCategory, {
-      substituted: totalSubs,
-      savedMoney: Math.round(totalSaved),
-      days: quitDays + 1
-    }, profile);
-
-    this.setData({
-      leaderboardList: result.list,
-      myRankInfo: result.myRankInfo
-    });
-  },
-
-  // 数据刷新 (腾讯级性能瘦身：仅维护首页 WXML 真正需要的烟盒库存、单支烟资与特效解锁列表)
+  // 数据刷新 (腾讯级性能瘦身：仅维护首页 WXML 真正需要的烟盒库存、可用替烟基金与特效解锁列表)
   refreshAllData() {
     const profile = storageService.getProfile();
     const records = storageService.getRecords();
     const totalSubs = records.length;
-    const totalSaved = calculateSavings(totalSubs, profile.packPrice);
+    const grossSaved = calculateSavings(totalSubs, profile.packPrice);
+    const availableSaved = Math.max(0, Number((grossSaved - storageService.getSpentSavings()).toFixed(2)));
+    const quitDays = calculateQuitDays(profile.quitStartDate);
 
-    // 烟具图鉴选择抽屉状态
-    const catalogList = CIGARETTE_CATALOG.map(c => ({
-      ...c,
-      unlocked: isCigaretteUnlocked(c.id, totalSubs),
-      currentStock: storageService.getPackCount(c.id, c.packCapacity || (c.isCigar ? 5 : 20))
-    }));
-
-    const packRemaining = storageService.getPackCount(this.data.currentCigarette.id, this.data.currentCigarette.packCapacity || 20);
+    const curCig = this.data.currentCigarette || DEFAULT_CIGARETTE;
+    const maxCap = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
+    const packRemaining = storageService.getPackCount(curCig.id, maxCap);
 
     // 烟雾特效解锁与替烟兑换状态
     const unlockedEffects = storageService.getUnlockedSmokeEffects();
     const smokeEffectsList = SMOKE_EFFECTS.map(effect => {
       const isUnlocked = isSmokeEffectUnlocked(effect.id, totalSubs, unlockedEffects);
-      const canBuyWithSavings = !isUnlocked && totalSaved >= (effect.requiredSavings || effect.price);
+      const canBuyWithSavings = !isUnlocked && availableSaved >= (effect.requiredSavings || effect.price);
       return {
         ...effect,
         unlocked: isUnlocked,
@@ -1463,37 +1294,15 @@ Page({
     this.setData({
       profile,
       totalSubstituted: totalSubs,
-      totalSavedMoney: totalSaved.toFixed(2),
+      totalSavedMoney: availableSaved.toFixed(2),
       singleStickSavedPrice: singleStickPrice,
-      catalogList,
+      quitDays,
       currentPackRemaining: packRemaining,
       smokeEffectsList
     });
   },
 
   // ================= 实机同款主控与快捷操作 =================
-  openSkillModal() {
-    audioManager.unlockAudio();
-    audioManager.playSwitchSound();
-    triggerHaptic('light');
-    this.setData({ showSkillModal: true });
-  },
-
-  closeSkillModal() {
-    this.setData({ showSkillModal: false });
-  },
-
-  openTipModal() {
-    audioManager.unlockAudio();
-    audioManager.playSwitchSound();
-    triggerHaptic('light');
-    this.setData({ showTipModal: true });
-  },
-
-  closeTipModal() {
-    this.setData({ showTipModal: false });
-  },
-
   switchToLeaderboard() {
     audioManager.unlockAudio();
     audioManager.playSwitchSound();
@@ -1520,34 +1329,20 @@ Page({
     });
   },
 
-  // 切换Dock菜单展开/收起
-  toggleDockMenu() {
-    audioManager.unlockAudio();
-    audioManager.playSwitchSound();
-    triggerHaptic('light');
-    this.setData({
-      showDockMenu: !this.data.showDockMenu
-    });
-  },
-
-  backToSimulator() {
-    audioManager.unlockAudio();
-    audioManager.playSwitchSound();
-    triggerHaptic('light');
-    this.setData({ currentTab: 'simulator' });
-  },
-
   // ================= 烟雾特效新手长按引导微气泡管线 (Tencent UX Tooltip Pipeline) =================
   checkSmokeGuide() {
     try {
       const seen = wx.getStorageSync('SMOKE_EFFECT_GUIDE_SEEN');
       if (!seen && !this.data.showSmokeEffectGuide) {
+        if (this._guideTimer) clearTimeout(this._guideTimer);
         // 延迟 800ms 优雅弹出，避开主页首屏渲染争抢
-        setTimeout(() => {
+        this._guideTimer = setTimeout(() => {
+          this._guideTimer = null;
           this.setData({ showSmokeEffectGuide: true, isGuideFading: false });
           if (this.smokeGuideTimer) clearTimeout(this.smokeGuideTimer);
           // 3.8 秒后优雅渐隐消失
           this.smokeGuideTimer = setTimeout(() => {
+            this.smokeGuideTimer = null;
             this.dismissSmokeGuide();
           }, 3800);
         }, 800);
@@ -1561,11 +1356,16 @@ Page({
       clearTimeout(this.smokeGuideTimer);
       this.smokeGuideTimer = null;
     }
+    if (this._guideTimer) {
+      clearTimeout(this._guideTimer);
+      this._guideTimer = null;
+    }
     this.setData({ isGuideFading: true });
     try {
       wx.setStorageSync('SMOKE_EFFECT_GUIDE_SEEN', true);
     } catch (e) {}
-    setTimeout(() => {
+    this._guideTimer = setTimeout(() => {
+      this._guideTimer = null;
       this.setData({ showSmokeEffectGuide: false, isGuideFading: false });
     }, 400);
   },
@@ -1605,10 +1405,10 @@ Page({
 
     this.setData({
       currentSmokeEffect: nextEffect,
-      smokeEffectType: nextEffect.id,
-      smokeRingMode: nextEffect.id === 'ring_classic'
+      smokeEffectType: nextEffect.id
     });
     storageService.setSelectedSmokeEffectId(nextEffect.id);
+    this._checkAndUnlockAchievements();
 
     audioManager.playZenChimeSound(528);
   },
@@ -1676,10 +1476,10 @@ Page({
     this.setData({
       currentSmokeEffect: item,
       smokeEffectType: item.id,
-      smokeRingMode: item.id === 'ring_classic',
       showSmokeEffectDrawer: false
     });
     storageService.setSelectedSmokeEffectId(item.id);
+    this._checkAndUnlockAchievements();
   },
 
   startTrialSmokeEffect(itemOrEvent) {
@@ -1687,7 +1487,7 @@ Page({
     if (!item) return;
 
     if (this.trialInterval) clearInterval(this.trialInterval);
-    const originalEffect = this.data.currentSmokeEffect;
+    const originalEffect = getSmokeEffectById(storageService.getSelectedSmokeEffectId()) || DEFAULT_SMOKE_EFFECT;
 
     // 清理前置延时定时器，杜绝跨特效杂糅
     if (this.exhaleEffectTimers && this.exhaleEffectTimers.length) {
@@ -1706,7 +1506,6 @@ Page({
     this.setData({
       currentSmokeEffect: item,
       smokeEffectType: item.id,
-      smokeRingMode: item.id === 'ring_classic',
       isTrialActive: true,
       trialSecondsLeft: 30,
       showSmokeEffectDrawer: false
@@ -1723,8 +1522,7 @@ Page({
           isTrialActive: false,
           trialSecondsLeft: 0,
           currentSmokeEffect: originalEffect,
-          smokeEffectType: originalEffect.id,
-          smokeRingMode: originalEffect.id === 'ring_classic'
+          smokeEffectType: originalEffect.id
         });
         toast.info('30秒尊享试抽已结束，已切回原特效');
       } else {
@@ -1739,22 +1537,24 @@ Page({
 
     const totalSubs = this.data.totalSubstituted || 0;
     const profile = storageService.getProfile();
-    const totalSaved = calculateSavings(totalSubs, profile.packPrice);
+    const grossSaved = calculateSavings(totalSubs, profile.packPrice);
+    const availableSaved = Math.max(0, Number((grossSaved - storageService.getSpentSavings()).toFixed(2)));
     const needMoney = item.requiredSavings || item.price;
 
-    if (totalSaved < needMoney) {
+    if (availableSaved < needMoney) {
       triggerHaptic('medium');
-      toast.warn(`替烟基金不足！已攒 ¥${totalSaved.toFixed(2)} / 需 ¥${needMoney}`);
+      toast.warn(`替烟基金不足！可用 ¥${availableSaved.toFixed(2)} / 需 ¥${needMoney}`);
       return;
     }
 
     wx.showModal({
       title: `💎 替烟基金零元购兑换`,
-      content: `您已通过不抽真烟累计节省 ¥${totalSaved.toFixed(2)}！\n确定使用替烟基金兑换尊享【${item.name}】(${item.priceDisplay})？\n（健康替烟，零元尊享！）`,
+      content: `您当前可用替烟基金 ¥${availableSaved.toFixed(2)}！\n确定使用替烟基金 ¥${needMoney} 兑换尊享【${item.name}】(${item.priceDisplay})？\n（健康替烟，零元尊享！）`,
       confirmText: '立即兑换',
       cancelText: '再想想',
       success: (res) => {
         if (res.confirm) {
+          storageService.addSpentSavings(needMoney);
           storageService.unlockSmokeEffect(item.id);
           audioManager.playSuccessSound();
           triggerHaptic('heavy');
@@ -1769,11 +1569,11 @@ Page({
 
           this.setData({
             currentSmokeEffect: item,
-            smokeEffectType: item.id,
-            smokeRingMode: item.id === 'ring_classic'
+            smokeEffectType: item.id
           });
           storageService.setSelectedSmokeEffectId(item.id);
           this.refreshAllData();
+          this._checkAndUnlockAchievements();
 
           toast.success(`成功兑换并装配【${item.name}】！`);
         }
@@ -1824,49 +1624,69 @@ Page({
     }, duration);
   },
 
-  // 递烟专属交互：点击递出一支，扣减烟盒余量，外层圆圈显示进度条并提示
+  // 递烟专属交互：只要点了递烟就会消耗一支，扣减烟盒槽位与余量，外层圆圈实时显示进度条并提示
+  consumeOneStickForGive() {
+    const now = Date.now();
+    // 防止同一次点击同时触发 bindtap 与 onShareAppMessage(button) 导致双扣，300ms 内视为同一次点击
+    if (this._lastGiveConsumeTime && (now - this._lastGiveConsumeTime < 300)) {
+      return this.data.currentPackRemaining;
+    }
+    this._lastGiveConsumeTime = now;
+
+    const curCig = this.data.currentCigarette || CIGARETTE_CATALOG[0] || DEFAULT_CIGARETTE;
+    const cap = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
+    let cur = storageService.getPackCount(curCig.id, cap);
+
+    // 若当前烟盒已空（0支），自动拆封全新一盒并立即消耗递出一支，确保“只要点了就会消耗一支”
+    let autoUnwrapped = false;
+    if (cur <= 0) {
+      storageService.resetPackCount(curCig.id, cap);
+      autoUnwrapped = true;
+    }
+
+    const { remaining: next } = storageService.consumePackSlot(curCig.id, -1, cap);
+
+    this.setData({
+      currentPackRemaining: next
+    });
+
+    if (autoUnwrapped) {
+      toast.info(`已拆新盒并递出一支（余 ${next}/${cap}）`);
+    } else if (next === 0) {
+      toast.warn('🤝 递出最后一支！', '整盒已空，下次点击将自动拆新盒');
+    } else {
+      toast.info(`🤝 已递出一支【${curCig.name}】（余 ${next}/${cap}）`);
+    }
+    return next;
+  },
+
   giveCigarette() {
     audioManager.unlockAudio();
-    const curCig = this.data.currentCigarette || DEFAULT_CIGARETTE;
-    const cur = this.data.currentPackRemaining;
-    if (cur <= 0) {
-      audioManager.playSwitchSound();
-      triggerHaptic('heavy');
-      toast.warn('烟盒已空', '去商店拆新盒');
-      return;
-    }
-
-    const cap = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
-    const { remaining: next } = storageService.consumePackSlot(curCig.id, -1, cap);
-    this.setData({ currentPackRemaining: next });
-
     audioManager.playSwitchSound();
     triggerHaptic('medium');
-    if (next === 0) {
-      toast.warn('🤝 递出最后一支！', '整盒已空，去商店拆新盒补满吧～');
-    }
+    this.consumeOneStickForGive();
   },
 
   onShareAppMessage(options) {
     audioManager.playSwitchSound();
     triggerHaptic('light');
 
+    // 兜底保障：若通过分享按钮触发且 bindtap 尚未执行，同样确保消耗一支
+    if (options && options.from === 'button') {
+      this.consumeOneStickForGive();
+    }
+
     const curCig = this.data.currentCigarette || DEFAULT_CIGARETTE;
     const profile = this.data.profile || {};
-    const senderName = profile.nickname || '老哥';
-    const isPackEmpty = this.data.currentPackRemaining <= 0;
+    const senderName = profile.nickname || profile.nickName || '老哥';
 
-    let title = isPackEmpty 
-      ? `💨 老哥，我这盒【${curCig.name}】抽空了！递你一缕赛博仙气，健康替烟！`
-      : `🤝 递你一支【${curCig.name}】！赛博替烟，少抽真烟多活好多年！`;
-    if (!isPackEmpty) {
-      if (curCig.brand === '中华' || curCig.id.includes('chunghwa')) {
-        title = `🤝 老哥，递你一支软中华！赛博替烟，有面更有健康！`;
-      } else if (curCig.brand === '黄鹤楼' || curCig.id.includes('huanghelou')) {
-        title = `🤝 递你一支黄鹤楼！赛博替烟，登高望远，清肺自愈！`;
-      } else if (curCig.category === '雪茄' || curCig.id.includes('cohiba')) {
-        title = `🥂 递你一支古巴雪茄！赛博顶奢品吸，免除焦油侵害！`;
-      }
+    let title = `🤝 递你一支【${curCig.name}】！赛博替烟，少抽真烟多活好多年！`;
+    if (curCig.brand === '中华' || curCig.id.includes('chunghwa')) {
+      title = `🤝 老哥，递你一支软中华！赛博替烟，有面更有健康！`;
+    } else if (curCig.brand === '黄鹤楼' || curCig.id.includes('huanghelou')) {
+      title = `🤝 递你一支黄鹤楼！赛博替烟，登高望远，清肺自愈！`;
+    } else if (curCig.category === '雪茄' || curCig.id.includes('cohiba')) {
+      title = `🥂 递你一支古巴雪茄！赛博顶奢品吸，免除焦油侵害！`;
     }
 
     return {
@@ -1917,138 +1737,36 @@ Page({
     });
   },
 
-  openPackPage() {
-    this.openCigarettePicker();
-  },
-
-  closePicker() {
-    this.setData({ showPicker: false });
-  },
-
-  onSelectPickerCigarette(e) {
-    const item = e.currentTarget.dataset.item;
-    if (!item.unlocked) {
-      triggerHaptic('medium');
-      toast.warn(item.unlockDesc);
-      return;
-    }
-    audioManager.playSwitchSound();
-    triggerHaptic('light');
-    const packRemaining = storageService.getPackCount(item.id, item.packCapacity || (item.isCigar ? 5 : 20));
-    this.setData({
-      currentCigarette: item,
-      currentPackRemaining: packRemaining,
-      showPicker: false,
-      isBeadPopped: false
-    });
-    storageService.setSelectedCigaretteId(item.id);
-    this.refreshUserData();
-    // 换烟：旧烟舍弃，重置为全新未点燃的烟
-    if (this.fsm) {
-      this.restartCigarette();
-    }
-  },
-
-  onSelectCatalogItem(e) {
-    this.onSelectPickerCigarette(e);
-  },
-
-  // 个人设置弹窗
-  openProfileModal() {
-    audioManager.unlockAudio();
-    audioManager.playSwitchSound();
-    triggerHaptic('light');
-    const p = storageService.getProfile();
-    this.setData({
-      showProfileModal: true,
-      editProfile: { ...p }
-    });
-  },
-
-  closeProfileModal() {
-    this.setData({ showProfileModal: false });
-  },
-
-  adjustPackPrice(e) {
-    const delta = Number(e.currentTarget.dataset.delta);
-    const val = Math.max(1, (this.data.editProfile.packPrice || 25) + delta);
-    this.setData({ 'editProfile.packPrice': val });
-    triggerHaptic('light');
-  },
-
-  setQuickPrice(e) {
-    const val = Number(e.currentTarget.dataset.val);
-    this.setData({ 'editProfile.packPrice': val });
-    triggerHaptic('light');
-  },
-
-  onInputPackPrice(e) {
-    const val = Math.max(1, Number(e.detail.value) || 25);
-    this.setData({ 'editProfile.packPrice': val });
-  },
-
-  adjustCigsPerDay(e) {
-    const delta = Number(e.currentTarget.dataset.delta);
-    const val = Math.max(1, (this.data.editProfile.cigsPerDay || 15) + delta);
-    this.setData({ 'editProfile.cigsPerDay': val });
-    triggerHaptic('light');
-  },
-
-  onInputCigsPerDay(e) {
-    const val = Math.max(1, Number(e.detail.value) || 15);
-    this.setData({ 'editProfile.cigsPerDay': val });
-  },
-
-  adjustSmokeYears(e) {
-    const delta = Number(e.currentTarget.dataset.delta);
-    const val = Math.max(0, (this.data.editProfile.smokeYears || 5) + delta);
-    this.setData({ 'editProfile.smokeYears': val });
-    triggerHaptic('light');
-  },
-
-  onInputSmokeYears(e) {
-    const val = Math.max(0, Number(e.detail.value) || 0);
-    this.setData({ 'editProfile.smokeYears': val });
-  },
-
-  saveProfile() {
-    const updated = {
-      ...this.data.profile,
-      packPrice: Math.max(1, Number(this.data.editProfile.packPrice) || 25),
-      cigsPerDay: Math.max(1, Number(this.data.editProfile.cigsPerDay) || 15),
-      smokeYears: Math.max(0, Number(this.data.editProfile.smokeYears) || 0)
-    };
-    storageService.saveProfile(updated);
-    this.setData({ showProfileModal: false });
-    audioManager.playSwitchSound();
-    triggerHaptic('medium');
-    toast.success('已保存偏好');
-    this.refreshAllData();
-  },
-
-  onUpdateAvatar(e) {
-    const avatarUrl = e.detail && e.detail.avatarUrl ? e.detail.avatarUrl : '';
-    if (!avatarUrl) return;
-    const updated = storageService.updateProfile({ avatarUrl });
-    this.setData({ profile: updated });
-    this.refreshLeaderboard();
-    toast.success('头像已同步');
-  },
-
-  onUpdateNickname(e) {
-    const nickName = (e.detail && e.detail.nickName ? e.detail.nickName : '').trim();
-    if (!nickName) return;
-    const updated = storageService.updateProfile({ nickName });
-    this.setData({ profile: updated });
-    this.refreshLeaderboard();
-  },
-
   // ================= 沉浸生活场景氛围切换 =================
   openSceneModal() {
     audioManager.unlockAudio();
     audioManager.playSwitchSound();
     triggerHaptic('light');
-    this.setData({ showSceneModal: true });
+    const curScene = this.data.currentScene || 'obsidian';
+    let list = ATMOSPHERE_SCENES;
+    if (this.data.activeSceneCategory && this.data.activeSceneCategory !== 'all') {
+      list = ATMOSPHERE_SCENES.filter(s => s.category === this.data.activeSceneCategory);
+    }
+    this.setData({
+      showSceneModal: true,
+      filteredAtmosphereScenes: list,
+      activeScrollSceneId: `scene_card_${curScene}`
+    });
+  },
+
+  onSelectSceneCategory(e) {
+    const catId = e.currentTarget.dataset.id || 'all';
+    if (catId === this.data.activeSceneCategory) return;
+    audioManager.playSwitchSound();
+    triggerHaptic('light');
+    let list = ATMOSPHERE_SCENES;
+    if (catId !== 'all') {
+      list = ATMOSPHERE_SCENES.filter(s => s.category === catId);
+    }
+    this.setData({
+      activeSceneCategory: catId,
+      filteredAtmosphereScenes: list
+    });
   },
 
   closeSceneModal() {

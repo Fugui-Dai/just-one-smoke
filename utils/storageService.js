@@ -11,6 +11,9 @@ const PACK_INVENTORY_KEY = 'SMOKEFREE_PACK_INVENTORY';
 const PACK_SLOTS_KEY = 'SMOKEFREE_PACK_SLOTS';
 const HOME_STICK_DIGESTED_KEY = 'SMOKEFREE_HOME_STICK_DIGESTED';
 const CHECKIN_DATES_KEY = 'SMOKEFREE_CHECKIN_DATES';
+const SPENT_SAVINGS_KEY = 'SMOKEFREE_SPENT_SAVINGS';
+const TRIAL_CIGARETTE_KEY = 'SMOKEFREE_TRIAL_CIGARETTE';
+const SUMMONED_EFFECTS_KEY = 'SMOKEFREE_SUMMONED_SMOKE_EFFECTS';
 const DEFAULT_CIGARETTE_ID = 'chaotianmen_gold';
 
 function getItem(key) {
@@ -62,51 +65,6 @@ export function getDailyStats(records, days = 7, refDate = new Date()) {
       dateKey: key,
       label,
       count: map[key] || 0
-    });
-  }
-  return result;
-}
-
-export function getDailyCumulativeStats(records, days = 7, refDate = new Date()) {
-  const result = [];
-  const map = {};
-
-  if (Array.isArray(records)) {
-    records.forEach(r => {
-      if (!r || !r.timestamp) return;
-      const ts = typeof r.timestamp === 'string' ? Number(r.timestamp) || Date.parse(r.timestamp) : r.timestamp;
-      const d = new Date(ts);
-      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      map[key] = (map[key] || 0) + 1;
-    });
-  }
-
-  const now = refDate instanceof Date ? refDate : new Date(refDate);
-  const curY = now.getFullYear();
-  const curM = now.getMonth();
-  const curD = now.getDate();
-
-  const startDay = new Date(curY, curM, curD - (days - 1));
-  startDay.setHours(0, 0, 0, 0);
-
-  let runningCumulative = Array.isArray(records)
-    ? records.filter(r => r && r.timestamp && Number(r.timestamp) < startDay.getTime()).length
-    : 0;
-
-  for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(curY, curM, curD - i);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    const month = d.getMonth() + 1;
-    const day = d.getDate();
-    const label = i === 0 ? '今天' : `${month}/${day}`;
-    const dayCount = map[key] || 0;
-    runningCumulative += dayCount;
-
-    result.push({
-      dateKey: key,
-      label,
-      count: dayCount,
-      cumulative: runningCumulative
     });
   }
   return result;
@@ -202,10 +160,6 @@ export const storageService = {
     setItem(RECORDS_KEY, records);
   },
 
-  clearRecords() {
-    removeItem(RECORDS_KEY);
-  },
-
   getCheckInDates() {
     const raw = getItem(CHECKIN_DATES_KEY);
     if (!raw) return [];
@@ -232,23 +186,61 @@ export const storageService = {
     return getDailyStats(this.getRecords(), days);
   },
 
-  getRecentDailyCumulativeStats(days = 7) {
-    return getDailyCumulativeStats(this.getRecords(), days);
-  },
-
   getIgniteCount() {
     const raw = getItem('SMOKEFREE_IGNITE_COUNT');
-    if (raw !== null && raw !== undefined) {
-      return Number(raw) || 0;
+    if (raw !== null && raw !== undefined && raw !== '') {
+      return Math.max(0, Number(raw) || 0);
     }
-    const len = this.getRecords().length;
-    return len > 0 ? len * 2 : 0;
+    const initial = this.getRecords().length;
+    setItem('SMOKEFREE_IGNITE_COUNT', initial);
+    return initial;
   },
 
   incrementIgniteCount() {
     const cur = this.getIgniteCount();
     setItem('SMOKEFREE_IGNITE_COUNT', cur + 1);
     return cur + 1;
+  },
+
+  // ==========================================
+  // 替烟基金消费账本 (Spent Savings Ledger)
+  // ==========================================
+  getSpentSavings() {
+    const raw = getItem(SPENT_SAVINGS_KEY);
+    return Math.max(0, Number(raw) || 0);
+  },
+
+  addSpentSavings(amount) {
+    const addVal = Math.max(0, Number(amount) || 0);
+    const next = Number((this.getSpentSavings() + addVal).toFixed(2));
+    setItem(SPENT_SAVINGS_KEY, next);
+    return next;
+  },
+
+  // ==========================================
+  // 尝鲜试抽 1 支临时凭证管理 (1-Stick Trial Pass)
+  // ==========================================
+  getTrialCigaretteInfo() {
+    const raw = getItem(TRIAL_CIGARETTE_KEY);
+    if (!raw) return null;
+    try {
+      return typeof raw === 'string' ? JSON.parse(raw) : raw;
+    } catch {
+      return null;
+    }
+  },
+
+  setTrialCigaretteInfo(info) {
+    if (!info || !info.id) {
+      removeItem(TRIAL_CIGARETTE_KEY);
+      return null;
+    }
+    setItem(TRIAL_CIGARETTE_KEY, info);
+    return info;
+  },
+
+  clearTrialCigaretteInfo() {
+    removeItem(TRIAL_CIGARETTE_KEY);
   },
 
   getSelectedCigaretteId() {
@@ -398,11 +390,6 @@ export const storageService = {
     };
   },
 
-  decrementPackCount(cigaretteId, defaultCapacity = 20) {
-    const res = this.consumePackSlot(cigaretteId, -1, defaultCapacity);
-    return res.remaining;
-  },
-
   resetPackCount(cigaretteId, capacity = 20) {
     const cap = Math.max(1, Number(capacity) || 20);
     const fullSlots = [];
@@ -482,6 +469,29 @@ export const storageService = {
 
   setSelectedSmokeEffectId(effectId) {
     setItem('SMOKEFREE_SELECTED_SMOKE_EFFECT', effectId);
+    if (effectId && effectId !== 'ring_classic') {
+      this.recordSmokeEffectSummoned(effectId);
+    }
+  },
+
+  getSummonedSmokeEffects() {
+    const raw = getItem(SUMMONED_EFFECTS_KEY);
+    if (!raw) return [];
+    try {
+      return typeof raw === 'string' ? JSON.parse(raw) : (Array.isArray(raw) ? raw : []);
+    } catch {
+      return [];
+    }
+  },
+
+  recordSmokeEffectSummoned(effectId) {
+    if (!effectId) return [];
+    const list = this.getSummonedSmokeEffects();
+    if (Array.isArray(list) && !list.includes(effectId)) {
+      list.push(effectId);
+      setItem(SUMMONED_EFFECTS_KEY, list);
+    }
+    return list;
   },
 
   getUnlockedSmokeEffects() {
@@ -508,6 +518,7 @@ export const storageService = {
       list.push(effectId);
       setItem('SMOKEFREE_UNLOCKED_SMOKE_EFFECTS', list);
     }
+    this.recordSmokeEffectSummoned(effectId);
     return list;
   }
 };
@@ -516,7 +527,6 @@ if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     storageService,
     getDailyStats,
-    getDailyCumulativeStats,
     default: storageService
   };
 }

@@ -32,6 +32,29 @@ function formatFillColor(color, defaultColor = '#ffffff') {
   return color;
 }
 
+function formatColorWithAlpha(color, alpha, fallbackRgb = '240, 246, 255') {
+  if (!color || typeof color !== 'string') return `rgba(${fallbackRgb}, ${alpha})`;
+  if (color.startsWith('rgba(')) {
+    return color.endsWith(')') ? color.replace(/,\s*[\d.]+\)$/, `, ${alpha})`) : `${color}${alpha})`;
+  }
+  if (color.startsWith('#')) {
+    const hex = color.slice(1);
+    if (hex.length === 3) {
+      const r = parseInt(hex[0] + hex[0], 16);
+      const g = parseInt(hex[1] + hex[1], 16);
+      const b = parseInt(hex[2] + hex[2], 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+    if (hex.length >= 6) {
+      const r = parseInt(hex.slice(0, 2), 16);
+      const g = parseInt(hex.slice(2, 4), 16);
+      const b = parseInt(hex.slice(4, 6), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+  }
+  return `rgba(${fallbackRgb}, ${alpha})`;
+}
+
 // 腾讯总监美学：飘舞的 3D 宝相金莲花瓣粒子
 function drawLotusPetalParticle(ctx, p) {
   const len = p.radius || 7.0;
@@ -250,6 +273,11 @@ export class ParticleSystem {
     this.streamNodeCounter = 0;
     this.time = 0;
     this.igniteStartTime = 0;
+    this._boundPushParticle = (p) => this._pushParticle(p);
+    this._silkLeftX = new Float32Array(160);
+    this._silkLeftY = new Float32Array(160);
+    this._silkRightX = new Float32Array(160);
+    this._silkRightY = new Float32Array(160);
   }
 
   // 重置青烟流体 (点火瞬间仅清空烟头旧节点，并开启点火渐进生长计时；绝不干涉空中正在飞行的烟雾特效)
@@ -740,8 +768,13 @@ export class ParticleSystem {
 
   // 4.3 起火处真实流体微烟羽 (Volumetric Combustion Smoke from Cherry Ember)
   emitVolumetricCombustionSmoke(emberX, emberY, color) {
-    const activeCount = this.particles.filter(p => p.isVolumetricSmoke).length;
-    if (activeCount > 14) return;
+    let activeCount = 0;
+    for (let i = 0, len = this.particles.length; i < len; i++) {
+      if (this.particles[i].isVolumetricSmoke) {
+        activeCount++;
+        if (activeCount > 14) return;
+      }
+    }
 
     const baseCol = color || (Math.random() < 0.65 ? 'rgba(240, 244, 252, ' : 'rgba(186, 230, 253, ');
     this._pushParticle({
@@ -818,6 +851,76 @@ export class ParticleSystem {
         color: c,
         growRate: 0.28,
         isZen: true
+      });
+    }
+  }
+
+  // 3.1 青莲化境 · 步步生莲 (Lotus Zen) - 翡翠宝莲层层绽放 + 晨露星尘 + 琉璃金蕊
+  emitLotusZen(x, y) {
+    const petalColors = [
+      'rgba(52, 211, 153, ', // 翡翠青碧
+      'rgba(110, 231, 183, ', // 浅玉绿
+      'rgba(103, 232, 249, ', // 冰晶湖蓝
+      'rgba(167, 243, 208, '  // 凝脂月白
+    ];
+    // 1. 九重莲花花瓣粒子：环形均匀散射，外扩舒展绽放
+    const petalCount = 18;
+    for (let i = 0; i < petalCount; i++) {
+      const angle = (i / petalCount) * Math.PI * 2;
+      const speed = 1.6 + Math.random() * 0.8;
+      const c = petalColors[i % petalColors.length];
+      this._pushParticle({
+        x: x + Math.cos(angle) * 12,
+        y: y + Math.sin(angle) * 8,
+        vx: Math.cos(angle) * speed,
+        vy: -1.2 + Math.sin(angle) * speed * 0.65,
+        radius: 8.0 + Math.random() * 6.0,
+        alpha: 0.68,
+        baseAlpha: 0.68,
+        life: 0,
+        maxLife: 150 + Math.random() * 25,
+        color: c,
+        growRate: 0.32,
+        petalAngle: angle,
+        isLotusPetal: true
+      });
+    }
+
+    // 2. 莲心琉璃金蕊粒子 (温润琥珀金芒)
+    for (let i = 0; i < 10; i++) {
+      this._pushParticle({
+        x: x + (Math.random() - 0.5) * 16,
+        y: y + (Math.random() - 0.5) * 12,
+        vx: (Math.random() - 0.5) * 0.6,
+        vy: -(1.4 + Math.random() * 0.5),
+        radius: 3.5 + Math.random() * 3.0,
+        alpha: 0.85,
+        baseAlpha: 0.85,
+        life: 0,
+        maxLife: 120,
+        color: Math.random() < 0.6 ? 'rgba(254, 240, 138, ' : 'rgba(251, 191, 36, ',
+        growRate: 0.12,
+        isLotusCore: true
+      });
+    }
+
+    // 3. 清晨甘露星尘微粒 (晶莹漂浮)
+    for (let i = 0; i < 14; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 15 + Math.random() * 28;
+      this._pushParticle({
+        x: x + Math.cos(angle) * dist,
+        y: y + Math.sin(angle) * dist,
+        vx: Math.cos(angle) * 0.8,
+        vy: -(0.9 + Math.random() * 0.6),
+        radius: 1.8 + Math.random() * 1.5,
+        alpha: 0.75,
+        baseAlpha: 0.75,
+        life: 0,
+        maxLife: 110,
+        color: 'rgba(224, 242, 254, ',
+        growRate: 0.05,
+        isDewdrop: true
       });
     }
   }
@@ -1648,6 +1751,9 @@ export class ParticleSystem {
       case 'purple_zen':
         this.emitPurpleZen(x, y);
         break;
+      case 'lotus_zen':
+        this.emitLotusZen(x, y);
+        break;
       case 'gold_stardust':
         this.emitGoldStardust(x, y);
         break;
@@ -1887,7 +1993,7 @@ export class ParticleSystem {
     if (this.dragons && this.dragons.length) {
       for (let i = this.dragons.length - 1; i >= 0; i--) {
         const d = this.dragons[i];
-        const isAlive = d.update(ch, ceilingY, (p) => this._pushParticle(p));
+        const isAlive = d.update(ch, ceilingY, this._boundPushParticle);
         if (!isAlive) {
           this.dragons.splice(i, 1);
         }
@@ -1898,7 +2004,7 @@ export class ParticleSystem {
     if (this.phoenixes && this.phoenixes.length) {
       for (let i = this.phoenixes.length - 1; i >= 0; i--) {
         const ph = this.phoenixes[i];
-        const isAlive = ph.update(ch, ceilingY, (p) => this._pushParticle(p));
+        const isAlive = ph.update(ch, ceilingY, this._boundPushParticle);
         if (!isAlive) {
           this.phoenixes.splice(i, 1);
         }
@@ -1909,7 +2015,7 @@ export class ParticleSystem {
     if (this.wordRivers && this.wordRivers.length) {
       for (let i = this.wordRivers.length - 1; i >= 0; i--) {
         const river = this.wordRivers[i];
-        const isAlive = river.update(ch, ceilingY, (p) => this._pushParticle(p));
+        const isAlive = river.update(ch, ceilingY, this._boundPushParticle);
         if (!isAlive) {
           this.wordRivers.splice(i, 1);
         }
@@ -1920,7 +2026,7 @@ export class ParticleSystem {
     if (this.baguaMatrices && this.baguaMatrices.length) {
       for (let i = this.baguaMatrices.length - 1; i >= 0; i--) {
         const matrix = this.baguaMatrices[i];
-        const isAlive = matrix.update(ch, ceilingY, (p) => this._pushParticle(p));
+        const isAlive = matrix.update(ch, ceilingY, this._boundPushParticle);
         if (!isAlive) {
           this.baguaMatrices.splice(i, 1);
         }
@@ -1931,7 +2037,7 @@ export class ParticleSystem {
     if (this.buddhaLights && this.buddhaLights.length) {
       for (let i = this.buddhaLights.length - 1; i >= 0; i--) {
         const buddha = this.buddhaLights[i];
-        const isAlive = buddha.update(ch, ceilingY, (p) => this._pushParticle(p));
+        const isAlive = buddha.update(ch, ceilingY, this._boundPushParticle);
         if (!isAlive) {
           this.buddhaLights.splice(i, 1);
         }
@@ -2077,6 +2183,18 @@ export class ParticleSystem {
         p.vy = Math.min(-0.80, p.vy * 0.99 - 0.010);
         p.radius += (p.growRate || 0.28);
         p.alpha = (p.baseAlpha || 0.62) * fadeMultiplier;
+      } else if (p.isLotusPetal) {
+        p.x += p.vx + Math.cos(p.life * 0.04 + (p.petalAngle || 0)) * 0.65;
+        p.y += p.vy;
+        p.vx *= 0.988;
+        p.vy = Math.min(-0.82, p.vy * 0.99 - 0.012);
+        p.radius += (p.growRate || 0.32);
+        p.alpha = (p.baseAlpha || 0.68) * fadeMultiplier;
+      } else if (p.isLotusCore || p.isDewdrop) {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy = Math.min(-0.95, p.vy * 0.99 - 0.010);
+        p.alpha = (p.baseAlpha || 0.80) * fadeMultiplier;
       } else if (p.isNebula) {
         p.x += p.vx + Math.cos(p.life * 0.05 + p.wavePhase) * 0.65;
         p.y += p.vy;
@@ -2268,12 +2386,15 @@ export class ParticleSystem {
       ctx.stroke();
 
       // 2. 中层：丝绢流线带 (Continuous Silk Ribbon Contour - 优雅闭合曲面)
-      const lefts = [];
-      const rights = [];
-      for (let i = 0; i < nodes.length; i++) {
+      const nCount = nodes.length;
+      const leftX = this._silkLeftX;
+      const leftY = this._silkLeftY;
+      const rightX = this._silkRightX;
+      const rightY = this._silkRightY;
+      for (let i = 0; i < nCount; i++) {
         const n = nodes[i];
         let dx = 0, dy = -1;
-        if (i < nodes.length - 1) {
+        if (i < nCount - 1) {
           dx = nodes[i + 1].x - n.x;
           dy = nodes[i + 1].y - n.y;
         } else if (i > 0) {
@@ -2285,24 +2406,26 @@ export class ParticleSystem {
         const ny = dx / len;
         const halfW = n.width * 0.5;
 
-        lefts.push({ x: n.x - nx * halfW, y: n.y - ny * halfW });
-        rights.push({ x: n.x + nx * halfW, y: n.y + ny * halfW });
+        leftX[i] = n.x - nx * halfW;
+        leftY[i] = n.y - ny * halfW;
+        rightX[i] = n.x + nx * halfW;
+        rightY[i] = n.y + ny * halfW;
       }
 
       ctx.beginPath();
-      ctx.moveTo(lefts[0].x, lefts[0].y);
-      for (let i = 1; i < lefts.length - 1; i++) {
-        const xc = (lefts[i].x + lefts[i + 1].x) / 2;
-        const yc = (lefts[i].y + lefts[i + 1].y) / 2;
-        ctx.quadraticCurveTo(lefts[i].x, lefts[i].y, xc, yc);
+      ctx.moveTo(leftX[0], leftY[0]);
+      for (let i = 1; i < nCount - 1; i++) {
+        const xc = (leftX[i] + leftX[i + 1]) / 2;
+        const yc = (leftY[i] + leftY[i + 1]) / 2;
+        ctx.quadraticCurveTo(leftX[i], leftY[i], xc, yc);
       }
-      ctx.lineTo(lefts[lefts.length - 1].x, lefts[lefts.length - 1].y);
+      ctx.lineTo(leftX[nCount - 1], leftY[nCount - 1]);
 
-      ctx.lineTo(rights[rights.length - 1].x, rights[rights.length - 1].y);
-      for (let i = rights.length - 2; i > 0; i--) {
-        const xc = (rights[i].x + rights[i - 1].x) / 2;
-        const yc = (rights[i].y + rights[i - 1].y) / 2;
-        ctx.quadraticCurveTo(rights[i].x, rights[i].y, xc, yc);
+      ctx.lineTo(rightX[nCount - 1], rightY[nCount - 1]);
+      for (let i = nCount - 2; i > 0; i--) {
+        const xc = (rightX[i] + rightX[i - 1]) / 2;
+        const yc = (rightY[i] + rightY[i - 1]) / 2;
+        ctx.quadraticCurveTo(rightX[i], rightY[i], xc, yc);
       }
       ctx.closePath();
 
@@ -2491,8 +2614,6 @@ export class ParticleSystem {
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
 
-      const hasShadow = (p.alpha || 0.8) > 0.15;
-
       if (p.isVolumetricSmoke) {
         // 真实起火处涌现的高斯柔和羽化烟雾团 (无生硬边缘，层叠半透流体光影)
         try {
@@ -2503,20 +2624,20 @@ export class ParticleSystem {
           puffGrad.addColorStop(1.0, `${p.color || 'rgba(240, 246, 255, '}0.0)`);
           ctx.fillStyle = puffGrad;
         } catch (e) {
-          ctx.fillStyle = formatFillColor(p.color, 'rgba(240, 246, 255, 0.3)');
+          ctx.fillStyle = formatColorWithAlpha(p.color, 0.3, '240, 246, 255');
         }
         ctx.globalAlpha = Math.min(0.65, p.alpha || 0.38);
       } else if (p.isExhaleCloud) {
         // 口中吐出的真实烟雾团：4 阶高斯径向渐变，内部温润凝实，外部彻底无痕羽化消散
         try {
           const puffGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
-          puffGrad.addColorStop(0.0, formatFillColor(p.color, 'rgba(240, 246, 255, 0.85)'));
-          puffGrad.addColorStop(0.30, formatFillColor(p.color, 'rgba(240, 246, 255, 0.55)'));
-          puffGrad.addColorStop(0.68, formatFillColor(p.color, 'rgba(240, 246, 255, 0.16)'));
-          puffGrad.addColorStop(1.0, formatFillColor(p.color, 'rgba(240, 246, 255, 0.0)'));
+          puffGrad.addColorStop(0.0, formatColorWithAlpha(p.color, 0.85, '240, 246, 255'));
+          puffGrad.addColorStop(0.30, formatColorWithAlpha(p.color, 0.55, '240, 246, 255'));
+          puffGrad.addColorStop(0.68, formatColorWithAlpha(p.color, 0.16, '240, 246, 255'));
+          puffGrad.addColorStop(1.0, formatColorWithAlpha(p.color, 0.0, '240, 246, 255'));
           ctx.fillStyle = puffGrad;
         } catch (e) {
-          ctx.fillStyle = formatFillColor(p.color, 'rgba(240, 246, 255, 0.35)');
+          ctx.fillStyle = formatColorWithAlpha(p.color, 0.35, '240, 246, 255');
         }
         ctx.globalAlpha = Math.min(0.68, p.alpha || 0.52);
       } else if (p.isSpark) {
@@ -2590,26 +2711,54 @@ export class ParticleSystem {
         // 极光星云荧光 (柔和羽化渐变)
         try {
           const nebGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
-          nebGrad.addColorStop(0, formatFillColor(p.color, 'rgba(56, 189, 248, 0.8)'));
-          nebGrad.addColorStop(0.55, formatFillColor(p.color, 'rgba(56, 189, 248, 0.35)'));
-          nebGrad.addColorStop(1.0, formatFillColor(p.color, 'rgba(56, 189, 248, 0.0)'));
+          nebGrad.addColorStop(0.0, formatColorWithAlpha(p.color, 0.80, '56, 189, 248'));
+          nebGrad.addColorStop(0.55, formatColorWithAlpha(p.color, 0.35, '56, 189, 248'));
+          nebGrad.addColorStop(1.0, formatColorWithAlpha(p.color, 0.0, '56, 189, 248'));
           ctx.fillStyle = nebGrad;
         } catch (e) {
-          ctx.fillStyle = formatFillColor(p.color, 'rgba(56, 189, 248, 0.5)');
+          ctx.fillStyle = formatColorWithAlpha(p.color, 0.50, '56, 189, 248');
         }
         ctx.globalAlpha = (p.alpha || 0.8) * 0.90;
       } else if (p.isZen) {
         // 紫气祥云仙气 (柔和羽化渐变)
         try {
           const zenGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
-          zenGrad.addColorStop(0, formatFillColor(p.color, 'rgba(192, 132, 252, 0.8)'));
-          zenGrad.addColorStop(0.55, formatFillColor(p.color, 'rgba(192, 132, 252, 0.35)'));
-          zenGrad.addColorStop(1.0, formatFillColor(p.color, 'rgba(192, 132, 252, 0.0)'));
+          zenGrad.addColorStop(0.0, formatColorWithAlpha(p.color, 0.80, '192, 132, 252'));
+          zenGrad.addColorStop(0.55, formatColorWithAlpha(p.color, 0.35, '192, 132, 252'));
+          zenGrad.addColorStop(1.0, formatColorWithAlpha(p.color, 0.0, '192, 132, 252'));
           ctx.fillStyle = zenGrad;
         } catch (e) {
-          ctx.fillStyle = formatFillColor(p.color, 'rgba(192, 132, 252, 0.5)');
+          ctx.fillStyle = formatColorWithAlpha(p.color, 0.50, '192, 132, 252');
         }
         ctx.globalAlpha = (p.alpha || 0.8) * 0.85;
+      } else if (p.isLotusPetal) {
+        // 青莲碧玉凝脂花瓣 (高雅翡翠羽化)
+        try {
+          const lotusGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
+          lotusGrad.addColorStop(0.0, formatColorWithAlpha(p.color, 0.85, '52, 211, 153'));
+          lotusGrad.addColorStop(0.55, formatColorWithAlpha(p.color, 0.38, '52, 211, 153'));
+          lotusGrad.addColorStop(1.0, formatColorWithAlpha(p.color, 0.0, '52, 211, 153'));
+          ctx.fillStyle = lotusGrad;
+        } catch (e) {
+          ctx.fillStyle = formatColorWithAlpha(p.color, 0.50, '52, 211, 153');
+        }
+        ctx.globalAlpha = (p.alpha || 0.8) * 0.88;
+      } else if (p.isLotusCore) {
+        // 莲心琥珀琉璃金蕊
+        try {
+          const coreGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
+          coreGrad.addColorStop(0.0, 'rgba(254, 240, 138, 0.95)');
+          coreGrad.addColorStop(0.6, 'rgba(245, 158, 11, 0.55)');
+          coreGrad.addColorStop(1.0, 'rgba(217, 119, 6, 0.0)');
+          ctx.fillStyle = coreGrad;
+        } catch (e) {
+          ctx.fillStyle = 'rgba(251, 191, 36, 0.7)';
+        }
+        ctx.globalAlpha = (p.alpha || 0.85);
+      } else if (p.isDewdrop) {
+        // 晶莹甘露晨星微粒
+        ctx.fillStyle = `rgba(224, 242, 254, ${p.alpha || 0.75})`;
+        ctx.globalAlpha = p.alpha || 0.75;
       } else if (p.isObsidian) {
         // 黑曜石深色烟雾 (柔和羽化渐变)
         try {
@@ -2671,7 +2820,6 @@ export class ParticleSystem {
       } else if (p.isFireworkBurst) {
         // 烟花高空绽放彩星
         ctx.fillStyle = p.color || '#fbbf24';
-        ctx.shadowColor = p.color || '#fbbf24';
         ctx.globalAlpha = p.alpha || 1.0;
       } else if (p.isWillowRain) {
         // 垂落金雨

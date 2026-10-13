@@ -14,10 +14,15 @@ class AudioManager {
     this.ambientSource = null;
     this.ambientGain = null;
     this.ambientType = null;
+    this._sharedNoiseBuffer = null;
+    this._ambientBuffers = {};
+    this._audioOptionInitialized = false;
     this.initWeChatAudioOption();
   }
 
   initWeChatAudioOption() {
+    if (this._audioOptionInitialized) return;
+    this._audioOptionInitialized = true;
     try {
       if (typeof wx !== 'undefined' && wx.setInnerAudioOption) {
         wx.setInnerAudioOption({
@@ -28,6 +33,21 @@ class AudioManager {
     } catch (e) {
       console.warn('initWeChatAudioOption error:', e);
     }
+  }
+
+  _getSharedNoiseBuffer(ctx) {
+    if (!ctx) return null;
+    if (!this._sharedNoiseBuffer) {
+      const sampleRate = (ctx.sampleRate && ctx.sampleRate > 0) ? ctx.sampleRate : 44100;
+      const bufferSize = sampleRate * 2;
+      const buf = ctx.createBuffer(1, bufferSize, sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+      this._sharedNoiseBuffer = buf;
+    }
+    return this._sharedNoiseBuffer;
   }
 
   // 播放本地高品质真实音效文件 (微信原生 InnerAudioContext 硬件加速播放)
@@ -466,12 +486,8 @@ class AudioManager {
       if (!ctx) return;
       const t = ctx.currentTime;
 
-      const bufferSize = ctx.sampleRate * 2;
-      const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-      const data = noiseBuffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) {
-        data[i] = Math.random() * 2 - 1;
-      }
+      const noiseBuffer = this._getSharedNoiseBuffer(ctx);
+      if (!noiseBuffer) return;
 
       this.burnSource = ctx.createBufferSource();
       this.burnSource.buffer = noiseBuffer;
@@ -504,28 +520,31 @@ class AudioManager {
         if (!this.burnSource || this.muted) return;
         try {
           const now = ctx.currentTime;
-          const popBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.008), ctx.sampleRate);
-          const popData = popBuf.getChannelData(0);
-          for (let i = 0; i < popData.length; i++) {
-            popData[i] = (Math.random() * 2 - 1) * Math.sin((i / popData.length) * Math.PI);
-          }
+          const sharedBuf = this._getSharedNoiseBuffer(ctx);
+          if (!sharedBuf) return;
           const popSrc = ctx.createBufferSource();
-          popSrc.buffer = popBuf;
+          popSrc.buffer = sharedBuf;
 
           const popFilter = ctx.createBiquadFilter();
           popFilter.type = 'bandpass';
           popFilter.frequency.setValueAtTime(2400 + Math.random() * 3200, now);
           popFilter.Q.setValueAtTime(4.0, now);
 
-          const popGain = ctx.createGain();
+          const cGain = ctx.createGain();
           const popVol = 0.22 + Math.random() * 0.28;
-          popGain.gain.setValueAtTime(popVol, now);
-          popGain.gain.exponentialRampToValueAtTime(0.01, now + 0.008);
+          cGain.gain.setValueAtTime(popVol, now);
+          cGain.gain.exponentialRampToValueAtTime(0.01, now + 0.008);
 
           popSrc.connect(popFilter);
-          popFilter.connect(popGain);
-          this.connectToMaster(popGain);
-          popSrc.start(now);
+          popFilter.connect(cGain);
+          this.connectToMaster(cGain);
+          const randomOffset = Math.random() * 1.95;
+          popSrc.start(now, randomOffset, 0.008);
+          setTimeout(() => {
+            try { popSrc.disconnect(); } catch {}
+            try { popFilter.disconnect(); } catch {}
+            try { cGain.disconnect(); } catch {}
+          }, 25);
         } catch {}
 
         if (this.burnSource) {
@@ -559,11 +578,19 @@ class AudioManager {
           const now = this.ctx.currentTime;
           this.burnGain.gain.linearRampToValueAtTime(0.001, now + 0.05);
           const src = this.burnSource;
+          const filter = this.burnFilter;
+          const gain = this.burnGain;
           setTimeout(() => {
             try {
               src.stop();
               src.disconnect();
             } catch {}
+            if (filter) {
+              try { filter.disconnect(); } catch {}
+            }
+            if (gain) {
+              try { gain.disconnect(); } catch {}
+            }
           }, 60);
           this.burnSource = null;
           this.burnGain = null;
@@ -571,6 +598,12 @@ class AudioManager {
         } else {
           this.burnSource.stop();
           this.burnSource.disconnect();
+          if (this.burnFilter) {
+            try { this.burnFilter.disconnect(); } catch {}
+          }
+          if (this.burnGain) {
+            try { this.burnGain.disconnect(); } catch {}
+          }
           this.burnSource = null;
           this.burnGain = null;
           this.burnFilter = null;
@@ -598,11 +631,8 @@ class AudioManager {
       const t = ctx.currentTime;
       const duration = 1.3;
 
-      const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * duration), ctx.sampleRate);
-      const data = buf.getChannelData(0);
-      for (let i = 0; i < data.length; i++) {
-        data[i] = Math.random() * 2 - 1;
-      }
+      const buf = this._getSharedNoiseBuffer(ctx);
+      if (!buf) return;
       const src = ctx.createBufferSource();
       src.buffer = buf;
 
@@ -611,15 +641,20 @@ class AudioManager {
       filter.frequency.setValueAtTime(360, t);
       filter.frequency.exponentialRampToValueAtTime(140, t + duration);
 
-      const gain = ctx.createGain();
-      gain.gain.setValueAtTime(0.001, t);
-      gain.gain.linearRampToValueAtTime(0.38, t + 0.15);
-      gain.gain.exponentialRampToValueAtTime(0.001, t + duration);
+      const exhaleGain = ctx.createGain();
+      exhaleGain.gain.setValueAtTime(0.001, t);
+      exhaleGain.gain.linearRampToValueAtTime(0.38, t + 0.15);
+      exhaleGain.gain.exponentialRampToValueAtTime(0.001, t + duration);
 
       src.connect(filter);
-      filter.connect(gain);
-      this.connectToMaster(gain);
-      src.start(t);
+      filter.connect(exhaleGain);
+      this.connectToMaster(exhaleGain);
+      src.start(t, 0, duration);
+      setTimeout(() => {
+        try { src.disconnect(); } catch {}
+        try { filter.disconnect(); } catch {}
+        try { exhaleGain.disconnect(); } catch {}
+      }, Math.ceil(duration * 1000) + 60);
     } catch (e) {
       console.warn('播放呼气音失败:', e);
     }
@@ -736,6 +771,10 @@ class AudioManager {
       osc.start(t);
       osc.stop(t + 0.035);
     } catch {}
+  }
+
+  playClick() {
+    this.playSwitchSound();
   }
 
   // 8. 捏爆珠真实物理破壳声 (5阶物理声学建模：滤嘴捏压摩擦 -> 明胶脆壳咔啪双裂瞬态 -> 内部高压香精爆浆 -> 残壳微碎 -> 海绵毛细吸纳微滋声)
@@ -1138,76 +1177,125 @@ class AudioManager {
       const t = ctx.currentTime;
       const sampleRate = (ctx && ctx.sampleRate && ctx.sampleRate > 0) ? ctx.sampleRate : 44100;
 
-      // 生成 6.0 秒超长平滑声床缓冲 + 0.5 秒首尾无缝余弦交叉融接
-      const loopDur = 6.0;
-      const fadeSamples = Math.floor(sampleRate * 0.5);
-      const bufferLength = Math.floor(sampleRate * loopDur);
-      const totalGen = bufferLength + fadeSamples;
-      const raw = new Float32Array(totalGen);
-
-      let cutoffFreq = 280;
-      let targetGain = 0.048;
-
+      let cutoffFreq = 240;
+      let targetGain = 0.044;
       if (sceneType === 'rainy_car' || sceneType === 'rainy_camp') {
-        // 隔窗微雨 / 天幕细雨：豪车双层夹胶玻璃外的温润绵密细雨，滤除一切刺耳高频沙沙声
-        let b0 = 0, b1 = 0;
-        for (let i = 0; i < totalGen; i++) {
-          const white = Math.random() * 2 - 1;
-          b0 = 0.994 * b0 + white * 0.032;
-          b1 = 0.982 * b1 + b0 * 0.18;
-          const breath = 0.78 + 0.22 * Math.sin((i / bufferLength) * Math.PI * 2);
-          raw[i] = b1 * 0.48 * breath;
-        }
         cutoffFreq = 380;
         targetGain = 0.060;
-      } else if (sceneType === 'campfire') {
-        // 森林篝火：温暖壁炉低频暖流 + 极偶发温润松木微暖共鸣（彻底剔除高频刺耳电流爆音）
-        let b0 = 0, b1 = 0;
-        for (let i = 0; i < totalGen; i++) {
-          const white = Math.random() * 2 - 1;
-          b0 = 0.996 * b0 + white * 0.026;
-          b1 = 0.988 * b1 + b0 * 0.16;
-          const breath = 0.80 + 0.20 * Math.sin((i / bufferLength) * Math.PI * 2);
-          raw[i] = b1 * 0.52 * breath;
-        }
-        cutoffFreq = 310;
+      } else if (sceneType === 'campfire' || sceneType === 'whisky_bar') {
+        cutoffFreq = 320;
         targetGain = 0.054;
-      } else if (sceneType === 'midnight_balcony' || sceneType === 'midnight_rooftop' || sceneType === 'ocean') {
-        // 楼顶晚风 / 蔚蓝深海：6秒一呼一吸的慢周期远方海浪潮汐与松林晚风
-        let b0 = 0, b1 = 0;
-        for (let i = 0; i < totalGen; i++) {
-          const white = Math.random() * 2 - 1;
-          b0 = 0.9965 * b0 + white * 0.022;
-          b1 = 0.990 * b1 + b0 * 0.15;
-          const tideLFO = 0.62 + 0.38 * Math.sin((i / bufferLength) * Math.PI * 2);
-          raw[i] = b1 * 0.55 * tideLFO;
-        }
+      } else if (sceneType === 'midnight_balcony' || sceneType === 'midnight_rooftop' || sceneType === 'ocean' || sceneType === 'zen_bamboo') {
         cutoffFreq = 290;
         targetGain = 0.056;
-      } else {
-        // 极简黑曜 / 宇宙深空 / 街角便利店 / 车库 / 楼道：深宵书房级微阈丝绒空气声床（无任何正弦单音蜂鸣）
-        let b0 = 0, b1 = 0;
-        for (let i = 0; i < totalGen; i++) {
-          const white = Math.random() * 2 - 1;
-          b0 = 0.997 * b0 + white * 0.018;
-          b1 = 0.991 * b1 + b0 * 0.14;
-          const zenBreath = 0.82 + 0.18 * Math.sin((i / bufferLength) * Math.PI * 2);
-          raw[i] = b1 * 0.50 * zenBreath;
-        }
-        cutoffFreq = 250;
-        targetGain = 0.044;
+      } else if (sceneType === 'night_fishing' || sceneType === 'snowy_lamp') {
+        cutoffFreq = 260;
+        targetGain = 0.048;
+      } else if (sceneType === 'underground_garage' || sceneType === 'stairwell' || sceneType === 'convenience_store') {
+        cutoffFreq = 220;
+        targetGain = 0.046;
+      } else if (sceneType === 'solar_system' || sceneType === 'deep_cosmos' || sceneType === 'lunar_planet') {
+        cutoffFreq = 240;
+        targetGain = 0.045;
       }
 
-      // 首尾 0.5s 余弦平滑交叉融接 (Seamless Crossfade Loop)，保证循环点 100% 连续无咔哒声
-      const buffer = ctx.createBuffer(1, bufferLength, sampleRate);
-      const data = buffer.getChannelData(0);
-      for (let i = 0; i < bufferLength; i++) {
-        if (i < fadeSamples) {
-          const alpha = 0.5 * (1 - Math.cos((i / fadeSamples) * Math.PI));
-          data[i] = raw[i] * alpha + raw[bufferLength + i] * (1 - alpha);
+      if (!this._ambientBuffers) {
+        this._ambientBuffers = {};
+      }
+      let buffer = this._ambientBuffers[sceneType];
+      if (!buffer) {
+        // 生成 6.0 秒超长平滑声床缓冲 + 0.5 秒首尾无缝余弦交叉融接
+        const loopDur = 6.0;
+        const fadeSamples = Math.floor(sampleRate * 0.5);
+        const bufferLength = Math.floor(sampleRate * loopDur);
+        const totalGen = bufferLength + fadeSamples;
+        const raw = new Float32Array(totalGen);
+
+        if (sceneType === 'rainy_car' || sceneType === 'rainy_camp') {
+          // 隔窗微雨 / 天幕细雨：豪车双层夹胶玻璃外的温润绵密细雨，滤除一切刺耳高频沙沙声
+          let b0 = 0, b1 = 0;
+          for (let i = 0; i < totalGen; i++) {
+            const white = Math.random() * 2 - 1;
+            b0 = 0.994 * b0 + white * 0.032;
+            b1 = 0.982 * b1 + b0 * 0.18;
+            const breath = 0.78 + 0.22 * Math.sin((i / bufferLength) * Math.PI * 2);
+            raw[i] = b1 * 0.48 * breath;
+          }
+        } else if (sceneType === 'campfire' || sceneType === 'whisky_bar') {
+          // 森林篝火 / 威士忌酒吧：温暖壁炉低频暖流 + 柔暖黑胶松弛余韵
+          let b0 = 0, b1 = 0;
+          for (let i = 0; i < totalGen; i++) {
+            const white = Math.random() * 2 - 1;
+            b0 = 0.996 * b0 + white * 0.026;
+            b1 = 0.988 * b1 + b0 * 0.16;
+            const breath = 0.80 + 0.20 * Math.sin((i / bufferLength) * Math.PI * 2);
+            raw[i] = b1 * 0.52 * breath;
+          }
+        } else if (sceneType === 'midnight_balcony' || sceneType === 'midnight_rooftop' || sceneType === 'ocean' || sceneType === 'zen_bamboo') {
+          // 楼顶晚风 / 蔚蓝深海 / 禅院竹海：6秒一呼一吸的慢周期远方潮汐、晚风与竹浪清风
+          let b0 = 0, b1 = 0;
+          for (let i = 0; i < totalGen; i++) {
+            const white = Math.random() * 2 - 1;
+            b0 = 0.9965 * b0 + white * 0.022;
+            b1 = 0.990 * b1 + b0 * 0.15;
+            const tideLFO = 0.62 + 0.38 * Math.sin((i / bufferLength) * Math.PI * 2);
+            raw[i] = b1 * 0.55 * tideLFO;
+          }
+        } else if (sceneType === 'night_fishing' || sceneType === 'snowy_lamp') {
+          // 江湖夜钓 / 雪夜孤灯：夜钓湖面极微弱水声波澜 + 凛冬落雪空灵静谧声
+          let b0 = 0, b1 = 0;
+          for (let i = 0; i < totalGen; i++) {
+            const white = Math.random() * 2 - 1;
+            b0 = 0.9972 * b0 + white * 0.020;
+            b1 = 0.9915 * b1 + b0 * 0.14;
+            const nightBreath = 0.70 + 0.30 * Math.sin((i / bufferLength) * Math.PI * 2);
+            raw[i] = b1 * 0.50 * nightBreath;
+          }
+        } else if (sceneType === 'underground_garage' || sceneType === 'stairwell' || sceneType === 'convenience_store') {
+          // 地下车库 / 楼道 / 便利店街角：深夜空间混响与低频通风机暖音
+          let b0 = 0, b1 = 0;
+          for (let i = 0; i < totalGen; i++) {
+            const white = Math.random() * 2 - 1;
+            b0 = 0.9975 * b0 + white * 0.016;
+            b1 = 0.9920 * b1 + b0 * 0.13;
+            const roomDrone = 0.84 + 0.16 * Math.sin((i / bufferLength) * Math.PI * 2 * 0.5);
+            raw[i] = b1 * 0.48 * roomDrone;
+          }
+        } else if (sceneType === 'solar_system' || sceneType === 'deep_cosmos' || sceneType === 'lunar_planet') {
+          // 浩瀚太阳系 / 深空宇宙 / 荒原星球：深空引力波空灵双耳谐波冥想音
+          let b0 = 0, b1 = 0;
+          for (let i = 0; i < totalGen; i++) {
+            const white = Math.random() * 2 - 1;
+            b0 = 0.9968 * b0 + white * 0.019;
+            b1 = 0.9905 * b1 + b0 * 0.15;
+            const cosmosSine = 0.12 * Math.sin((i / sampleRate) * 2 * Math.PI * 108); // 108Hz 空灵柔低音
+            const deepWave = 0.75 + 0.25 * Math.sin((i / bufferLength) * Math.PI * 2);
+            raw[i] = (b1 * 0.42 + cosmosSine) * deepWave;
+          }
         } else {
-          data[i] = raw[i];
+          // 极简黑曜：侘寂纯黑微阈丝绒声床
+          let b0 = 0, b1 = 0;
+          for (let i = 0; i < totalGen; i++) {
+            const white = Math.random() * 2 - 1;
+            b0 = 0.997 * b0 + white * 0.018;
+            b1 = 0.991 * b1 + b0 * 0.14;
+            const zenBreath = 0.82 + 0.18 * Math.sin((i / bufferLength) * Math.PI * 2);
+            raw[i] = b1 * 0.50 * zenBreath;
+          }
         }
+
+        // 首尾 0.5s 余弦平滑交叉融接 (Seamless Crossfade Loop)，保证循环点 100% 连续无咔哒声
+        buffer = ctx.createBuffer(1, bufferLength, sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferLength; i++) {
+          if (i < fadeSamples) {
+            const alpha = 0.5 * (1 - Math.cos((i / fadeSamples) * Math.PI));
+            data[i] = raw[i] * alpha + raw[bufferLength + i] * (1 - alpha);
+          } else {
+            data[i] = raw[i];
+          }
+        }
+        this._ambientBuffers[sceneType] = buffer;
       }
 
       const source = ctx.createBufferSource();

@@ -223,8 +223,6 @@ export class GoldenDragon {
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     ctx.strokeStyle = `rgba(245, 158, 11, ${0.16 * this.alpha})`;
-    ctx.shadowColor = '#eab308';
-    ctx.shadowBlur = 12;
     ctx.stroke();
     ctx.restore();
 
@@ -369,8 +367,6 @@ export class GoldenDragon {
       ctx.bezierCurveTo(plumeLen * 0.4, -3, plumeLen * 0.75, 3, plumeLen, 0);
       ctx.bezierCurveTo(plumeLen * 0.65, 4.5, plumeLen * 0.3, 2, 0, 0);
       ctx.fillStyle = k % 2 === 0 ? '#f59e0b' : '#fef08a';
-      ctx.shadowColor = '#eab308';
-      ctx.shadowBlur = 4;
       ctx.fill();
       ctx.restore();
     }
@@ -403,8 +399,6 @@ export class GoldenDragon {
     ctx.quadraticCurveTo(0, 3, -8, -1);     // 龙颔底部
     ctx.closePath();
     ctx.fillStyle = '#f59e0b';
-    ctx.shadowColor = '#eab308';
-    ctx.shadowBlur = 6;
     ctx.fill();
     ctx.lineWidth = 1.0;
     ctx.strokeStyle = '#fef08a';
@@ -450,8 +444,6 @@ export class GoldenDragon {
     ctx.beginPath();
     ctx.ellipse(-4.5, -9.5, 2.6, 1.4, -0.3, 0, Math.PI * 2);
     ctx.fillStyle = '#ffffff';
-    ctx.shadowColor = '#fef08a';
-    ctx.shadowBlur = 6;
     ctx.fill();
     ctx.beginPath();
     ctx.arc(-4.5, -9.5, 0.8, 0, Math.PI * 2);
@@ -462,8 +454,6 @@ export class GoldenDragon {
     ctx.beginPath();
     ctx.ellipse(4.5, -9.5, 2.6, 1.4, 0.3, 0, Math.PI * 2);
     ctx.fillStyle = '#ffffff';
-    ctx.shadowColor = '#fef08a';
-    ctx.shadowBlur = 6;
     ctx.fill();
     ctx.beginPath();
     ctx.arc(4.5, -9.5, 0.8, 0, Math.PI * 2);
@@ -503,8 +493,6 @@ export class GoldenDragon {
     ctx.beginPath();
     ctx.arc(0, 0, 7.5, 0, Math.PI * 2);
     ctx.fillStyle = '#f59e0b';
-    ctx.shadowColor = '#eab308';
-    ctx.shadowBlur = 12;
     ctx.fill();
 
     ctx.beginPath();
@@ -516,8 +504,6 @@ export class GoldenDragon {
     ctx.beginPath();
     ctx.arc(-1.5, -1.5, 2.2, 0, Math.PI * 2);
     ctx.fillStyle = '#ffffff';
-    ctx.shadowColor = '#ffffff';
-    ctx.shadowBlur = 8;
     ctx.fill();
 
     // 4. 四芒星光芒 (Cross Diamond Flare)
@@ -572,8 +558,6 @@ export class GoldenDragon {
       ctx.quadraticCurveTo(3 * scale, 1 * scale, 5.5 * scale, 3 * scale);
       ctx.lineWidth = 1.1 * scale;
       ctx.strokeStyle = '#ffffff';
-      ctx.shadowColor = '#fef08a';
-      ctx.shadowBlur = 3;
       ctx.stroke();
       ctx.restore();
     }
@@ -593,8 +577,6 @@ export class GoldenDragon {
     ctx.bezierCurveTo(side * 5, 8, side * 8, 16, side * 11, 22);
     ctx.lineWidth = 2.4;
     ctx.strokeStyle = '#fef08a';
-    ctx.shadowColor = '#eab308';
-    ctx.shadowBlur = 5;
     ctx.stroke();
 
     // 次角分叉 (Coral tine)
@@ -625,8 +607,6 @@ export class GoldenDragon {
     );
     ctx.lineWidth = 1.3;
     ctx.strokeStyle = '#fef08a';
-    ctx.shadowColor = '#fbbf24';
-    ctx.shadowBlur = 6;
     ctx.stroke();
 
     // 细尖微须
@@ -674,8 +654,6 @@ export class GoldenDragon {
     }
     ctx.lineWidth = 1.8;
     ctx.strokeStyle = `rgba(254, 240, 138, ${this.alpha * 0.85})`;
-    ctx.shadowColor = '#eab308';
-    ctx.shadowBlur = 8;
     ctx.stroke();
 
     // 在螺旋波峰节点点缀闪烁的四芒星钻
@@ -688,8 +666,6 @@ export class GoldenDragon {
         ctx.beginPath();
         ctx.arc(0, 0, starSize, 0, Math.PI * 2);
         ctx.fillStyle = '#ffffff';
-        ctx.shadowColor = '#fef08a';
-        ctx.shadowBlur = 6;
         ctx.fill();
         ctx.restore();
       }

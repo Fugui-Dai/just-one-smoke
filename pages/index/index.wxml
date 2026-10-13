@@ -1,5 +1,5 @@
 <!-- pages/index/index.wxml -->
-<view class="app-container {{ vipTheme ? 'vip-theme-' + vipTheme : '' }}">
+<view class="app-container {{ vipTheme ? 'theme-' + vipTheme : '' }}">
 
   <!-- ==================== 顶部统一导航栏 (安全避让微信原生胶囊按钮) ==================== -->
   <view class="custom-navbar" style="padding-top: {{ statusBarHeight }}px; height: {{ statusBarHeight + navBarHeight }}px;">
@@ -95,14 +95,14 @@
           <!-- 动态烟盒余量进度圆环 -->
           <view 
             class="share-progress-ring" 
-            style="background: conic-gradient(#34d399 0deg, #10b981 {{ (currentPackRemaining / (currentCigarette.packCapacity || 20)) * 360 }}deg, rgba(255, 255, 255, 0.14) {{ (currentPackRemaining / (currentCigarette.packCapacity || 20)) * 360 }}deg 360deg);"
+            style="background: conic-gradient(#34d399 0deg, #10b981 {{ (currentPackRemaining / (currentCigarette.packCapacity || (currentCigarette.isCigar ? 5 : 20))) * 360 }}deg, rgba(255, 255, 255, 0.14) {{ (currentPackRemaining / (currentCigarette.packCapacity || (currentCigarette.isCigar ? 5 : 20))) * 360 }}deg 360deg);"
           ></view>
           <view class="share-btn-inner">
             <text class="dock-icon">🤲</text>
             <view class="pack-remain-dock-badge {{ currentPackRemaining <= 0 ? 'is-empty' : '' }}" wx:if="{{ currentPackRemaining !== undefined }}">{{ currentPackRemaining }}</view>
           </view>
         </view>
-        <text class="dock-title emerald-title">递烟</text>
+        <text class="dock-title">递烟</text>
       </button>
 
       <!-- 6. 商店 (纯净无24字样矢量图标 + 仅显示“商店”) -->
@@ -110,42 +110,29 @@
         <view class="dock-circle-btn store-btn-circle">
           <image class="dock-svg-icon store-svg-icon" src="{{ storeIconUri }}" mode="aspectFit" />
         </view>
-        <text class="dock-title gold-title">商店</text>
+        <text class="dock-title">商店</text>
       </view>
 
-      <!-- 7. 排行 (曜金奖杯图标 + 下方“排行”) -->
+      <!-- 7. 排行榜 (曜金奖杯图标 + 下方“排行榜”) -->
       <view class="dock-btn-wrap rank-dock-wrap" bindtap="switchToLeaderboard">
         <view class="dock-circle-btn rank-btn-circle">
           <text class="dock-icon rank-trophy-icon">🏆</text>
         </view>
-        <text class="dock-title gold-title">排行</text>
+        <text class="dock-title">排行榜</text>
       </view>
 
       <!-- 8. 我的 (金字“我” + 下方“我的”) -->
       <view class="dock-btn-wrap" bindtap="switchToStats">
-        <view class="dock-circle-btn my-btn-circle">
+        <view class="dock-circle-btn my-btn-circle {{ vipTheme ? 'is-vip-my-btn' : '' }}">
           <text class="dock-char-icon my-char">我</text>
         </view>
-        <text class="dock-title">我的</text>
+        <text class="dock-title {{ vipTheme ? 'gold-title' : '' }}">我的</text>
       </view>
 
     </view>
 
     <!-- 画布区域 (居中展示 3D 拟真卷烟/雪茄与袅袅青烟) -->
     <view class="canvas-wrapper">
-      
-      <!-- 4-7-8 呼吸引导悬浮药丸 -->
-      <view class="hint-pill breathing {{ breathingPhase }}" wx:if="{{ breathingMode && (breathingPhase !== 'none') }}">
-        <text wx:if="{{ breathingPhase === 'inhale' }}">🌿 缓缓吸气... {{ inhaleElapsedDisplay }}s (目标 4s)</text>
-        <text wx:elif="{{ breathingPhase === 'hold' }}">✨ 屏气静心... 保持平静</text>
-        <text wx:elif="{{ breathingPhase === 'exhale' }}">💨 舒缓呼气... 释放深层压力</text>
-      </view>
-
-      <!-- 3分钟烟瘾急救冲浪浮窗 -->
-      <view class="hint-pill sos-pill" wx:elif="{{ sosActive }}">
-        <view class="pulse-spark green"></view>
-        <text>⚡ 3分钟烟瘾急救倒计时：{{ sosTimerDisplay }}</text>
-      </view>
 
       <!-- 30秒特效试抽中动态浮动胶囊 -->
       <view class="trial-floating-capsule" wx:if="{{ isTrialActive }}" bindtap="openSmokeEffectDrawer">
@@ -299,53 +286,35 @@
 
 
 
-  <!-- ==================== 弹窗 3: 烟具更换抽屉 ==================== -->
-  <view class="glass-modal-backdrop" wx:if="{{ showPicker }}" catchtouchmove="preventTouchMove" bindtap="closePicker">
-    <view class="picker-bottom-sheet" catchtap="stopBubble">
-      <view class="sheet-top-handle"></view>
-      <view class="sheet-title-row">
-        <text class="sheet-main-title">更换装配名烟/雪茄</text>
-        <view class="sheet-close-btn" bindtap="closePicker">✕</view>
-      </view>
-      
-      <scroll-view class="sheet-items-scroll" scroll-y>
-        <view 
-          class="sheet-cig-item {{ item.id === currentCigarette.id ? 'is-active-item' : '' }} {{ !item.unlocked ? 'is-locked-item' : '' }}"
-          wx:for="{{ catalogList }}"
-          wx:key="id"
-          bindtap="onSelectPickerCigarette"
-          data-item="{{ item }}"
-        >
-          <view class="sheet-cig-preview {{ item.isCigar ? 'cigar-prev' : (item.widthType === 'slender' ? 'slender-prev' : '') }}" style="background: {{ item.paperColor }};">
-            <view class="sheet-filter-tip" style="background: {{ item.filterColor }};"></view>
-          </view>
-          <view class="sheet-cig-meta">
-            <view class="sheet-name-line">
-              <view class="picker-title-badge">
-                <text class="sheet-name">{{ item.name }}</text>
-                <text class="sheet-brand-tag">{{ item.brand }}</text>
-              </view>
-              <view class="sheet-badge-using" wx:if="{{ item.id === currentCigarette.id }}">正在使用</view>
-            </view>
-            <text class="sheet-desc">{{ item.description }}</text>
-            <text class="sheet-lock-note" wx:if="{{ !item.unlocked }}">🔒 {{ item.unlockDesc }}</text>
-          </view>
-        </view>
-      </scroll-view>
-    </view>
-  </view>
-
   <!-- ==================== 弹窗 4: 抽烟环境面板 (底部精致抽屉布局) ==================== -->
   <view class="glass-modal-backdrop" wx:if="{{ showSceneModal }}" catchtouchmove="preventTouchMove" bindtap="closeSceneModal">
     <view class="skill-bottom-sheet scene-bottom-sheet" catchtap="stopBubble">
       <view class="sheet-top-handle"></view>
       <view class="sheet-title-row">
-        <text class="sheet-main-title">🌿 抽烟环境</text>
+        <view class="sheet-title-left">
+          <text class="sheet-main-title">🌿 抽烟环境 · 16大典藏声景</text>
+          <text class="sheet-sub-title-tag">支持「吸烟火光映照」实时联动</text>
+        </view>
         <view class="sheet-close-btn" bindtap="closeSceneModal">✕</view>
       </view>
 
-      <!-- 可滚动区域 (解决遮罩层导致无法上下滑动的问题) -->
-      <scroll-view class="scene-sheet-scroll" scroll-y="true" enhanced="true" show-scrollbar="false">
+      <!-- 场景主题分类快筛胶囊栏 -->
+      <view class="scene-category-pills-row">
+        <view 
+          class="scene-cat-pill {{ activeSceneCategory === cat.id ? 'active-cat-pill' : '' }}"
+          wx:for="{{ sceneCategories }}"
+          wx:for-item="cat"
+          wx:key="id"
+          bindtap="onSelectSceneCategory"
+          data-id="{{ cat.id }}"
+        >
+          <text class="scp-icon">{{ cat.icon }}</text>
+          <text class="scp-text">{{ cat.name }}</text>
+        </view>
+      </view>
+
+      <!-- 可滚动区域 -->
+      <scroll-view class="scene-sheet-scroll" scroll-y="true" enhanced="true" show-scrollbar="false" scroll-into-view="{{ activeScrollSceneId }}">
         <!-- 白噪音与声景伴吸 -->
         <view class="menu-tools-section">
           <text class="menu-section-title">🎧 环境白噪音伴吸</text>
@@ -357,23 +326,27 @@
                 <text class="sst-desc">{{ isAmbientEnabled ? '已开启 -26dB 暖频呼吸柔音 · 久听静心不吵耳' : '已静音 · 纯享无声' }}</text>
               </view>
             </view>
-            <switch checked="{{ isAmbientEnabled }}" color="#10b981" />
+            <switch checked="{{ isAmbientEnabled }}" color="#10b981" style="pointer-events: none;" />
           </view>
         </view>
 
         <!-- 沉浸场景网格卡片 -->
         <view class="menu-skills-section">
-          <text class="menu-section-title">沉浸声景</text>
+          <text class="menu-section-title">沉浸声景 ({{ filteredAtmosphereScenes.length }}款)</text>
           <view class="skill-cards-grid">
             <view 
+              id="scene_card_{{ item.id }}"
               class="skill-item-card scene-item-card {{ item.id === currentScene ? 'is-active-skill' : '' }}"
-              wx:for="{{ atmosphereScenes }}"
+              wx:for="{{ filteredAtmosphereScenes }}"
               wx:key="id"
               bindtap="onSelectAtmosphereScene"
               data-id="{{ item.id }}"
             >
               <view class="skill-card-top-row">
-                <text class="skill-card-icon">{{ item.icon }}</text>
+                <view class="scene-icon-wrap">
+                  <text class="skill-card-icon">{{ item.icon }}</text>
+                  <view class="scene-accent-dot" style="background: {{ item.accentColor || '#10b981' }}; box-shadow: 0 0 10rpx {{ item.accentColor || '#10b981' }};"></view>
+                </view>
                 <view class="scene-item-badge {{ item.id === currentScene ? 'active-badge' : '' }}" wx:if="{{ item.badge }}">{{ item.badge }}</view>
               </view>
               <view class="skill-card-info">
@@ -526,7 +499,7 @@
         <button class="primary-gold-btn gift-accept-btn" bindtap="acceptGiftAndIgnite">
           <text class="btn-main-text">🔥 点燃品吸 · 收下敬意</text>
         </button>
-        <button class="secondary-dark-btn gift-return-btn" open-type="share">
+        <button class="secondary-dark-btn gift-return-btn" open-type="share" bindtap="giveCigarette">
           <text class="btn-sub-text">🤝 回敬老哥 · 再递一支</text>
         </button>
       </view>

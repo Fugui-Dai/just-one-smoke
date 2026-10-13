@@ -1,8 +1,18 @@
 <!-- pages/shop/shop.wxml -->
-<view class="pack-page-container {{ vipTheme ? 'vip-theme-' + vipTheme : '' }}">
+<view class="pack-page-container {{ vipTheme ? 'theme-' + vipTheme : '' }}">
 
-  <!-- ==================== 顶部自定义导航栏 (适配微信胶囊) ==================== -->
-  <view class="custom-navbar" style="padding-top: {{ statusBarHeight }}px; height: {{ statusBarHeight + navBarHeight }}px;">
+  <!-- VIP 尊享动态极光天幕与浮光星尘层 (开通 VIP 后激活情绪价值背景特效) -->
+  <view wx:if="{{ vipTheme }}" class="vip-ambient-stage">
+    <view class="vip-aurora-orb orb-primary"></view>
+    <view class="vip-aurora-orb orb-secondary"></view>
+    <view class="vip-spark s1"></view>
+    <view class="vip-spark s2"></view>
+    <view class="vip-spark s3"></view>
+    <view class="vip-spark s4"></view>
+  </view>
+
+  <!-- ==================== 顶部自定义导航栏 (全站统一高雅银白标题) ==================== -->
+  <view class="custom-navbar navbar-shelf-solid" style="padding-top: {{ statusBarHeight }}px; height: {{ statusBarHeight + navBarHeight }}px;">
     <view class="navbar-content" style="height: {{ navBarHeight }}px; padding-right: {{ capsuleRightSpace }}px;">
       
       <!-- 返回按钮 -->
@@ -10,12 +20,12 @@
         <view class="back-chevron-arrow"></view>
       </view>
 
-      <!-- 导航中心标题：固定高定东方雅称 -->
+      <!-- 导航中心标题：与全站其他页面统一银白字色 -->
       <view class="nav-center-title-box">
-        <text class="nav-center-title-text">{{ viewMode === 'shelf' ? '替烟艺术展柜' : '名烟品鉴' }}</text>
+        <text class="nav-center-title-text">替烟艺术展柜</text>
       </view>
 
-      <!-- 右侧占位保持对称 (已移除喇叭) -->
+      <!-- 右侧占位保持对称 -->
       <view class="nav-placeholder"></view>
 
     </view>
@@ -27,77 +37,96 @@
     class="shelf-view-scroll" 
     scroll-y 
     enable-back-to-top
-    wx:if="{{ viewMode === 'shelf' }}"
-    style="padding-top: {{ statusBarHeight + navBarHeight + 6 }}px;"
   >
-    <view class="shelf-content-container">
+    <view class="shelf-content-container" style="padding-top: {{ statusBarHeight + navBarHeight + 10 }}px;">
       
-      <!-- 1. 置顶 VIP 特权横幅 (Touchpoint 1: 腾讯级黑金 VIP 免解畅吸直通通栏) -->
-      <view class="shelf-vip-banner {{ isVipUser ? 'is-vip-active' : '' }}" bindtap="onTapVipBanner">
+      <!-- 1A. 未开通 VIP：置顶 VIP 特权横幅 -->
+      <view wx:if="{{ !isVipUser }}" class="shelf-vip-banner" bindtap="onTapVipBanner">
         <view class="shelf-vip-banner-left">
-          <view class="vip-crown-icon-wrap {{ isVipUser ? 'active-crown' : '' }}">
+          <view class="vip-crown-icon-wrap">
             <text class="vip-crown-icon">👑</text>
           </view>
           <view class="vip-banner-texts">
             <view class="vip-banner-headline">
-              <text class="vip-headline-tag {{ isVipUser ? 'active-tag' : '' }}">{{ isVipUser ? '尊贵 VIP 会员' : 'VIP 直通特权' }}</text>
-              <text class="vip-headline-title">{{ isVipUser ? '全场33款名烟已全解锁畅吸' : '全场33款名烟免解畅吸' }}</text>
+              <text class="vip-headline-tag">VIP 直通特权</text>
+              <text class="vip-headline-title">全场33款名烟免解畅吸</text>
             </view>
-            <text class="vip-banner-sub">{{ isVipUser ? '享无限即拆补满 · 全域0秒免广告特权' : '跳过替烟门槛 · 全系列名烟0门槛开盒品吸' }}</text>
+            <text class="vip-banner-sub">跳过替烟门槛 · 全系列名烟0门槛开盒品吸</text>
           </view>
         </view>
-        <view class="shelf-vip-banner-btn {{ isVipUser ? 'active-btn' : '' }}">
-          <text class="vip-btn-text">{{ isVipUser ? '特权中心' : '开通直通' }}</text>
+        <view class="shelf-vip-banner-btn">
+          <text class="vip-btn-text">开通直通</text>
           <text class="vip-btn-arrow">➔</text>
         </view>
       </view>
 
-      <!-- 2. 分类筛选胶囊条 (腾讯级五大优雅分组，纯净无数字) -->
+      <!-- 1B. 已开通 VIP：尊享流光礼遇横幅（强化已付费 VIP 尊贵感与情绪价值） -->
+      <view wx:else class="shelf-vip-banner vip-active-banner" bindtap="onTapVipBanner">
+        <view class="vip-banner-shimmer"></view>
+        <view class="shelf-vip-banner-left">
+          <view class="vip-crown-icon-wrap active-crown-wrap">
+            <text class="vip-crown-icon">👑</text>
+          </view>
+          <view class="vip-banner-texts">
+            <view class="vip-banner-headline">
+              <text class="vip-headline-tag active-vip-tag">{{ vipTheme === 'lifetime' ? '至尊永久VIP' : (vipTheme === 'day' ? '翡翠日卡VIP' : '极光月卡VIP') }}</text>
+              <text class="vip-headline-title">全馆 33 款典藏名烟已为您敞开</text>
+            </view>
+            <text class="vip-banner-sub">尊享 0 门槛无限拆封 · 专属流光天幕已点亮</text>
+          </view>
+        </view>
+        <view class="shelf-vip-banner-btn active-vip-btn">
+          <text class="vip-btn-text">尊享权益</text>
+          <text class="vip-btn-arrow">✦</text>
+        </view>
+      </view>
+
+      <!-- 2. 分类筛选胶囊条 (腾讯级五大精炼分组，对称双字排版) -->
       <view class="category-filter-strip">
         <view 
           class="cat-filter-item {{ activeFilter === 'all' ? 'active-cat' : '' }}" 
           bindtap="onSelectFilter" 
           data-filter="all"
         >
-          全部 ({{ catalogList.length }})
+          全部
         </view>
         <view 
           class="cat-filter-item {{ activeFilter === 'national' ? 'active-cat' : '' }}" 
           bindtap="onSelectFilter" 
           data-filter="national"
         >
-          国烤名品
+          国烤
         </view>
         <view 
           class="cat-filter-item {{ activeFilter === 'slender' ? 'active-cat' : '' }}" 
           bindtap="onSelectFilter" 
           data-filter="slender"
         >
-          细支爆珠
+          细支
         </view>
         <view 
           class="cat-filter-item {{ activeFilter === 'imported' ? 'active-cat' : '' }}" 
           bindtap="onSelectFilter" 
           data-filter="imported"
         >
-          港外风尚
+          港外
         </view>
         <view 
           class="cat-filter-item {{ activeFilter === 'heritage' ? 'active-cat' : '' }}" 
           bindtap="onSelectFilter" 
           data-filter="heritage"
         >
-          岁月经典
+          经典
         </view>
       </view>
 
       <!-- 2.5 纯净健康与控烟导向提示栏 (腾讯级合规精工微标：明确标价为参考基准，用于为您精确测算省下的烟资) -->
       <view class="shelf-compliance-banner">
-        <text class="compliance-icon">🌿</text>
+        <text class="compliance-icon">✦</text>
         <text class="compliance-text">倡导健康呼吸 · 标价为真烟参考零售价，用于测算为您省下的烟资</text>
       </view>
 
-      <!-- 3. 真实烟柜三列立体陈列架 (The Tobacco Display Shelf - 3-Column Grid) -->
+      <!-- 3. 沉浸式 3D 展柜网格 (Dark Luxury 3D Showcase Grid) -->
       <view class="shelf-display-cabinet">
         <view 
           class="shelf-pack-card {{ item.isEquipped ? 'is-currently-equipped' : '' }} {{ !item.unlocked ? 'is-locked-pack' : '' }}"
@@ -106,251 +135,66 @@
           bindtap="onTapShelfPack"
           data-item="{{ item }}"
         >
-          <!-- 正在使用角标 -->
-          <view class="shelf-equipped-badge" wx:if="{{ item.isEquipped }}">使用中</view>
+          <!-- 正在使用角标 (发光金标) -->
+          <view class="shelf-equipped-badge" wx:if="{{ item.isEquipped }}">当前使用中</view>
 
-          <!-- 未解锁 VIP 免解直通角标 (Touchpoint 2: 双路径指引) -->
-          <view class="shelf-vip-badge" wx:if="{{ !item.unlocked }}">
+          <!-- 未解锁 VIP 免解直通角标 -->
+          <view class="shelf-vip-badge" wx:if="{{ !item.unlocked && !item.isEquipped }}">
             <text class="vip-badge-crown">👑</text>
             <text class="vip-badge-txt">VIP免解</text>
           </view>
 
-          <!-- 货架背部氛围光 -->
+          <!-- 展柜左上角锁定微标 (保持底部信息栏严格 2 行对齐) -->
+          <view class="pack-lock-tip" wx:if="{{ !item.unlocked }}">
+            <text>🔒 需替{{ item.requiredCount }}支</text>
+          </view>
+
+          <!-- 货架背部同源基因氛围光 -->
           <view class="card-ambient-spot" style="background: {{ item.packTheme.accentColor }};"></view>
 
-          <!-- 烟盒立体立面外观 (100% 还原真实生活名烟壳) -->
-          <view class="shelf-pack-facade {{ item.packImage ? 'has-real-pack' : '' }} {{ item.packType === 'slender' ? 'slender-facade' : (item.isCigar ? 'cigar-facade' : '') }}" style="{{ item.packImage ? '' : ('background: ' + item.packTheme.boxGradient + ';') }}">
-            <!-- 表面高光反射与覆膜流光层 (进页面完成后平滑执行扫光) -->
-            <view class="facade-sheen-overlay {{ enableSheen ? 'is-sheen-active' : '' }}"></view>
+          <!-- 烟盒 3D 展厅腔体与数字底座 (Dark Gallery Chamber & 3D Digital Pedestal) -->
+          <view class="shelf-pack-facade {{ item.packImage ? 'has-real-pack' : '' }} {{ item.packType === 'slender' ? 'slender-facade' : (item.isCigar ? 'cigar-facade' : '') }}">
+            <block wx:if="{{ item.packImage }}">
+              <!-- 展厅竖向光栅背景纹理 -->
+              <view class="shelf-gallery-flutes"></view>
 
-            <!-- 真实高清烟盒图片 (无杂质背景，完整呈现烟盒立面) -->
-            <image 
-              class="shelf-pack-real-img" 
-              src="{{ item.packImage }}" 
-              mode="aspectFit" 
-              wx:if="{{ item.packImage }}" 
-            />
-
-            <!-- 纯 CSS 兜底立面 -->
-            <block wx:else>
-              <!-- 1. 翻盖上部与封签 -->
-              <view class="facade-lid" style="background: {{ item.packTheme.lidGradient }};">
-                <view class="facade-gold-tear-tape"></view>
-                <view class="facade-seal-tape" style="border-color: {{ item.packTheme.sealColor }};">
-                  <text>{{ item.packTheme.sealText || '原厂封签' }}</text>
-                </view>
+              <!-- 数字展厅 3D 圆柱底座 (柔和接地阴影 + 金属拉丝盘面 + 微弱光晕) -->
+              <view class="shelf-pedestal-base">
+                <view class="pedestal-cylinder-body"></view>
+                <view class="pedestal-top-disc"></view>
+                <view class="pedestal-contact-shadow"></view>
+                <view class="pedestal-rim-glow"></view>
               </view>
 
-            <!-- 2. 翻盖开盒折痕缝线 (3D Bevel Crease) -->
-            <view class="facade-lid-crease"></view>
+              <!-- 表面高光反射与覆膜流光层 (进页面完成后平滑执行扫光) -->
+              <view class="facade-sheen-overlay {{ enableSheen ? 'is-sheen-active' : '' }}"></view>
 
-            <!-- 3. 盒身主体 - 现实生活真实名烟艺术图案 (Brand Authentic Artwork) -->
-            <view class="facade-emblem-area">
-              
-              <!-- 软中华：金柱华表、天安门剪影、双金边烫金、五星 -->
-              <view class="facade-art-chunghwa" wx:if="{{ item.packTheme.patternType === 'chunghwa_tiananmen' }}">
-                <view class="mini-gold-frame">
-                  <view class="mini-tiananmen-icon">🏛️</view>
-                  <text class="art-brand-title">中華</text>
-                  <view class="art-stars-line">★★★★★</view>
-                </view>
+              <!-- 微 3D 轴测透视藏品容器 -->
+              <view class="shelf-pack-3d-tilt">
+                <image 
+                  class="shelf-pack-real-img" 
+                  src="{{ item.packImage }}" 
+                  mode="aspectFit" 
+                />
               </view>
+            </block>
+          </view>
 
-              <!-- 南京·炫赫门：青绿幽蓝、金陵龙纹滚边、红方印「南京」、隶书「炫赫門」 -->
-              <view class="facade-art-xuanhemen" wx:elif="{{ item.packTheme.patternType === 'dragon' }}">
-                <view class="mini-dragon-filigree">
-                  <view class="nanjing-red-stamp">南京</view>
-                  <text class="art-brand-title gold-calligraphy">炫赫門</text>
-                </view>
-              </view>
-
-              <!-- 利群：经典红灰三段色块、双金线隔离、草书「利群」 -->
-              <view class="facade-art-liqun" wx:elif="{{ item.packTheme.patternType === 'liqun_tricolor' }}">
-                <view class="liqun-gold-band"></view>
-                <text class="art-brand-title liqun-title">利群</text>
-                <text class="art-eng-sub">LIQUN</text>
-              </view>
-
-              <!-- 黄鹤楼1916：复古羊皮纸金、双环黄铜古楼徽印、传统「黃鶴樓」、复古「1916」 -->
-              <view class="facade-art-1916" wx:elif="{{ item.packTheme.patternType === 'yellow_crane_1916' }}">
-                <view class="mini-crane-ring">
-                  <text class="art-ancient-text">黃鶴樓</text>
-                  <text class="art-year-1916">1916</text>
-                </view>
-              </view>
-
-              <!-- 高希霸：经典黑底白点3排棋盘格、金条印第安酋长、明黄「COHIBA」 -->
-              <view class="facade-art-cohiba" wx:elif="{{ item.packTheme.patternType === 'cohiba_checker' }}">
-                <view class="mini-cohiba-checker">
-                  <view class="mini-c-dot" wx:for="{{ [1,2,3,4,5,6,7,8,9,10,11,12] }}" wx:key="*this"></view>
-                </view>
-                <view class="mini-taino-gold-bar"></view>
-                <text class="art-cohiba-title">COHIBA</text>
-              </view>
-
-              <!-- 万宝路：经典锐角冰蓝山峰V槽、极寒冰晶「Marlboro ICE BLAST」 -->
-              <view class="facade-art-marlboro" wx:elif="{{ item.packTheme.patternType === 'ice_polygon' }}">
-                <view class="mini-marlboro-chevron"></view>
-                <text class="art-marlboro-text">Marlboro</text>
-                <text class="art-ice-badge">ICE BLAST</text>
-              </view>
-
-              <!-- 芙蓉王：金砂纹理、宝蓝金盾、3D金色王冠、隶书「芙蓉王」 -->
-              <view class="facade-art-furongwang" wx:elif="{{ item.packTheme.patternType === 'crown_badge' }}">
-                <view class="mini-royal-shield">
-                  <view class="mini-crown-shape"></view>
-                  <text class="art-brand-title">芙蓉王</text>
-                </view>
-              </view>
-
-              <!-- 白沙：纯银白珠光、深蓝金圈徽章、双鹤翱翔朝阳、书法「白沙」 -->
-              <view class="facade-art-baisha" wx:elif="{{ item.packTheme.patternType === 'crane_badge' }}">
-                <view class="mini-baisha-oval">
-                  <view class="mini-crane-shape"></view>
-                  <text class="art-baisha-title">白沙</text>
-                </view>
-              </view>
-
-              <!-- 贵烟·跨越：纯黑深邃星空、璀璨流星弧光、橙金陈皮爆珠光环 -->
-              <view class="facade-art-kuayue" wx:elif="{{ item.packTheme.patternType === 'orange_dots' }}">
-                <view class="mini-galaxy-stars"></view>
-                <view class="mini-meteor-swoosh"></view>
-                <view class="mini-orange-bead-halo"></view>
-                <text class="art-brand-title">貴煙</text>
-              </view>
-
-              <!-- 利群·江南韵：水墨黑白青砖、龙井茶香爆珠视窗、印章「江南韻」 -->
-              <view class="facade-art-jiangnan" wx:elif="{{ item.packTheme.patternType === 'ink_lotus' }}">
-                <view class="mini-ink-lotus-wrap">
-                  <view class="mini-tea-bead-eye"></view>
-                  <text class="art-brand-title">江南韻</text>
-                </view>
-              </view>
-
-              <!-- 大卫杜夫：象牙白钢琴漆、双金线、烫金斜体草书签名「Davidoff」 -->
-              <view class="facade-art-davidoff" wx:elif="{{ item.packTheme.patternType === 'davidoff_script' }}">
-                <view class="davidoff-pinstripes">
-                  <text class="art-davidoff-script">Davidoff</text>
-                  <text class="art-geneve-text">GENÈVE</text>
-                </view>
-              </view>
-
-              <!-- 红塔山：经典白塔红日圆徽、红金质感、书法「紅塔山」 -->
-              <view class="facade-art-hongtashan" wx:elif="{{ item.packTheme.patternType === 'tower_badge' }}">
-                <view class="mini-tower-medallion">
-                  <view class="mini-white-pagoda"></view>
-                  <text class="art-brand-title">紅塔山</text>
-                </view>
-              </view>
-
-              <!-- 红双喜：喜庆大红、传统金色双喜「囍」繁花金纹徽标 -->
-              <view class="facade-art-shuangxi" wx:elif="{{ item.packTheme.patternType === 'double_happiness' }}">
-                <view class="mini-shuangxi-crest">
-                  <text class="mini-shuangxi-char">囍</text>
-                  <text class="art-shuangxi-sub">雙喜</text>
-                </view>
-              </view>
-
-              <!-- 宽窄·五粮浓香：青砖黛瓦四合院门楼浮雕、门匾「宽窄」、白酒爆珠 -->
-              <view class="facade-art-kuanzhai" wx:elif="{{ item.packTheme.patternType === 'kuanzhai_gate' }}">
-                <view class="mini-kuanzhai-roof"></view>
-                <view class="mini-kuanzhai-plaque">宽窄</view>
-                <view class="mini-liquor-bead" wx:if="{{ item.hasBead }}"></view>
-              </view>
-
-              <!-- 中南海：纯白极简、红蓝速度几何线条、清爽「中南海 8mg」 -->
-              <view class="facade-art-zhongnanhai" wx:elif="{{ item.packTheme.patternType === 'minimal_white' }}">
-                <view class="mini-znh-lines"></view>
-                <text class="art-znh-title">中南海</text>
-                <text class="art-znh-badge">8mg</text>
-              </view>
-
-              <!-- 云烟：幽紫底色、金色传统祥云缭绕、篆刻「雲煙」 -->
-              <view class="facade-art-yunyan" wx:elif="{{ item.packTheme.patternType === 'cloud_pattern' }}">
-                <view class="mini-cloud-swirls"></view>
-                <text class="art-brand-title">雲煙</text>
-              </view>
-
-              <!-- 黄鹤楼·软蓝：深蓝底金黄双重檐、仙鹤飞仙、书法「黄鹤楼」 -->
-              <view class="facade-art-ruanlan" wx:elif="{{ item.packTheme.patternType === 'yellow_crane' }}">
-                <view class="mini-tower-gold-crest"></view>
-                <text class="art-brand-title">黄鹤楼</text>
-              </view>
-
-              <!-- 朝天门：山城江流金浪、千帆过尽、金樽「潮天门」 -->
-              <view class="facade-art-chaotianmen" wx:elif="{{ item.packTheme.patternType === 'chaotianmen_gate' }}">
-                <view class="mini-river-gold-crest"></view>
-                <text class="art-brand-title">潮天门</text>
-              </view>
-
-              <!-- 老辈白纸手卷旱烟：传统大喇叭筒锥度手卷原画 -->
-              <view class="facade-art-hanyan" wx:elif="{{ item.packTheme.patternType === 'hand_rolled' }}">
-                <view class="mini-hanyan-cone-facade">
-                  <view class="cone-facade-tobacco"></view>
-                </view>
-                <text class="art-brand-title">老輩旱煙</text>
-                <text class="art-hanyan-sub">白紙手捲</text>
-              </view>
-
-              <!-- 牛来电影：35mm经典胶片金牛与光影大字「牛来」 -->
-              <view class="facade-art-niulai" wx:elif="{{ item.packTheme.patternType === 'niulai_cinema' }}">
-                <view class="mini-niulai-film-strip">
-                  <view class="mini-niulai-sprocket"></view>
-                  <view class="mini-niulai-reels">
-                    <view class="mini-reel-left"></view>
-                    <view class="mini-reel-right"></view>
-                  </view>
-                  <view class="mini-niulai-sprocket"></view>
-                </view>
-                <text class="art-brand-title niulai-gold-font">牛来</text>
-                <text class="art-eng-sub niulai-sub">CINEMA 35mm</text>
-              </view>
-
-              <!-- 迪加·凹凸曼：动画光之巨人胸甲与彩色能量灯 -->
-              <view class="facade-art-tiga" wx:elif="{{ item.packTheme.patternType === 'ultraman_tiga' }}">
-                <view class="mini-tiga-protector">
-                  <view class="mini-tiga-color-timer"></view>
-                </view>
-                <text class="art-brand-title tiga-silver-font">迪加·凹凸曼</text>
-                <text class="art-eng-sub tiga-sub">DIGA AOTUMAN</text>
-              </view>
-
-              <!-- 纯氧无烟之境 -->
-              <view class="facade-art-zen" wx:else>
-                <view class="mini-zen-halo"></view>
-                <text class="art-zen-title">ZEN</text>
-                <text class="art-zen-sub">100% 纯氧</text>
-              </view>
-
-            </view>
-
-            <!-- 4. 底部标准中国烟草双层警示框 (Standard Tobacco Health Warning Strip) -->
-            <view class="facade-warning-strip">
-              <text class="facade-warn-company">本公司提示</text>
-              <text class="facade-warn-text">{{ item.packTheme.warningText }}</text>
-            </view>
-          </block>
-        </view>
-
-          <!-- 货架商品信息与真实零售价 (3列显示完整无遮挡，纯净不显示库存余量) -->
+          <!-- 货架商品信息与真实参考零售价 (高对比度奢华排版，严格2行网格对齐) -->
           <view class="shelf-meta-block">
             <view class="meta-title-row">
-              <text class="shelf-brand-title">{{ item.name }}</text>
+              <text class="shelf-brand-title">{{ item.shelfTitle || item.name }}</text>
             </view>
 
-            <!-- 官方指导零售价高光标签 (用户核心关注) -->
+            <!-- 官方指导零售价高光标签 + 细线圆角规格标签 -->
             <view class="shelf-price-row">
               <view class="price-val-wrap">
+                <text class="price-ref-label">参考</text>
                 <text class="price-symbol">¥</text>
                 <text class="price-val">{{ item.price }}</text>
                 <text class="price-unit">/{{ item.isCigar ? '支' : '盒' }}</text>
               </view>
-              <text class="tar-tag">{{ item.packTheme.tar || '10mg' }}</text>
-            </view>
-
-            <!-- 锁定说明 -->
-            <view class="pack-lock-tip" wx:if="{{ !item.unlocked }}">
-              <text>🔒 需替{{ item.requiredCount }}支</text>
+              <text class="tar-tag">{{ item.shelfSpecTag || (item.id === 'pure_oxygen_zen' ? '0mg空气卷' : (item.packTheme.tar || '10mg')) }}</text>
             </view>
           </view>
 
@@ -360,643 +204,7 @@
   </scroll-view>
 
 
-  <!-- ==================== 视图 2: 单盒 3D 深度开盒与抽烟视图 (The 3D Flip-top Pack Stage) ==================== -->
-  <view 
-    class="pack-3d-stage-container" 
-    wx:if="{{ viewMode === '3d_pack' }}"
-    style="padding-top: {{ statusBarHeight + navBarHeight + 6 }}px;"
-  >
-    
-    <!-- 顶部浪漫流金名牌 + 烟盒剩余烟支数量胶囊 (与顶栏【岁月名烟馆】呼应，留出超宽天顶画幅，绝不碰盖) -->
-    <view class="pack-meta-header">
-      <view class="pack-romantic-plaque">
-        <text class="plaque-ornament">✦</text>
-        <text class="plaque-brand-name">{{ currentCigarette.name }}</text>
-        <text class="plaque-divider">·</text>
-        <text class="plaque-price">¥{{ currentCigarette.price }}/{{ currentCigarette.isCigar ? '支' : '盒' }}</text>
-        <text class="plaque-divider">·</text>
-        <text class="plaque-spec">焦油 {{ currentCigarette.packTheme.tar || '10mg' }}</text>
-        <text class="plaque-ornament">✦</text>
-      </view>
-      <!-- 盒内剩余数量实时铭牌胶囊 -->
-      <view class="pack-inventory-row">
-        <view class="pack-inventory-pill {{ packCount === 0 ? 'pill-empty' : (packCount <= 5 ? 'pill-low' : '') }}">
-          <view class="inv-pulse-dot"></view>
-          <text class="inv-text">剩余 {{ packCount }} / {{ packCapacity }} 支</text>
-        </view>
-        <view class="pack-unwrap-mini-btn" wx:if="{{ isCurrentUnlocked && packCount < packCapacity }}" bindtap="onUnwrapNewPack">
-          <text class="unwrap-mini-text">↻ 换新盒</text>
-        </view>
-        <!-- 特效选择胶囊 (特效1 经典出鞘 360° | 特效2 九天游龙 720°) -->
-        <view class="pack-vfx-selector-pill">
-          <view 
-            class="vfx-pill-btn {{ pullVfxType === 'vfx1' ? 'vfx-pill-active' : '' }}" 
-            catchtap="onSwitchPullVfx" 
-            data-vfx="vfx1"
-          >
-            <text class="vfx-pill-text">特效1</text>
-          </view>
-          <view 
-            class="vfx-pill-btn {{ pullVfxType === 'vfx2' ? 'vfx-pill-active' : '' }}" 
-            catchtap="onSwitchPullVfx" 
-            data-vfx="vfx2"
-          >
-            <text class="vfx-pill-text">特效2</text>
-          </view>
-        </view>
-      </view>
-    </view>
-
-
-    <!-- 3D 拟真烟盒舞台 (The 3D Cigarette Pack Stage) -->
-    <view class="pack-3d-stage">
-
-      <!-- ==================== 1. 腾讯高定：天顶星穹棱镜追光矩阵 (Celestial Prism Spotlight Matrix - 纯上部照射，底部零圆圈) ==================== -->
-      <view class="pack-spotlight-rig" style="--accent-tint: {{ currentCigarette.packTheme.accentColor || '#f59e0b' }};">
-        <!-- 穹顶流金光学翼轨与电影级宽银幕变形拉丝光刃 -->
-        <view class="spotlight-luminaire-bar"></view>
-        <view class="spotlight-anamorphic-streak"></view>
-
-        <!-- 天顶三联光学追光灯头与八芒星主灯核 -->
-        <view class="spotlight-emitter emitter-left"></view>
-        <view class="spotlight-emitter emitter-right"></view>
-        <view class="spotlight-emitter emitter-center"></view>
-        <view class="spotlight-crown-star">✦</view>
-
-        <!-- 扇形辐射丁达尔神光锥 + 左右动态交叉追光束 + 双翼锐利激光束边 -->
-        <view class="spotlight-godray-fan"></view>
-        <view class="spotlight-beam beam-left"></view>
-        <view class="spotlight-beam beam-right"></view>
-        <view class="spotlight-beam beam-center"></view>
-        <view class="spotlight-laser-edge laser-left"></view>
-        <view class="spotlight-laser-edge laser-right"></view>
-        <view class="spotlight-prism-veil"></view>
-
-        <!-- 聚光灯束内的璀璨悬浮星尘粒子 -->
-        <view class="spotlight-motes-field">
-          <view class="tyndall-mote m1"></view>
-          <view class="tyndall-mote m2"></view>
-          <view class="tyndall-mote m3"></view>
-          <view class="tyndall-mote m4"></view>
-          <view class="tyndall-mote m5"></view>
-          <view class="tyndall-mote m6"></view>
-          <view class="tyndall-mote m7"></view>
-          <view class="tyndall-mote m8"></view>
-          <view class="tyndall-mote m9"></view>
-          <view class="tyndall-mote m10"></view>
-        </view>
-      </view>
-
-      <!-- 3D 烟盒主体容器 (支持翻盖动画与抽动特效，底部纯净无圆圈底座) -->
-      <view 
-        class="pack-box-wrapper {{ isLidOpen ? 'lid-open' : 'lid-closed' }} {{ currentCigarette.packType }}-box {{ isPulling ? 'pulling-animation' : '' }}"
-        style="--box-grad: {{ currentCigarette.packTheme.boxGradient }}; --lid-grad: {{ currentCigarette.packTheme.lidGradient }}; --foil-color: {{ currentCigarette.packTheme.foilColor }}; --accent-color: {{ currentCigarette.packTheme.accentColor }}; --lid-h: {{ currentCigarette.lidLine || 168 }}rpx;"
-      >
-        <!-- 聚光灯倾泻在烟壳顶冠与双肩的高光流线 (Overhead Spotlight Corona & Shoulder Cascade) -->
-        <view class="pack-spotlight-top-crown"></view>
-        <view class="pack-spotlight-rim-highlight"></view>
-        <view class="pack-shoulder-cascade left"></view>
-        <view class="pack-shoulder-cascade right"></view>
-        <view class="pack-spotlight-surface-sheen"></view>
-        
-        <!-- ==================== 盒内烟支与金箔层 (内胆) ==================== -->
-        <view class="pack-inner-chamber" bindtap="togglePackLid">
-          
-          <!-- 金锡箔撕口内衬 (Golden Foil Liner) -->
-          <view class="foil-paper-liner">
-            <view class="foil-notch-cutout"></view>
-            <view class="foil-texture-shimmer"></view>
-          </view>
-
-          <!-- 真实硬盒内衬领口卡纸 (Inner Collar Frame) -->
-          <view class="inner-collar-frame">
-            <view class="collar-u-notch"></view>
-            <view class="collar-card-rim"></view>
-          </view>
-
-          <!-- 盒内整齐排布的立体香烟过滤嘴与延伸烟身 (前排+后排双排阶梯陈列，点到谁谁就出来且原位置留空) -->
-          <view class="cigarettes-matrix {{ currentCigarette.packType }}-matrix">
-            <view 
-              class="cig-filter-slot {{ currentCigarette.isCigar ? 'cigar-row-slot' : (index < 10 ? 'back-row-slot' : 'front-row-slot') }} {{ (slotStates[index] && !(pulledSlotIndex === index && isSlotEjected)) ? 'has-cigarette' : 'empty-slot' }} {{ (pulledSlotIndex === index && isPulling) ? 'slot-launching' : '' }}"
-              wx:for="{{ slotArray }}"
-              wx:key="*this"
-              catchtap="onTapCigaretteSlot"
-              data-index="{{ index }}"
-            >
-              <!-- 02 [点击触发]：被点击槽位底部的蓝金全息波纹与扫描光柱 -->
-              <view class="slot-launch-fx" wx:if="{{ pulledSlotIndex === index && isPulling }}">
-                <view class="slot-ripple-ring sr-1"></view>
-                <view class="slot-ripple-ring sr-2"></view>
-                <view class="slot-energy-beam"></view>
-              </view>
-
-              <!-- 01 [竖壳静置] -> 02 [点击触发] -> 03 [拔升腾空]：先在盒内发光垂直拔升出盒，再无缝交接给全屏S弧线飞行烟支 -->
-              <view 
-                class="slot-cigarette-stick {{ (pulledSlotIndex === index && isPulling && !isSlotEjected) ? 'stick-rising-out' : '' }}" 
-                wx:if="{{ slotStates[index] && !(pulledSlotIndex === index && isSlotEjected) }}"
-              >
-                <!-- 老辈白纸手卷旱烟：通体纯白一体手卷纸，绝无工业过滤嘴与金箍 -->
-                <block wx:if="{{ currentCigarette.widthType === 'hand_rolled' }}">
-                  <view class="slot-hanyan-stick">
-                    <view class="slot-hanyan-top"></view>
-                    <view class="slot-hanyan-body"></view>
-                  </view>
-                </block>
-                <!-- 普通名烟 / 细支 / 雪茄：上方过滤嘴 + 下方白色/雪茄烟身纸管 -->
-                <block wx:else>
-                  <view 
-                    class="slot-filter-cylinder" 
-                    style="background: {{ currentCigarette.filterColor }};"
-                  >
-                    <!-- 顶部圆形滤嘴切面光泽 -->
-                    <view class="filter-top-bevel"></view>
-                    <!-- 滤嘴金箍饰圈 -->
-                    <view class="filter-mini-band" style="background: {{ currentCigarette.bandColor }};"></view>
-                    <!-- 爆珠专属微型发光晶体点 -->
-                    <view class="filter-bead-spark" wx:if="{{ currentCigarette.hasBead }}" style="background: {{ currentCigarette.beadColor }};"></view>
-                  </view>
-                  <!-- 下方真实白色烟身纸管（弹起时顺畅露出） -->
-                  <view class="slot-paper-cylinder" style="background: {{ currentCigarette.paperColor || '#fffdf5' }};">
-                    <view class="slot-paper-ribbing"></view>
-                  </view>
-                </block>
-              </view>
-
-              <!-- 当该位置烟支已被抽走时：原位置保持空着，露出立体深色空槽位 -->
-              <view class="slot-empty-groove" wx:else>
-                <view class="empty-socket-rim"></view>
-                <view class="empty-shadow"></view>
-              </view>
-            </view>
-          </view>
-
-        </view>
-
-        <!-- ==================== 3D 翻盖盒盖 (Flip-Top Lid - 开盖时朝上后仰呈立体角度，绝不挡烟) ==================== -->
-        <view class="pack-flip-lid" catchtap="togglePackLid">
-          <!-- 盒盖外立面 -->
-          <view class="lid-face-outer {{ currentCigarette.packImage ? 'has-real-lid' : '' }}">
-            <!-- 真实名烟盖顶大图切片 (100% 还原真实名烟) -->
-            <image 
-              class="pack-lid-real-img" 
-              src="{{ currentCigarette.packImage }}" 
-              mode="scaleToFill" 
-              wx:if="{{ currentCigarette.packImage }}" 
-            />
-            <block wx:else>
-              <view class="lid-bevel-edge"></view>
-              <!-- 盒盖顶部封签贴纸 (防伪封口) -->
-              <view class="lid-seal-tape" style="border-color: {{ currentCigarette.packTheme.sealColor }};">
-                <text class="seal-text">{{ currentCigarette.packTheme.sealText || '原厂封签' }}</text>
-              </view>
-              <!-- 盒盖品牌小标 -->
-              <view class="lid-brand-print">
-                <text class="lid-sub-text">{{ currentCigarette.packTheme.subText || currentCigarette.brand }}</text>
-              </view>
-            </block>
-            <!-- 表面高光反光涂层 -->
-            <view class="facade-sheen-overlay"></view>
-            <!-- 闭合时底部极细物理缝隙阴影 -->
-            <view class="lid-bottom-slit-shadow"></view>
-          </view>
-          <!-- 盒盖朝上后仰翻转时的 3D 立体结构 (顶部斜切厚度面 + 铝箔压边 + 内壁凹槽 + 左右立体三角斜翼 + 后仰铰链深影) -->
-          <view class="lid-face-inner">
-            <!-- 朝上后仰时可见的盒盖顶部 3D 斜切外沿厚度面 -->
-            <view class="lid-open-top-bevel" style="background: {{ currentCigarette.packTheme.lidGradient || '#991b1b' }};"></view>
-            <!-- 盒盖内翻折铝箔金边 -->
-            <view class="lid-inner-foil-strip" style="background: {{ currentCigarette.packTheme.foilColor || '#f59e0b' }};"></view>
-            <!-- 白卡纸立体凹槽内衬与品牌钢印 -->
-            <view class="lid-inner-cardstock">
-              <view class="lid-inner-watermark">★ 20 FILTER CIGARETTES ★</view>
-              <view class="lid-dust-flap left"></view>
-              <view class="lid-dust-flap right"></view>
-              <view class="lid-hinge-shadow"></view>
-            </view>
-          </view>
-        </view>
-
-        <!-- ==================== 烟盒主体箱体 (Pack Main Body) ==================== -->
-        <view class="pack-main-body" bindtap="togglePackLid">
-          <!-- 盒身切口白色卡纸厚度剖面光边缘 -->
-          <view class="body-top-rim-edge"></view>
-
-          <!-- 盒体外立面 -->
-          <view class="body-face-outer {{ currentCigarette.packImage ? 'has-real-body' : '' }}">
-            <!-- 真实名烟盒身主体艺术图 (100% 还原真实名烟) -->
-            <image 
-              class="pack-body-real-img" 
-              src="{{ currentCigarette.packImage }}" 
-              mode="scaleToFill" 
-              wx:if="{{ currentCigarette.packImage }}" 
-            />
-
-            <!-- 纯 CSS 兜底立面 -->
-            <block wx:else>
-              <!-- 品牌专属大徽标 / 烫金浮雕 (100% 还原真实名烟生活质感) -->
-              <view class="brand-emblem-container">
-              
-              <!-- 中华：天安门双金柱、金边浮雕、毛体大字「中華」、五星 -->
-              <view class="emblem-tiananmen" wx:if="{{ currentCigarette.packTheme.patternType === 'chunghwa_tiananmen' }}">
-                <view class="huabiao-gold-pillar"></view>
-                <view class="tiananmen-facade-gate"></view>
-                <text class="emblem-big-title chunghwa-font">中華</text>
-                <view class="emblem-star-row">★★★★★</view>
-                <text class="emblem-eng-sub">CHUNGHWA</text>
-              </view>
-
-              <!-- 南京·炫赫门：金陵龙纹飞天印记、红印章「南京」、隶书「炫 赫 門」 -->
-              <view class="emblem-dragon" wx:elif="{{ currentCigarette.packTheme.patternType === 'dragon' }}">
-                <view class="dragon-crest-ring"></view>
-                <view class="nanjing-red-seal-big">南京</view>
-                <text class="emblem-big-title xuanhemen-font">炫 赫 門</text>
-                <text class="emblem-sub-title">NANJING · 细支</text>
-              </view>
-
-              <!-- 利群：经典红灰三段色块、双金线金条、草书「利群」 -->
-              <view class="emblem-liqun" wx:elif="{{ currentCigarette.packTheme.patternType === 'liqun_tricolor' }}">
-                <view class="liqun-gold-separator"></view>
-                <text class="emblem-big-title liqun-font">利群</text>
-                <text class="emblem-sub-title">LIQUN · 新版经典</text>
-              </view>
-
-              <!-- 黄鹤楼1916：复古羊皮纸金、双环黄铜古楼印、传统「黃鶴樓」、1916 -->
-              <view class="emblem-1916" wx:elif="{{ currentCigarette.packTheme.patternType === 'yellow_crane_1916' }}">
-                <view class="bronze-crane-tower"></view>
-                <text class="emblem-big-title hhl-font">黃鶴樓</text>
-                <view class="emblem-vintage-year">1916</view>
-              </view>
-
-              <!-- 高希霸：古巴原木雪松、3排黑底白方格棋盘、金条印第安人像浮雕、明黄「COHIBA」 -->
-              <view class="emblem-cohiba" wx:elif="{{ currentCigarette.packTheme.patternType === 'cohiba_checker' }}">
-                <view class="cohiba-checker-board">
-                  <view class="c-dot" wx:for="{{ [1,2,3,4,5,6,7,8,9,10,11,12] }}" wx:key="*this"></view>
-                </view>
-                <view class="cohiba-taino-gold-ribbon"></view>
-                <text class="emblem-cohiba-title">COHIBA</text>
-                <text class="emblem-cohiba-habana">HABANA, CUBA</text>
-              </view>
-
-              <!-- 万宝路：锐利冰蓝 V 槽徽记、Marlboro ICE BLAST -->
-              <view class="emblem-marlboro" wx:elif="{{ currentCigarette.packTheme.patternType === 'ice_polygon' }}">
-                <view class="marlboro-chevron"></view>
-                <text class="emblem-marlboro-name">Marlboro</text>
-                <text class="emblem-ice-tag">ICE BLAST</text>
-              </view>
-
-              <!-- 芙蓉王：金色王冠浮雕、宝蓝金盾、隶书「芙蓉王」 -->
-              <view class="emblem-crown" wx:elif="{{ currentCigarette.packTheme.patternType === 'crown_badge' }}">
-                <view class="crown-gold-icon"></view>
-                <text class="emblem-big-title frw-font">芙蓉王</text>
-                <view class="crown-blue-ribbon">FURONGWANG</view>
-              </view>
-
-              <!-- 白沙：纯银白珠光、深蓝金圈徽章、双鹤翱翔朝阳、书法「白沙」 -->
-              <view class="emblem-baisha" wx:elif="{{ currentCigarette.packTheme.patternType === 'crane_badge' }}">
-                <view class="baisha-shield-ring">
-                  <view class="baisha-crane-icons"></view>
-                </view>
-                <text class="emblem-big-title baisha-font">白沙</text>
-                <text class="emblem-sub-title">BAISHA · 鹤舞白沙</text>
-              </view>
-
-              <!-- 贵烟·跨越：纯黑深邃星空、璀璨流星弧光、橙金陈皮爆珠光环 -->
-              <view class="emblem-kuayue" wx:elif="{{ currentCigarette.packTheme.patternType === 'orange_dots' }}">
-                <view class="kuayue-galaxy-stars"></view>
-                <view class="kuayue-meteor-arc"></view>
-                <view class="kuayue-bead-spark" wx:if="{{ currentCigarette.hasBead }}"></view>
-                <text class="emblem-big-title guiyan-font">貴煙</text>
-                <text class="emblem-sub-title">跨越 · 陈皮爆珠</text>
-              </view>
-
-              <!-- 利群·江南韵：水墨黑金爆珠徽印 -->
-              <view class="emblem-lotus" wx:elif="{{ currentCigarette.packTheme.patternType === 'ink_lotus' }}">
-                <view class="bead-eye-window">
-                  <view class="bead-eye-gem"></view>
-                </view>
-                <text class="emblem-big-title liqun-font">利群</text>
-                <text class="emblem-sub-title">江 南 韻</text>
-              </view>
-
-              <!-- 大卫杜夫：瑞士贵族象牙白木盒签名 -->
-              <view class="emblem-davidoff" wx:elif="{{ currentCigarette.packTheme.patternType === 'davidoff_script' }}">
-                <text class="davidoff-signature">Davidoff</text>
-                <view class="davidoff-divider-line"></view>
-                <text class="davidoff-geneve">GENÈVE · PRIMEROS</text>
-              </view>
-
-              <!-- 红塔山：玉溪古白塔红日圆徽、书法「紅塔山」 -->
-              <view class="emblem-hongtashan" wx:elif="{{ currentCigarette.packTheme.patternType === 'tower_badge' }}">
-                <view class="hongtashan-pagoda-badge">
-                  <view class="pagoda-gold-sun"></view>
-                </view>
-                <text class="emblem-big-title hts-font">紅塔山</text>
-                <text class="emblem-sub-title">CLASSIC 100</text>
-              </view>
-
-              <!-- 红双喜：喜庆大红、传统金色双喜「囍」繁花金纹徽标 -->
-              <view class="emblem-shuangxi" wx:elif="{{ currentCigarette.packTheme.patternType === 'double_happiness' }}">
-                <view class="shuangxi-gold-medallion">
-                  <text class="shuangxi-xi-glyph">囍</text>
-                </view>
-                <text class="emblem-big-title sx-font">雙喜</text>
-                <text class="emblem-sub-title">DOUBLE HAPPINESS</text>
-              </view>
-
-              <!-- 宽窄·五粮浓香：青砖黛瓦四合院门楼浮雕、门匾「宽窄」、白酒爆珠 -->
-              <view class="emblem-kuanzhai" wx:elif="{{ currentCigarette.packTheme.patternType === 'kuanzhai_gate' }}">
-                <view class="kuanzhai-roof-gate"></view>
-                <view class="kuanzhai-name-plaque">宽 窄</view>
-                <view class="kuanzhai-liquor-drop" wx:if="{{ currentCigarette.hasBead }}"></view>
-                <text class="emblem-sub-title">五粮浓香 · 国酒爆珠</text>
-              </view>
-
-              <!-- 中南海：纯白极简、红蓝速度几何线条、清爽「中南海 8mg」 -->
-              <view class="emblem-zhongnanhai" wx:elif="{{ currentCigarette.packTheme.patternType === 'minimal_white' }}">
-                <view class="znh-speed-lines"></view>
-                <text class="emblem-big-title znh-font">中南海</text>
-                <text class="emblem-sub-title">LIGHTS · 8mg</text>
-              </view>
-
-              <!-- 云烟：幽紫底色、金色传统祥云缭绕、篆刻「雲煙」 -->
-              <view class="emblem-yunyan" wx:elif="{{ currentCigarette.packTheme.patternType === 'cloud_pattern' }}">
-                <view class="yunyan-clouds-swirl">☁️</view>
-                <text class="emblem-big-title yy-font">雲煙</text>
-                <text class="emblem-sub-title">YUNYAN · 紫云</text>
-              </view>
-
-              <!-- 黄鹤楼·软蓝：深蓝底金黄双重檐、仙鹤飞仙、书法「黄鹤楼」 -->
-              <view class="emblem-ruanlan" wx:elif="{{ currentCigarette.packTheme.patternType === 'yellow_crane' }}">
-                <view class="bronze-crane-tower"></view>
-                <text class="emblem-big-title hhl-font">黄鹤楼</text>
-                <text class="emblem-sub-title">HUANGHELOU · 软蓝</text>
-              </view>
-
-              <!-- 朝天门：山城江流金浪、千帆过尽、金樽「潮天门」 -->
-              <view class="emblem-chaotianmen" wx:elif="{{ currentCigarette.packTheme.patternType === 'chaotianmen_gate' }}">
-                <view class="chaotianmen-river-pavilion"></view>
-                <text class="emblem-big-title ctm-font">潮天门</text>
-                <text class="emblem-sub-title">CHAOTIANMEN · 金樽</text>
-              </view>
-
-              <!-- 牛来电影：35mm经典胶片金牛与光影大字「牛来」 -->
-              <view class="emblem-niulai" wx:elif="{{ currentCigarette.packTheme.patternType === 'niulai_cinema' }}">
-                <view class="niulai-bull-film-crest">
-                  <view class="niulai-film-strip-ring">
-                    <view class="niulai-sprocket-dot" wx:for="{{ [1,2,3,4,5,6] }}" wx:key="*this"></view>
-                  </view>
-                  <view class="niulai-bull-horns-vector"></view>
-                </view>
-                <text class="emblem-big-title niulai-font">牛来</text>
-                <text class="emblem-sub-title">NIULAI · 电影经典 · 35mm</text>
-                <view class="niulai-gold-seal">光影定制</view>
-              </view>
-
-              <!-- 迪加·凹凸曼：动画光之巨人复合型胸甲与彩色能量灯 -->
-              <view class="emblem-tiga" wx:elif="{{ currentCigarette.packTheme.patternType === 'ultraman_tiga' }}">
-                <view class="tiga-chest-crest">
-                  <view class="tiga-v-wing"></view>
-                  <view class="tiga-color-timer-orb"></view>
-                </view>
-                <text class="emblem-big-title tiga-font">迪加·凹凸曼</text>
-                <text class="emblem-sub-title">DIGA AOTUMAN · 动画光之巨人</text>
-                <view class="tiga-light-seal">奇迹光粒子</view>
-              </view>
-
-              <!-- 纯净空气：极光纯氧徽记 -->
-              <view class="emblem-zen" wx:else>
-                <view class="zen-lotus-ring"></view>
-                <text class="emblem-big-title">ZEN</text>
-                <text class="emblem-sub-title">100% 纯净大自然氧气</text>
-              </view>
-            </view>
-
-            <!-- 底部官方健康警示框 (标准两段式) -->
-            <view class="pack-warning-banner">
-              <text class="warning-company-header">本公司提示</text>
-              <text class="warning-line">{{ currentCigarette.packTheme.warningText || '吸烟有害健康 尽早戒烟有益健康' }}</text>
-              <view class="tar-spec-line">
-                <text class="spec-tag">焦油量 {{ currentCigarette.packTheme.tar || '10mg' }}</text>
-                <text class="spec-dot-divider">·</text>
-                <text class="spec-tag">烟气烟碱量 {{ currentCigarette.packTheme.nicotine || '0.9mg' }}</text>
-              </view>
-            </view>
-            </block>
-
-            <!-- 表面高光反光涂层 -->
-            <view class="facade-sheen-overlay"></view>
-
-            <!-- 未解锁时的磨砂锁罩 -->
-            <view class="pack-locked-overlay" wx:if="{{ !isCurrentUnlocked }}">
-              <view class="lock-shield-box">
-                <text class="lock-shield-icon">🔒</text>
-                <text class="lock-shield-title">名烟尚在锁定中</text>
-                <text class="lock-shield-desc">{{ currentCigarette.unlockDesc }}</text>
-              </view>
-            </view>
-
-          </view>
-        </view>
-
-      </view>
-
-      <!-- 品牌专属经典标语 (如：抽烟只抽炫赫门，一生只爱一个人) -->
-      <view class="pack-slogan-card" wx:if="{{ currentCigarette.slogan }}">
-        <view class="slogan-ribbon">
-          <text class="slogan-quote">“</text>
-          <text class="slogan-text">{{ currentCigarette.slogan }}</text>
-          <text class="slogan-quote">”</text>
-        </view>
-      </view>
-
-    </view>
-
-
-    <!-- ==================== 腾讯 CG / UE5 级 6 阶段破空盘旋粒子拖尾舞台 (Canvas 2D + 3D 联动) ==================== -->
-    <!-- 1. 深渊暗夜蓝金聚光暗场 (压暗背景烟盒，位于 Canvas 与 3D 烟支下方，绝不遮挡星河粒子光辉) -->
-    <view class="ssr-stage-backdrop {{ isFlightVisible ? 'backdrop-visible' : '' }} {{ isFlightActive ? 'backdrop-active' : '' }}"></view>
-
-    <!-- 2. 60fps 全屏 2D 弧线插值丝带与星尘粒子画布 -->
-    <canvas 
-      type="2d" 
-      id="packFlightCanvas" 
-      class="pack-flight-canvas {{ isFlightVisible ? 'canvas-active' : '' }}"
-    ></canvas>
-
-    <!-- 3. 顶层 3D 主角烟 S 弧线破空盘旋与屏幕呈现舞台 -->
-    <view 
-      class="ssr-awaken-overlay {{ isFlightActive ? 'ssr-active' : '' }} {{ pullVfxType === 'vfx1' ? 'vfx-mode-1' : 'vfx-mode-2' }}" 
-      wx:if="{{ isFlightVisible }}"
-      bindtap="onTapAwakenOverlay"
-      catchtouchmove="preventTouchMove"
-    >
-
-      <!-- 2. 冲霄电光蓝金能量光柱与破空全息震波环 -->
-      <view class="ssr-sky-pillar" style="--brand-accent: {{ currentCigarette.packTheme.accentColor || '#38bdf8' }};"></view>
-      <view class="ssr-shockwave-ring ring-1"></view>
-      <view class="ssr-shockwave-ring ring-2"></view>
-
-      <!-- 3. 3D S-Curve 银河紫金流光弧线轨迹带 (与 Canvas 2D 粒子交相辉映) -->
-      <view class="ssr-scurve-galaxy-layer">
-        <view class="scurve-ribbon-arc arc-cyan"></view>
-        <view class="scurve-ribbon-arc arc-violet"></view>
-        <view class="scurve-ribbon-arc arc-gold"></view>
-      </view>
-
-      <!-- 4. 天美/光子级双层逆旋神芒轮与全息星轨法阵 -->
-      <view class="ssr-celestial-wheel">
-        <view class="ssr-god-rays"></view>
-        <view class="ssr-sacred-halo">
-          <view class="halo-diamond d-top">✦</view>
-          <view class="halo-diamond d-right">✦</view>
-          <view class="halo-diamond d-bottom">✦</view>
-          <view class="halo-diamond d-left">✦</view>
-        </view>
-        <view class="ssr-inner-energy-ring"></view>
-      </view>
-
-      <!-- 5. 螺旋飞升星尘粒子与电光流线 (纯能量星尘，无火无烟) -->
-      <view class="ssr-particles-field">
-        <view class="ssr-ember-particle p1"></view>
-        <view class="ssr-ember-particle p2"></view>
-        <view class="ssr-ember-particle p3"></view>
-        <view class="ssr-ember-particle p4"></view>
-        <view class="ssr-ember-particle p5"></view>
-        <view class="ssr-ember-particle p6"></view>
-        <view class="ssr-ember-particle p7"></view>
-        <view class="ssr-ember-particle p8"></view>
-        <view class="ssr-light-streamer st1"></view>
-        <view class="ssr-light-streamer st2"></view>
-        <view class="ssr-light-streamer st3"></view>
-        <view class="ssr-light-streamer st4"></view>
-      </view>
-
-      <!-- 6. 主角名烟【宝刀出鞘 · 游龙惊鸿 · 3D剑气星轨环绕】舞台 -->
-      <view 
-        class="ssr-hero-cigarette-stage"
-        style="--slot-offset-x: {{ slotOffsetX || 0 }}rpx; --filter-bg: {{ currentCigarette.filterColor || '#d97706' }}; --paper-bg: {{ currentCigarette.paperColor || '#fffdf5' }}; --band-bg: {{ currentCigarette.bandColor || '#fbbf24' }}; --bead-color: {{ currentCigarette.beadColor || '#38bdf8' }}; --hero-w: {{ flightStyles.heroW || 38 }}rpx; --hero-h: {{ flightStyles.heroH || 400 }}rpx; --hero-filter-h: {{ flightStyles.heroFilterH || 116 }}rpx;"
-      >
-        <!-- 360° 黄金电光星芒爆发光环 -->
-        <view class="ssr-radial-starburst">
-          <view class="starburst-flare sf-1"></view>
-          <view class="starburst-flare sf-2"></view>
-          <view class="starburst-flare sf-3"></view>
-          <view class="starburst-halo-ring"></view>
-        </view>
-
-        <!-- 3D 陀螺双龙剑气环绕法阵 (围绕烟支 3D 空间立体旋转环绕) -->
-        <view class="ssr-sword-orbit-system">
-          <view class="ssr-orbit-ring orbit-gold">
-            <view class="orbit-pearl pearl-gold"></view>
-          </view>
-          <view class="ssr-orbit-ring orbit-cyan">
-            <view class="orbit-pearl pearl-cyan"></view>
-          </view>
-          <view class="ssr-orbit-ring orbit-jade"></view>
-          <text class="ssr-blade-sigil sigil-1">✦</text>
-          <text class="ssr-blade-sigil sigil-2">❖</text>
-          <text class="ssr-blade-sigil sigil-3">✦</text>
-          <text class="ssr-blade-sigil sigil-4">❖</text>
-        </view>
-
-        <!-- 刀光十字寒芒斩 (X-Slash Golden-Cyan Flare) -->
-        <view class="ssr-cross-slash">
-          <view class="slash-beam beam-a"></view>
-          <view class="slash-beam beam-b"></view>
-          <view class="slash-core-star">✦</view>
-        </view>
-
-        <!-- 香烟 3D 实体 (100% 纯正完整烟支还原，烟头与滤嘴干净纯粹无杂色) -->
-        <view class="ssr-hero-cigarette-body">
-          <!-- 破鞘与飞行阶段：尾部蓝金星河推进流光尾羽 (定格前完全消散，绝不染色烟头) -->
-          <view class="ssr-tail-thruster-plume">
-            <view class="thruster-core-jet"></view>
-            <view class="thruster-ribbon-wake wake-left"></view>
-            <view class="thruster-ribbon-wake wake-right"></view>
-          </view>
-
-          <!-- 分支 A: 老辈白纸手卷旱烟专属圆锥喇叭筒 -->
-          <block wx:if="{{ currentCigarette.widthType === 'hand_rolled' }}">
-            <view class="ssr-hanyan-cone">
-              <view class="ssr-hanyan-tobacco-crown">
-                <view class="hanyan-gold-strand gs1"></view>
-                <view class="hanyan-gold-strand gs2"></view>
-                <view class="hanyan-gold-strand gs3"></view>
-              </view>
-              <view class="ssr-hanyan-paper-cone">
-                <view class="ssr-hanyan-spiral-seam"></view>
-                <text class="ssr-hanyan-red-stamp">老辈手卷</text>
-                <view class="ssr-blade-sheen"></view>
-              </view>
-            </view>
-          </block>
-
-          <!-- 分支 B: 标准名烟 / 细支爆珠 / 古巴雪茄 3D 纯正完整模型 -->
-          <block wx:else>
-            <!-- 上段：纯正过滤嘴 (真实本色 + 圆柱光影 + 爆珠标识 + 烫金箍圈) -->
-            <view class="ssr-cig-filter">
-              <view class="ssr-filter-cylinder-shine"></view>
-              <!-- 爆珠璀璨晶核 (仅带爆珠款式显示) -->
-              <view class="ssr-bead-gem" wx:if="{{ currentCigarette.hasBead }}">
-                <view class="ssr-bead-core"></view>
-              </view>
-              <!-- 滤嘴烫金箍圈 -->
-              <view class="ssr-filter-gold-band"></view>
-            </view>
-
-            <!-- 下段：修长纯净烟身纸管 (通体纯净延伸至底端，零杂色色块) -->
-            <view class="ssr-cig-paper">
-              <view class="ssr-paper-cylinder-shine"></view>
-              <text class="ssr-paper-brand-stamp" wx:if="{{ currentCigarette.stampText }}">{{ currentCigarette.stampText }}</text>
-            </view>
-
-            <!-- 贯穿全烟身的宝刀寒芒流光 -->
-            <view class="ssr-blade-sheen"></view>
-          </block>
-        </view>
-      </view>
-
-      <!-- 7. 腾讯游戏 SSR 传说级黑金赛博铭牌横幅 (06 [屏幕呈现] 弹出) -->
-      <view class="ssr-mythic-banner">
-        <view class="ssr-banner-top-tag">
-          <text class="ssr-tag-ornament">❖</text>
-          <text class="ssr-tag-text">臻品出匣 · 星河就绪</text>
-          <text class="ssr-tag-ornament">❖</text>
-        </view>
-        <view class="ssr-banner-main-box">
-          <view class="ssr-banner-wing left-wing"></view>
-          <text class="ssr-banner-cig-name">{{ currentCigarette.name }}</text>
-          <view class="ssr-banner-wing right-wing"></view>
-        </view>
-        <view class="ssr-banner-sub-hint">
-          <text class="ssr-ignite-dot">✦</text>
-          <text class="ssr-ignite-text">轻触屏幕任意位置 · 携烟进入品吸席</text>
-          <text class="ssr-ignite-dot">✦</text>
-        </view>
-      </view>
-    </view>
-
-
-    <!-- 底部操作区 (抽出一支) -->
-    <view class="pack-bottom-dock">
-      <view class="action-buttons-row">
-        <!-- 抽出一支品吸按键 (核心黄金大按键) -->
-        <view 
-          class="action-btn-card pull-btn {{ !isCurrentUnlocked ? 'btn-disabled' : '' }}" 
-          bindtap="onTriggerPullCigarette"
-        >
-          <text class="btn-icon">🚬</text>
-          <view class="btn-text-wrap">
-            <text class="btn-main-title">{{ packCount > 0 ? '抽出一支' : '拆开新盒并抽出' }}</text>
-            <text class="btn-sub-note">{{ packCount > 0 ? '点选盒内烟支 · 或轻触直接抽取' : '本盒已空 · 轻触立即换新盒' }}</text>
-          </view>
-        </view>
-      </view>
-    </view>
-
-  </view>
-
-
-  <!-- ==================== 视图 3: 腾讯级双路径解锁决策弹窗 (Unlock Decision Modal) ==================== -->
+  <!-- ==================== 腾讯级双路径解锁决策弹窗 (Unlock Decision Modal) ==================== -->
   <view 
     class="unlock-choice-backdrop" 
     wx:if="{{ showUnlockDialog }}" 
