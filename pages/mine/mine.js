@@ -1,18 +1,69 @@
 // pages/mine/mine.js
-import { audioManager } from '../../utils/audioManager.js';
-import { triggerHaptic } from '../../utils/haptics.js';
-import { toast } from '../../utils/toastService.js';
-import { storageService } from '../../utils/storageService.js';
-import { leaderboardService } from '../../utils/leaderboardService.js';
-import { vipService } from '../../utils/vipService.js';
+import { audioManager } from '../../services/audioManager.js';
+import { triggerHaptic } from '../../services/haptics.js';
+import { toast } from '../../services/toastService.js';
+import { storageService } from '../../services/storageService.js';
+import { leaderboardService } from '../../services/leaderboardService.js';
+import { vipService } from '../../services/vipService.js';
 import {
   calculateSavings,
   calculateTarAvoided,
   calculateLifeRegained,
   calculateQuitDays,
   getWhoStages
-} from '../../utils/healthCalculator.js';
-import { checkAchievementsToUnlock } from '../../utils/achievements.js';
+} from '../../configs/healthCalculator.js';
+import { checkAchievementsToUnlock } from '../../configs/achievements.js';
+import {
+  PRICE_COIN_ICON_SVG,
+  CIGS_COUNT_ICON_SVG,
+  YEARS_CLOCK_ICON_SVG,
+  PROJECTION_SPARK_SVG
+} from '../../utils/vectorIcons.js';
+
+const QUICK_PRICE_PRESETS = [
+  { val: 15, label: '¥15 白沙' },
+  { val: 18, label: '¥18 炫赫' },
+  { val: 25, label: '¥25 芙蓉' },
+  { val: 26, label: '¥26 江南' },
+  { val: 65, label: '¥65 中华' },
+  { val: 100, label: '¥100' }
+];
+
+const QUICK_CIG_PRESETS = [
+  { val: 5, label: '5支' },
+  { val: 10, label: '10支(半包)' },
+  { val: 15, label: '15支' },
+  { val: 20, label: '20支(1包)' },
+  { val: 30, label: '30支+' }
+];
+
+const QUICK_YEAR_PRESETS = [
+  { val: 1, label: '1年内' },
+  { val: 3, label: '3年' },
+  { val: 5, label: '5年' },
+  { val: 10, label: '10年' },
+  { val: 20, label: '20年+' }
+];
+
+
+function computeProfileProjections(profile = {}) {
+  const packPrice = Number(profile.packPrice) || 25;
+  const cigsPerDay = Number(profile.cigsPerDay) || 15;
+  const smokeYears = Number(profile.smokeYears) || 0;
+
+  const annualMoney = Math.round((cigsPerDay / 20) * packPrice * 365);
+  const annualTar = ((cigsPerDay * 10 * 365) / 1000).toFixed(1);
+  const dailyMoney = ((cigsPerDay / 20) * packPrice).toFixed(1);
+  const annualPacks = Math.round((cigsPerDay / 20) * 365);
+
+  return {
+    annualMoney,
+    annualMoneyFormatted: annualMoney.toLocaleString('zh-CN'),
+    annualTar,
+    dailyMoney,
+    annualPacks
+  };
+}
 
 function measureSafeAreaSync() {
   try {
@@ -111,18 +162,43 @@ function computeMineStatsPayload() {
 
 function buildInitialMineState() {
   const safeArea = measureSafeAreaSync();
+  const staticPresets = {
+    quickPricePresets: QUICK_PRICE_PRESETS,
+    quickCigPresets: QUICK_CIG_PRESETS,
+    quickYearPresets: QUICK_YEAR_PRESETS,
+    priceCoinIcon: PRICE_COIN_ICON_SVG,
+    cigsCountIcon: CIGS_COUNT_ICON_SVG,
+    yearsClockIcon: YEARS_CLOCK_ICON_SVG,
+    projectionSparkIcon: PROJECTION_SPARK_SVG
+  };
   try {
+    const payload = computeMineStatsPayload();
     return {
       ...safeArea,
-      ...computeMineStatsPayload(),
+      ...payload,
+      ...staticPresets,
+      projections: computeProfileProjections(payload.profile),
       vipTheme: vipService.getVipTheme(),
       showProfileModal: false
     };
   } catch (e) {
+    console.error('buildInitialMineState error:', e);
+    let storedProfile = {};
+    try {
+      storedProfile = storageService.getProfile() || {};
+    } catch (pe) {}
+    const fallbackProfile = {
+      packPrice: storedProfile.packPrice || 25,
+      cigsPerDay: storedProfile.cigsPerDay || 15,
+      smokeYears: storedProfile.smokeYears || 5,
+      ...storedProfile
+    };
     return {
       ...safeArea,
+      ...staticPresets,
+      projections: computeProfileProjections(fallbackProfile),
       vipTheme: '',
-      profile: {},
+      profile: fallbackProfile,
       myRankInfo: {
         rank: 1,
         title: '无烟觉醒者',
@@ -146,13 +222,68 @@ function buildInitialMineState() {
       dailyTrends: [],
       whoStages: [],
       showProfileModal: false,
-      editProfile: {
-        packPrice: 25,
-        cigsPerDay: 15,
-        smokeYears: 5
-      }
+      editProfile: fallbackProfile
     };
   }
+}
+
+/**
+ * 微信临时头像路径转持久化用户存储路径
+ * 防止临时文件被小程序系统回收清除后变成黑圈/无法加载
+ */
+function persistAvatarFile(tempPath) {
+  if (!tempPath || typeof tempPath !== 'string') return '';
+  // 如果是网络图片、Base64 或内联 SVG，直接使用
+  if (tempPath.startsWith('data:') || tempPath.startsWith('https://')) {
+    return tempPath;
+  }
+  // http://tmp/ 是微信客户端/开发者的临时路径，需要保存；如果已经是永久用户目录则直接返回
+  if (wx.env && wx.env.USER_DATA_PATH && tempPath.startsWith(wx.env.USER_DATA_PATH)) {
+    return tempPath;
+  }
+
+  try {
+    if (wx.getFileSystemManager && wx.env && wx.env.USER_DATA_PATH) {
+      const fs = wx.getFileSystemManager();
+      let ext = '.png';
+      const dotIdx = tempPath.lastIndexOf('.');
+      if (dotIdx !== -1) {
+        const potentialExt = tempPath.substring(dotIdx).toLowerCase();
+        if (['.png', '.jpg', '.jpeg', '.webp', '.gif'].includes(potentialExt)) {
+          ext = potentialExt;
+        }
+      }
+      const targetPath = `${wx.env.USER_DATA_PATH}/user_avatar_${Date.now()}${ext}`;
+
+      // 清理旧的历史头像文件，防止占用存储
+      try {
+        const dirFiles = fs.readdirSync(wx.env.USER_DATA_PATH);
+        if (Array.isArray(dirFiles)) {
+          dirFiles.forEach(f => {
+            if (f.startsWith('user_avatar_')) {
+              try { fs.unlinkSync(`${wx.env.USER_DATA_PATH}/${f}`); } catch (e) {}
+            }
+          });
+        }
+      } catch (e) {}
+
+      // 优先同步移动/保存临时文件
+      try {
+        fs.saveFileSync(tempPath, targetPath);
+        return targetPath;
+      } catch (eSave) {
+        try {
+          fs.copyFileSync(tempPath, targetPath);
+          return targetPath;
+        } catch (eCopy) {
+          console.warn('saveFileSync / copyFileSync failed, fallback to tempPath', eCopy);
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('persistAvatarFile error:', err);
+  }
+  return tempPath;
 }
 
 Page({
@@ -178,30 +309,50 @@ Page({
   },
 
   refreshAllData() {
-    this.setData({
-      ...computeMineStatsPayload(),
-      vipTheme: vipService.getVipTheme()
-    });
+    try {
+      this.setData({
+        ...computeMineStatsPayload(),
+        vipTheme: vipService.getVipTheme()
+      });
+    } catch (e) {
+      console.error('refreshAllData error:', e);
+    }
   },
 
-  // 微信头像选择与同步
+  // 微信头像选择与持久化同步
   onUpdateAvatar(e) {
-    const avatarUrl = e.detail && e.detail.avatarUrl ? e.detail.avatarUrl : '';
-    if (!avatarUrl) return;
-    const updated = storageService.updateProfile({ avatarUrl });
-    this.setData({ profile: updated });
-    this.refreshAllData();
-    toast.success('头像已同步');
+    try {
+      const avatarUrl = e.detail && e.detail.avatarUrl ? e.detail.avatarUrl : '';
+      if (!avatarUrl) {
+        // 重置/清除失效头像
+        const updated = storageService.updateProfile({ avatarUrl: '' });
+        this.setData({ profile: updated });
+        this.refreshAllData();
+        return;
+      }
+      // 持久化保存到本地用户目录
+      const savedPath = persistAvatarFile(avatarUrl);
+      const updated = storageService.updateProfile({ avatarUrl: savedPath });
+      this.setData({ profile: updated });
+      this.refreshAllData();
+      toast.success('头像已同步');
+    } catch (err) {
+      console.error('onUpdateAvatar error:', err);
+    }
   },
 
   // 微信昵称输入与同步
   onUpdateNickname(e) {
-    const nickName = (e.detail && e.detail.nickName ? e.detail.nickName : '').trim();
-    if (!nickName) return;
-    const updated = storageService.updateProfile({ nickName });
-    this.setData({ profile: updated });
-    this.refreshAllData();
-    toast.success('昵称已同步');
+    try {
+      const nickName = (e.detail && e.detail.nickName ? e.detail.nickName : '').trim();
+      if (!nickName) return;
+      const updated = storageService.updateProfile({ nickName });
+      this.setData({ profile: updated });
+      this.refreshAllData();
+      toast.success('昵称已同步');
+    } catch (err) {
+      console.error('onUpdateNickname error:', err);
+    }
   },
 
   // 跳转英雄榜
@@ -220,70 +371,172 @@ Page({
     audioManager.playSwitchSound();
     triggerHaptic('light');
     const p = storageService.getProfile();
+    const editProfile = {
+      packPrice: p.packPrice || 25,
+      cigsPerDay: p.cigsPerDay || 15,
+      smokeYears: p.smokeYears !== undefined ? p.smokeYears : 5
+    };
     this.setData({
       showProfileModal: true,
-      editProfile: { ...p }
+      editProfile,
+      projections: computeProfileProjections(editProfile)
     });
   },
 
   closeProfileModal() {
+    audioManager.unlockAudio();
+    audioManager.playSwitchSound();
+    triggerHaptic('light');
     this.setData({ showProfileModal: false });
+  },
+
+  updateEditProfile(partial) {
+    const updated = {
+      ...this.data.editProfile,
+      ...partial
+    };
+    const projections = computeProfileProjections(updated);
+    this.setData({
+      editProfile: updated,
+      projections
+    });
   },
 
   adjustPackPrice(e) {
     const delta = Number(e.currentTarget.dataset.delta);
-    const val = Math.max(1, (this.data.editProfile.packPrice || 25) + delta);
-    this.setData({ 'editProfile.packPrice': val });
+    const cur = Number(this.data.editProfile.packPrice) || 25;
+    const val = Math.min(2000, Math.max(5, cur + delta));
+    this.updateEditProfile({ packPrice: val });
     triggerHaptic('light');
   },
 
   setQuickPrice(e) {
     const val = Number(e.currentTarget.dataset.val);
-    this.setData({ 'editProfile.packPrice': val });
+    const clamped = Math.min(2000, Math.max(5, val));
+    this.updateEditProfile({ packPrice: clamped });
     triggerHaptic('light');
   },
 
   onInputPackPrice(e) {
-    const val = Math.max(1, Number(e.detail.value) || 25);
-    this.setData({ 'editProfile.packPrice': val });
+    const raw = e.detail.value;
+    if (raw === '') {
+      this.updateEditProfile({ packPrice: '' });
+      return;
+    }
+    const num = parseInt(raw, 10);
+    if (isNaN(num)) return;
+    const val = Math.min(2000, Math.max(0, num));
+    this.updateEditProfile({ packPrice: val });
+  },
+
+  onBlurPackPrice(e) {
+    let num = parseInt(e.detail.value, 10);
+    if (isNaN(num) || num < 5) {
+      num = (num > 0 && num < 5) ? 5 : 25;
+    } else if (num > 2000) {
+      num = 2000;
+    }
+    this.updateEditProfile({ packPrice: num });
   },
 
   adjustCigsPerDay(e) {
     const delta = Number(e.currentTarget.dataset.delta);
-    const val = Math.max(1, (this.data.editProfile.cigsPerDay || 15) + delta);
-    this.setData({ 'editProfile.cigsPerDay': val });
+    const cur = Number(this.data.editProfile.cigsPerDay) || 15;
+    const val = Math.min(100, Math.max(1, cur + delta));
+    this.updateEditProfile({ cigsPerDay: val });
+    triggerHaptic('light');
+  },
+
+  setQuickCigs(e) {
+    const val = Number(e.currentTarget.dataset.val);
+    const clamped = Math.min(100, Math.max(1, val));
+    this.updateEditProfile({ cigsPerDay: clamped });
     triggerHaptic('light');
   },
 
   onInputCigsPerDay(e) {
-    const val = Math.max(1, Number(e.detail.value) || 15);
-    this.setData({ 'editProfile.cigsPerDay': val });
+    const raw = e.detail.value;
+    if (raw === '') {
+      this.updateEditProfile({ cigsPerDay: '' });
+      return;
+    }
+    const num = parseInt(raw, 10);
+    if (isNaN(num)) return;
+    const val = Math.min(100, Math.max(0, num));
+    this.updateEditProfile({ cigsPerDay: val });
+  },
+
+  onBlurCigsPerDay(e) {
+    let num = parseInt(e.detail.value, 10);
+    if (isNaN(num) || num < 1) {
+      num = 15;
+    } else if (num > 100) {
+      num = 100;
+    }
+    this.updateEditProfile({ cigsPerDay: num });
   },
 
   adjustSmokeYears(e) {
     const delta = Number(e.currentTarget.dataset.delta);
-    const val = Math.max(0, (this.data.editProfile.smokeYears || 5) + delta);
-    this.setData({ 'editProfile.smokeYears': val });
+    const cur = Number(this.data.editProfile.smokeYears) || 0;
+    const val = Math.min(70, Math.max(0, cur + delta));
+    this.updateEditProfile({ smokeYears: val });
+    triggerHaptic('light');
+  },
+
+  setQuickYears(e) {
+    const val = Number(e.currentTarget.dataset.val);
+    const clamped = Math.min(70, Math.max(0, val));
+    this.updateEditProfile({ smokeYears: clamped });
     triggerHaptic('light');
   },
 
   onInputSmokeYears(e) {
-    const val = Math.max(0, Number(e.detail.value) || 0);
-    this.setData({ 'editProfile.smokeYears': val });
+    const raw = e.detail.value;
+    if (raw === '') {
+      this.updateEditProfile({ smokeYears: '' });
+      return;
+    }
+    const num = parseInt(raw, 10);
+    if (isNaN(num)) return;
+    const val = Math.min(70, Math.max(0, num));
+    this.updateEditProfile({ smokeYears: val });
+  },
+
+  onBlurSmokeYears(e) {
+    let num = parseInt(e.detail.value, 10);
+    if (isNaN(num) || num < 0) {
+      num = 5;
+    } else if (num > 70) {
+      num = 70;
+    }
+    this.updateEditProfile({ smokeYears: num });
   },
 
   saveProfile() {
+    let packPrice = Number(this.data.editProfile.packPrice);
+    if (isNaN(packPrice) || packPrice < 5) packPrice = 25;
+    if (packPrice > 2000) packPrice = 2000;
+
+    let cigsPerDay = Number(this.data.editProfile.cigsPerDay);
+    if (isNaN(cigsPerDay) || cigsPerDay < 1) cigsPerDay = 15;
+    if (cigsPerDay > 100) cigsPerDay = 100;
+
+    let smokeYears = Number(this.data.editProfile.smokeYears);
+    if (isNaN(smokeYears) || smokeYears < 0) smokeYears = 5;
+    if (smokeYears > 70) smokeYears = 70;
+
     const updated = {
       ...this.data.profile,
-      packPrice: Math.max(1, Number(this.data.editProfile.packPrice) || 25),
-      cigsPerDay: Math.max(1, Number(this.data.editProfile.cigsPerDay) || 15),
-      smokeYears: Math.max(0, Number(this.data.editProfile.smokeYears) || 0)
+      packPrice,
+      cigsPerDay,
+      smokeYears
     };
     storageService.saveProfile(updated);
     this.setData({ showProfileModal: false });
     audioManager.playSwitchSound();
     triggerHaptic('medium');
-    toast.success('已保存偏好');
+    toast.success('已保存偏好设置');
     this.refreshAllData();
   },
 

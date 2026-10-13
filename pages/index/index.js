@@ -1,38 +1,38 @@
 // pages/index/index.js
-import { SmokeStateMachine } from '../../utils/smokeStateMachine.js';
-import { ParticleSystem } from '../../utils/particleSystem.js';
-import { audioManager } from '../../utils/audioManager.js';
-import { triggerHaptic } from '../../utils/haptics.js';
-import { storageService } from '../../utils/storageService.js';
-import { canvasRenderer } from '../../utils/canvasRenderer.js';
-import { toast } from '../../utils/toastService.js';
-import { ATMOSPHERE_SCENES, SCENE_CATEGORIES, getSceneById } from '../../utils/sceneRenderer.js';
+import { SmokeStateMachine } from '../../engine/smokeStateMachine.js';
+import { ParticleSystem } from '../../engine/particleSystem.js';
+import { canvasRenderer } from '../../engine/canvasRenderer.js';
+import { ATMOSPHERE_SCENES, SCENE_CATEGORIES, getSceneById } from '../../engine/sceneRenderer.js';
+
+import { audioManager } from '../../services/audioManager.js';
+import { triggerHaptic } from '../../services/haptics.js';
+import { storageService } from '../../services/storageService.js';
+import { toast } from '../../services/toastService.js';
+import { IGNITION_TOOLS, getActiveIgnitionTool } from '../../services/ignitionService.js';
+import { vipService } from '../../services/vipService.js';
+
 import {
   calculateSavings,
   calculateTarAvoided,
   calculateLifeRegained,
   calculateQuitDays
-} from '../../utils/healthCalculator.js';
+} from '../../configs/healthCalculator.js';
 import {
   CIGARETTE_CATALOG,
   DEFAULT_CIGARETTE,
   getCigaretteById,
   isCigaretteUnlocked,
   computeCigaretteDimensions
-} from '../../utils/catalog.js';
-import { checkAchievementsToUnlock, getAchievementById } from '../../utils/achievements.js';
-import {
-  IGNITION_TOOLS,
-  getActiveIgnitionTool
-} from '../../utils/ignitionService.js';
+} from '../../configs/catalog.js';
+import { checkAchievementsToUnlock, getAchievementById } from '../../configs/achievements.js';
 import {
   SMOKE_EFFECTS,
   DEFAULT_SMOKE_EFFECT,
   getSmokeEffectById,
   isSmokeEffectUnlocked
-} from '../../utils/smokeEffects.js';
+} from '../../configs/smokeEffects.js';
+
 import { EXTINGUISH_ICON_SVG, STORE_ICON_SVG } from '../../utils/vectorIcons.js';
-import { vipService } from '../../utils/vipService.js';
 
 Page({
   data: {
@@ -1130,14 +1130,18 @@ Page({
     const quitDays = calculateQuitDays(profile.quitStartDate);
     const unlockedEffects = storageService.getUnlockedSmokeEffects() || [];
     const summonedEffects = storageService.getSummonedSmokeEffects() || [];
-    const allEffects = Array.from(new Set([...unlockedEffects, ...summonedEffects]));
+    const activeEffectId = this.data.smokeEffectType;
+    if (activeEffectId && ['dragon_breath', 'phoenix_nirvana', 'buddha_light', 'bagua_taichi'].includes(activeEffectId)) {
+      storageService.recordSmokeEffectSummoned(activeEffectId);
+    }
+    const allEffects = Array.from(new Set([...unlockedEffects, ...summonedEffects, ...(activeEffectId ? [activeEffectId] : [])]));
 
     const newly = checkAchievementsToUnlock({
       totalSubstituted: totalSubs,
       totalSavedMoney: grossSaved,
       quitDays: quitDays + 1,
       unlockedEffects: allEffects,
-      unlockedEffectsCount: unlockedEffects.length,
+      unlockedEffectsCount: allEffects.length,
       hasCustomEffect: allEffects.some(id => id !== 'ring_classic' && id !== 'auspicious_river') || (this.data.smokeEffectType !== 'ring_classic' && this.data.smokeEffectType !== 'auspicious_river'),
       hasSummonedMythic: allEffects.includes('dragon_breath') || allEffects.includes('phoenix_nirvana') || allEffects.includes('buddha_light') || allEffects.includes('bagua_taichi')
     }, storageService.getUnlockedAchievements());
@@ -1408,6 +1412,9 @@ Page({
       smokeEffectType: nextEffect.id
     });
     storageService.setSelectedSmokeEffectId(nextEffect.id);
+    if (['dragon_breath', 'phoenix_nirvana', 'buddha_light', 'bagua_taichi'].includes(nextEffect.id)) {
+      storageService.recordSmokeEffectSummoned(nextEffect.id);
+    }
     this._checkAndUnlockAchievements();
 
     audioManager.playZenChimeSound(528);
@@ -1479,6 +1486,9 @@ Page({
       showSmokeEffectDrawer: false
     });
     storageService.setSelectedSmokeEffectId(item.id);
+    if (['dragon_breath', 'phoenix_nirvana', 'buddha_light', 'bagua_taichi'].includes(item.id)) {
+      storageService.recordSmokeEffectSummoned(item.id);
+    }
     this._checkAndUnlockAchievements();
   },
 
@@ -1510,6 +1520,11 @@ Page({
       trialSecondsLeft: 30,
       showSmokeEffectDrawer: false
     });
+
+    if (['dragon_breath', 'phoenix_nirvana', 'buddha_light', 'bagua_taichi'].includes(item.id)) {
+      storageService.recordSmokeEffectSummoned(item.id);
+      this._checkAndUnlockAchievements();
+    }
 
     toast.flame(`开启【${item.name}】30秒尊享试抽`);
 

@@ -14,7 +14,7 @@
         <view class="my-rank-identity">
           <view class="my-rank-badge-num">No.{{ myRankInfo.rank || 1 }}</view>
           <view class="my-rank-avatar-wrap">
-            <image class="my-rank-avatar-img {{ isVip ? 'vip-avatar-ring' : '' }}" src="{{ profile.avatarUrl || defaultAvatarSvg }}" mode="aspectFill" />
+            <image class="my-rank-avatar-img {{ isVip ? 'vip-avatar-ring' : '' }}" src="{{ profile.avatarUrl || defaultAvatarSvg }}" mode="aspectFill" binderror="onAvatarError" />
           </view>
           <view class="my-rank-text-wrap">
             <view class="my-rank-name-row">
@@ -25,6 +25,10 @@
               </view>
             </view>
             <text class="my-rank-title">{{ myRankInfo.title || '无烟先锋' }}</text>
+            <view class="my-rank-slogan-wrap" wx:if="{{ myRankInfo.quote || profile.customQuote }}">
+              <text class="mr-slogan-icon">❝</text>
+              <text class="mr-slogan-text">{{ myRankInfo.quote || profile.customQuote }}</text>
+            </view>
           </view>
         </view>
         <view class="my-rank-beat">
@@ -89,7 +93,7 @@
         </view>
 
         <!-- 英雄头像与信息 (支持本人高清头像与微信Svg回退) -->
-        <image class="hero-avatar-img" src="{{ item.avatarUrl || defaultAvatarSvg }}" mode="aspectFill" wx:if="{{ item.avatarUrl || item.isMe }}" />
+        <image class="hero-avatar-img" src="{{ item.avatarUrl || defaultAvatarSvg }}" mode="aspectFill" wx:if="{{ item.avatarUrl || item.isMe }}" binderror="onAvatarError" />
         <view class="hero-avatar" wx:else>{{ item.avatar }}</view>
 
         <view class="hero-info-main">
@@ -99,11 +103,14 @@
             <text class="hero-title-tag" wx:if="{{ item.title }}">{{ item.title }}</text>
             <text class="me-badge" wx:if="{{ item.isMe }}">我</text>
           </view>
-          <text class="hero-quote">“{{ item.quote }}”</text>
+          <view class="hero-slogan-wrap" wx:if="{{ item.quote }}">
+            <text class="slogan-icon">❝</text>
+            <text class="hero-slogan-text">{{ item.quote }}</text>
+          </view>
           <view class="hero-data-tags">
-            <text class="data-tag">替烟 {{ item.substituted }} 支</text>
+            <text class="data-tag">替烟 {{ item.substituted }}支</text>
             <text class="data-tag green">省 ¥{{ item.savedMoney }}</text>
-            <text class="data-tag purple">坚持 {{ item.days }} 天</text>
+            <text class="data-tag purple">坚持 {{ item.days }}天</text>
           </view>
         </view>
 

@@ -77,6 +77,9 @@
   display: flex;
   align-items: center;
   gap: 14rpx;
+  flex: 1;
+  min-width: 0;
+  margin-right: 16rpx;
 }
 
 .my-rank-badge-num {
@@ -124,6 +127,8 @@
   display: flex;
   flex-direction: column;
   gap: 4rpx;
+  flex: 1;
+  min-width: 0;
 }
 
 .my-rank-name-row {
@@ -133,7 +138,7 @@
 }
 
 .my-rank-name {
-  font-size: 26rpx;
+  font-size: 30rpx;
   font-weight: 700;
   color: #f8fafc;
   display: block;
@@ -156,22 +161,62 @@
 }
 
 .vnn-crown {
-  font-size: 16rpx;
+  font-size: 18rpx;
   line-height: 1;
 }
 
 .vnn-txt {
-  font-size: 17rpx;
+  font-size: 22rpx;
   font-weight: 800;
   color: #fde68a;
   line-height: 1.1;
 }
 
 .my-rank-title {
-  font-size: 22rpx;
+  font-size: 24rpx;
   font-weight: 500;
   color: #fbbf24;
   display: block;
+}
+
+.my-rank-slogan-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 6rpx;
+  margin-top: 4rpx;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.mr-slogan-icon {
+  font-size: 20rpx;
+  color: #fbbf24;
+  line-height: 1.35;
+  flex-shrink: 0;
+  opacity: 0.9;
+  margin-top: 2rpx;
+}
+
+.mr-slogan-text {
+  font-size: 21rpx;
+  color: #cbd5e1;
+  font-weight: 500;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-all;
+  flex: 1;
+  min-width: 0;
+}
+
+.is-vip-rank-card .mr-slogan-text {
+  color: #fef3c7;
+}
+.is-vip-rank-card .mr-slogan-icon {
+  color: #fde047;
 }
 
 .my-rank-beat {
@@ -179,7 +224,7 @@
 }
 
 .beat-label {
-  font-size: 18rpx;
+  font-size: 22rpx;
   color: #9ca3af;
   display: block;
 }
@@ -285,10 +330,11 @@
 }
 
 /* 英雄榜单列表 */
+/* 英雄榜单列表 */
 .rank-list-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 16rpx;
+  gap: 10rpx;
 }
 
 .rank-row-card {
@@ -296,12 +342,12 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  border-radius: 24rpx;
-  padding: 22rpx 24rpx;
+  border-radius: 20rpx;
+  padding: 12rpx 16rpx;
   display: flex;
   align-items: center;
-  gap: 18rpx;
-  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.35);
+  gap: 14rpx;
+  box-shadow: 0 6rpx 18rpx rgba(0, 0, 0, 0.32);
   transition: transform 0.18s ease;
 }
 
@@ -330,15 +376,16 @@
 }
 
 .rank-number-box {
-  width: 44rpx;
+  width: 40rpx;
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-shrink: 0;
 }
 
-.crown-icon { font-size: 36rpx; }
+.crown-icon { font-size: 32rpx; }
 .plain-rank {
-  font-size: 28rpx;
+  font-size: 26rpx;
   font-weight: 800;
   color: #6b7280;
 }
@@ -349,41 +396,45 @@
 }
 
 .hero-avatar {
-  font-size: 42rpx;
-  width: 64rpx;
-  height: 64rpx;
+  font-size: 36rpx;
+  width: 54rpx;
+  height: 54rpx;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.06);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .hero-avatar-img {
-  width: 64rpx;
-  height: 64rpx;
+  width: 54rpx;
+  height: 54rpx;
   border-radius: 50%;
   border: 2rpx solid #f59e0b;
   background: #0f172a;
   flex-shrink: 0;
-  box-shadow: 0 0 10rpx rgba(245, 158, 11, 0.35);
+  box-shadow: 0 0 8rpx rgba(245, 158, 11, 0.35);
 }
 
 .hero-info-main {
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .hero-title-line {
   display: flex;
   align-items: center;
-  margin-bottom: 6rpx;
+  gap: 6rpx;
+  margin-bottom: 2rpx;
 }
 
 .hero-name {
-  font-size: 28rpx;
+  font-size: 30rpx;
   font-weight: 700;
   color: #f3f4f6;
-  max-width: 420rpx;
+  max-width: 280rpx;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -412,90 +463,136 @@
 }
 
 .hero-vip-badge {
-  margin-left: 8rpx;
-  font-size: 18rpx;
+  font-size: 21rpx;
   font-weight: 800;
   color: #fde68a;
   background: linear-gradient(90deg, #3b2a10 0%, #1c150a 100%);
   border: 1px solid rgba(251, 191, 36, 0.68);
-  padding: 1rpx 10rpx;
+  padding: 2rpx 10rpx;
   border-radius: 999rpx;
-  line-height: 1.3;
+  line-height: 1.25;
   box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
 }
 
 .hero-title-tag {
-  margin-left: 10rpx;
-  font-size: 19rpx;
+  font-size: 21rpx;
   font-weight: 600;
   color: #fbbf24;
   background: rgba(245, 158, 11, 0.12);
   border: 1px solid rgba(245, 158, 11, 0.28);
-  padding: 1rpx 10rpx;
-  border-radius: 8rpx;
-  line-height: 1.3;
+  padding: 2rpx 10rpx;
+  border-radius: 6rpx;
+  line-height: 1.25;
+  flex-shrink: 0;
 }
 
 .me-badge {
-  margin-left: 12rpx;
-  font-size: 20rpx;
+  font-size: 21rpx;
   font-weight: 800;
   color: #111827;
   background: linear-gradient(135deg, #fef08a, #f59e0b);
-  padding: 2rpx 12rpx;
-  border-radius: 10rpx;
-  line-height: 1.4;
+  padding: 2rpx 10rpx;
+  border-radius: 6rpx;
+  line-height: 1.25;
   box-shadow: 0 2rpx 8rpx rgba(245, 158, 11, 0.4);
-  vertical-align: middle;
+  flex-shrink: 0;
 }
 
-.hero-quote {
-  font-size: 18rpx;
-  color: #9ca3af;
-  font-style: italic;
-  display: block;
-  margin-bottom: 8rpx;
+.hero-slogan-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 6rpx;
+  margin-top: 4rpx;
+  margin-bottom: 6rpx;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.slogan-icon {
+  font-size: 20rpx;
+  color: #fbbf24;
   line-height: 1.35;
+  flex-shrink: 0;
+  opacity: 0.85;
+  margin-top: 2rpx;
 }
 
+.hero-slogan-text {
+  font-size: 22rpx;
+  color: #cbd5e1;
+  font-weight: 500;
+  letter-spacing: 0.3rpx;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-all;
+  flex: 1;
+  min-width: 0;
+}
+
+.rank-row-card.top-1 .slogan-icon { color: #fde047; }
+.rank-row-card.top-1 .hero-slogan-text { color: #fef08a; font-weight: 600; }
+
+.rank-row-card.top-2 .slogan-icon { color: #94a3b8; }
+.rank-row-card.top-2 .hero-slogan-text { color: #f1f5f9; }
+
+.rank-row-card.top-3 .slogan-icon { color: #fb923c; }
+.rank-row-card.top-3 .hero-slogan-text { color: #fed7aa; }
+
+.rank-row-card.is-me-card .slogan-icon { color: #38bdf8; }
+.rank-row-card.is-me-card .hero-slogan-text { color: #bae6fd; font-weight: 600; }
+
+/* 底部 替烟、省、坚持 一排显示 */
 .hero-data-tags {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8rpx;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 6rpx;
+  width: 100%;
+  overflow: hidden;
 }
 
 .data-tag {
-  font-size: 19rpx;
+  font-size: 21rpx;
   font-weight: 600;
   color: #fbbf24;
   background: rgba(245, 158, 11, 0.10);
-  border: 1px solid rgba(245, 158, 11, 0.28);
-  padding: 3rpx 14rpx;
-  border-radius: 10rpx;
-  letter-spacing: 0.3rpx;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  padding: 2rpx 10rpx;
+  border-radius: 6rpx;
+  letter-spacing: 0.2rpx;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1.25;
 }
 
 .data-tag.green {
   color: #34d399;
   background: rgba(16, 185, 129, 0.10);
-  border: 1px solid rgba(16, 185, 129, 0.28);
+  border: 1px solid rgba(16, 185, 129, 0.25);
 }
 
 .data-tag.purple {
   color: #38bdf8;
   background: rgba(56, 189, 248, 0.10);
-  border: 1px solid rgba(56, 189, 248, 0.28);
+  border: 1px solid rgba(56, 189, 248, 0.25);
 }
 
 .like-btn-wrap {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 8rpx 12rpx;
-  border-radius: 16rpx;
+  justify-content: center;
+  padding: 4rpx 10rpx;
+  border-radius: 12rpx;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .like-btn-wrap:active {
@@ -507,11 +604,12 @@
   background: rgba(239, 68, 68, 0.15);
 }
 
-.like-heart { font-size: 26rpx; }
+.like-heart { font-size: 22rpx; }
 .like-count {
-  font-size: 18rpx;
+  font-size: 20rpx;
   color: #9ca3af;
-  margin-top: 2rpx;
+  font-weight: 600;
+  margin-top: 1rpx;
 }
 
 .like-btn-wrap.liked .like-count {
@@ -535,7 +633,7 @@
 }
 
 .footer-text {
-  font-size: 20rpx;
+  font-size: 22rpx;
   color: #64748b;
   letter-spacing: 2rpx;
   font-weight: 500;

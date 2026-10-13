@@ -267,3 +267,123 @@ export const STORE_ICON_SVG = svgToUri(`
 </svg>
 `);
 
+// 10. 青莲化境 · 步步生莲 翡翠宝莲高定矢量图标 (高阶东方禅意·翡翠金蕊莲花)
+export const LOTUS_ICON_SVG = svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
+  <defs>
+    <linearGradient id="lotusPetalGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="60%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#a7f3d0"/>
+    </linearGradient>
+    <linearGradient id="lotusCenterGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="70%" stop-color="#6ee7b7"/>
+      <stop offset="100%" stop-color="#ecfdf5"/>
+    </linearGradient>
+    <linearGradient id="lotusGoldGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#fef08a"/>
+    </linearGradient>
+  </defs>
+  <!-- 底座祥和甘露水波光晕 -->
+  <ellipse cx="32" cy="54" rx="20" ry="3.5" fill="#047857" opacity="0.45"/>
+  <path d="M 16 52 C 22 56 42 56 48 52 C 40 50 24 50 16 52 Z" fill="#059669" opacity="0.6"/>
+  <!-- 后排舒展莲瓣 (左外、右外) -->
+  <path d="M 32 46 C 22 44 10 38 8 28 C 14 26 24 33 32 46 Z" fill="url(#lotusPetalGrad)" opacity="0.85"/>
+  <path d="M 32 46 C 42 44 54 38 56 28 C 50 26 40 33 32 46 Z" fill="url(#lotusPetalGrad)" opacity="0.85"/>
+  <!-- 次外层莲瓣 (左次、右次) -->
+  <path d="M 32 48 C 20 45 13 32 15 20 C 23 23 28 35 32 48 Z" fill="url(#lotusPetalGrad)"/>
+  <path d="M 32 48 C 44 45 51 32 49 20 C 41 23 36 35 32 48 Z" fill="url(#lotusPetalGrad)"/>
+  <!-- 中层优雅主瓣 (左中、右中) -->
+  <path d="M 32 50 C 23 45 19 28 23 14 C 29 20 31 36 32 50 Z" fill="url(#lotusCenterGrad)"/>
+  <path d="M 32 50 C 41 45 45 28 41 14 C 35 20 33 36 32 50 Z" fill="url(#lotusCenterGrad)"/>
+  <!-- 正中亭亭玉立主花瓣 -->
+  <path d="M 32 52 C 26 42 26 24 32 8 C 38 24 38 42 32 52 Z" fill="url(#lotusCenterGrad)" stroke="#6ee7b7" stroke-width="0.8"/>
+  <!-- 莲心金蕊光芒 -->
+  <circle cx="32" cy="38" r="3.2" fill="url(#lotusGoldGrad)"/>
+  <circle cx="32" cy="38" r="1.5" fill="#ffffff" opacity="0.9"/>
+  <!-- 晨露甘霖珍珠微光 -->
+  <circle cx="32" cy="14" r="1.2" fill="#ffffff" opacity="0.95"/>
+  <circle cx="24" cy="22" r="0.9" fill="#ffffff" opacity="0.8"/>
+  <circle cx="40" cy="22" r="0.9" fill="#ffffff" opacity="0.8"/>
+</svg>
+`);
+
+// 11. 偏好设置 · 单包烟价流金徽标 (¥ 专属矢量金币)
+export const PRICE_COIN_ICON_SVG = svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="100%" height="100%">
+  <defs>
+    <linearGradient id="coinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="45%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <linearGradient id="coinInnerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef9c3"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+  <circle cx="24" cy="24" r="21" fill="url(#coinGrad)" stroke="#78350f" stroke-width="1.2"/>
+  <circle cx="24" cy="24" r="16.5" fill="none" stroke="rgba(254, 240, 138, 0.75)" stroke-width="1.4" stroke-dasharray="3, 2"/>
+  <text x="24" y="30.5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="900" fill="#ffffff" text-anchor="middle" filter="drop-shadow(0px 1px 2px rgba(120,53,15,0.6))">¥</text>
+</svg>
+`);
+
+// 12. 偏好设置 · 吸烟支数徽标 (斜向香烟与微光余烬)
+export const CIGS_COUNT_ICON_SVG = svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="100%" height="100%">
+  <defs>
+    <linearGradient id="cigBodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#cbd5e1"/>
+    </linearGradient>
+    <linearGradient id="cigFilterGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fde68a"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+  <circle cx="24" cy="24" r="21" fill="rgba(56, 189, 248, 0.12)" stroke="rgba(56, 189, 248, 0.35)" stroke-width="1.2"/>
+  <g transform="rotate(-30 24 24)">
+    <rect x="9" y="21" width="20" height="6" rx="1.5" fill="url(#cigBodyGrad)"/>
+    <rect x="29" y="21" width="10" height="6" rx="1.5" fill="url(#cigFilterGrad)"/>
+    <!-- 余烬与微火 -->
+    <path d="M 9 21 L 7.5 24 L 9 27 Z" fill="#ef4444"/>
+    <circle cx="7" cy="24" r="1.2" fill="#fef08a"/>
+  </g>
+</svg>
+`);
+
+// 13. 偏好设置 · 既往烟龄岁月徽标 (罗盘时钟与光影时光)
+export const YEARS_CLOCK_ICON_SVG = svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="100%" height="100%">
+  <defs>
+    <linearGradient id="clockRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c084fc"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+  </defs>
+  <circle cx="24" cy="24" r="21" fill="rgba(168, 85, 247, 0.12)" stroke="rgba(192, 132, 252, 0.35)" stroke-width="1.2"/>
+  <circle cx="24" cy="24" r="15" fill="none" stroke="url(#clockRingGrad)" stroke-width="2"/>
+  <!-- 刻度点 -->
+  <circle cx="24" cy="11.5" r="1" fill="#c084fc"/>
+  <circle cx="36.5" cy="24" r="1" fill="#c084fc"/>
+  <circle cx="24" cy="36.5" r="1" fill="#c084fc"/>
+  <circle cx="11.5" cy="24" r="1" fill="#c084fc"/>
+  <!-- 时针分针 -->
+  <line x1="24" y1="15" x2="24" y2="24" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+  <line x1="24" y1="24" x2="31" y2="24" stroke="#fef08a" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="24" cy="24" r="2.2" fill="#fef08a"/>
+</svg>
+`);
+
+// 14. 偏好设置 · 灵动星芒徽标 (四角金色璀璨星辉)
+export const PROJECTION_SPARK_SVG = svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="100%" height="100%">
+  <path d="M 24 4 Q 24 24 44 24 Q 24 24 24 44 Q 24 24 4 24 Q 24 24 24 4 Z" fill="#fbbf24"/>
+  <circle cx="24" cy="24" r="4.5" fill="#ffffff"/>
+  <circle cx="24" cy="24" r="8" fill="rgba(254, 240, 138, 0.35)"/>
+</svg>
+`);
+
+

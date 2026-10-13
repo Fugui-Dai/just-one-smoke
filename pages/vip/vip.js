@@ -1,8 +1,8 @@
 // pages/vip/vip.js
-import { audioManager } from '../../utils/audioManager.js';
-import { triggerHaptic } from '../../utils/haptics.js';
-import { toast } from '../../utils/toastService.js';
-import { VIP_TIERS, VIP_PRIVILEGES, VIP_COMPARE_ROWS, VIP_THEME_OPTIONS, vipService } from '../../utils/vipService.js';
+import { audioManager } from '../../services/audioManager.js';
+import { triggerHaptic } from '../../services/haptics.js';
+import { toast } from '../../services/toastService.js';
+import { VIP_TIERS, VIP_PRIVILEGES, VIP_COMPARE_ROWS, VIP_THEME_OPTIONS, vipService } from '../../services/vipService.js';
 
 Page({
   data: {

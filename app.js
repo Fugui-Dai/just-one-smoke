@@ -1,5 +1,5 @@
 // app.js
-import { storageService } from './utils/storageService.js';
+import { storageService } from './services/storageService.js';
 
 const appOptions = {
   onLaunch() {

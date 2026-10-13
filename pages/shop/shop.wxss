@@ -367,7 +367,7 @@
 }
 
 .vip-headline-tag {
-  font-size: 17rpx;
+  font-size: 19rpx;
   font-weight: 800;
   color: #fef08a;
   background: rgba(180, 138, 52, 0.36);
@@ -395,7 +395,7 @@
 }
 
 .vip-banner-sub {
-  font-size: 20rpx;
+  font-size: 22rpx;
   font-weight: 600;
   color: #f3e5ab;
   text-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.65);
@@ -425,13 +425,13 @@
 }
 
 .vip-btn-text {
-  font-size: 20rpx;
+  font-size: 22rpx;
   font-weight: 800;
   line-height: 1;
 }
 
 .vip-btn-arrow {
-  font-size: 18rpx;
+  font-size: 20rpx;
   font-weight: 800;
   line-height: 1;
 }
@@ -565,7 +565,7 @@
   z-index: 15;
   background: linear-gradient(90deg, #c89e4c 0%, #ecd28f 50%, #b88c36 100%);
   color: #1c1305;
-  font-size: 14rpx;
+  font-size: 20rpx;
   font-weight: 800;
   padding: 3rpx 10rpx;
   border-radius: 8rpx;
@@ -580,22 +580,22 @@
   z-index: 14;
   display: flex;
   align-items: center;
-  gap: 3rpx;
+  gap: 4rpx;
   background: linear-gradient(135deg, rgba(22, 24, 30, 0.92) 0%, rgba(12, 13, 18, 0.96) 100%);
   border: 1px solid rgba(212, 175, 55, 0.52);
   box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.65);
-  padding: 2rpx 8rpx;
+  padding: 2rpx 10rpx;
   border-radius: 8rpx;
   pointer-events: none;
 }
 
 .vip-badge-crown {
-  font-size: 13rpx;
+  font-size: 18rpx;
   line-height: 1;
 }
 
 .vip-badge-txt {
-  font-size: 13rpx;
+  font-size: 20rpx;
   font-weight: 800;
   color: #f3d27a;
   line-height: 1;
@@ -606,12 +606,12 @@
   top: 8rpx;
   left: 8rpx;
   z-index: 14;
-  font-size: 13rpx;
+  font-size: 20rpx;
   font-weight: 600;
-  color: rgba(248, 250, 252, 0.78);
-  background: rgba(12, 14, 18, 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  padding: 2rpx 8rpx;
+  color: rgba(248, 250, 252, 0.88);
+  background: rgba(12, 14, 18, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  padding: 2rpx 10rpx;
   border-radius: 8rpx;
   white-space: nowrap;
   pointer-events: none;
@@ -908,14 +908,14 @@
 }
 
 .price-ref-label {
-  font-size: 15rpx;
+  font-size: 18rpx;
   color: #9ca3af;
   font-weight: 500;
   margin-right: 2rpx;
 }
 
 .price-symbol {
-  font-size: 16rpx;
+  font-size: 19rpx;
   color: #f5b82e;
   font-weight: 800;
 }
@@ -928,17 +928,17 @@
 }
 
 .price-unit {
-  font-size: 15rpx;
+  font-size: 18rpx;
   color: #9ca3af;
   margin-left: 1rpx;
 }
 
 .tar-tag {
-  font-size: 14rpx;
+  font-size: 18rpx;
   color: #9ca3af;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.14);
-  padding: 2rpx 8rpx;
+  padding: 2rpx 10rpx;
   border-radius: 999rpx;
   line-height: 1.2;
   white-space: nowrap;
@@ -1096,7 +1096,7 @@
 }
 
 .dpc-fb-text {
-  font-size: 14rpx;
+  font-size: 18rpx;
   font-weight: 800;
   color: #ffffff;
   text-align: center;
@@ -1126,11 +1126,11 @@
 }
 
 .dpc-cat-tag {
-  font-size: 16rpx;
+  font-size: 19rpx;
   color: #f59e0b;
   background: rgba(245, 158, 11, 0.15);
   border: 1px solid rgba(245, 158, 11, 0.35);
-  padding: 2rpx 8rpx;
+  padding: 2rpx 10rpx;
   border-radius: 8rpx;
   flex-shrink: 0;
 }
@@ -1143,7 +1143,7 @@
 }
 
 .dpc-price-sym {
-  font-size: 18rpx;
+  font-size: 20rpx;
   color: #cbd5e1;
 }
 
@@ -1155,12 +1155,12 @@
 }
 
 .dpc-price-unit {
-  font-size: 18rpx;
+  font-size: 20rpx;
   color: #94a3b8;
 }
 
 .dpc-slogan-line {
-  font-size: 17rpx;
+  font-size: 20rpx;
   color: #94a3b8;
   font-style: italic;
   overflow: hidden;
@@ -1240,13 +1240,13 @@
 }
 
 .track-status-tag {
-  font-size: 19rpx;
+  font-size: 21rpx;
   font-weight: 800;
   color: #10b981;
 }
 
 .track-vip-badge {
-  font-size: 17rpx;
+  font-size: 19rpx;
   font-weight: 800;
   color: #0b0f19;
   background: linear-gradient(90deg, #fbbf24, #f59e0b);
@@ -1271,7 +1271,7 @@
 }
 
 .track-progress-desc {
-  font-size: 18rpx;
+  font-size: 20rpx;
   color: #94a3b8;
 }
 
@@ -1292,14 +1292,14 @@
   border: 1px solid rgba(251, 191, 36, 0.25);
   border-radius: 10rpx;
   padding: 6rpx 4rpx;
-  font-size: 17rpx;
+  font-size: 19rpx;
   font-weight: 600;
   color: #fde68a;
   white-space: nowrap;
 }
 
 .perk-chip-icon {
-  font-size: 18rpx;
+  font-size: 20rpx;
   line-height: 1;
 }
 

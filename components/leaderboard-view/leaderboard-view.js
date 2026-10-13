@@ -58,6 +58,10 @@ Component({
     onLikeItem(e) {
       const id = e.currentTarget.dataset.id;
       this.triggerEvent('like', { id });
+    },
+
+    onAvatarError() {
+      this.setData({ 'profile.avatarUrl': '' });
     }
   }
 });

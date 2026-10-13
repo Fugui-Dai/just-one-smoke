@@ -190,6 +190,14 @@ button.user-avatar-btn::after,
   justify-content: center;
 }
 
+.user-nickname-row {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  width: 100%;
+  min-width: 0;
+}
+
 .user-nickname-input {
   font-size: 34rpx;
   font-weight: 700;
@@ -204,7 +212,11 @@ button.user-avatar-btn::after,
   outline: none;
   padding: 0;
   margin: 0;
-  max-width: 380rpx;
+  max-width: 250rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
 }
 
 .user-nickname-input.vip-nickname-gold {
@@ -212,35 +224,22 @@ button.user-avatar-btn::after,
   text-shadow: 0 2rpx 10rpx rgba(245, 208, 128, 0.25);
 }
 
-.user-meta-subrow {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10rpx;
-  margin-top: 6rpx;
-  cursor: pointer;
-}
-
-.user-meta-smoke-info {
-  font-size: 21rpx;
-  color: #94a3b8;
-  line-height: 1.3;
-}
-
 .profile-vip-nameplate {
   display: inline-flex;
   align-items: center;
-  align-self: flex-start;
+  gap: 4rpx;
+  flex-shrink: 0;
   padding: 3rpx 14rpx;
   border-radius: 999rpx;
   background: linear-gradient(90deg, rgba(245, 208, 128, 0.22) 0%, rgba(212, 175, 55, 0.08) 100%);
   border: 1px solid rgba(245, 208, 128, 0.45);
-  font-size: 20rpx;
+  font-size: 21rpx;
   font-weight: 700;
   color: #f5d080;
-  letter-spacing: 1rpx;
+  letter-spacing: 0.5rpx;
   box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.35);
   transition: all 0.25s ease;
+  white-space: nowrap;
 }
 
 .profile-vip-nameplate.is-vip-inactive {
@@ -253,6 +252,43 @@ button.user-avatar-btn::after,
 .profile-vip-nameplate.is-vip-inactive .pvn-crown {
   filter: grayscale(1);
   opacity: 0.65;
+}
+
+.user-meta-subrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6rpx;
+  margin-top: 8rpx;
+  padding: 3rpx 14rpx;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 999rpx;
+  width: fit-content;
+  max-width: 100%;
+  box-sizing: border-box;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.user-meta-subrow:active {
+  background: rgba(255, 255, 255, 0.12);
+  transform: scale(0.97);
+}
+
+.user-meta-smoke-tag {
+  font-size: 22rpx;
+  color: #cbd5e1;
+  font-weight: 500;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.user-meta-edit-icon {
+  font-size: 20rpx;
+  color: #38bdf8;
+  margin-left: 2rpx;
+  line-height: 1;
 }
 
 .profile-action-pills-row {
@@ -327,7 +363,7 @@ button.user-avatar-btn::after,
 }
 
 .punch-card-title {
-  font-size: 20rpx;
+  font-size: 22rpx;
   color: #94a3b8;
   line-height: 1.2;
   margin-bottom: 2rpx;
@@ -432,12 +468,12 @@ button.user-avatar-btn::after,
 
 /* 黑金超微胶囊微标 */
 .vb-black-gold-tag {
-  font-size: 18rpx;
+  font-size: 22rpx;
   font-weight: 700;
   color: #e5c07b;
   background: rgba(229, 192, 123, 0.12);
   border: 1px solid rgba(229, 192, 123, 0.32);
-  padding: 2rpx 12rpx;
+  padding: 2rpx 14rpx;
   border-radius: 999px;
   letter-spacing: 0.5rpx;
   line-height: 1.2;
@@ -446,7 +482,7 @@ button.user-avatar-btn::after,
 
 /* 副文案：钛银冷灰，清晰可读 */
 .vb-sub {
-  font-size: 22rpx;
+  font-size: 24rpx;
   color: #8c9bb0;
   line-height: 1.3;
   white-space: nowrap;
@@ -468,7 +504,7 @@ button.user-avatar-btn::after,
 }
 
 .vbb-text {
-  font-size: 22rpx;
+  font-size: 24rpx;
   font-weight: 800;
   color: #17120a;
   letter-spacing: 0.5rpx;
@@ -491,12 +527,13 @@ button.user-avatar-btn::after,
   margin-bottom: 16rpx;
 }
 
+
 .sec-pill-tag {
-  font-size: 18rpx;
+  font-size: 22rpx;
   color: #34d399;
   background: rgba(52, 211, 153, 0.15);
   border: 1px solid rgba(52, 211, 153, 0.35);
-  padding: 2rpx 10rpx;
+  padding: 2rpx 12rpx;
   border-radius: 12rpx;
   font-weight: 600;
   margin-left: 10rpx;
@@ -604,7 +641,7 @@ button.user-avatar-btn::after,
 }
 
 .multiplier-label {
-  font-size: 18rpx;
+  font-size: 22rpx;
   color: #94a3b8;
   margin-top: 6rpx;
 }
@@ -625,7 +662,7 @@ button.user-avatar-btn::after,
 }
 
 .result-yen {
-  font-size: 22rpx;
+  font-size: 24rpx;
   font-weight: 800;
   color: #fbbf24;
 }
@@ -640,7 +677,7 @@ button.user-avatar-btn::after,
 }
 
 .result-label {
-  font-size: 18rpx;
+  font-size: 22rpx;
   color: #94a3b8;
   margin-top: 6rpx;
 }
@@ -824,7 +861,7 @@ button.user-avatar-btn::after,
 }
 
 .node-check-mark {
-  font-size: 14rpx;
+  font-size: 20rpx;
   color: #ffffff;
   font-weight: 900;
 }
@@ -875,13 +912,13 @@ button.user-avatar-btn::after,
 }
 
 .node-dot-symbol {
-  font-size: 14rpx;
+  font-size: 20rpx;
   color: #ffffff;
   font-weight: 900;
 }
 
 .node-dot-hollow {
-  font-size: 12rpx;
+  font-size: 18rpx;
   color: #64748b;
 }
 
@@ -892,12 +929,12 @@ button.user-avatar-btn::after,
 }
 
 .who-range-tag {
-  font-size: 18rpx;
+  font-size: 22rpx;
   color: #34d399;
   background: rgba(16, 185, 129, 0.12);
   border: 1px solid rgba(16, 185, 129, 0.25);
   border-radius: 12rpx;
-  padding: 2rpx 10rpx;
+  padding: 2rpx 12rpx;
   font-weight: 600;
 }
 
@@ -1089,14 +1126,14 @@ button.user-avatar-btn::after,
 }
 .hud-scanner-code {
   font-family: monospace;
-  font-size: 17rpx;
+  font-size: 22rpx;
   color: rgba(56, 189, 248, 0.85);
   letter-spacing: 2rpx;
   font-weight: 700;
 }
 .hud-scanner-status {
   font-family: monospace;
-  font-size: 17rpx;
+  font-size: 22rpx;
   color: #10b981;
   letter-spacing: 1rpx;
   font-weight: 600;
@@ -1359,9 +1396,9 @@ button.user-avatar-btn::after,
 /* HUD 数据引出框 (半透明磨砂科技卡片) */
 .hud-card {
   position: absolute;
-  width: 176rpx;
-  background: rgba(6, 15, 30, 0.84);
-  border: 1px solid rgba(56, 189, 248, 0.26);
+  width: 184rpx;
+  background: rgba(6, 15, 30, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 14rpx;
   padding: 10rpx 12rpx;
   box-sizing: border-box;
@@ -1369,16 +1406,57 @@ button.user-avatar-btn::after,
   -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.55);
   z-index: 10;
-  transition: all 0.25s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .hud-card:active {
   transform: scale(0.95);
 }
-.hud-card.is-active {
-  border-color: rgba(56, 189, 248, 0.85);
-  background: rgba(14, 116, 144, 0.38);
-  box-shadow: 0 0 18rpx rgba(56, 189, 248, 0.5);
+
+/* 各器官独立专属色彩与微发光边框 */
+.hud-card-lungs {
+  border-color: rgba(56, 189, 248, 0.35);
+  background: rgba(7, 24, 44, 0.84);
 }
+.hud-card-lungs.is-active {
+  border-color: rgba(56, 189, 248, 0.95);
+  background: rgba(14, 116, 144, 0.42);
+  box-shadow: 0 0 20rpx rgba(56, 189, 248, 0.5), inset 0 0 12rpx rgba(56, 189, 248, 0.25);
+  transform: scale(1.02);
+}
+
+.hud-card-heart {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(38, 22, 7, 0.84);
+}
+.hud-card-heart.is-active {
+  border-color: rgba(245, 158, 11, 0.95);
+  background: rgba(180, 83, 9, 0.42);
+  box-shadow: 0 0 20rpx rgba(245, 158, 11, 0.5), inset 0 0 12rpx rgba(245, 158, 11, 0.25);
+  transform: scale(1.02);
+}
+
+.hud-card-brain {
+  border-color: rgba(192, 132, 252, 0.35);
+  background: rgba(28, 13, 44, 0.84);
+}
+.hud-card-brain.is-active {
+  border-color: rgba(192, 132, 252, 0.95);
+  background: rgba(126, 34, 206, 0.42);
+  box-shadow: 0 0 20rpx rgba(192, 132, 252, 0.5), inset 0 0 12rpx rgba(192, 132, 252, 0.25);
+  transform: scale(1.02);
+}
+
+.hud-card-blood {
+  border-color: rgba(52, 211, 153, 0.35);
+  background: rgba(6, 32, 23, 0.84);
+}
+.hud-card-blood.is-active {
+  border-color: rgba(52, 211, 153, 0.95);
+  background: rgba(5, 150, 105, 0.42);
+  box-shadow: 0 0 20rpx rgba(52, 211, 153, 0.5), inset 0 0 12rpx rgba(52, 211, 153, 0.25);
+  transform: scale(1.02);
+}
+
 .hud-card-tl { top: 48rpx; left: 14rpx; }
 .hud-card-bl { bottom: 94rpx; left: 14rpx; }
 .hud-card-tr { top: 48rpx; right: 14rpx; }
@@ -1389,19 +1467,55 @@ button.user-avatar-btn::after,
   flex-direction: column;
   margin-bottom: 6rpx;
 }
+
+.hud-title-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+/* 呼吸式器官脉冲状态指示灯 */
+.hud-organ-dot {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+  animation: organDotPulse 2.2s infinite ease-in-out;
+}
+
+@keyframes organDotPulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.35); opacity: 1; }
+}
+
+.dot-lungs { background: #38bdf8; box-shadow: 0 0 8rpx #38bdf8; }
+.dot-heart { background: #f59e0b; box-shadow: 0 0 8rpx #f59e0b; }
+.dot-brain { background: #c084fc; box-shadow: 0 0 8rpx #c084fc; }
+.dot-blood { background: #34d399; box-shadow: 0 0 8rpx #34d399; }
+
 .hud-card-title {
-  font-size: 20rpx;
+  font-size: 24rpx;
   font-weight: 700;
-  color: #f1f5f9;
   line-height: 1.2;
 }
+
+/* 器官专属高亮标题 */
+.title-lungs { color: #7dd3fc; text-shadow: 0 0 8rpx rgba(56, 189, 248, 0.45); }
+.title-heart { color: #fde047; text-shadow: 0 0 8rpx rgba(245, 158, 11, 0.45); }
+.title-brain { color: #e9d5ff; text-shadow: 0 0 8rpx rgba(192, 132, 252, 0.45); }
+.title-blood { color: #6ee7b7; text-shadow: 0 0 8rpx rgba(52, 211, 153, 0.45); }
+
 .hud-card-en {
-  font-size: 15rpx;
+  font-size: 19rpx;
   font-family: monospace;
-  color: #64748b;
   text-transform: uppercase;
   letter-spacing: 0.5rpx;
+  margin-top: 2rpx;
 }
+.en-lungs { color: rgba(56, 189, 248, 0.7); }
+.en-heart { color: rgba(245, 158, 11, 0.7); }
+.en-brain { color: rgba(192, 132, 252, 0.7); }
+.en-blood { color: rgba(52, 211, 153, 0.7); }
 
 .hud-card-body {
   display: flex;
@@ -1414,11 +1528,16 @@ button.user-avatar-btn::after,
   align-items: center;
 }
 .hud-metric-label {
-  font-size: 18rpx;
-  color: #94a3b8;
+  font-size: 22rpx;
+  font-weight: 500;
 }
+.label-lungs { color: #bae6fd; }
+.label-heart { color: #fef08a; }
+.label-brain { color: #f3e8ff; }
+.label-blood { color: #a7f3d0; }
+
 .hud-metric-val {
-  font-size: 20rpx;
+  font-size: 23rpx;
   font-weight: 700;
   font-family: monospace;
 }
@@ -1430,10 +1549,14 @@ button.user-avatar-btn::after,
 .hud-progress-track {
   width: 100%;
   height: 6rpx;
-  background: rgba(255, 255, 255, 0.08);
   border-radius: 4rpx;
   overflow: hidden;
 }
+.track-lungs { background: rgba(56, 189, 248, 0.16); }
+.track-heart { background: rgba(245, 158, 11, 0.16); }
+.track-brain { background: rgba(192, 132, 252, 0.16); }
+.track-blood { background: rgba(52, 211, 153, 0.16); }
+
 .hud-progress-bar {
   height: 100%;
   border-radius: 4rpx;
@@ -1449,15 +1572,16 @@ button.user-avatar-btn::after,
   position: absolute;
   pointer-events: none;
   z-index: 5;
+  transition: all 0.3s ease;
 }
 /* 左上指向左肺叶 (胸腔左中部) */
 .hud-lead-line.to-lung {
   top: 104rpx;
-  left: 186rpx;
-  width: 78rpx;
+  left: 194rpx;
+  width: 70rpx;
   height: 92rpx;
-  border-top: 2rpx solid rgba(56, 189, 248, 0.7);
-  border-right: 2rpx solid rgba(56, 189, 248, 0.7);
+  border-top: 2rpx solid rgba(56, 189, 248, 0.55);
+  border-right: 2rpx solid rgba(56, 189, 248, 0.55);
 }
 .hud-lead-line.to-lung::after {
   content: '';
@@ -1469,16 +1593,26 @@ button.user-avatar-btn::after,
   background: #38bdf8;
   border-radius: 50%;
   box-shadow: 0 0 10rpx #38bdf8;
+  transition: all 0.3s ease;
+}
+.hud-lead-line.to-lung.lead-active {
+  border-top-color: #38bdf8;
+  border-right-color: #38bdf8;
+  filter: drop-shadow(0 0 6rpx rgba(56, 189, 248, 0.8));
+}
+.hud-lead-line.to-lung.lead-active::after {
+  box-shadow: 0 0 14rpx #38bdf8, 0 0 24rpx #38bdf8;
+  transform: scale(1.3);
 }
 
 /* 右上指向心脏 (正中偏左纵隔心区) */
 .hud-lead-line.to-heart {
   top: 104rpx;
-  right: 186rpx;
-  width: 118rpx;
+  right: 194rpx;
+  width: 110rpx;
   height: 112rpx;
-  border-top: 2rpx solid rgba(245, 158, 11, 0.7);
-  border-left: 2rpx solid rgba(245, 158, 11, 0.7);
+  border-top: 2rpx solid rgba(245, 158, 11, 0.55);
+  border-left: 2rpx solid rgba(245, 158, 11, 0.55);
 }
 .hud-lead-line.to-heart::after {
   content: '';
@@ -1490,16 +1624,26 @@ button.user-avatar-btn::after,
   background: #f59e0b;
   border-radius: 50%;
   box-shadow: 0 0 10rpx #f59e0b;
+  transition: all 0.3s ease;
+}
+.hud-lead-line.to-heart.lead-active {
+  border-top-color: #f59e0b;
+  border-left-color: #f59e0b;
+  filter: drop-shadow(0 0 6rpx rgba(245, 158, 11, 0.8));
+}
+.hud-lead-line.to-heart.lead-active::after {
+  box-shadow: 0 0 14rpx #f59e0b, 0 0 24rpx #f59e0b;
+  transform: scale(1.3);
 }
 
 /* 左下指向迷走神经/太阳神经丛中枢 */
 .hud-lead-line.to-visceral {
   bottom: 245rpx;
-  left: 186rpx;
-  width: 120rpx;
+  left: 194rpx;
+  width: 112rpx;
   height: 70rpx;
-  border-bottom: 2rpx solid rgba(192, 132, 252, 0.7);
-  border-right: 2rpx solid rgba(192, 132, 252, 0.7);
+  border-bottom: 2rpx solid rgba(192, 132, 252, 0.55);
+  border-right: 2rpx solid rgba(192, 132, 252, 0.55);
 }
 .hud-lead-line.to-visceral::after {
   content: '';
@@ -1511,16 +1655,26 @@ button.user-avatar-btn::after,
   background: #c084fc;
   border-radius: 50%;
   box-shadow: 0 0 10rpx #c084fc;
+  transition: all 0.3s ease;
+}
+.hud-lead-line.to-visceral.lead-active {
+  border-bottom-color: #c084fc;
+  border-right-color: #c084fc;
+  filter: drop-shadow(0 0 6rpx rgba(192, 132, 252, 0.8));
+}
+.hud-lead-line.to-visceral.lead-active::after {
+  box-shadow: 0 0 14rpx #c084fc, 0 0 24rpx #c084fc;
+  transform: scale(1.3);
 }
 
 /* 右下指向大动脉与全身微循环血管网 */
 .hud-lead-line.to-blood {
   bottom: 140rpx;
-  right: 190rpx;
-  width: 68rpx;
+  right: 198rpx;
+  width: 60rpx;
   height: 52rpx;
-  border-bottom: 2rpx solid rgba(52, 211, 153, 0.7);
-  border-left: 2rpx solid rgba(52, 211, 153, 0.7);
+  border-bottom: 2rpx solid rgba(52, 211, 153, 0.55);
+  border-left: 2rpx solid rgba(52, 211, 153, 0.55);
 }
 .hud-lead-line.to-blood::after {
   content: '';
@@ -1532,6 +1686,16 @@ button.user-avatar-btn::after,
   background: #34d399;
   border-radius: 50%;
   box-shadow: 0 0 10rpx #34d399;
+  transition: all 0.3s ease;
+}
+.hud-lead-line.to-blood.lead-active {
+  border-bottom-color: #34d399;
+  border-left-color: #34d399;
+  filter: drop-shadow(0 0 6rpx rgba(52, 211, 153, 0.8));
+}
+.hud-lead-line.to-blood.lead-active::after {
+  box-shadow: 0 0 14rpx #34d399, 0 0 24rpx #34d399;
+  transform: scale(1.3);
 }
 
 /* 交互触控热区透明层 */
@@ -1608,8 +1772,8 @@ button.user-avatar-btn::after,
 
 /* 选中器官医学临床深度分析卡片 */
 .twin-detail-card {
-  background: rgba(15, 23, 42, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20rpx;
   padding: 24rpx;
   display: flex;
@@ -1618,6 +1782,28 @@ button.user-avatar-btn::after,
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.35);
+  transition: all 0.35s ease;
+}
+
+.twin-detail-card.card-theme-lungs {
+  border-color: rgba(56, 189, 248, 0.4);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(14, 116, 144, 0.22));
+  box-shadow: 0 8rpx 26rpx rgba(0, 0, 0, 0.45), 0 0 20rpx rgba(56, 189, 248, 0.18);
+}
+.twin-detail-card.card-theme-heart {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(180, 83, 9, 0.22));
+  box-shadow: 0 8rpx 26rpx rgba(0, 0, 0, 0.45), 0 0 20rpx rgba(245, 158, 11, 0.18);
+}
+.twin-detail-card.card-theme-brain {
+  border-color: rgba(192, 132, 252, 0.4);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(126, 34, 206, 0.22));
+  box-shadow: 0 8rpx 26rpx rgba(0, 0, 0, 0.45), 0 0 20rpx rgba(192, 132, 252, 0.18);
+}
+.twin-detail-card.card-theme-blood {
+  border-color: rgba(52, 211, 153, 0.4);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(5, 150, 105, 0.22));
+  box-shadow: 0 8rpx 26rpx rgba(0, 0, 0, 0.45), 0 0 20rpx rgba(52, 211, 153, 0.18);
 }
 
 .detail-header-row {
@@ -1632,13 +1818,26 @@ button.user-avatar-btn::after,
   gap: 14rpx;
 }
 
+.dh-icon-box {
+  width: 68rpx;
+  height: 68rpx;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
 .dh-icon {
   font-size: 38rpx;
 }
 
 .dh-svg-icon {
-  width: 52rpx;
-  height: 52rpx;
+  width: 48rpx;
+  height: 48rpx;
   display: block;
 }
 
@@ -1655,12 +1854,12 @@ button.user-avatar-btn::after,
 }
 
 .dh-stage-title {
-  font-size: 20rpx;
+  font-size: 22rpx;
   color: #94a3b8;
 }
 
 .dh-badge {
-  font-size: 20rpx;
+  font-size: 22rpx;
   font-weight: 700;
   padding: 6rpx 16rpx;
   border-radius: 24rpx;
@@ -1696,7 +1895,7 @@ button.user-avatar-btn::after,
 }
 
 .dm-label {
-  font-size: 18rpx;
+  font-size: 22rpx;
   color: #64748b;
 }
 
@@ -1712,12 +1911,12 @@ button.user-avatar-btn::after,
 }
 
 .cb-icon {
-  font-size: 22rpx;
+  font-size: 24rpx;
   margin-top: 2rpx;
 }
 
 .cb-text {
-  font-size: 20rpx;
+  font-size: 24rpx;
   color: #cbd5e1;
   line-height: 1.5;
 }
@@ -1796,7 +1995,7 @@ button.user-avatar-btn::after,
 }
 
 .c-week-lbl {
-  font-size: 18rpx;
+  font-size: 22rpx;
   color: #64748b;
   font-weight: 600;
 }
@@ -1907,8 +2106,8 @@ button.user-avatar-btn::after,
 }
 
 .cc-num.is-green { color: #34d399; }
-.cc-unit { font-size: 18rpx; font-weight: 500; margin-left: 2rpx; }
-.cc-label { font-size: 20rpx; color: #64748b; margin-top: 2rpx; }
+.cc-unit { font-size: 20rpx; font-weight: 500; margin-left: 2rpx; }
+.cc-label { font-size: 22rpx; color: #64748b; margin-top: 2rpx; }
 .cc-divider { width: 1px; height: 24rpx; background: rgba(255, 255, 255, 0.08); }
 
 /* ==================== 8. 意见反馈 (严格左对齐，杜绝居中) ==================== */
@@ -1989,7 +2188,7 @@ button.user-avatar-btn::after,
 }
 
 .fb-badge {
-  font-size: 20rpx;
+  font-size: 22rpx;
   color: #38bdf8;
   background: rgba(56, 189, 248, 0.15);
   border: 1px solid rgba(56, 189, 248, 0.3);
@@ -2081,11 +2280,11 @@ button.user-avatar-btn::after,
 }
 
 .sec-pill-tag.gold-pill {
-  font-size: 18rpx;
+  font-size: 22rpx;
   font-weight: 800;
   color: #1e1204;
   background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
-  padding: 2rpx 12rpx;
+  padding: 2rpx 14rpx;
   border-radius: 10rpx;
 }
 
@@ -2096,13 +2295,13 @@ button.user-avatar-btn::after,
 }
 
 .hhr-text {
-  font-size: 22rpx;
+  font-size: 24rpx;
   font-weight: 700;
   color: #fbbf24;
 }
 
 .hhr-percent {
-  font-size: 20rpx;
+  font-size: 22rpx;
   color: #94a3b8;
 }
 
@@ -2196,16 +2395,16 @@ button.user-avatar-btn::after,
 }
 
 .lock-icon {
-  font-size: 16rpx;
+  font-size: 20rpx;
 }
 
 .badge-tier-tag {
   position: absolute;
   top: -6rpx;
   right: -6rpx;
-  font-size: 14rpx;
+  font-size: 18rpx;
   font-weight: 800;
-  padding: 1rpx 8rpx;
+  padding: 2rpx 10rpx;
   border-radius: 8rpx;
   line-height: 1.2;
   box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.5);
@@ -2222,7 +2421,7 @@ button.user-avatar-btn::after,
 }
 
 .badge-name {
-  font-size: 21rpx;
+  font-size: 23rpx;
   font-weight: 800;
   color: #f8fafc;
   margin-top: 10rpx;
@@ -2239,7 +2438,7 @@ button.user-avatar-btn::after,
 }
 
 .badge-sub-progress {
-  font-size: 16rpx;
+  font-size: 20rpx;
   color: #94a3b8;
   margin-top: 2rpx;
   text-align: center;
@@ -2335,7 +2534,7 @@ button.user-avatar-btn::after,
 }
 
 .cert-tier-pill {
-  font-size: 18rpx;
+  font-size: 22rpx;
   font-weight: 800;
   padding: 4rpx 16rpx;
   border-radius: 20rpx;
@@ -2352,9 +2551,9 @@ button.user-avatar-btn::after,
 }
 
 .cert-status-badge {
-  font-size: 20rpx;
+  font-size: 24rpx;
   font-weight: 800;
-  padding: 4rpx 16rpx;
+  padding: 4rpx 18rpx;
   border-radius: 12rpx;
   margin-bottom: 24rpx;
 }
@@ -2372,7 +2571,7 @@ button.user-avatar-btn::after,
 }
 
 .cert-desc {
-  font-size: 23rpx;
+  font-size: 25rpx;
   color: #cbd5e1;
   text-align: center;
   line-height: 1.5;
@@ -2394,7 +2593,7 @@ button.user-avatar-btn::after,
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 20rpx;
+  font-size: 23rpx;
   margin-bottom: 10rpx;
 }
 
@@ -2404,7 +2603,7 @@ button.user-avatar-btn::after,
 
 .cp-val {
   font-weight: 800;
-  font-size: 22rpx;
+  font-size: 24rpx;
 }
 
 .cp-track {
@@ -2439,7 +2638,7 @@ button.user-avatar-btn::after,
 }
 
 .cq-text {
-  font-size: 19rpx;
+  font-size: 24rpx;
   color: #fbbf24;
   line-height: 1.4;
 }

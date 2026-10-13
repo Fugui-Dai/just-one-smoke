@@ -107,7 +107,7 @@ page {
   position: absolute;
   top: -8rpx;
   right: -14rpx;
-  font-size: 16rpx;
+  font-size: 18rpx;
   line-height: 1;
 }
 
@@ -125,7 +125,7 @@ page {
 }
 
 .vtw-pill-tag {
-  font-size: 18rpx;
+  font-size: 20rpx;
   color: #94a3b8;
 }
 

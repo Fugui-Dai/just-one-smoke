@@ -1,4 +1,0 @@
-/* components/navigation-bar/navigation-bar.wxss */
-.nav-bar-placeholder {
-  display: none;
-}

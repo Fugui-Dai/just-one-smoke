@@ -1,10 +1,10 @@
 // pages/leaderboard/leaderboard.js
-import { audioManager } from '../../utils/audioManager.js';
-import { triggerHaptic } from '../../utils/haptics.js';
-import { storageService } from '../../utils/storageService.js';
-import { leaderboardService } from '../../utils/leaderboardService.js';
-import { calculateSavings, calculateQuitDays } from '../../utils/healthCalculator.js';
-import { vipService } from '../../utils/vipService.js';
+import { audioManager } from '../../services/audioManager.js';
+import { triggerHaptic } from '../../services/haptics.js';
+import { storageService } from '../../services/storageService.js';
+import { leaderboardService } from '../../services/leaderboardService.js';
+import { calculateSavings, calculateQuitDays } from '../../configs/healthCalculator.js';
+import { vipService } from '../../services/vipService.js';
 
 function measureSafeAreaSync() {
   try {

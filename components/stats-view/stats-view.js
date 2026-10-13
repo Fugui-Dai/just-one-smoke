@@ -1,8 +1,8 @@
 // components/stats-view/stats-view.js
 import { buildTrendLineChartSvg } from '../../utils/trendChartSvgBuilder.js';
-import { storageService } from '../../utils/storageService.js';
-import { vipService } from '../../utils/vipService.js';
-import { toast } from '../../utils/toastService.js';
+import { storageService } from '../../services/storageService.js';
+import { vipService } from '../../services/vipService.js';
+import { toast } from '../../services/toastService.js';
 import {
   LUNG_ICON_SVG,
   HEART_ICON_SVG,
@@ -15,7 +15,7 @@ import {
   ACHIEVEMENTS,
   checkAchievementsToUnlock,
   getAchievementProgress
-} from '../../utils/achievements.js';
+} from '../../configs/achievements.js';
 
 Component({
   properties: {
@@ -589,6 +589,12 @@ Component({
         if (wx.vibrateShort) wx.vibrateShort({ type: 'medium' });
       } catch (err) {}
       this.triggerEvent('updateavatar', { avatarUrl });
+    },
+
+    onAvatarError(e) {
+      console.warn('Avatar image failed to load, falling back to default vector SVG', e);
+      this.setData({ 'profile.avatarUrl': '' });
+      this.triggerEvent('updateavatar', { avatarUrl: '' });
     },
 
     onNicknameChange(e) {

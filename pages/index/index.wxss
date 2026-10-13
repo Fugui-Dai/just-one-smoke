@@ -73,7 +73,7 @@
 }
 
 .brand-tag {
-  font-size: 18rpx;
+  font-size: 20rpx;
   color: #ff9944;
   background: rgba(255, 102, 0, 0.15);
   border: 1px solid rgba(255, 102, 0, 0.3);
@@ -194,7 +194,7 @@
   border: 1px solid rgba(16, 185, 129, 0.35);
   padding: 4rpx 14rpx;
   border-radius: 20rpx;
-  font-size: 20rpx;
+  font-size: 22rpx;
   color: #34d399;
   font-weight: 600;
 }
@@ -212,7 +212,7 @@
   border: 1px solid rgba(245, 158, 11, 0.3);
   padding: 4rpx 14rpx;
   border-radius: 20rpx;
-  font-size: 20rpx;
+  font-size: 22rpx;
   color: #fbbf24;
   font-weight: 600;
 }
@@ -694,7 +694,7 @@ button.dock-btn-wrap.share-dock-item::after {
 }
 
 .dock-title {
-  font-size: 20rpx;
+  font-size: 22rpx;
   font-weight: 600;
   color: #f1f5f9;
   margin-top: 5rpx;
@@ -704,7 +704,7 @@ button.dock-btn-wrap.share-dock-item::after {
 }
 
 .dock-sub-title {
-  font-size: 15rpx;
+  font-size: 20rpx;
   color: #d97706;
   margin-top: 1rpx;
   letter-spacing: 0.3rpx;
@@ -831,7 +831,7 @@ button.dock-btn-wrap.share-dock-item::after {
   z-index: 6;
   background: #f59e0b;
   color: #000000;
-  font-size: 16rpx;
+  font-size: 19rpx;
   font-weight: 800;
   padding: 1rpx 8rpx;
   border-radius: 12rpx;
@@ -903,7 +903,7 @@ button.dock-btn-wrap.share-dock-item::after {
   border-radius: 12rpx;
   background: #10b981;
   color: #ffffff;
-  font-size: 16rpx;
+  font-size: 19rpx;
   font-weight: 800;
   display: flex;
   align-items: center;
@@ -983,7 +983,7 @@ button.dock-btn-wrap.share-dock-item::after {
   gap: 4rpx;
   padding: 6rpx 14rpx;
   border-radius: 24rpx;
-  font-size: 18rpx;
+  font-size: 20rpx;
   color: #94a3b8;
   transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -996,11 +996,11 @@ button.dock-btn-wrap.share-dock-item::after {
 }
 
 .chip-icon {
-  font-size: 20rpx;
+  font-size: 22rpx;
 }
 
 .chip-name {
-  font-size: 18rpx;
+  font-size: 20rpx;
   white-space: nowrap;
 }
 
@@ -2158,7 +2158,7 @@ button.dock-btn-wrap.share-dock-item::after {
 }
 
 .scene-badge {
-  font-size: 16rpx;
+  font-size: 20rpx;
   font-weight: 700;
   color: #34d399;
   background: rgba(16, 185, 129, 0.18);
@@ -2175,7 +2175,7 @@ button.dock-btn-wrap.share-dock-item::after {
 }
 
 .scene-sub {
-  font-size: 18rpx;
+  font-size: 22rpx;
   color: #94a3b8;
   margin-bottom: 14rpx;
   line-height: 1.3;
@@ -2191,8 +2191,8 @@ button.dock-btn-wrap.share-dock-item::after {
   align-self: flex-start;
 }
 
-.st-icon { font-size: 16rpx; }
-.st-text { font-size: 17rpx; color: #cbd5e1; }
+.st-icon { font-size: 20rpx; }
+.st-text { font-size: 22rpx; color: #cbd5e1; }
 
 /* 底部快捷名烟陈列入口 */
 .drawer-shelf-entry {
@@ -2228,7 +2228,7 @@ button.dock-btn-wrap.share-dock-item::after {
 }
 
 .dse-sub {
-  font-size: 18rpx;
+  font-size: 22rpx;
   color: #cbd5e1;
   margin-top: 2rpx;
 }
@@ -2695,7 +2695,7 @@ button.dock-btn-wrap.share-dock-item::after {
   width: 44rpx;
   height: 44rpx;
   display: block;
-  filter: drop-shadow(0 0 6rpx rgba(249, 115, 22, 0.8));
+  filter: drop-shadow(0 2rpx 6rpx rgba(0, 0, 0, 0.45));
 }
 
 .tfc-img-icon {
@@ -2709,7 +2709,7 @@ button.dock-btn-wrap.share-dock-item::after {
   width: 46rpx;
   height: 46rpx;
   display: block;
-  filter: drop-shadow(0 0 10rpx rgba(249, 115, 22, 0.85));
+  filter: drop-shadow(0 2rpx 6rpx rgba(0, 0, 0, 0.45));
 }
 
 .trial-dock-badge {
@@ -2718,9 +2718,9 @@ button.dock-btn-wrap.share-dock-item::after {
   right: -8rpx;
   background: #f43f5e;
   color: #ffffff;
-  font-size: 16rpx;
+  font-size: 18rpx;
   font-weight: 800;
-  padding: 2rpx 8rpx;
+  padding: 2rpx 10rpx;
   border-radius: 12rpx;
   box-shadow: 0 0 10rpx rgba(244, 63, 94, 0.7);
   animation: pulseTrialBadge 1s infinite alternate;
@@ -2825,7 +2825,7 @@ button.dock-btn-wrap.share-dock-item::after {
 }
 
 .tfc-link {
-  font-size: 18rpx;
+  font-size: 20rpx;
   color: #fbbf24;
   font-weight: 700;
 }
@@ -2847,6 +2847,7 @@ button.dock-btn-wrap.share-dock-item::after {
   display: flex;
   flex-direction: column;
   animation: slideDrawerUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
 }
 
 @keyframes slideDrawerUp {
@@ -2880,7 +2881,7 @@ button.dock-btn-wrap.share-dock-item::after {
 }
 
 .ed-vip-pill {
-  font-size: 16rpx;
+  font-size: 19rpx;
   font-weight: 800;
   color: #1e1204;
   background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
@@ -2896,9 +2897,11 @@ button.dock-btn-wrap.share-dock-item::after {
 }
 
 .effects-cards-scroll {
+  width: 100%;
   height: 58vh;
   max-height: 58vh;
   overflow-y: auto;
+  box-sizing: border-box;
   margin-bottom: 16rpx;
 }
 
@@ -2906,12 +2909,16 @@ button.dock-btn-wrap.share-dock-item::after {
   display: flex;
   flex-direction: column;
   gap: 16rpx;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6rpx 8rpx; /* 预留微光晕安全边距，彻底杜绝左右边框被截断或溢出屏幕 */
 }
 
 .effect-card {
   display: flex;
   align-items: center;
   gap: 14rpx;
+  width: 100%;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20rpx;
@@ -2922,9 +2929,9 @@ button.dock-btn-wrap.share-dock-item::after {
 
 .effect-card.active-effect-card {
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.18) 0%, rgba(217, 119, 6, 0.08) 100%);
-  border-color: #f59e0b;
-  box-shadow: 0 0 24rpx rgba(245, 158, 11, 0.35), inset 0 0 12rpx rgba(245, 158, 11, 0.15);
-  transform: scale(1.01);
+  border: 1.5px solid #f59e0b;
+  box-shadow: 0 4rpx 18rpx rgba(0, 0, 0, 0.4), inset 0 0 14rpx rgba(245, 158, 11, 0.22);
+  /* 彻底移除导致横向溢出屏幕的 transform: scale(1.01) */
 }
 
 .effect-card.locked-effect-card {
@@ -2971,28 +2978,28 @@ button.dock-btn-wrap.share-dock-item::after {
 }
 
 .ec-cat-badge {
-  font-size: 16rpx;
+  font-size: 18rpx;
   font-weight: 700;
-  padding: 2rpx 8rpx;
+  padding: 2rpx 10rpx;
   border-radius: 6rpx;
   flex-shrink: 0;
   line-height: 1.3;
 }
 
 .ec-using-badge {
-  font-size: 16rpx;
+  font-size: 18rpx;
   font-weight: 800;
   color: #10b981;
   background: rgba(16, 185, 129, 0.16);
   border: 1px solid rgba(16, 185, 129, 0.4);
-  padding: 2rpx 8rpx;
+  padding: 2rpx 10rpx;
   border-radius: 6rpx;
   flex-shrink: 0;
   line-height: 1.3;
 }
 
 .ec-desc {
-  font-size: 19rpx;
+  font-size: 21rpx;
   color: #94a3b8;
   margin-top: 4rpx;
   line-height: 1.35;
@@ -3020,7 +3027,7 @@ button.dock-btn-wrap.share-dock-item::after {
 }
 
 .ec-need-note {
-  font-size: 18rpx;
+  font-size: 20rpx;
   color: #64748b;
   white-space: nowrap;
   overflow: hidden;

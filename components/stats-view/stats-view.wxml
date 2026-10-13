@@ -26,27 +26,31 @@
                 class="user-avatar-img {{ vipInfo.isVip ? 'vip-avatar-img' : '' }}" 
                 src="{{ profile.avatarUrl || defaultAvatarSvg }}" 
                 mode="aspectFill" 
+                binderror="onAvatarError"
               />
             </button>
           </view>
 
           <!-- 昵称紧随头像：微信官方昵称选择控件 + VIP 荣耀身份铭牌 -->
           <view class="user-info-col">
-            <input 
-              class="user-nickname-input {{ vipInfo.isVip ? 'vip-nickname-gold' : '' }}" 
-              type="nickname" 
-              value="{{ profile.nickName || '无烟觉醒者' }}" 
-              bindinput="onNicknameChange"
-              bindchange="onNicknameChange" 
-              bindblur="onNicknameBlur" 
-              cursor-color="transparent"
-            />
-            <view class="user-meta-subrow" bindtap="onOpenProfileModal">
+            <view class="user-nickname-row">
+              <input 
+                class="user-nickname-input {{ vipInfo.isVip ? 'vip-nickname-gold' : '' }}" 
+                type="nickname" 
+                value="{{ profile.nickName || '无烟觉醒者' }}" 
+                bindinput="onNicknameChange"
+                bindchange="onNicknameChange" 
+                bindblur="onNicknameBlur" 
+                cursor-color="transparent"
+              />
               <view class="profile-vip-nameplate {{ vipInfo.isVip ? '' : 'is-vip-inactive' }}" catchtap="onGoToVip">
                 <text class="pvn-crown">👑</text>
-                <text class="pvn-text">{{ vipInfo.isVip ? (vipInfo.isLifetime ? '至尊永久VIP' : '尊贵VIP会员') : '尊贵VIP会员' }}</text>
+                <text class="pvn-text">{{ vipInfo.isVip ? (vipInfo.isLifetime ? '至尊VIP' : '尊贵VIP') : '尊贵VIP' }}</text>
               </view>
-              <text class="user-meta-smoke-info">烟龄 {{ profile.smokeYears || 5 }}年 · 日均 {{ profile.cigsPerDay || 15 }}支 ✎</text>
+            </view>
+            <view class="user-meta-subrow" bindtap="onOpenProfileModal">
+              <text class="user-meta-smoke-tag">烟龄 {{ profile.smokeYears || 5 }}年 · 日均 {{ profile.cigsPerDay || 15 }}支</text>
+              <text class="user-meta-edit-icon">✎</text>
             </view>
           </view>
         </view>
@@ -151,74 +155,86 @@
 
 
         <!-- HUD 数据引线 (纯 CSS 矢量引线折线与发光锚点，精准指向人体靶器官) -->
-        <view class="hud-lead-line to-lung"></view>
-        <view class="hud-lead-line to-visceral"></view>
-        <view class="hud-lead-line to-heart"></view>
-        <view class="hud-lead-line to-blood"></view>
+        <view class="hud-lead-line to-lung {{ activeOrgan === 'lungs' ? 'lead-active' : '' }}"></view>
+        <view class="hud-lead-line to-visceral {{ activeOrgan === 'brain' ? 'lead-active' : '' }}"></view>
+        <view class="hud-lead-line to-heart {{ activeOrgan === 'heart' ? 'lead-active' : '' }}"></view>
+        <view class="hud-lead-line to-blood {{ activeOrgan === 'blood' ? 'lead-active' : '' }}"></view>
 
         <!-- 左上方 HUD 引出数据框：双肺呼吸系统 (精准指向左侧胸腔肺叶) -->
-        <view class="hud-card hud-card-tl {{ activeOrgan === 'lungs' ? 'is-active' : '' }}" bindtap="onSelectOrgan" data-organ="lungs">
+        <view class="hud-card hud-card-tl hud-card-lungs {{ activeOrgan === 'lungs' ? 'is-active' : '' }}" bindtap="onSelectOrgan" data-organ="lungs">
           <view class="hud-card-header">
-            <text class="hud-card-title">双肺自愈</text>
-            <text class="hud-card-en">Pulmonary Lungs</text>
+            <view class="hud-title-badge-row">
+              <view class="hud-organ-dot dot-lungs"></view>
+              <text class="hud-card-title title-lungs">双肺自愈</text>
+            </view>
+            <text class="hud-card-en en-lungs">PULMONARY</text>
           </view>
           <view class="hud-card-body">
             <view class="hud-metric-row">
-              <text class="hud-metric-label">纤毛活力</text>
+              <text class="hud-metric-label label-lungs">纤毛活力</text>
               <text class="hud-metric-val cyan">{{ lungPercent }}%</text>
             </view>
-            <view class="hud-progress-track">
+            <view class="hud-progress-track track-lungs">
               <view class="hud-progress-bar cyan-bar" style="width: {{ lungPercent }}%;"></view>
             </view>
           </view>
         </view>
 
         <!-- 右上方 HUD 引出数据框：心血管系统 (精准指向右侧胸腔心脏) -->
-        <view class="hud-card hud-card-tr {{ activeOrgan === 'heart' ? 'is-active' : '' }}" bindtap="onSelectOrgan" data-organ="heart">
+        <view class="hud-card hud-card-tr hud-card-heart {{ activeOrgan === 'heart' ? 'is-active' : '' }}" bindtap="onSelectOrgan" data-organ="heart">
           <view class="hud-card-header">
-            <text class="hud-card-title">心血管系统</text>
-            <text class="hud-card-en">Cardiovascular</text>
+            <view class="hud-title-badge-row">
+              <view class="hud-organ-dot dot-heart"></view>
+              <text class="hud-card-title title-heart">心血管系统</text>
+            </view>
+            <text class="hud-card-en en-heart">CARDIOVASCULAR</text>
           </view>
           <view class="hud-card-body">
             <view class="hud-metric-row">
-              <text class="hud-metric-label">心肌供氧</text>
+              <text class="hud-metric-label label-heart">心肌供氧</text>
               <text class="hud-metric-val orange">{{ heartPercent }}%</text>
             </view>
-            <view class="hud-progress-track">
+            <view class="hud-progress-track track-heart">
               <view class="hud-progress-bar orange-bar" style="width: {{ heartPercent }}%;"></view>
             </view>
           </view>
         </view>
 
         <!-- 左下方 HUD 引出数据框：自律神经系统 (精准指向腹部植物神经中枢/肠脑轴) -->
-        <view class="hud-card hud-card-bl {{ activeOrgan === 'brain' ? 'is-active' : '' }}" bindtap="onSelectOrgan" data-organ="brain">
+        <view class="hud-card hud-card-bl hud-card-brain {{ activeOrgan === 'brain' ? 'is-active' : '' }}" bindtap="onSelectOrgan" data-organ="brain">
           <view class="hud-card-header">
-            <text class="hud-card-title">自律神经</text>
-            <text class="hud-card-en">Autonomic Nerves</text>
+            <view class="hud-title-badge-row">
+              <view class="hud-organ-dot dot-brain"></view>
+              <text class="hud-card-title title-brain">自律神经</text>
+            </view>
+            <text class="hud-card-en en-brain">AUTONOMIC</text>
           </view>
           <view class="hud-card-body">
             <view class="hud-metric-row">
-              <text class="hud-metric-label">交感舒缓</text>
+              <text class="hud-metric-label label-brain">交感舒缓</text>
               <text class="hud-metric-val purple">{{ brainPercent }}%</text>
             </view>
-            <view class="hud-progress-track">
+            <view class="hud-progress-track track-brain">
               <view class="hud-progress-bar purple-bar" style="width: {{ brainPercent }}%;"></view>
             </view>
           </view>
         </view>
 
         <!-- 右下方 HUD 引出数据框：血液循环网络 (精准指向全身微血管与携氧循环) -->
-        <view class="hud-card hud-card-br {{ activeOrgan === 'blood' ? 'is-active' : '' }}" bindtap="onSelectOrgan" data-organ="blood">
+        <view class="hud-card hud-card-br hud-card-blood {{ activeOrgan === 'blood' ? 'is-active' : '' }}" bindtap="onSelectOrgan" data-organ="blood">
           <view class="hud-card-header">
-            <text class="hud-card-title">血液循环</text>
-            <text class="hud-card-en">Blood Circulation</text>
+            <view class="hud-title-badge-row">
+              <view class="hud-organ-dot dot-blood"></view>
+              <text class="hud-card-title title-blood">血液循环</text>
+            </view>
+            <text class="hud-card-en en-blood">CIRCULATION</text>
           </view>
           <view class="hud-card-body">
             <view class="hud-metric-row">
-              <text class="hud-metric-label">血氧饱满</text>
+              <text class="hud-metric-label label-blood">血氧饱满</text>
               <text class="hud-metric-val green">{{ bloodPercent }}%</text>
             </view>
-            <view class="hud-progress-track">
+            <view class="hud-progress-track track-blood">
               <view class="hud-progress-bar green-bar" style="width: {{ bloodPercent }}%;"></view>
             </view>
           </view>
@@ -236,16 +252,18 @@
       </view>
 
       <!-- 选中器官医学临床深度分析卡片 -->
-      <view class="twin-detail-card">
+      <view class="twin-detail-card card-theme-{{ activeOrgan }}">
         <view class="detail-header-row">
           <view class="dh-left">
-            <image class="dh-svg-icon" src="{{ organInfo.iconUri }}" mode="aspectFit" />
+            <view class="dh-icon-box" style="border-color: {{ organInfo.color }}; background: {{ organInfo.accentBg }};">
+              <image class="dh-svg-icon" src="{{ organInfo.iconUri }}" mode="aspectFit" />
+            </view>
             <view class="dh-titles">
-              <text class="dh-organ-name">{{ organInfo.name }}</text>
+              <text class="dh-organ-name" style="color: {{ organInfo.color }}; text-shadow: 0 0 10rpx {{ organInfo.accentBg }};">{{ organInfo.name }}</text>
               <text class="dh-stage-title">{{ organInfo.stageTitle }}</text>
             </view>
           </view>
-          <view class="dh-badge" style="background: {{ organInfo.accentBg }}; color: {{ organInfo.color }};">
+          <view class="dh-badge" style="background: {{ organInfo.accentBg }}; color: {{ organInfo.color }}; border: 1px solid {{ organInfo.color }};">
             {{ organInfo.statusBadge }} · {{ organInfo.percent }}%
           </view>
         </view>

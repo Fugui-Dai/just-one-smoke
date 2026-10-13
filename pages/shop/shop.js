@@ -1,14 +1,14 @@
 // pages/shop/shop.js
-import { storageService } from '../../utils/storageService.js';
-import { audioManager } from '../../utils/audioManager.js';
-import { triggerHaptic } from '../../utils/haptics.js';
-import { toast } from '../../utils/toastService.js';
-import { vipService } from '../../utils/vipService.js';
+import { storageService } from '../../services/storageService.js';
+import { audioManager } from '../../services/audioManager.js';
+import { triggerHaptic } from '../../services/haptics.js';
+import { toast } from '../../services/toastService.js';
+import { vipService } from '../../services/vipService.js';
 import {
   CIGARETTE_CATALOG,
   DEFAULT_CIGARETTE,
   isCigaretteUnlocked
-} from '../../utils/catalog.js';
+} from '../../configs/catalog.js';
 
 function resolveCigaretteCategory(item) {
   // 1. 细支爆珠 (所有带爆珠或细支的名烟：炫赫门、贵烟跨越、利群江南韵、万宝路冰蓝、七星蓝莓双爆、宽窄五粮浓香、芙蓉王硬细支、中华双中支等)

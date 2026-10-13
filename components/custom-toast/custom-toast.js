@@ -1,5 +1,5 @@
 // components/custom-toast/custom-toast.js
-import { triggerHaptic } from '../../utils/haptics.js';
+import { triggerHaptic } from '../../services/haptics.js';
 
 Component({
   data: {

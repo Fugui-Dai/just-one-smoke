@@ -1,16 +1,16 @@
 // pages/pack/pack.js
-import { storageService } from '../../utils/storageService.js';
-import { audioManager } from '../../utils/audioManager.js';
-import { triggerHaptic } from '../../utils/haptics.js';
-import { toast } from '../../utils/toastService.js';
-import { vipService } from '../../utils/vipService.js';
-import { packFlightVfxRenderer } from '../../utils/canvasRenderer.js';
+import { storageService } from '../../services/storageService.js';
+import { audioManager } from '../../services/audioManager.js';
+import { triggerHaptic } from '../../services/haptics.js';
+import { toast } from '../../services/toastService.js';
+import { vipService } from '../../services/vipService.js';
+import { packFlightVfxRenderer } from '../../engine/canvasRenderer.js';
 import {
   DEFAULT_CIGARETTE,
   getCigaretteById,
   isCigaretteUnlocked,
   computeFlightStyles
-} from '../../utils/catalog.js';
+} from '../../configs/catalog.js';
 
 function measureSafeAreaSync() {
   try {
@@ -257,6 +257,7 @@ Page({
   },
 
   clearPullTimers() {
+    this._isPullingInProgress = false;
     if (this._pullTimer1) { clearTimeout(this._pullTimer1); this._pullTimer1 = null; }
     if (this._pullTimer2) { clearTimeout(this._pullTimer2); this._pullTimer2 = null; }
     if (this._pullTimer3) { clearTimeout(this._pullTimer3); this._pullTimer3 = null; }
@@ -270,6 +271,8 @@ Page({
   },
 
   onUnload() {
+    this._isPullingInProgress = false;
+    this._isNavigatingBack = false;
     this.clearPullTimers();
   },
 
@@ -366,9 +369,11 @@ Page({
 
   // 执行腾讯 CG / UE5 级 6 阶段星河 S 弧线抽烟觉醒演出，点到谁谁就出来，原位置留空
   executePullCigarette(slotIndex) {
-    if (this.data.isPulling) return;
+    if (this._isPullingInProgress || this._isNavigatingBack || this.data.isPulling) return;
+    this._isPullingInProgress = true;
     audioManager.unlockAudio();
     this.clearPullTimers();
+    this._isPullingInProgress = true;
 
     if (!this.data.isLidOpen) {
       audioManager.playPackOpenSound();
@@ -457,7 +462,8 @@ Page({
 
   // 用户在名烟呈现界面点击屏幕任意位置后，才执行跳转回首页品吸
   onTapAwakenOverlay() {
-    if (!this.data.isFlightVisible || !this._canTapToConfirm) return;
+    if (!this.data.isFlightVisible || !this._canTapToConfirm || this._isNavigatingBack) return;
+    this._isNavigatingBack = true;
     this._canTapToConfirm = false;
     this.clearPullTimers();
     if (typeof this._pendingPackCount === 'number') {
@@ -503,6 +509,9 @@ Page({
 
   // 确认并携带这支烟返回主页品吸（烟进入首页代表盒内已消化该支烟，但首页处于未点燃待抽状态，不代表抽完）
   onConfirmAndSmoke() {
+    if (this._isNavigatingBackConfirmed) return;
+    this._isNavigatingBackConfirmed = true;
+    this._isNavigatingBack = true;
     audioManager.unlockAudio();
     audioManager.playSwitchSound();
     triggerHaptic('medium');
@@ -532,6 +541,8 @@ Page({
   },
 
   onNavigateBack() {
+    if (this._isNavigatingBack) return;
+    this._isNavigatingBack = true;
     audioManager.unlockAudio();
     audioManager.playSwitchSound();
     const pages = getCurrentPages();

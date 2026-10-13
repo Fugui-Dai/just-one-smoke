@@ -1073,7 +1073,7 @@
 }
 
 .seal-text {
-  font-size: 16rpx;
+  font-size: 18rpx;
   font-weight: 800;
   color: #1e293b;
   letter-spacing: 2rpx;
@@ -1468,7 +1468,7 @@
 }
 
 .scroll-count-tag {
-  font-size: 18rpx;
+  font-size: 20rpx;
   color: #94a3b8;
 }
 
@@ -1548,18 +1548,18 @@
 }
 
 .mini-price {
-  font-size: 18rpx;
+  font-size: 22rpx;
   font-weight: 700;
   color: #fbbf24;
 }
 
 .mini-active-status {
-  font-size: 16rpx;
+  font-size: 20rpx;
   color: #34d399;
 }
 
 .mini-lock-status {
-  font-size: 16rpx;
+  font-size: 20rpx;
   color: #ef4444;
 }
 
