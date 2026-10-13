@@ -338,56 +338,158 @@ button.user-avatar-btn::after,
   color: #fbbf24;
 }
 
-/* 最右边打卡状态方卡 (已打卡 / X天) */
+/* 最右边打卡状态方卡 (主动盖印自律状态 / 敲章仪式感) */
 .user-punch-card {
   flex-shrink: 0;
   margin-left: 16rpx;
-  min-width: 110rpx;
-  padding: 10rpx 16rpx;
-  background: linear-gradient(135deg, rgba(16, 28, 28, 0.88) 0%, rgba(10, 20, 22, 0.96) 100%);
-  border: 1px solid rgba(16, 185, 129, 0.28);
+  min-width: 120rpx;
+  padding: 10rpx 14rpx;
   border-radius: 20rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.25s, background 0.25s;
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 1. 待打卡状态：暖金微光脉冲 · 强交互自律号召 */
+.user-punch-card.is-pending-card {
+  background: linear-gradient(135deg, rgba(38, 28, 12, 0.92) 0%, rgba(24, 18, 8, 0.96) 100%);
+  border: 1.5rpx solid rgba(245, 158, 11, 0.55);
+  box-shadow: 0 6rpx 20rpx rgba(245, 158, 11, 0.22), inset 0 1px 0 rgba(254, 240, 138, 0.2);
+  animation: pendingCardPulse 2.8s ease-in-out infinite;
+}
+
+@keyframes pendingCardPulse {
+  0%, 100% {
+    border-color: rgba(245, 158, 11, 0.45);
+    box-shadow: 0 4rpx 14rpx rgba(245, 158, 11, 0.18);
+  }
+  50% {
+    border-color: rgba(245, 158, 11, 0.85);
+    box-shadow: 0 6rpx 24rpx rgba(245, 158, 11, 0.38), inset 0 0 12rpx rgba(245, 158, 11, 0.2);
+  }
+}
+
+/* 2. 已打卡状态：沉静墨玉翡翠 · 尊贵从容自律 */
+.user-punch-card.is-punched-card {
+  background: linear-gradient(135deg, rgba(14, 26, 22, 0.88) 0%, rgba(8, 18, 15, 0.96) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.32);
 }
 
 .user-punch-card:active {
   transform: scale(0.92);
-  border-color: rgba(52, 211, 153, 0.7);
-  box-shadow: 0 2rpx 10rpx rgba(52, 211, 153, 0.4);
+}
+
+/* 3. 敲章下压震颤与微粒子爆开动效 */
+.user-punch-card.is-stamping-active {
+  animation: stampPress 0.45s cubic-bezier(0.17, 0.89, 0.32, 1.28) forwards;
+}
+
+@keyframes stampPress {
+  0% { transform: scale(1) rotate(0deg); }
+  35% { transform: scale(0.82) rotate(-4deg); filter: drop-shadow(0 0 16rpx #f59e0b); }
+  70% { transform: scale(1.08) rotate(1.5deg); filter: drop-shadow(0 0 24rpx #34d399); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+.punch-card-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  margin-bottom: 2rpx;
+}
+
+.punch-card-status-dot {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.punch-card-status-dot.dot-pending {
+  background: #f59e0b;
+  box-shadow: 0 0 8rpx #f59e0b;
+  animation: pendingDotFlash 1.6s ease-in-out infinite;
+}
+
+@keyframes pendingDotFlash {
+  0%, 100% { opacity: 0.5; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+.punch-card-status-dot.dot-punched {
+  background: #10b981;
+  box-shadow: 0 0 8rpx rgba(16, 185, 129, 0.6);
 }
 
 .punch-card-title {
-  font-size: 22rpx;
-  color: #94a3b8;
+  font-size: 21rpx;
   line-height: 1.2;
-  margin-bottom: 2rpx;
+  white-space: nowrap;
+}
+
+.punch-card-title.title-pending {
+  color: #fde68a;
+  font-weight: 700;
+}
+
+.punch-card-title.title-punched {
+  color: #94a3b8;
+  font-weight: 500;
 }
 
 .punch-card-days-row {
   display: flex;
   align-items: baseline;
   justify-content: center;
-  gap: 2rpx;
+  gap: 3rpx;
 }
 
 .punch-card-num {
-  font-size: 34rpx;
+  font-size: 32rpx;
   font-weight: 800;
-  color: #34d399;
   line-height: 1.1;
+}
+
+.punch-card-num.num-pending {
+  color: #fbbf24;
+  text-shadow: 0 0 10rpx rgba(251, 191, 36, 0.4);
+}
+
+.punch-card-num.num-punched {
+  color: #34d399;
   text-shadow: 0 0 10rpx rgba(52, 211, 153, 0.35);
 }
 
 .punch-card-unit {
-  font-size: 22rpx;
+  font-size: 20rpx;
   font-weight: 600;
+}
+
+.punch-card-unit.unit-pending {
+  color: #fde68a;
+}
+
+.punch-card-unit.unit-punched {
   color: #a7f3d0;
+}
+
+.punch-card-action-hint {
+  font-size: 18rpx;
+  font-weight: 700;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.16);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 1rpx 8rpx;
+  border-radius: 999rpx;
+  margin-top: 4rpx;
+  line-height: 1.2;
+  letter-spacing: 0.5rpx;
 }
 
 /* ==================== VIP 尊享特权入口横幅 (腾讯黑金曜石奢雅标准) ==================== */
@@ -1126,17 +1228,19 @@ button.user-avatar-btn::after,
 }
 .hud-scanner-code {
   font-family: monospace;
-  font-size: 22rpx;
+  font-size: 16rpx;
   color: rgba(56, 189, 248, 0.85);
-  letter-spacing: 2rpx;
+  letter-spacing: 1rpx;
   font-weight: 700;
+  line-height: 1.2;
 }
 .hud-scanner-status {
   font-family: monospace;
-  font-size: 22rpx;
+  font-size: 16rpx;
   color: #10b981;
-  letter-spacing: 1rpx;
+  letter-spacing: 0.5rpx;
   font-weight: 600;
+  line-height: 1.2;
 }
 
 /* 3D 全息医学透明人体与脏器高清渲染图 */

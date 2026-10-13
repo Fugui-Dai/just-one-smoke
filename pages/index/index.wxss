@@ -551,52 +551,52 @@
 
 
 
-/* ==================== 6. 右侧半月弧形主控 DOCK 栏 (黑曜琉璃毛玻璃高奢质感) ==================== */
+/* ==================== 6. 右侧半月弧形主控 DOCK 栏 (轻透流光毛玻璃质感 · 紧凑贴合图标) ==================== */
 .right-arc-dock {
   position: absolute;
   right: 0;
   top: 50%;
   transform: translateY(-48%);
-  width: 128rpx;
-  background: rgba(12, 16, 26, 0.84);
-  border: 1.5rpx solid rgba(255, 255, 255, 0.14);
+  width: 92rpx;
+  background: rgba(12, 16, 26, 0.40);
+  border: 1rpx solid rgba(255, 255, 255, 0.12);
   border-right: none;
-  border-top-left-radius: 70rpx;
-  border-bottom-left-radius: 70rpx;
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  box-shadow: -10rpx 0 36rpx rgba(0, 0, 0, 0.65), inset 1rpx 1rpx 0 rgba(255, 255, 255, 0.12);
+  border-top-left-radius: 46rpx;
+  border-bottom-left-radius: 46rpx;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: -6rpx 0 24rpx rgba(0, 0, 0, 0.35), inset 1rpx 1rpx 0 rgba(255, 255, 255, 0.10);
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20rpx 0 22rpx 0;
-  gap: 14rpx;
+  padding: 16rpx 0 18rpx 0;
+  gap: 12rpx;
   z-index: 45;
 }
 
 .right-arc-dock::before {
   content: '';
   position: absolute;
-  top: -24rpx;
+  top: -20rpx;
   right: 0;
-  width: 24rpx;
-  height: 24rpx;
+  width: 20rpx;
+  height: 20rpx;
   background: transparent;
-  border-bottom-right-radius: 24rpx;
-  box-shadow: 8rpx 8rpx 0 0 rgba(12, 16, 26, 0.84);
+  border-bottom-right-radius: 20rpx;
+  box-shadow: 6rpx 6rpx 0 0 rgba(12, 16, 26, 0.40);
   pointer-events: none;
 }
 
 .right-arc-dock::after {
   content: '';
   position: absolute;
-  bottom: -24rpx;
+  bottom: -20rpx;
   right: 0;
-  width: 24rpx;
-  height: 24rpx;
+  width: 20rpx;
+  height: 20rpx;
   background: transparent;
-  border-top-right-radius: 24rpx;
-  box-shadow: 8rpx -8rpx 0 0 rgba(12, 16, 26, 0.84);
+  border-top-right-radius: 20rpx;
+  box-shadow: 6rpx -6rpx 0 0 rgba(12, 16, 26, 0.40);
   pointer-events: none;
 }
 
@@ -694,11 +694,11 @@ button.dock-btn-wrap.share-dock-item::after {
 }
 
 .dock-title {
-  font-size: 22rpx;
+  font-size: 20rpx;
   font-weight: 600;
   color: #f1f5f9;
-  margin-top: 5rpx;
-  letter-spacing: 0.5rpx;
+  margin-top: 4rpx;
+  letter-spacing: 0.2rpx;
   text-shadow: 0 1rpx 3rpx rgba(0, 0, 0, 0.85);
   white-space: nowrap;
 }

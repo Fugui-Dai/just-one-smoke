@@ -1,23 +1,23 @@
 // configs/smokeEffects.js
 import { vipService } from '../services/vipService.js';
-import { LOTUS_ICON_SVG } from '../utils/vectorIcons.js';
+import { LOTUS_ICON_SVG, BUDDHA_ICON_SVG, PHOENIX_ICON_SVG, FAIRY_ICON_SVG, DRAGON_ICON_SVG } from '../utils/vectorIcons.js';
 
 /**
  * 赛博烟雾特效工坊元数据与解锁配置 (Tencent Games 顶级品质 · 情绪价值巅峰典藏)
  * 进阶排序逻辑（从返璞纯享到炽金神品）：
  * 1. 【原真纯享 · 极简返璞（白阶入门）】：经典空灵烟圈 (唯一的极简大师白雾)
  * 2. 【浪漫至死 · 甜蜜暴击（粉阶进阶）】：一见倾心 · 丘比特星钻双心
- * 3. 【尊贵鸿运 · 帝王天青（紫阶稀有）】：紫气东来 · 宣德九龙盘香
- * 4. 【空灵治愈 · 梦幻星幕（蓝阶稀有）】：极光星海 · 冰岛幻彩星穹
- * 5. 【泼天富贵 · 顶奢黑金（黑金史诗）】：曜世黑金 · 24K暴富金雨 (情绪价值巅峰)
- * 6. 【宇宙浩瀚 · 许愿流星（星芒史诗）】：星穹浩瀚 · 璀璨流星银河
- * 7. 【万福金印 · 功德护体（朱金传说）】：金玉满堂 · 迎祥纳福宝印
- * 8. 【华夏欢庆 · 终极盛典（赤炎传说）】：华夏盛世 · 万家璀璨烟火
- * 9. 【青云直上 · 乘风破浪（天阶祥瑞）】：紫霄凌云 · 步步高升天河
- * 10.【道韵化境 · 掌控乾坤（神品玄道）】：乾坤八卦 · 紫微天穹大阵
- * 11.【梵天圣境 · 慈悲普度（神品佛瑞）】：佛光普照 · 梵天千叶金莲
- * 12.【九五之尊 · 帝王气运（至臻神品）】：真龙降世 · 曜金神龙戏珠
- * 13.【绝境逆风 · 涅槃浴火（至臻神品）】：涅槃重光 · 赤金神凤降世
+ * 3. 【东方禅意 · 宁心静气（翡翠青莲）】：青莲化境 · 步步生莲
+ * 4. 【泼天富贵 · 顶奢黑金（黑金史诗）】：曜世黑金 · 24K暴富金雨 (情绪价值巅峰)
+ * 5. 【宇宙浩瀚 · 许愿流星（星芒史诗）】：星穹浩瀚 · 璀璨流星银河
+ * 6. 【万福金印 · 功德护体（朱金传说）】：金玉满堂 · 迎祥纳福宝印
+ * 7. 【华夏欢庆 · 终极盛典（赤炎传说）】：华夏盛世 · 万家璀璨烟火
+ * 8. 【青云直上 · 乘风破浪（天阶祥瑞）】：紫霄凌云 · 步步高升天河
+ * 9. 【道韵化境 · 掌控乾坤（神品玄道）】：乾坤八卦 · 紫微天穹大阵
+ * 10.【梵天圣境 · 慈悲普度（神品佛瑞）】：佛光普照 · 梵天千叶金莲
+ * 11.【九五之尊 · 帝王气运（至臻神品）】：真龙降世 · 曜金神龙戏珠
+ * 12.【绝境逆风 · 涅槃浴火（至臻神品）】：涅槃重光 · 赤金神凤降世
+ * 13.【瑶池仙境 · 天女散花（传世神品）】：七仙降世 · 霓裳羽衣散花
  */
 export const SMOKE_EFFECTS = [
   // ================= 1. 原真纯享 · 极简返璞（白阶入门） =================
@@ -64,29 +64,7 @@ export const SMOKE_EFFECTS = [
     renderType: 'heart_double'
   },
 
-  // ================= 3. 尊贵鸿运 · 帝王天青（紫阶稀有） =================
-  {
-    id: 'purple_zen',
-    name: '紫气东来 · 宣德九龙盘香',
-    shortName: '紫气东来',
-    icon: '🟣',
-    category: '东方至尊',
-    categoryTag: '鸿运当头',
-    tagColor: '#c084fc',
-    badgeBg: 'rgba(192, 132, 252, 0.18)',
-    badgeBorder: 'rgba(168, 85, 247, 0.45)',
-    price: 12,
-    priceDisplay: '¥12 / 替烟5支',
-    requiredCount: 5,
-    requiredSavings: 6.25,
-    description: '宣德御炉同款帝王紫与秘色天青双龙盘旋，祥云回纹若隐若现，烫金沉香云雾直贯青云',
-    themeColor: '#c084fc',
-    glowColor: 'rgba(192, 132, 252, 0.75)',
-    accentBorder: '#a855f7',
-    renderType: 'purple_zen'
-  },
-
-  // ================= 东方禅意 · 宁心静气（翡翠青莲） =================
+  // ================= 3. 东方禅意 · 宁心静气（翡翠青莲） =================
   {
     id: 'lotus_zen',
     name: '青莲化境 · 步步生莲',
@@ -107,28 +85,6 @@ export const SMOKE_EFFECTS = [
     glowColor: 'rgba(52, 211, 153, 0.85)',
     accentBorder: '#10b981',
     renderType: 'lotus_zen'
-  },
-
-  // ================= 4. 空灵治愈 · 梦幻星幕（蓝阶稀有） =================
-  {
-    id: 'aurora_nebula',
-    name: '极光星海 · 冰岛幻彩星穹',
-    shortName: '极光星海',
-    icon: '🌌',
-    category: '赛博幻境',
-    categoryTag: '空灵治愈',
-    tagColor: '#38bdf8',
-    badgeBg: 'rgba(56, 189, 248, 0.18)',
-    badgeBorder: 'rgba(56, 189, 248, 0.45)',
-    price: 18,
-    priceDisplay: '¥18 / 替烟15支',
-    requiredCount: 15,
-    requiredSavings: 18.75,
-    description: '北纬66度翡翠极光与深空冰蓝丝缎光幕交融翻滚，星云深处脉冲星钻明灭呼吸，如置身幻彩星海',
-    themeColor: '#38bdf8',
-    glowColor: 'rgba(56, 189, 248, 0.75)',
-    accentBorder: '#38bdf8',
-    renderType: 'aurora_nebula'
   },
 
   // ================= 5. 泼天富贵 · 顶奢黑金（黑金史诗） =================
@@ -269,7 +225,7 @@ export const SMOKE_EFFECTS = [
     name: '佛光普照 · 梵天千叶金莲',
     shortName: '佛光金莲',
     icon: '佛',
-    iconImage: '/images/icons/buddha.png',
+    iconImage: BUDDHA_ICON_SVG,
     category: '梵天圣境',
     categoryTag: '万丈光芒',
     tagColor: '#fde047',
@@ -289,11 +245,12 @@ export const SMOKE_EFFECTS = [
   // ================= 12. 九五之尊 · 帝王气运（至臻神品） =================
   {
     id: 'dragon_breath',
-    name: '真龙降世 · 曜金神龙戏珠',
-    shortName: '曜金神龙',
-    icon: '🐉',
+    name: '飞龙在天 · 曜金祥云真龙',
+    shortName: '曜金真龙',
+    icon: '龙',
+    iconImage: DRAGON_ICON_SVG,
     category: '帝王九五',
-    categoryTag: '神威降临',
+    categoryTag: '飞龙在天',
     tagColor: '#fef08a',
     badgeBg: 'rgba(254, 240, 138, 0.20)',
     badgeBorder: 'rgba(234, 179, 8, 0.50)',
@@ -301,7 +258,7 @@ export const SMOKE_EFFECTS = [
     priceDisplay: '免费尊享',
     requiredCount: 0,
     requiredSavings: 0,
-    description: '纯正五爪赤金神龙破雾盘旋，赤金火珠领衔升腾，万道龙鳞金光与祥云漫天激荡',
+    description: '纯正五爪曜金真龙昂首破云冲霄，万重祥云缭绕龙身，龙吐九霄瑞气与漫天龙鳞金雨',
     themeColor: '#fef08a',
     glowColor: 'rgba(254, 240, 138, 0.88)',
     accentBorder: '#eab308',
@@ -314,7 +271,7 @@ export const SMOKE_EFFECTS = [
     name: '涅槃重光 · 赤金神凤降世',
     shortName: '赤金神凤',
     icon: '凤',
-    iconImage: '/images/icons/phoenix.png',
+    iconImage: PHOENIX_ICON_SVG,
     category: '涅槃重生',
     categoryTag: '百鸟朝凤',
     tagColor: '#fb923c',
@@ -329,6 +286,29 @@ export const SMOKE_EFFECTS = [
     glowColor: 'rgba(251, 146, 60, 0.88)',
     accentBorder: '#f97316',
     renderType: 'phoenix_nirvana'
+  },
+
+  // ================= 14. 瑶池仙境 · 天女散花（传世神品） =================
+  {
+    id: 'seven_fairies',
+    name: '七仙降世 · 霓裳羽衣散花',
+    shortName: '七仙羽衣',
+    icon: '仙',
+    iconImage: FAIRY_ICON_SVG,
+    category: '瑶池仙境',
+    categoryTag: '霓裳羽衣',
+    tagColor: '#f472b6',
+    badgeBg: 'rgba(244, 114, 182, 0.20)',
+    badgeBorder: 'rgba(236, 72, 153, 0.50)',
+    price: 0,
+    priceDisplay: '免费尊享',
+    requiredCount: 0,
+    requiredSavings: 0,
+    description: '七彩飞天彩带在云雾中曼妙起舞，瑶池仙乐涟漪荡漾，天女散花漫天琼花与仙桃纷飞飘落',
+    themeColor: '#f472b6',
+    glowColor: 'rgba(244, 114, 182, 0.90)',
+    accentBorder: '#ec4899',
+    renderType: 'seven_fairies'
   }
 ];
 

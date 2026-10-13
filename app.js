@@ -6,15 +6,11 @@ const appOptions = {
     console.log('【我抽一支】无烟替瘾器小程序启动成功');
     try {
       storageService.getProfile();
-      storageService.recordDailyCheckIn();
     } catch (e) {
-      console.warn('App onLaunch checkin error', e);
+      console.warn('App onLaunch profile error', e);
     }
   },
   onShow() {
-    try {
-      storageService.recordDailyCheckIn();
-    } catch (e) {}
   },
   globalData: {
     appName: '我抽一支',

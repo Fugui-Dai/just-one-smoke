@@ -170,6 +170,14 @@ export const storageService = {
     }
   },
 
+  hasCheckedInToday(dateObj = new Date()) {
+    const d = dateObj instanceof Date ? dateObj : new Date(dateObj);
+    if (isNaN(d.getTime())) return false;
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    const dates = this.getCheckInDates();
+    return Array.isArray(dates) && dates.includes(dateStr);
+  },
+
   recordDailyCheckIn(dateObj = new Date()) {
     const d = dateObj instanceof Date ? dateObj : new Date(dateObj);
     if (isNaN(d.getTime())) return this.getCheckInDates();
@@ -463,7 +471,7 @@ export const storageService = {
   // ==========================================
   getSelectedSmokeEffectId() {
     const id = getItem('SMOKEFREE_SELECTED_SMOKE_EFFECT');
-    if (!id || id === 'cloud_dense' || id === 'silk_pure') return 'auspicious_river';
+    if (!id || id === 'cloud_dense' || id === 'silk_pure' || id === 'purple_zen' || id === 'aurora_nebula') return 'auspicious_river';
     return id;
   },
 

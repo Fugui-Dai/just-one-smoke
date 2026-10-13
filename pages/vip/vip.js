@@ -4,11 +4,23 @@ import { triggerHaptic } from '../../services/haptics.js';
 import { toast } from '../../services/toastService.js';
 import { VIP_TIERS, VIP_PRIVILEGES, VIP_COMPARE_ROWS, VIP_THEME_OPTIONS, vipService } from '../../services/vipService.js';
 
+function detectIsIOS() {
+  try {
+    const sysInfo = wx.getSystemInfoSync ? wx.getSystemInfoSync() : {};
+    const platform = (sysInfo.platform || '').toLowerCase();
+    const system = (sysInfo.system || '').toLowerCase();
+    return platform === 'ios' || system.includes('ios') || system.includes('iphone') || system.includes('ipad');
+  } catch (e) {
+    return false;
+  }
+}
+
 Page({
   data: {
     statusBarHeight: 44,
     navBarHeight: 44,
     capsuleRightSpace: 96,
+    isIOS: false,
 
     tiers: VIP_TIERS,
     themeOptions: VIP_THEME_OPTIONS,
@@ -31,6 +43,8 @@ Page({
 
   onLoad() {
     this.measureSafeArea();
+    const isIOS = detectIsIOS();
+    this.setData({ isIOS });
     this.refreshVipStatus();
   },
 
@@ -203,11 +217,39 @@ Page({
     });
   },
 
-  // 立即开通 / 永久会员去品吸名烟
+  // 立即开通 / 永久会员去品吸名烟 / iOS 免费开启自律特权
   onSubscribe() {
     if (this.data.vipInfo && this.data.vipInfo.isLifetime) {
       triggerHaptic('medium');
       this.onNavigateBack();
+      return;
+    }
+
+    const tier = this.data.selectedTier;
+
+    // iOS 虚拟支付合规隔离：跳过协议勾选与收银台，提供自律免费体验通道
+    if (this.data.isIOS) {
+      triggerHaptic('heavy');
+      try {
+        audioManager.playClick();
+      } catch (e) {}
+
+      wx.showLoading({ title: '开启专属特权…' });
+
+      setTimeout(() => {
+        wx.hideLoading();
+        // 直接激活对应档位权益
+        vipService.activateTier(tier.id);
+        this.refreshVipStatus();
+
+        this.setData({
+          showSuccessModal: true,
+          activatedTierName: tier.name
+        });
+
+        triggerHaptic('success');
+        toast.flame(`【iOS自律专享】已开启${tier.name}！`);
+      }, 500);
       return;
     }
 
@@ -217,7 +259,6 @@ Page({
       return;
     }
 
-    const tier = this.data.selectedTier;
     triggerHaptic('heavy');
     try {
       audioManager.playClick();

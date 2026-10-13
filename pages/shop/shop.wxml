@@ -300,8 +300,8 @@
         <view class="dialog-cta-primary" bindtap="onGoToVipFromDialog">
           <text class="cta-crown-glyph">👑</text>
           <view class="cta-text-group">
-            <text class="cta-main-title">开通 VIP 立即开盒品吸</text>
-            <text class="cta-sub-title">全套名烟畅吸 · 低至 ¥0.13/天</text>
+            <text class="cta-main-title">开启 VIP 特权立即开盒品吸</text>
+            <text class="cta-sub-title">全套名烟畅吸 · 尊享全图鉴特权</text>
           </view>
           <text class="cta-arrow-glyph">➔</text>
         </view>

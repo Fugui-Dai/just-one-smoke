@@ -188,16 +188,11 @@ Page({
     });
 
     this._skipFirstShowRefresh = true;
-    try {
-      storageService.recordDailyCheckIn();
-    } catch (e) {}
     this.refreshAllData();
   },
 
   onShow() {
-    try {
-      storageService.recordDailyCheckIn();
-    } catch (e) {}
+    this._isNavigating = false;
     // 页面唤醒时同步最新装配的名烟与音效状态
     const savedCigId = storageService.getSelectedCigaretteId();
     const curCig = getCigaretteById(savedCigId) || DEFAULT_CIGARETTE;
@@ -484,66 +479,68 @@ Page({
     const h = this.cHeight;
 
     ctx.save();
-    ctx.scale(dpr, dpr);
-    ctx.clearRect(0, 0, w, h);
+    try {
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, w, h);
 
-    const isInhaling = this.fsm.getState() === 'INHALING';
+      const isInhaling = this.fsm.getState() === 'INHALING';
 
-    const burnRes = this.fsm.burn(dt, isInhaling, this.data.currentCigarette);
-    const curAsh = this.fsm.getAshLength();
-    const curState = this.fsm.getState();
+      const burnRes = this.fsm.burn(dt, isInhaling, this.data.currentCigarette);
+      const curAsh = this.fsm.getAshLength();
+      const curState = this.fsm.getState();
 
-    // 现实物理规律：静置或吸烟时烟灰积满自重断落
-    if (burnRes && burnRes.ashDropped) {
-      const { cx, cy } = this.getTipCoordinates();
-      const curCig = this.data.currentCigarette || {};
-      const isHandRolled = curCig.widthType === 'hand_rolled';
-      this.particles.emitAshDrop(cx, cy, isHandRolled ? 6 : 3, isHandRolled ? 22 : 6);
-      triggerHaptic('light');
-    }
-
-    // 燃尽结算触发
-    if (curState === 'FINISHED' && this.data.simulatorState !== 'FINISHED') {
-      if (this.isHoldingInhale) {
-        this.isHoldingInhale = false;
-        if (this.hapticInterval) clearInterval(this.hapticInterval);
-        audioManager.stopBurnSound();
+      // 现实物理规律：静置或吸烟时烟灰积满自重断落
+      if (burnRes && burnRes.ashDropped) {
+        const { cx, cy } = this.getTipCoordinates();
+        const curCig = this.data.currentCigarette || {};
+        const isHandRolled = curCig.widthType === 'hand_rolled';
+        this.particles.emitAshDrop(cx, cy, isHandRolled ? 6 : 3, isHandRolled ? 22 : 6);
+        triggerHaptic('light');
       }
-      this.handleSmokingFinished();
+
+      // 燃尽结算触发
+      if (curState === 'FINISHED' && this.data.simulatorState !== 'FINISHED') {
+        if (this.isHoldingInhale) {
+          this.isHoldingInhale = false;
+          if (this.hapticInterval) clearInterval(this.hapticInterval);
+          audioManager.stopBurnSound();
+        }
+        this.handleSmokingFinished();
+      }
+
+      // 抖灰轻弹阻尼微动效进度 (0.0 ~ 1.0, 持续约 400ms)
+      let ashTapProgress = 1.0;
+      if (this.ashTapStartTime > 0) {
+        const elapsed = Date.now() - this.ashTapStartTime;
+        ashTapProgress = Math.min(1.0, elapsed / 400);
+      }
+
+      // 调用高保真 3D Canvas 渲染引擎
+      canvasRenderer.render(ctx, {
+        w,
+        h,
+        dt,
+        fsm: this.fsm,
+        particles: this.particles,
+        currentCigarette: this.data.currentCigarette,
+        isBeadPopped: this.data.isBeadPopped,
+        breathingMode: false,
+        breathingPhase: 'none',
+        screenFogAlpha: this.screenFogAlpha,
+        sceneType: this.data.currentScene,
+        isSparking: this.data.isSparking,
+        ignitionTool: this.data.currentIgnitionTool,
+        vipTheme: this.data.vipTheme,
+        ashTapProgress
+      });
+
+      // 呼气微雾衰减
+      if (this.screenFogAlpha > 0.002) {
+        this.screenFogAlpha = Math.max(0, this.screenFogAlpha - dt * 0.25);
+      }
+    } finally {
+      ctx.restore();
     }
-
-    // 抖灰轻弹阻尼微动效进度 (0.0 ~ 1.0, 持续约 400ms)
-    let ashTapProgress = 1.0;
-    if (this.ashTapStartTime > 0) {
-      const elapsed = Date.now() - this.ashTapStartTime;
-      ashTapProgress = Math.min(1.0, elapsed / 400);
-    }
-
-    // 调用高保真 3D Canvas 渲染引擎
-    canvasRenderer.render(ctx, {
-      w,
-      h,
-      dt,
-      fsm: this.fsm,
-      particles: this.particles,
-      currentCigarette: this.data.currentCigarette,
-      isBeadPopped: this.data.isBeadPopped,
-      breathingMode: false,
-      breathingPhase: 'none',
-      screenFogAlpha: this.screenFogAlpha,
-      sceneType: this.data.currentScene,
-      isSparking: this.data.isSparking,
-      ignitionTool: this.data.currentIgnitionTool,
-      vipTheme: this.data.vipTheme,
-      ashTapProgress
-    });
-
-    // 呼气微雾衰减
-    if (this.screenFogAlpha > 0.002) {
-      this.screenFogAlpha = Math.max(0, this.screenFogAlpha - dt * 0.25);
-    }
-
-    ctx.restore();
 
     const curAshRatio = this.fsm.getAshRatio ? this.fsm.getAshRatio() : 0;
     const ashProgress = Number(curAshRatio.toFixed(3));
@@ -651,28 +648,12 @@ Page({
         this.particles.emitSmokeRing(mx, my - 24, smokeColor, 0.75 * effIntensity, { speedMul: 0.85 * effIntensity, offsetX: 6 });
       }, 190);
       this.exhaleEffectTimers.push(timer);
-    } else if (effectId === 'purple_zen') {
-      // 3. 紫气东来：暮霭紫与天青祥云，双波次左右舒展翻滚散开
-      this.particles.emitPurpleZen(mx, my - 16);
-      const timer = setTimeout(() => {
-        if (!this.particles) return;
-        this.particles.emitPurpleZen(mx, my - 18);
-      }, 160);
-      this.exhaleEffectTimers.push(timer);
     } else if (effectId === 'gold_stardust') {
       // 4. 黑金流沙：黑曜石深色烟雾基底与24K金箔大范围闪烁飞溅
       this.particles.emitGoldStardust(mx, my - 16);
       const timer = setTimeout(() => {
         if (!this.particles) return;
         this.particles.emitGoldStardust(mx, my - 18);
-      }, 160);
-      this.exhaleEffectTimers.push(timer);
-    } else if (effectId === 'aurora_nebula') {
-      // 5. 极光星云：冰川碧绿与星云幽粉宽幅波浪扩散
-      this.particles.emitAuroraNebula(mx, my - 16);
-      const timer = setTimeout(() => {
-        if (!this.particles) return;
-        this.particles.emitAuroraNebula(mx, my - 18);
       }, 160);
       this.exhaleEffectTimers.push(timer);
     } else if (effectId === 'heart_double') {
@@ -740,6 +721,14 @@ Page({
       const timer = setTimeout(() => {
         if (!this.particles) return;
         this.particles.emitBuddhaLight(mx, my - 28, false);
+      }, 180);
+      this.exhaleEffectTimers.push(timer);
+    } else if (effectId === 'seven_fairies') {
+      // 14. 七仙降世 · 霓裳羽衣阵：七位轻灵仙女环阵起舞，七彩流光仙绸，天女散花琼花落雨 (偏左安全区绽放，绝不遮挡 DOCK)
+      this.particles.emitSevenFairies(mx - 16, my - 20, true);
+      const timer = setTimeout(() => {
+        if (!this.particles) return;
+        this.particles.emitSevenFairies(mx - 22, my - 28, false);
       }, 180);
       this.exhaleEffectTimers.push(timer);
     } else {
@@ -1131,7 +1120,7 @@ Page({
     const unlockedEffects = storageService.getUnlockedSmokeEffects() || [];
     const summonedEffects = storageService.getSummonedSmokeEffects() || [];
     const activeEffectId = this.data.smokeEffectType;
-    if (activeEffectId && ['dragon_breath', 'phoenix_nirvana', 'buddha_light', 'bagua_taichi'].includes(activeEffectId)) {
+    if (activeEffectId && ['dragon_breath', 'phoenix_nirvana', 'buddha_light', 'bagua_taichi', 'seven_fairies'].includes(activeEffectId)) {
       storageService.recordSmokeEffectSummoned(activeEffectId);
     }
     const allEffects = Array.from(new Set([...unlockedEffects, ...summonedEffects, ...(activeEffectId ? [activeEffectId] : [])]));
@@ -1143,7 +1132,7 @@ Page({
       unlockedEffects: allEffects,
       unlockedEffectsCount: allEffects.length,
       hasCustomEffect: allEffects.some(id => id !== 'ring_classic' && id !== 'auspicious_river') || (this.data.smokeEffectType !== 'ring_classic' && this.data.smokeEffectType !== 'auspicious_river'),
-      hasSummonedMythic: allEffects.includes('dragon_breath') || allEffects.includes('phoenix_nirvana') || allEffects.includes('buddha_light') || allEffects.includes('bagua_taichi')
+      hasSummonedMythic: allEffects.includes('dragon_breath') || allEffects.includes('phoenix_nirvana') || allEffects.includes('lotus_zen') || allEffects.includes('buddha_light') || allEffects.includes('bagua_taichi') || allEffects.includes('auspicious_river') || allEffects.includes('seven_fairies')
     }, storageService.getUnlockedAchievements());
 
     if (newly && newly.length) {
@@ -1308,6 +1297,8 @@ Page({
 
   // ================= 实机同款主控与快捷操作 =================
   switchToLeaderboard() {
+    if (this._isNavigating) return;
+    this._isNavigating = true;
     audioManager.unlockAudio();
     audioManager.playSwitchSound();
     triggerHaptic('light');
@@ -1315,12 +1306,20 @@ Page({
     wx.navigateTo({
       url: '/pages/leaderboard/leaderboard',
       fail: () => {
+        this._isNavigating = false;
         this.startRenderLoop();
+      },
+      complete: () => {
+        setTimeout(() => {
+          this._isNavigating = false;
+        }, 500);
       }
     });
   },
 
   switchToStats() {
+    if (this._isNavigating) return;
+    this._isNavigating = true;
     audioManager.unlockAudio();
     audioManager.playSwitchSound();
     triggerHaptic('light');
@@ -1328,7 +1327,13 @@ Page({
     wx.navigateTo({
       url: '/pages/mine/mine',
       fail: () => {
+        this._isNavigating = false;
         this.startRenderLoop();
+      },
+      complete: () => {
+        setTimeout(() => {
+          this._isNavigating = false;
+        }, 500);
       }
     });
   },
@@ -1412,7 +1417,7 @@ Page({
       smokeEffectType: nextEffect.id
     });
     storageService.setSelectedSmokeEffectId(nextEffect.id);
-    if (['dragon_breath', 'phoenix_nirvana', 'buddha_light', 'bagua_taichi'].includes(nextEffect.id)) {
+    if (['dragon_breath', 'phoenix_nirvana', 'buddha_light', 'bagua_taichi', 'seven_fairies'].includes(nextEffect.id)) {
       storageService.recordSmokeEffectSummoned(nextEffect.id);
     }
     this._checkAndUnlockAchievements();
@@ -1486,7 +1491,7 @@ Page({
       showSmokeEffectDrawer: false
     });
     storageService.setSelectedSmokeEffectId(item.id);
-    if (['dragon_breath', 'phoenix_nirvana', 'buddha_light', 'bagua_taichi'].includes(item.id)) {
+    if (['dragon_breath', 'phoenix_nirvana', 'buddha_light', 'bagua_taichi', 'seven_fairies'].includes(item.id)) {
       storageService.recordSmokeEffectSummoned(item.id);
     }
     this._checkAndUnlockAchievements();
@@ -1521,7 +1526,7 @@ Page({
       showSmokeEffectDrawer: false
     });
 
-    if (['dragon_breath', 'phoenix_nirvana', 'buddha_light', 'bagua_taichi'].includes(item.id)) {
+    if (['dragon_breath', 'phoenix_nirvana', 'buddha_light', 'bagua_taichi', 'seven_fairies'].includes(item.id)) {
       storageService.recordSmokeEffectSummoned(item.id);
       this._checkAndUnlockAchievements();
     }
@@ -1740,6 +1745,8 @@ Page({
 
   // 选烟与拟真开盒页面跳转 (3D 翻盖烟盒与抽烟仪式感)
   openCigarettePicker() {
+    if (this._isNavigating) return;
+    this._isNavigating = true;
     audioManager.unlockAudio();
     audioManager.playSwitchSound();
     triggerHaptic('light');
@@ -1747,7 +1754,13 @@ Page({
     wx.navigateTo({
       url: '/pages/shop/shop',
       fail: () => {
+        this._isNavigating = false;
         this.startRenderLoop();
+      },
+      complete: () => {
+        setTimeout(() => {
+          this._isNavigating = false;
+        }, 500);
       }
     });
   },

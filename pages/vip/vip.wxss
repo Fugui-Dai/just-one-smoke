@@ -36,6 +36,61 @@ page {
   background: radial-gradient(circle at 50% -10%, rgba(148, 163, 184, 0.14) 0%, #111318 45%, #07080b 100%);
 }
 
+/* iOS 合规提示条 (微信生态合规高定设计) */
+.ios-compliance-banner {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+  margin: 0 0 24rpx;
+  padding: 20rpx 24rpx;
+  border-radius: 20rpx;
+  background: rgba(30, 41, 59, 0.75);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.icb-glow {
+  position: absolute;
+  top: -20rpx;
+  left: -20rpx;
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.icb-icon {
+  font-size: 32rpx;
+  line-height: 1.2;
+  flex-shrink: 0;
+  margin-top: 2rpx;
+}
+
+.icb-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.icb-title {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #38bdf8;
+  letter-spacing: 0.5rpx;
+}
+
+.icb-desc {
+  font-size: 21rpx;
+  line-height: 1.45;
+  color: #cbd5e1;
+}
+
 /* VIP 专属流光主题衣橱 */
 .vip-theme-wardrobe-card {
   width: 100%;
@@ -695,6 +750,47 @@ page {
   margin-bottom: 14rpx;
 }
 
+/* iOS 档位特性徽章 (代替 ¥ 价格标) */
+.price-feature-badge {
+  font-size: 24rpx;
+  font-weight: 800;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.16);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  padding: 6rpx 14rpx;
+  border-radius: 12rpx;
+  line-height: 1.2;
+  letter-spacing: 0.5rpx;
+  text-align: center;
+  box-shadow: 0 4rpx 12rpx rgba(16, 185, 129, 0.15);
+}
+
+.price-feature-badge.badge-hot {
+  color: #c084fc;
+  background: rgba(168, 85, 247, 0.18);
+  border-color: rgba(192, 132, 252, 0.35);
+  box-shadow: 0 4rpx 12rpx rgba(168, 85, 247, 0.2);
+}
+
+.price-feature-badge.badge-gold {
+  color: #fde047;
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(253, 224, 71, 0.38);
+  box-shadow: 0 4rpx 12rpx rgba(245, 158, 11, 0.25);
+}
+
+.daily-label.ios-label {
+  font-size: 20rpx;
+  padding: 4rpx 10rpx;
+  letter-spacing: 0.5rpx;
+}
+
+.tier-original-price.ios-sub {
+  text-decoration: none;
+  font-size: 20rpx;
+  color: #94a3b8;
+}
+
 .tier-select-circle {
   width: 32rpx;
   height: 32rpx;
@@ -965,6 +1061,11 @@ page {
   line-height: 28rpx;
 }
 
+.agreement-row-ios {
+  justify-content: center;
+  gap: 6rpx;
+}
+
 .checkout-main-bar {
   display: flex;
   align-items: center;
@@ -985,6 +1086,14 @@ page {
   display: flex;
   align-items: baseline;
   gap: 6rpx;
+}
+
+.cpl-ios-badge {
+  font-size: 28rpx;
+  font-weight: 800;
+  color: #38bdf8;
+  letter-spacing: 1rpx;
+  text-shadow: 0 2rpx 8rpx rgba(56, 189, 248, 0.3);
 }
 
 .cpl-label {
@@ -1060,6 +1169,11 @@ page {
 
 .checkout-cta-btn.btn-disabled .btn-shine-sweep {
   display: none;
+}
+
+.checkout-cta-btn.btn-ios-free {
+  background: linear-gradient(135deg, #fef08a 0%, #f59e0b 50%, #b45309 100%);
+  box-shadow: 0 8rpx 28rpx rgba(245, 158, 11, 0.42);
 }
 
 /* 腾讯游戏级收银台 CTA 尊贵耀目光刃扫光 (Luminous Sweeping Light Blade) */

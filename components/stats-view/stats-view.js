@@ -3,6 +3,7 @@ import { buildTrendLineChartSvg } from '../../utils/trendChartSvgBuilder.js';
 import { storageService } from '../../services/storageService.js';
 import { vipService } from '../../services/vipService.js';
 import { toast } from '../../services/toastService.js';
+import { audioManager } from '../../services/audioManager.js';
 import {
   LUNG_ICON_SVG,
   HEART_ICON_SVG,
@@ -119,15 +120,17 @@ Component({
     isWhoCollapsed: true,
     displayedWhoStages: [],
 
-    // 打卡日历数据 (紧凑月历与切换)
+    // 打卡签到与日历数据 (真实主动盖印自律状态)
+    isTodayPunched: false,
+    isStamping: false,
     calendarYear: 2026,
     calendarMonth: 10,
     calendarDays: [],
     calendarStats: {
-      monthPunchedCount: 1,
-      totalPunchedDays: 1,
-      streakDays: 1,
-      punchRate: 100
+      monthPunchedCount: 0,
+      totalPunchedDays: 0,
+      streakDays: 0,
+      punchRate: 0
     },
 
     // 荣耀勋章殿堂数据 (Tencent Games 曜石展柜)
@@ -140,11 +143,6 @@ Component({
 
   lifetimes: {
     attached() {
-      try {
-        if (storageService.recordDailyCheckIn) {
-          storageService.recordDailyCheckIn();
-        }
-      } catch (e) {}
       const now = new Date();
       this.setData({
         calendarYear: now.getFullYear(),
@@ -158,6 +156,7 @@ Component({
 
   pageLifetimes: {
     show() {
+      this._isNavigating = false;
       this.refreshVipStatus();
       this._syncAllStats();
     }
@@ -369,27 +368,39 @@ Component({
         ? Math.min(100, Math.round((monthPunchedCount / elapsedActiveDays) * 100))
         : 0;
 
-      // 从今日起向回按自然日跨月/跨年倒推计算真实连续打卡天数 streakDays
+      // 真实判断今日是否已盖印打卡
+      const todayKey = formatYMD(now.getFullYear(), now.getMonth() + 1, now.getDate());
+      const isTodayPunched = allPunchedDateKeySet.has(todayKey);
+
+      // 计算真实连续打卡天数 streakDays：
+      // 1. 若今日已打卡，从今日开始向回倒推连续打卡天数
+      // 2. 若今日尚未打卡，从昨日开始向回倒推连续打卡天数（保留昨日积累的连签，等待今日续签）
       let streakDays = 0;
-      const cursorDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const startCursor = isTodayPunched
+        ? new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        : new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+
       for (let offset = 0; offset < 3650; offset++) {
-        const key = formatYMD(cursorDate.getFullYear(), cursorDate.getMonth() + 1, cursorDate.getDate());
+        const key = formatYMD(startCursor.getFullYear(), startCursor.getMonth() + 1, startCursor.getDate());
         if (allPunchedDateKeySet.has(key)) {
           streakDays++;
-        } else if (offset > 0) {
+        } else {
           break;
         }
-        cursorDate.setDate(cursorDate.getDate() - 1);
+        startCursor.setDate(startCursor.getDate() - 1);
       }
 
+      const totalPunchedDays = allPunchedDateKeySet.size;
+
       this.setData({
+        isTodayPunched,
         calendarYear: currentYear,
         calendarMonth: currentMonth,
         calendarDays,
         calendarStats: {
           monthPunchedCount,
-          totalPunchedDays: Math.max(1, monthPunchedCount, streakDays, allPunchedDateKeySet.size),
-          streakDays: Math.max(1, streakDays),
+          totalPunchedDays,
+          streakDays,
           punchRate
         }
       });
@@ -404,14 +415,12 @@ Component({
       const maxEffectiveSubs = Math.max(cigsPerDay, (days + 1) * cigsPerDay);
       const effectiveSubs = Math.min(subs, maxEffectiveSubs);
 
-      // VIP 会员尊享自愈加速增益
-      const vipBoost = (this.data.isVip || (this.data.vipInfo && this.data.vipInfo.isVip)) ? 1.18 : 1.0;
-
-      // 科学对数自愈饱和曲线 (契合 WHO 临床里程碑: 首日 12~20%, 7天 ~38-45%, 30天 ~65-72%, 100+天 ~95-99%)
-      const lungPercent = Math.min(99, Math.max(12, Math.round((12 + Math.log10(1 + days * 0.8 + effectiveSubs * 0.08) * 32) * vipBoost)));
-      const heartPercent = Math.min(99, Math.max(18, Math.round((18 + Math.log10(1 + days * 0.85 + effectiveSubs * 0.08) * 30) * vipBoost)));
-      const bloodPercent = Math.min(100, Math.max(20, Math.round((20 + Math.log10(1 + days * 0.9 + effectiveSubs * 0.09) * 30) * vipBoost)));
-      const brainPercent = Math.min(96, Math.max(15, Math.round((15 + Math.log10(1 + days * 0.8 + effectiveSubs * 0.08) * 31) * vipBoost)));
+      // 科学对数自愈饱和曲线 (严肃医学标准 · 契合 WHO 临床里程碑: 首日 12~20%, 7天 ~38-45%, 30天 ~65-72%, 100+天 ~95-99%)
+      // 坚持科学严谨：器官自愈严格基于真实无烟坚持时间与替烟阻断量，坚决不进行商业付费伪科学数值篡改
+      const lungPercent = Math.min(99, Math.max(12, Math.round(12 + Math.log10(1 + days * 0.8 + effectiveSubs * 0.08) * 32)));
+      const heartPercent = Math.min(99, Math.max(18, Math.round(18 + Math.log10(1 + days * 0.85 + effectiveSubs * 0.08) * 30)));
+      const bloodPercent = Math.min(100, Math.max(20, Math.round(20 + Math.log10(1 + days * 0.9 + effectiveSubs * 0.09) * 30)));
+      const brainPercent = Math.min(96, Math.max(15, Math.round(15 + Math.log10(1 + days * 0.8 + effectiveSubs * 0.08) * 31)));
 
       this.setData({
         lungPercent,
@@ -508,7 +517,7 @@ Component({
         },
         brain: {
           id: 'brain',
-          name: '自律植物神经系统',
+          name: '自律神经与脑中枢',
           icon: '🧠',
           iconUri: BRAIN_ICON_SVG,
           percent: brPct,
@@ -545,17 +554,38 @@ Component({
     },
 
     onTapPunchCard() {
-      try {
-        if (wx.vibrateShort) wx.vibrateShort({ type: 'medium' });
-      } catch (err) {}
-      if (storageService.recordDailyCheckIn) {
-        storageService.recordDailyCheckIn();
-      }
-      this.buildCalendarData();
+      const isAlreadyPunched = this.data.isTodayPunched;
       const calStats = this.data.calendarStats || {};
-      const streakDays = calStats.streakDays || 1;
-      const monthPunchedCount = calStats.monthPunchedCount || 1;
-      toast.success(`今日自律打卡已达成 · 连续 ${streakDays} 天（本月 ${monthPunchedCount} 天）`);
+
+      if (isAlreadyPunched) {
+        try {
+          if (wx.vibrateShort) wx.vibrateShort({ type: 'light' });
+        } catch (err) {}
+        try {
+          audioManager.playClick();
+        } catch (e) {}
+        toast.info(`今日已完成自律打卡 ✓ 连续坚持 ${calStats.streakDays || 1} 天，保持纯净呼吸！`);
+        return;
+      }
+
+      // 未打卡 -> 触发敲章盖印仪式感 (Haptic + Stamping Animation + Sound + Flame Toast)
+      try {
+        if (wx.vibrateShort) wx.vibrateShort({ type: 'heavy' });
+      } catch (err) {}
+      try {
+        audioManager.playClick();
+      } catch (e) {}
+
+      this.setData({ isStamping: true });
+      if (this._stampTimer) clearTimeout(this._stampTimer);
+      this._stampTimer = setTimeout(() => {
+        this.setData({ isStamping: false });
+      }, 500);
+
+      storageService.recordDailyCheckIn();
+      this.buildCalendarData();
+      const updatedStats = this.data.calendarStats || {};
+      toast.flame(`自律觉醒！今日已成功盖印打卡 ✓ 连续坚持 ${updatedStats.streakDays || 1} 天！`);
     },
 
     onTapCalendarDay(e) {
@@ -620,10 +650,22 @@ Component({
     },
 
     onGoToVip() {
+      if (this._isNavigating) return;
+      this._isNavigating = true;
       try {
         if (wx.vibrateShort) wx.vibrateShort({ type: 'light' });
       } catch (err) {}
-      wx.navigateTo({ url: '/pages/vip/vip' });
+      wx.navigateTo({
+        url: '/pages/vip/vip',
+        fail: () => {
+          this._isNavigating = false;
+        },
+        complete: () => {
+          setTimeout(() => {
+            this._isNavigating = false;
+          }, 500);
+        }
+      });
     },
 
     onTapBanknote() {
@@ -658,7 +700,7 @@ Component({
           unlockedEffects: allEffects,
           unlockedEffectsCount: allEffects.length,
           hasCustomEffect: allEffects.some(id => id !== 'ring_classic' && id !== 'auspicious_river'),
-          hasSummonedMythic: allEffects.includes('dragon_breath') || allEffects.includes('phoenix_nirvana') || allEffects.includes('buddha_light') || allEffects.includes('bagua_taichi')
+          hasSummonedMythic: allEffects.includes('dragon_breath') || allEffects.includes('phoenix_nirvana') || allEffects.includes('lotus_zen') || allEffects.includes('buddha_light') || allEffects.includes('bagua_taichi') || allEffects.includes('auspicious_river')
         };
 
         const newlyUnlocked = checkAchievementsToUnlock(statsObj, unlockedIds);

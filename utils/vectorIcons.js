@@ -386,4 +386,188 @@ export const PROJECTION_SPARK_SVG = svgToUri(`
 </svg>
 `);
 
+// 15. 佛光普照 · 梵天千叶金莲 矢量图标 (大日佛光与黄金莲座)
+export const BUDDHA_ICON_SVG = svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
+  <defs>
+    <radialGradient id="buddhaGlow" cx="50%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#fffbeb"/>
+      <stop offset="35%" stop-color="#fef08a"/>
+      <stop offset="70%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#b45309" stop-opacity="0.2"/>
+    </radialGradient>
+    <linearGradient id="buddhaLotusGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="60%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#fef9c3"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="28" r="24" fill="url(#buddhaGlow)"/>
+  <g stroke="#fde047" stroke-width="1.2" opacity="0.85" stroke-linecap="round">
+    <line x1="32" y1="4" x2="32" y2="10"/>
+    <line x1="32" y1="46" x2="32" y2="52"/>
+    <line x1="10" y1="28" x2="16" y2="28"/>
+    <line x1="48" y1="28" x2="54" y2="28"/>
+    <line x1="16" y1="12" x2="20" y2="16"/>
+    <line x1="44" y1="40" x2="48" y2="44"/>
+    <line x1="48" y1="12" x2="44" y2="16"/>
+    <line x1="16" y1="44" x2="20" y2="40"/>
+  </g>
+  <path d="M 14 46 C 20 40 28 42 32 48 C 36 42 44 40 50 46 C 42 54 22 54 14 46 Z" fill="url(#buddhaLotusGrad)"/>
+  <path d="M 22 44 C 26 36 32 32 32 46 C 32 32 38 36 42 44 C 36 48 28 48 22 44 Z" fill="#fef08a"/>
+  <circle cx="32" cy="22" r="5" fill="#fef3c7"/>
+  <path d="M 24 38 C 24 30 27 28 32 28 C 37 28 40 30 40 38 Z" fill="#fef3c7"/>
+  <circle cx="32" cy="22" r="1.5" fill="#ffffff"/>
+  <circle cx="32" cy="14" r="1.2" fill="#ffffff"/>
+</svg>
+`);
+
+// 16. 涅槃重光 · 赤金神凤降世 矢量图标 (浴火展翼与南明离火)
+export const PHOENIX_ICON_SVG = svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
+  <defs>
+    <linearGradient id="phxFireGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#b91c1c"/>
+      <stop offset="35%" stop-color="#ea580c"/>
+      <stop offset="70%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#fef08a"/>
+    </linearGradient>
+    <radialGradient id="phxHalo" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(251, 146, 60, 0.45)"/>
+      <stop offset="70%" stop-color="rgba(234, 88, 12, 0.15)"/>
+      <stop offset="100%" stop-color="rgba(0, 0, 0, 0)"/>
+    </radialGradient>
+  </defs>
+  <circle cx="32" cy="32" r="28" fill="url(#phxHalo)"/>
+  <path d="M 32 38 C 22 36 8 26 6 12 C 16 16 26 26 32 38 Z" fill="url(#phxFireGrad)"/>
+  <path d="M 32 38 C 42 36 56 26 58 12 C 48 16 38 26 32 38 Z" fill="url(#phxFireGrad)"/>
+  <path d="M 32 38 C 24 34 14 20 16 8 C 24 14 28 26 32 38 Z" fill="#fde047" opacity="0.9"/>
+  <path d="M 32 38 C 40 34 50 20 48 8 C 40 14 36 26 32 38 Z" fill="#fde047" opacity="0.9"/>
+  <path d="M 32 46 C 30 38 30 26 32 18 C 34 26 34 38 32 46 Z" fill="#fef08a"/>
+  <circle cx="32" cy="18" r="2.8" fill="#ffffff"/>
+  <path d="M 32 16 L 31 10 L 32 12 L 33 10 Z" fill="#fde047"/>
+  <path d="M 32 46 Q 26 56 20 60 Q 28 54 32 48" stroke="#f97316" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M 32 46 Q 38 56 44 60 Q 36 54 32 48" stroke="#f97316" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M 32 46 L 32 58" stroke="#fef08a" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="32" cy="18" r="1.2" fill="#b91c1c"/>
+</svg>
+`);
+
+// 17. 七仙降世 · 霓裳羽衣散花 矢量图标 (瑶池飞仙、彩虹仙环与天女散花)
+export const FAIRY_ICON_SVG = svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
+  <defs>
+    <radialGradient id="fairyGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fdf2f8"/>
+      <stop offset="35%" stop-color="#f472b6"/>
+      <stop offset="70%" stop-color="#c084fc"/>
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.1"/>
+    </radialGradient>
+    <linearGradient id="ribbonRainbow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f43f5e"/>
+      <stop offset="25%" stop-color="#fb923c"/>
+      <stop offset="50%" stop-color="#facc15"/>
+      <stop offset="75%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#60a5fa"/>
+    </linearGradient>
+  </defs>
+  <!-- 柔美霞光光环 -->
+  <circle cx="32" cy="32" r="28" fill="url(#fairyGlow)"/>
+  <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(255, 255, 255, 0.6)" stroke-width="1.2" stroke-dasharray="3,2"/>
+  
+  <!-- 飞天流光飘带 (S形飘逸彩带) -->
+  <path d="M 12 44 C 10 26 24 16 34 14 C 44 12 54 22 52 38 C 50 48 38 52 26 50 C 18 48 14 36 18 28" 
+        fill="none" stroke="url(#ribbonRainbow)" stroke-width="3" stroke-linecap="round" opacity="0.95"/>
+  <path d="M 16 46 C 18 32 28 22 36 20 C 44 18 50 26 48 36" 
+        fill="none" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" opacity="0.8"/>
+
+  <!-- 飞仙曼妙剪影 -->
+  <path d="M 32 20 C 30 24 28 32 30 42 C 32 40 36 38 38 42 C 37 32 35 24 32 20 Z" fill="#ffffff" opacity="0.95"/>
+  <!-- 云髻高挽 -->
+  <circle cx="32" cy="18" r="3.2" fill="#27272a"/>
+  <circle cx="32" cy="15" r="2" fill="#fef08a"/>
+  <!-- 飞天手挽粉桃仙花 -->
+  <circle cx="27" cy="24" r="2.4" fill="#f472b6"/>
+  <circle cx="37" cy="26" r="2.2" fill="#fb7185"/>
+
+  <!-- 散落的飞舞琼花瓣 -->
+  <path d="M 16 18 C 14 16 14 12 18 14 C 18 18 16 18 16 18 Z" fill="#f472b6"/>
+  <path d="M 46 16 C 44 14 44 10 48 12 C 48 16 46 16 46 16 Z" fill="#fb7185"/>
+  <path d="M 46 48 C 44 46 44 42 48 44 C 48 48 46 48 46 48 Z" fill="#f472b6"/>
+  <circle cx="22" cy="14" r="1.2" fill="#ffffff"/>
+  <circle cx="42" cy="46" r="1.2" fill="#ffffff"/>
+  <circle cx="32" cy="54" r="1.5" fill="#fef08a"/>
+</svg>
+`);
+
+// 18. 飞龙在天 · 曜金祥云真龙 矢量图标 (曜金龙首、祥云缭绕与五爪神威)
+export const DRAGON_ICON_SVG = svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
+  <defs>
+    <radialGradient id="dragonBgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#451a03"/>
+      <stop offset="45%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#09090b"/>
+    </radialGradient>
+    <linearGradient id="goldDragonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fffbeb"/>
+      <stop offset="25%" stop-color="#fef08a"/>
+      <stop offset="60%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <linearGradient id="cloudPurpleGold" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#c084fc" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#fbbf24" stop-opacity="0.9"/>
+    </linearGradient>
+  </defs>
+  <!-- 尊贵玄金底晕与环形金纹 -->
+  <circle cx="32" cy="32" r="28" fill="url(#dragonBgGlow)"/>
+  <circle cx="32" cy="32" r="27" fill="none" stroke="rgba(250, 204, 21, 0.7)" stroke-width="1.2" stroke-dasharray="2,2"/>
+  <circle cx="32" cy="32" r="25" fill="none" stroke="rgba(254, 240, 138, 0.4)" stroke-width="0.8"/>
+
+  <!-- 底部祥云托日 -->
+  <path d="M 12 48 C 16 42 24 43 28 47 C 32 42 42 42 46 47 C 50 43 56 45 54 52 C 48 56 20 56 12 48 Z" 
+        fill="url(#cloudPurpleGold)"/>
+
+  <!-- 龙身破云之姿 (S形祥云龙躯) -->
+  <path d="M 20 46 C 24 38 32 36 38 30 C 44 26 48 24 46 18" 
+        fill="none" stroke="url(#goldDragonGrad)" stroke-width="5" stroke-linecap="round"/>
+  <!-- 背鳍锯齿 -->
+  <path d="M 23 41 L 24 37 L 27 40 L 30 35 L 33 38 L 36 32 L 39 35" 
+        fill="none" stroke="#fef08a" stroke-width="1.4" stroke-linecap="round"/>
+
+  <!-- 曜金龙首 (45度侧仰昂首破云) -->
+  <!-- 鹿角峥嵘 -->
+  <path d="M 40 18 Q 44 10 50 8 M 45 13 Q 50 14 54 13 M 42 16 Q 44 6 48 4" 
+        fill="none" stroke="#fef08a" stroke-width="2.2" stroke-linecap="round"/>
+  <!-- 龙首颅骨与龙吻 -->
+  <path d="M 36 22 C 38 17 44 16 48 18 C 52 20 54 24 50 26 C 45 28 40 27 36 22 Z" 
+        fill="url(#goldDragonGrad)"/>
+  <path d="M 48 22 C 54 21 56 25 51 27 C 46 29 44 26 48 22 Z" 
+        fill="#fef08a"/>
+  
+  <!-- 龙目日曜金辉 -->
+  <circle cx="44" cy="20" r="2.0" fill="#dc2626"/>
+  <circle cx="44" cy="20" r="1.3" fill="#fef08a"/>
+  <circle cx="44.4" cy="19.6" r="0.6" fill="#ffffff"/>
+
+  <!-- 猎猎飞扬金龙须 -->
+  <path d="M 52 25 Q 56 28 60 27 M 51 26 Q 54 32 58 35" 
+        fill="none" stroke="#fef08a" stroke-width="1.4" stroke-linecap="round"/>
+
+  <!-- 脑后与颈项飞扬龙鬃 -->
+  <path d="M 38 18 Q 30 16 26 22 M 36 23 Q 28 22 24 28 M 34 27 Q 26 28 22 34" 
+        fill="none" stroke="#f59e0b" stroke-width="2.4" stroke-linecap="round"/>
+
+  <!-- 拨云五爪金钩 -->
+  <path d="M 28 32 L 24 35 M 24 35 L 20 34 M 24 35 L 21 38 M 24 35 L 25 39" 
+        fill="none" stroke="#fef08a" stroke-width="1.6" stroke-linecap="round"/>
+
+  <!-- 龙吐祥瑞金芒星尘 -->
+  <circle cx="56" cy="21" r="1.5" fill="#fef08a"/>
+  <circle cx="60" cy="18" r="1.0" fill="#ffffff"/>
+  <circle cx="57" cy="15" r="0.8" fill="#fef08a"/>
+</svg>
+`);
+
 

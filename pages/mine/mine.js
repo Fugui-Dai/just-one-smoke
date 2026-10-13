@@ -131,7 +131,7 @@ function computeMineStatsPayload() {
       unlockedEffects: allEffects,
       unlockedEffectsCount: allEffects.length,
       hasCustomEffect: allEffects.some(id => id !== 'ring_classic' && id !== 'auspicious_river'),
-      hasSummonedMythic: allEffects.includes('dragon_breath') || allEffects.includes('phoenix_nirvana') || allEffects.includes('buddha_light') || allEffects.includes('bagua_taichi')
+      hasSummonedMythic: allEffects.includes('dragon_breath') || allEffects.includes('phoenix_nirvana') || allEffects.includes('lotus_zen') || allEffects.includes('buddha_light') || allEffects.includes('bagua_taichi') || allEffects.includes('auspicious_river')
     };
     const newlyUnlocked = checkAchievementsToUnlock(statsObj, unlockedIds);
     if (Array.isArray(newlyUnlocked) && newlyUnlocked.length > 0) {
@@ -295,6 +295,7 @@ Page({
   },
 
   onShow() {
+    this._isNavigating = false;
     if (this._skipFirstShowRefresh) {
       this._skipFirstShowRefresh = false;
       this.setData({ vipTheme: vipService.getVipTheme() });
@@ -357,11 +358,21 @@ Page({
 
   // 跳转英雄榜
   goToLeaderboard() {
+    if (this._isNavigating) return;
+    this._isNavigating = true;
     audioManager.unlockAudio();
     audioManager.playSwitchSound();
     triggerHaptic('light');
     wx.navigateTo({
-      url: '/pages/leaderboard/leaderboard'
+      url: '/pages/leaderboard/leaderboard',
+      fail: () => {
+        this._isNavigating = false;
+      },
+      complete: () => {
+        setTimeout(() => {
+          this._isNavigating = false;
+        }, 500);
+      }
     });
   },
 

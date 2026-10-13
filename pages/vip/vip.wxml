@@ -25,6 +25,16 @@
   <!-- ==================== VIP 主体流式滚动区 (微信原生顺畅平滑滚动) ==================== -->
   <view class="vip-scroll-content" style="padding-top: {{ statusBarHeight + navBarHeight + 10 }}px;">
 
+      <!-- iOS 平台规范合规说明条 (微信生态合规高定设计) -->
+      <view class="ios-compliance-banner" wx:if="{{ isIOS && !vipInfo.isVip }}">
+        <view class="icb-glow"></view>
+        <view class="icb-icon">🛡️</view>
+        <view class="icb-content">
+          <text class="icb-title">平台规范合规说明</text>
+          <text class="icb-desc">依据微信小程序运营规范，iOS 端暂不支持数字商品购买。为倡导健康自律，特权已全面开放免费体验。</text>
+        </view>
+      </view>
+
       <!-- 1. 腾讯游戏级 3D 浮雕黑金星曜 Header 舞台 (根据所选档位动态渲染专属气氛) -->
       <view class="vip-hero-stage">
         
@@ -100,7 +110,7 @@
         <view class="section-badge-bar">
           <text class="sb-dot"></text>
           <text class="sb-title">{{ vipInfo.isLifetime ? '我的终身特权方案' : '精选会员方案' }}</text>
-          <text class="sb-note">{{ vipInfo.isVip ? '点击下方卡片也可直接切换对应主题色' : '随时开通 · 立即生效' }}</text>
+          <text class="sb-note">{{ vipInfo.isVip ? '点击下方卡片也可直接切换对应主题色' : (isIOS ? '自律同行 · 免费自选特权档位' : '随时开通 · 立即生效') }}</text>
         </view>
 
         <view class="pricing-cards-row">
@@ -128,32 +138,47 @@
                 <text class="tier-period">{{ item.period }}</text>
               </view>
 
-              <!-- 价格主体 (永久会员态下展示终身已含/永久尊享，未开通态展示价格) -->
-              <view class="tier-price-row" wx:if="{{ !vipInfo.isLifetime }}">
-                <text class="price-currency">¥</text>
-                <text class="price-integer">{{ item.price }}</text>
-                <text class="price-unit">{{ item.id === 'day' ? '/天' : (item.id === 'month' ? '/月' : '') }}</text>
-              </view>
-              <view class="tier-price-row tier-owned-price-row" wx:elif="{{ item.id === 'lifetime' }}">
-                <text class="price-owned-text">永久尊享</text>
-              </view>
-              <view class="tier-price-row tier-included-price-row tier-included-{{ item.id }}" wx:else>
-                <text class="price-included-text">终身已含</text>
-              </view>
+              <!-- 价格主体 (永久会员态展示终身已含/永久尊享，iOS合规态展示特色时长，安卓态展示标价) -->
+              <block wx:if="{{ vipInfo.isLifetime }}">
+                <view class="tier-price-row tier-owned-price-row" wx:if="{{ item.id === 'lifetime' }}">
+                  <text class="price-owned-text">永久尊享</text>
+                </view>
+                <view class="tier-price-row tier-included-price-row tier-included-{{ item.id }}" wx:else>
+                  <text class="price-included-text">终身已含</text>
+                </view>
+                <view class="tier-daily-box">
+                  <text class="daily-label gold" wx:if="{{ item.id === 'lifetime' }}">终身永久有效</text>
+                  <text class="daily-label included-label" wx:else>已享终身权益</text>
+                </view>
+                <text class="tier-original-price owned" wx:if="{{ item.id === 'lifetime' }}">已永久解锁</text>
+                <text class="tier-original-price included" wx:elif="{{ item.id === 'day' }}">无需单独开通</text>
+                <text class="tier-original-price included" wx:else>无需按月续订</text>
+              </block>
 
-              <!-- 折合日均 / 权益标签 -->
-              <view class="tier-daily-box">
-                <text class="daily-label" wx:if="{{ !vipInfo.isLifetime && item.id !== 'lifetime' }}">低至 ¥{{ item.dailyCost }}/天</text>
-                <text class="daily-label gold" wx:elif="{{ !vipInfo.isLifetime && item.id === 'lifetime' }}">{{ item.dailyCost }}</text>
-                <text class="daily-label gold" wx:elif="{{ vipInfo.isLifetime && item.id === 'lifetime' }}">终身永久有效</text>
-                <text class="daily-label included-label" wx:else>已享终身权益</text>
-              </view>
+              <!-- iOS 合规体验展示 (完全隐去真实货币符号 ¥ 与数字，展现权益规格) -->
+              <block wx:elif="{{ isIOS }}">
+                <view class="tier-price-row">
+                  <text class="price-feature-badge {{ item.id === 'month' ? 'badge-hot' : (item.id === 'lifetime' ? 'badge-gold' : '') }}">{{ item.id === 'day' ? '24H 极速体验' : (item.id === 'month' ? '30天 深度陪伴' : '终身 曜世特权') }}</text>
+                </view>
+                <view class="tier-daily-box">
+                  <text class="daily-label ios-label {{ item.id === 'lifetime' ? 'gold' : '' }}">{{ item.id === 'day' ? '免广告 · 快速体验' : (item.id === 'month' ? '全33款名烟畅吸' : '全版本终身免广') }}</text>
+                </view>
+                <text class="tier-original-price ios-sub">{{ item.id === 'day' ? '零门槛体验' : (item.id === 'month' ? '全图鉴解锁' : '专属黑金标') }}</text>
+              </block>
 
-              <!-- 原价对比划线 / 终身说明 -->
-              <text class="tier-original-price" wx:if="{{ !vipInfo.isLifetime }}">原价 ¥{{ item.originalPrice }}</text>
-              <text class="tier-original-price owned" wx:elif="{{ vipInfo.isLifetime && item.id === 'lifetime' }}">已永久解锁</text>
-              <text class="tier-original-price included" wx:elif="{{ item.id === 'day' }}">无需单独开通</text>
-              <text class="tier-original-price included" wx:else>无需按月续订</text>
+              <!-- Android 正常商业化展示 -->
+              <block wx:else>
+                <view class="tier-price-row">
+                  <text class="price-currency">¥</text>
+                  <text class="price-integer">{{ item.price }}</text>
+                  <text class="price-unit">{{ item.id === 'day' ? '/天' : (item.id === 'month' ? '/月' : '') }}</text>
+                </view>
+                <view class="tier-daily-box">
+                  <text class="daily-label" wx:if="{{ item.id !== 'lifetime' }}">低至 ¥{{ item.dailyCost }}/天</text>
+                  <text class="daily-label gold" wx:else>{{ item.dailyCost }}</text>
+                </view>
+                <text class="tier-original-price">原价 ¥{{ item.originalPrice }}</text>
+              </block>
 
               <!-- 选中标记圆圈 -->
               <view class="tier-select-circle {{ selectedTierId === item.id ? 'circle-active' : '' }}">
@@ -239,12 +264,18 @@
   <!-- ==================== 底部固定高规格收银台 (Tencent Sticky Checkout Bar) ==================== -->
   <view class="sticky-checkout-dock">
     
-    <!-- 协议勾选行 / 终身会员官方凭证 -->
+    <!-- 协议勾选行 / 终身会员官方凭证 / iOS 合规免勾选协议 -->
     <block wx:if="{{ vipInfo.isLifetime }}">
       <view class="agreement-row agreement-lifetime-row" bindtap="openProtocolModal">
         <text class="lifetime-cert-badge">💎 官方认证</text>
         <text class="agreement-lifetime-text">至尊终身特权已永久生效 · </text>
         <text class="agreement-link">查看《服务协议》</text>
+      </view>
+    </block>
+    <block wx:elif="{{ isIOS }}">
+      <view class="agreement-row agreement-row-ios">
+        <text class="agreement-prefix">点击即代表查阅并同意</text>
+        <text class="agreement-link" catchtap="openProtocolModal">《用户服务与隐私协议》</text>
       </view>
     </block>
     <block wx:else>
@@ -262,7 +293,7 @@
     <!-- 结算操作主栏 -->
     <view class="checkout-main-bar">
       
-      <!-- 左侧价格展示 / 终身尊贵状态 -->
+      <!-- 左侧价格展示 / 终身尊贵状态 / iOS 尊享专区 -->
       <view class="checkout-price-left">
         <block wx:if="{{ vipInfo.isLifetime }}">
           <view class="cpl-amount-row">
@@ -270,6 +301,12 @@
             <text class="cpl-lifetime-status">全量特权生效中</text>
           </view>
           <text class="cpl-tip">已尊享：全域免广告 · 33款名烟全图鉴畅吸</text>
+        </block>
+        <block wx:elif="{{ isIOS }}">
+          <view class="cpl-amount-row">
+            <text class="cpl-ios-badge">👑 iOS 尊享专区</text>
+          </view>
+          <text class="cpl-tip">倡导健康自律 · 免费体验 {{ selectedTier.name }}</text>
         </block>
         <block wx:else>
           <view class="cpl-amount-row">
@@ -282,7 +319,7 @@
         </block>
       </view>
 
-      <!-- 右侧恒定高奢曜金按键 (未开通显示立即开通，已是永久会员则显示去品吸名烟) -->
+      <!-- 右侧按键 (已是永久会员去品吸名烟 / iOS 免费开启自律特权 / 安卓立即开通) -->
       <block wx:if="{{ vipInfo.isLifetime }}">
         <button 
           class="checkout-cta-btn btn-lifetime-active" 
@@ -290,6 +327,15 @@
         >
           <view class="btn-shine-sweep"></view>
           <text class="btn-cta-text">去品吸名烟 →</text>
+        </button>
+      </block>
+      <block wx:elif="{{ isIOS }}">
+        <button 
+          class="checkout-cta-btn btn-ios-free" 
+          bindtap="onSubscribe"
+        >
+          <view class="btn-shine-sweep"></view>
+          <text class="btn-cta-text">开启自律特权 →</text>
         </button>
       </block>
       <block wx:else>
@@ -311,7 +357,7 @@
   <view class="glass-modal-backdrop" wx:if="{{ showSuccessModal }}" catchtouchmove="preventTouchMove">
     <view class="success-dialog-card">
       <view class="dialog-confetti-badge">🎉</view>
-      <text class="dialog-title">恭喜开通【{{ activatedTierName }}】</text>
+      <text class="dialog-title">{{ isIOS ? '恭喜开启【' + activatedTierName + '】特权' : '恭喜开通【' + activatedTierName + '】' }}</text>
       <text class="dialog-subtitle">全域免广告、全套名烟已全量装配至您的账号！</text>
 
       <view class="dialog-rights-list">

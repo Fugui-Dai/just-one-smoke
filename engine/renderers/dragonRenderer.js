@@ -1,675 +1,1055 @@
-// utils/dragonRenderer.js
+// engine/renderers/dragonRenderer.js
 
 /**
- * 腾讯游戏设计级 · 东方神游九天金龙 (Celestial Golden Dragon 戏珠典藏版)
- * 零第三方依赖 · 纯原生 Canvas 2D 骨骼逆向动力学 (IK) 与多层流体光晕
- * 视觉特征升级：
- * 1. 紧凑灵动体态：尺寸缩减 ~28%，告别过粗拥挤，身法如行云流水般轻盈矫健；
- * 2. 凌空戏龙金珠 (Celestial Flaming Pearl)：龙头前方引路腾飞的炽焰龙珠，散发耀目光晕与星火；
- * 3. 逼真东方龙容貌：
- *    - 驼头鹿角：三叉珊瑚玉角与额前炽金神印；
- *    - 龙吻尖獠：雕琢龙鼻、龙须根、上下白金微獠牙与颔下龙髯；
- *    - 飘逸双长金须：多节贝塞尔流体飘拂，迎风倒掠起伏；
- *    - 龙身金鳞与背鬃：弧形精细金鳞，背脊交错烈焰流云鳍；
- *    - 腾云划水四爪：利爪指节分明，带金爪光晕破云前行；
- *    - 凤尾炽火拖尾：羽化凤火尾扇，沿途洒落 24K 金粉星屑。
+ * 腾讯游戏部门级 · 飞龙在天 · 曜金祥云真龙 (Celestial Golden Dragon 60FPS 创世典藏版)
+ *
+ * 核心升级（加长龙身、双龙交织异构路径、天穹高飞与蛇形波动）：
+ * 1. 【修长健美金龙加长 (46节高密度骨骼)】：
+ *    - 在保持 10.5px 灵动苗条体态的基础上加长身躯至 46 节，身姿更显恢弘威武；
+ *    - 尾椎自 23 节起平滑过渡收窄至 2.0px，尾端流光凤羽金扇随风摆动；
+ * 2. 【继续扶摇直上天穹 (High Celestial Ascent)】：
+ *    - 轨迹终点大幅抬高，且完成大S回旋后继续引吭乘风向上飞升，穿入云霄深处；
+ * 3. 【双龙异构交织腾霄 (Twin Intertwining Complementary Paths)】：
+ *    - 支持 variant 参数：
+ *      - 龙 A（青霄左跃龙）：向左上方腾跃，再向右上方大回旋穿云，飞向左上苍穹；
+ *      - 龙 B（紫穹右腾龙）：向右上方腾跃，再向左上方大回旋穿云，飞向右上苍穹；
+ *      - 双龙同屏时路径对称交织，波动相位相互错开，形成「双龙戏云 · 龙腾四海」绝美奇观！
+ * 4. 【顺次传递的蛇形行进波 (Propagating Wave Dynamics)】：
+ *    - wavePhase 随骨节顺延流动，颈项稳健、胸腹行云如水、龙尾大弧度甩尾；
+ * 5. 【清透空灵如意祥云与燃烧金鳞雨】。
  */
 
+// 兼容多端与微信小程序的安全椭圆绘制工具，杜绝异常崩溃与矩阵泄露
+function safeDrawEllipse(ctx, x, y, rx, ry, rot = 0) {
+  const absRx = Math.max(0.1, Math.abs(rx));
+  const absRy = Math.max(0.1, Math.abs(ry));
+  ctx.save();
+  ctx.translate(x, y);
+  if (rot !== 0) ctx.rotate(rot);
+  ctx.scale(absRx, absRy);
+  ctx.beginPath();
+  ctx.arc(0, 0, 1, 0, Math.PI * 2);
+  ctx.restore();
+}
+
+// 1. 绘制单片 3D 燃烧曜金龙鳞粒子
+export function drawDragonScaleParticle(ctx, p) {
+  const len = p.length || 14.0;
+  const w = len * 0.70;
+  const a = p.alpha || 0.90;
+  const rot = p.rotation || 0;
+  const flip = Math.cos(p.flipPhase || 0);
+  const absFlip = Math.max(0.18, Math.abs(flip));
+
+  ctx.save();
+  ctx.translate(p.x, p.y);
+  ctx.rotate(rot);
+  ctx.scale(absFlip, 1.0);
+
+  // 周身金焰微晕
+  ctx.beginPath();
+  ctx.arc(0, 0, len * 0.70, 0, Math.PI * 2);
+  ctx.fillStyle = `rgba(245, 158, 11, ${a * 0.25})`;
+  ctx.fill();
+
+  // 盾形金叶鳞片
+  ctx.beginPath();
+  ctx.moveTo(0, -len * 0.58);
+  ctx.quadraticCurveTo(w * 0.82, -len * 0.35, w * 0.68, len * 0.22);
+  ctx.quadraticCurveTo(w * 0.35, len * 0.65, 0, len * 0.60);
+  ctx.quadraticCurveTo(-w * 0.35, len * 0.65, -w * 0.7, len * 0.22);
+  ctx.quadraticCurveTo(-w * 0.82, -len * 0.35, 0, -len * 0.58);
+  ctx.closePath();
+  ctx.fillStyle = `rgba(234, 88, 12, ${a * 0.85})`;
+  ctx.fill();
+
+  // 鳞芯纯金高光
+  ctx.beginPath();
+  ctx.moveTo(0, -len * 0.42);
+  ctx.quadraticCurveTo(w * 0.55, -len * 0.25, w * 0.44, len * 0.15);
+  ctx.quadraticCurveTo(w * 0.2, len * 0.46, 0, len * 0.44);
+  ctx.quadraticCurveTo(-w * 0.2, len * 0.46, -w * 0.44, len * 0.15);
+  ctx.quadraticCurveTo(-w * 0.55, -len * 0.25, 0, -len * 0.42);
+  ctx.closePath();
+  ctx.fillStyle = `rgba(250, 204, 21, ${a * 0.96})`;
+  ctx.fill();
+
+  // 鳞脊白金亮线
+  ctx.beginPath();
+  ctx.moveTo(0, -len * 0.38);
+  ctx.lineTo(0, len * 0.38);
+  ctx.strokeStyle = `rgba(255, 255, 255, ${a * 0.98})`;
+  ctx.lineWidth = 1.1;
+  ctx.stroke();
+
+  ctx.restore();
+}
+
 export class GoldenDragon {
-  constructor(x, y) {
-    this.headX = x;
-    this.headY = y;
-    this.vx = (Math.random() - 0.5) * 0.6;
-    this.vy = -3.4; // 向上腾飞主速度
+  constructor(x, y, variant = 0) {
+    this.startX = x;
+    this.startY = y;
+    this.variant = variant; // 0: 左盘龙, 1: 右翔龙 (双龙交织异构路径)
+
+    // 初始位置与三段式三次贝塞尔航迹设计
+    if (this.variant === 0) {
+      // 龙A (左回旋主龙): 先向左上方腾跃，再向右上方回折，冲入左上苍穹
+      this.headX = x - 30;
+      this.headY = y;
+      this.bezierP0 = { x: this.headX, y: this.headY + 15 };
+      this.bezierP1 = { x: this.headX - 70, y: this.headY - 110 };
+      this.bezierP2 = { x: this.headX + 48, y: this.headY - 240 };
+      this.bezierP3 = { x: this.headX - 25, y: this.headY - 390 };
+      this.phaseOffset = 0;
+      this.goldHue = 'rgba(245, 158, 11, ';
+      this.goldMain = 'rgba(245, 158, 11, ';
+      this.goldGlow = 'rgba(251, 191, 36, ';
+      this.goldLight = 'rgba(254, 240, 138, ';
+    } else {
+      // 龙B (右回旋双龙伴飞): 先向右上方腾跃，再向左上方回折，冲入右上苍穹 (交织穿梭！)
+      this.headX = x + 24;
+      this.headY = y;
+      this.bezierP0 = { x: this.headX, y: this.headY + 15 };
+      this.bezierP1 = { x: this.headX + 68, y: this.headY - 105 };
+      this.bezierP2 = { x: this.headX - 45, y: this.headY - 235 };
+      this.bezierP3 = { x: this.headX + 28, y: this.headY - 390 };
+      this.phaseOffset = Math.PI * 0.85; // 错开波动相位，双龙灵动互补
+      this.goldHue = 'rgba(234, 88, 12, ';
+      this.goldMain = 'rgba(234, 88, 12, ';
+      this.goldGlow = 'rgba(249, 115, 22, ';
+      this.goldLight = 'rgba(253, 224, 71, ';
+    }
+
+    this.x = this.headX;
+    this.y = this.headY;
+    this.climbSpeed = 1.0;
 
     this.age = 0;
-    this.maxAge = 195; // 约 3.2 秒完整升腾与羽化生命周期
+    this.maxAge = 295; // 延长生命周期，留足吐息后扶摇直上苍穹的充足观赏时间
     this.alpha = 0;
-    this.scale = 0.72; // 精致比例：更紧凑灵动
+    this.scale = 0.94;
 
-    // 32 节灵巧游龙骨骼
-    this.numNodes = 32;
-    this.nodeDist = 6.8; // 骨节间距缩减，身形更加柔和紧实
+    // 吐息与天穹腾飞控制参数
+    this.flightProgress = 0.0;
+    this.mouthOpen = 0.0; // 0.0: 闭合, 1.0: 霸气大张
+    this.isBreathing = false;
+    this.breathIntensity = 0.0;
+    this.breathStart = this.variant === 0 ? 85 : 90;
+    this.breathDuration = 30; // 0.5 秒持续时间 (60 FPS 下正好 30 帧)
+    this.breathEnd = this.breathStart + this.breathDuration;
+
+    // 46 节修长骨骼节点 (在修长 10.5px 基础上加长节数，体态更为壮丽)
+    this.numNodes = 46;
     this.nodes = [];
 
-    // 初始化脊柱节点沿垂直向下方排列 (更纤细优美的流线体态)
+    // 精细修长体态设计 (项细、身长、腹挺、尾若凤羽)
     for (let i = 0; i < this.numNodes; i++) {
-      let r = 9.0;
-      if (i === 0) r = 9.5; // 龙首
-      else if (i <= 4) r = 9.5 + i * 0.55; // 龙颈
-      else if (i <= 13) r = 12.0; // 胸腔龙躯最大饱满处
-      else if (i <= 22) r = 12.0 - (i - 13) * 0.38; // 腹腰收紧
-      else r = Math.max(1.8, 8.5 - (i - 22) * 0.65); // 渐细灵动龙尾
+      let r = 8.5;
+      if (i === 0) r = 11.5; // 龙首
+      else if (i <= 4) r = 8.5 + i * 0.35; // 龙颈纤巧修长
+      else if (i <= 22) r = 10.5; // 胸腹最饱满处 (加长节数，线条流畅)
+      else if (i <= 35) r = 10.5 - (i - 22) * 0.45; // 渐细后腰
+      else r = Math.max(2.0, 4.6 - (i - 35) * 0.26); // 极细灵动龙尾
 
       this.nodes.push({
-        x: x,
-        y: y + i * this.nodeDist,
+        x: this.headX,
+        y: this.headY + i * 7.0,
         angle: -Math.PI / 2,
-        radius: r
+        radius: r,
+        roll: i * 0.28
       });
     }
 
-    // 随机初始相位 (让每一次出龙呈现独一无二的盘旋轨迹)
-    this.wavePhase = Math.random() * Math.PI * 2;
-    this.lateralAmp = 2.8 + Math.random() * 0.6;
+    // 历史航迹采样池 (扩展至 300 点，满足 46 节骨骼平滑跟随)
+    this.historyTrack = [];
+    for (let i = 0; i < 300; i++) {
+      this.historyTrack.push({
+        x: this.headX,
+        y: this.headY + i * 3.5,
+        angle: -Math.PI / 2
+      });
+    }
 
-    // 3D 螺旋盘旋轨迹与身体轴向自转系统 (Helical Climb & Body Axial Roll)
-    this.spiralAngle = Math.random() * Math.PI * 2;
-    this.spiralSpeed = 0.055;
-    this.rollAngle = 0;
-    this.rollSpeed = 0.082; // 身体轴向自转速度
+    // 龙吐紫金瑞气光痕
+    this.breathBursts = [];
 
-    // 戏龙金珠状态
-    this.pearlX = x;
-    this.pearlY = y - 32;
-    this.pearlRot = 0;
-    this.pearlOrbitAngle = Math.random() * Math.PI * 2;
+    // 龙鳞脱落与闪烁
+    this.scaleShedTimer = 0;
+
+    // 清透如意祥云团
+    this.clouds = [
+      { rx: this.variant === 0 ? -42 : 42, ry: -25, r: 28, col: 'rgba(254, 240, 138, 0.40)' },
+      { rx: this.variant === 0 ? 35 : -35, ry: 45, r: 32, col: 'rgba(251, 146, 60, 0.35)' },
+      { rx: -20, ry: 95, r: 36, col: 'rgba(233, 213, 255, 0.35)' }
+    ];
   }
 
-  // 动力学更新
+  // 采样三次贝塞尔曲线航迹点与切线
+  _sampleCubicBezier(t) {
+    const mt = 1 - t;
+    const mt2 = mt * mt;
+    const mt3 = mt2 * mt;
+    const t2 = t * t;
+    const t3 = t2 * t;
+
+    const p0 = this.bezierP0;
+    const p1 = this.bezierP1;
+    const p2 = this.bezierP2;
+    const p3 = this.bezierP3;
+
+    const x = mt3 * p0.x + 3 * mt2 * t * p1.x + 3 * mt * t2 * p2.x + t3 * p3.x;
+    const y = mt3 * p0.y + 3 * mt2 * t * p1.y + 3 * mt * t2 * p2.y + t3 * p3.y;
+
+    const dx = 3 * mt2 * (p1.x - p0.x) + 6 * mt * t * (p2.x - p1.x) + 3 * t2 * (p3.x - p2.x);
+    const dy = 3 * mt2 * (p1.y - p0.y) + 6 * mt * t * (p2.y - p1.y) + 3 * t2 * (p3.y - p2.y);
+    const angle = Math.atan2(dy, dx);
+
+    return { x, y, angle };
+  }
+
   update(screenH, ceilingY, emitParticleCallback) {
     this.age++;
+    const prog = this.age / this.maxAge;
 
-    // 1. 龙首 3D 螺旋升腾与盘旋轨迹动力学 (True 3D Corkscrew Flight)
-    this.vy = Math.max(-5.0, this.vy - 0.010);
-    this.spiralAngle += this.spiralSpeed;
-    this.rollAngle += this.rollSpeed;
+    // =================================================================
+    // 1. 五阶段轨迹与张嘴吐息状态机 (飞跃 -> 张嘴聚能 -> 0.5秒宏大吐息 -> 闭嘴 -> 扶摇直上苍穹)
+    // =================================================================
+    const bStart = this.breathStart;
+    const bEnd = this.breathEnd;
 
-    const spiralRadius = 26 + Math.sin(this.age * 0.035) * 8; // 动态放缩的盘旋半径
-    const spiralVx = -Math.sin(this.spiralAngle) * (spiralRadius * this.spiralSpeed);
-    const spiralVy = Math.cos(this.spiralAngle) * 0.55;
-    const microWobbleX = Math.sin(this.age * 0.12 + this.wavePhase) * 1.2;
+    if (this.age < bStart - 10) {
+      // 阶段 1：向吐息蓄力点凌空腾跃 (飞跃前 70% 弧线)
+      this.flightProgress = Math.min(0.70, (this.age / (bStart - 10)) * 0.70);
+      this.mouthOpen = 0.0;
+      this.isBreathing = false;
+      this.breathIntensity = 0.0;
+    } else if (this.age < bStart) {
+      // 阶段 2：减速进入昂首悬停蓄能姿态，龙口大开！(mouthOpen: 0 -> 1)
+      const openProg = (this.age - (bStart - 10)) / 10;
+      this.mouthOpen = Math.min(1.0, Math.max(0.0, openProg));
+      this.breathIntensity = this.mouthOpen * 0.35;
+      this.isBreathing = false;
+      this.flightProgress += 0.0006; // 悬停微漂移
+    } else if (this.age < bEnd) {
+      // 阶段 3：【核心需求：长大嘴巴，吐息大一点，持续 0.5 秒 (整整 30 帧)】
+      this.mouthOpen = 1.0;
+      this.isBreathing = true;
+      this.breathIntensity = 1.0;
+      this.flightProgress += 0.0008; // 悬停昂首蓄能怒啸
+    } else if (this.age < bEnd + 10) {
+      // 阶段 4：吐息结束，龙吻平滑闭合
+      const closeProg = 1.0 - (this.age - bEnd) / 10;
+      this.mouthOpen = Math.max(0.0, closeProg);
+      this.isBreathing = false;
+      this.breathIntensity = this.mouthOpen * 0.35;
+      this.flightProgress += 0.005;
+    } else {
+      // 阶段 5：【核心需求：然后在往上 (昂首破云，扶摇加速直冲天霄！)】
+      this.mouthOpen = 0.0;
+      this.isBreathing = false;
+      this.breathIntensity = 0.0;
 
-    this.headX += spiralVx + microWobbleX + this.vx;
-    this.headY += this.vy + spiralVy;
+      if (this.flightProgress < 1.0) {
+        this.flightProgress = Math.min(1.0, this.flightProgress + 0.022);
+      }
+    }
 
-    // 2. 脊柱多骨节逆向动力学 (IK Follow) 与 3D 轴向自转传递
+    // 计算龙首当前位置与朝向切线
+    let currentAngle;
+    if (this.flightProgress < 1.0) {
+      const easeT = this.flightProgress * this.flightProgress * (3 - 2 * this.flightProgress);
+      const trackPoint = this._sampleCubicBezier(easeT);
+      this.headX = trackPoint.x;
+      this.headY = trackPoint.y;
+      currentAngle = trackPoint.angle;
+    } else {
+      // 完成贝塞尔弧线后，引吭加速垂直冲入苍穹深处 (然后在往上)
+      this.climbSpeed = Math.min(3.8, this.climbSpeed + 0.048);
+      this.headY -= this.climbSpeed;
+      this.headX += Math.sin(this.age * 0.045 + this.phaseOffset) * 1.8;
+      const vx = Math.cos(this.age * 0.045 + this.phaseOffset) * 1.8;
+      const vy = -this.climbSpeed;
+      currentAngle = Math.atan2(vy, vx);
+    }
+
+    // 记录航迹点
+    this.historyTrack.unshift({
+      x: this.headX,
+      y: this.headY,
+      angle: currentAngle
+    });
+    if (this.historyTrack.length > 300) {
+      this.historyTrack.pop();
+    }
+
+    // =================================================================
+    // 2. 真正的蛇形行进波与摆动物理学 (Snake Wave Propagation)
+    // =================================================================
+    // 龙首骨节：由航迹切线微幅轻摇引领方向，吐息时叠加威严震颤
+    const breathTremor = this.isBreathing ? Math.sin(this.age * 1.6) * 0.035 : 0;
     this.nodes[0].x = this.headX;
     this.nodes[0].y = this.headY;
-    this.nodes[0].roll = this.rollAngle;
+    this.nodes[0].angle = currentAngle + breathTremor;
 
+    // 龙身 1 ~ 45 节沿航迹回溯取点，并叠加顺次传递的行进波
     for (let i = 1; i < this.numNodes; i++) {
-      const prev = this.nodes[i - 1];
       const cur = this.nodes[i];
+      const trackIdx = Math.min(this.historyTrack.length - 1, Math.round(i * 4.2));
+      const tp = this.historyTrack[trackIdx];
 
-      let dx = cur.x - prev.x;
-      let dy = cur.y - prev.y;
-      let angle = Math.atan2(dy, dx);
-      if (isNaN(angle)) angle = -Math.PI / 2;
+      if (tp) {
+        // 波动相位顺次传递，并在双龙间错位相位
+        const wavePhase = this.age * 0.18 - i * 0.32 + this.phaseOffset;
+        const normIdx = i / (this.numNodes - 1);
+        const amp = (1.5 + normIdx * 11.5) * this.scale;
+        const lateralDist = Math.sin(wavePhase) * amp;
 
-      cur.x = prev.x + Math.cos(angle) * this.nodeDist;
-      cur.y = prev.y + Math.sin(angle) * this.nodeDist;
-      cur.angle = angle;
+        // 法线方向位移 (垂直于航迹切线)
+        const perpAngle = tp.angle + Math.PI / 2;
+        const targetX = tp.x + Math.cos(perpAngle) * lateralDist;
+        const targetY = tp.y + Math.sin(perpAngle) * lateralDist;
 
-      // 叠加脊椎传播波动 (灵动S形波浪自头向尾推进)
-      const travelWave = Math.sin(this.age * 0.14 - i * 0.28 + this.wavePhase) * (0.9 + i * 0.05);
-      const perpAngle = angle + Math.PI / 2;
-      cur.x += Math.cos(perpAngle) * travelWave;
-      cur.y += Math.sin(perpAngle) * travelWave;
-
-      // 身体轴向自转相位沿脊柱螺旋传播 (Axial Roll Wave)
-      cur.roll = this.rollAngle + i * 0.26;
-      cur.depthZ = Math.cos(cur.roll); // 3D 空间深度
-    }
-
-    // 3. 戏龙金珠先行引导位姿 (3D 围绕龙头盘旋戏珠)
-    this.pearlOrbitAngle += 0.10;
-    const headAngle = Math.atan2(this.nodes[0].y - this.nodes[1].y, this.nodes[0].x - this.nodes[1].x);
-    const pearlDist = 28;
-    const pearlOrbitX = Math.cos(this.pearlOrbitAngle) * 14;
-    const pearlOrbitY = Math.sin(this.pearlOrbitAngle) * 8;
-    this.pearlX = this.headX + Math.cos(headAngle) * pearlDist + pearlOrbitX;
-    this.pearlY = this.headY + Math.sin(headAngle) * pearlDist + pearlOrbitY;
-    this.pearlRot += 0.08;
-
-    // 4. 飞行途中的龙鳞火星脱落与祥云金气吐纳
-    if (typeof emitParticleCallback === 'function' && this.age % 2 === 0) {
-      // 龙珠与龙吻前端洒落纯金碎屑
-      emitParticleCallback({
-        x: this.pearlX + (Math.random() - 0.5) * 10,
-        y: this.pearlY + (Math.random() - 0.5) * 10,
-        vx: (Math.random() - 0.5) * 0.8,
-        vy: Math.random() * 0.6 + 0.2,
-        radius: 1.2 + Math.random() * 1.2,
-        alpha: 0.95,
-        maxLife: 55,
-        color: '#ffffff',
-        isGold: true,
-        shimmerPhase: Math.random() * Math.PI * 2,
-        shimmerSpeed: 0.22
-      });
-
-      // 随机选取龙躯节点脱落金芒火星
-      const dropNodeIdx = Math.floor(Math.random() * (this.numNodes - 4)) + 2;
-      const targetNode = this.nodes[dropNodeIdx];
-      if (targetNode) {
-        emitParticleCallback({
-          x: targetNode.x + (Math.random() - 0.5) * 8,
-          y: targetNode.y + (Math.random() - 0.5) * 6,
-          vx: (Math.random() - 0.5) * 0.8,
-          vy: Math.random() * 0.6 - 0.2,
-          radius: 1.1 + Math.random() * 1.1,
-          alpha: 0.92,
-          maxLife: 60,
-          color: Math.random() < 0.6 ? '#fef08a' : '#fbbf24',
-          isGold: true,
-          shimmerPhase: Math.random() * Math.PI * 2,
-          shimmerSpeed: 0.18
-        });
+        // 柔和弹性平滑跟随
+        cur.x += (targetX - cur.x) * 0.45;
+        cur.y += (targetY - cur.y) * 0.45;
+        cur.angle = tp.angle;
       }
 
-      // 龙尾星河解体瀑布 (Tail dissolving stardust waterfall)
-      const tailIdx = this.numNodes - 1 - Math.floor(Math.random() * 5);
-      const tailNode = this.nodes[tailIdx];
-      if (tailNode) {
-        emitParticleCallback({
-          x: tailNode.x + (Math.random() - 0.5) * 10,
-          y: tailNode.y + Math.random() * 6,
-          vx: (Math.random() - 0.5) * 1.2,
-          vy: Math.random() * 1.2 + 0.6,
-          radius: 1.1 + Math.random() * 1.5,
-          alpha: this.alpha * 0.92,
-          baseAlpha: 0.92,
-          life: 0,
-          maxLife: 45 + Math.random() * 25,
-          color: Math.random() < 0.55 ? '#fef08a' : (Math.random() < 0.85 ? '#fbbf24' : '#ffffff'),
-          isGold: true,
-          shimmerPhase: Math.random() * Math.PI * 2,
-          shimmerSpeed: 0.22
+      cur.roll = i * 0.26 + this.age * 0.04;
+    }
+
+    // =================================================================
+    // 3. 龙吐紫金瑞气光痕
+    // =================================================================
+    if (this.age >= 45 && this.age <= 210 && this.alpha > 0.3) {
+      if (this.age % 22 === 0) {
+        const mouthAngle = this.nodes[0].angle;
+        this.breathBursts.push({
+          x: this.headX + Math.cos(mouthAngle) * 16 * this.scale,
+          y: this.headY + Math.sin(mouthAngle) * 16 * this.scale,
+          angle: mouthAngle,
+          radius: 8 * this.scale,
+          maxRadius: 85 * this.scale,
+          alpha: this.alpha * 0.85
         });
       }
     }
 
-    // 5. 透明度渐变 (破雾而出 ➔ 盛世金芒 ➔ 羽化升仙)
-    if (this.age < 16) {
-      this.alpha = Math.sin((this.age / 16) * (Math.PI / 2));
-    } else if (this.age > 130) {
-      this.alpha = Math.max(0, 1.0 - (this.age - 130) / (this.maxAge - 130));
-    } else {
-      this.alpha = 1.0;
+    for (let i = this.breathBursts.length - 1; i >= 0; i--) {
+      const b = this.breathBursts[i];
+      b.radius += 2.4 * this.scale;
+      b.alpha *= 0.94;
+      if (b.radius >= b.maxRadius || b.alpha <= 0.02) {
+        this.breathBursts.splice(i, 1);
+      }
     }
 
-    // 升至接近顶端安全屏障时平滑羽化消散
-    if (this.headY < (ceilingY || 40) + 110) {
-      const topFade = Math.max(0, (this.headY - (ceilingY || 40)) / 110);
-      this.alpha *= topFade;
+    // =================================================================
+    // 4. 透明度包络控制 (优雅破雾 -> 龙腾九天冲霄 -> 穿云羽化)
+    // =================================================================
+    let birthFade = 1.0;
+    if (this.age < 22) {
+      birthFade = Math.sin((this.age / 22) * (Math.PI / 2));
     }
 
-    return this.age < this.maxAge && this.alpha > 0.005;
+    let lifeFade = 1.0;
+    if (prog > 0.75) {
+      const fadeProg = Math.max(0, 1 - (prog - 0.75) / 0.25);
+      lifeFade = Math.pow(fadeProg, 1.8);
+    }
+
+    let ceilingFade = 1.0;
+    if (this.headY < ceilingY + 80) {
+      ceilingFade = Math.max(0, (this.headY - ceilingY) / 80);
+    }
+
+    this.alpha = birthFade * lifeFade * ceilingFade;
+
+    // =================================================================
+    // 5. 飘散的 3D 燃烧曜金龙鳞与万丈金雨星尘 + 吐息高速烈焰喷射
+    // =================================================================
+    if (typeof emitParticleCallback === 'function' && this.alpha > 0.20) {
+      // 吐息期间从龙口高频喷发超音速曜金烈焰粒子与破空鳞片
+      if (this.isBreathing) {
+        const mouthAngle = this.nodes[0].angle;
+        const mouthWorldX = this.headX + Math.cos(mouthAngle) * 16 * this.scale;
+        const mouthWorldY = this.headY + Math.sin(mouthAngle) * 16 * this.scale;
+
+        for (let k = 0; k < 3; k++) {
+          const spreadAngle = mouthAngle + (Math.random() - 0.5) * 0.36;
+          const speed = (9.0 + Math.random() * 6.5) * this.scale;
+          emitParticleCallback({
+            x: mouthWorldX + (Math.random() - 0.5) * 6 * this.scale,
+            y: mouthWorldY + (Math.random() - 0.5) * 6 * this.scale,
+            vx: Math.cos(spreadAngle) * speed,
+            vy: Math.sin(spreadAngle) * speed,
+            radius: 1.8 + Math.random() * 2.2,
+            alpha: this.alpha * 0.95,
+            baseAlpha: 0.95,
+            life: 0,
+            maxLife: 22 + Math.random() * 14,
+            color: Math.random() > 0.35 ? '#ffffff' : '#fef08a',
+            isGold: true,
+            shimmerPhase: Math.random() * Math.PI * 2,
+            shimmerSpeed: 0.35
+          });
+        }
+
+        if (this.age % 4 === 0) {
+          const spreadAngle = mouthAngle + (Math.random() - 0.5) * 0.25;
+          const speed = (7.5 + Math.random() * 4.5) * this.scale;
+          emitParticleCallback({
+            x: mouthWorldX,
+            y: mouthWorldY,
+            vx: Math.cos(spreadAngle) * speed,
+            vy: Math.sin(spreadAngle) * speed,
+            length: 13.0 + Math.random() * 5.0,
+            rotation: Math.random() * Math.PI * 2,
+            rotSpeed: (Math.random() - 0.5) * 0.08,
+            flipPhase: Math.random() * Math.PI * 2,
+            alpha: this.alpha * 0.95,
+            baseAlpha: 0.95,
+            life: 0,
+            maxLife: 45 + Math.random() * 20,
+            isDragonScale: true
+          });
+        }
+      }
+
+      this.scaleShedTimer++;
+
+      if (this.scaleShedTimer % 8 === 0) {
+        const shedIdx = Math.floor(Math.random() * (this.numNodes - 8)) + 3;
+        const sn = this.nodes[shedIdx];
+        if (sn) {
+          emitParticleCallback({
+            x: sn.x + (Math.random() - 0.5) * 14 * this.scale,
+            y: sn.y + (Math.random() - 0.5) * 12 * this.scale,
+            vx: (Math.random() - 0.5) * 0.75,
+            vy: 0.6 + Math.random() * 0.7,
+            length: 12.0 + Math.random() * 5.0,
+            rotation: Math.random() * Math.PI * 2,
+            rotSpeed: (Math.random() - 0.5) * 0.05,
+            flipPhase: Math.random() * Math.PI * 2,
+            alpha: this.alpha * 0.95,
+            baseAlpha: 0.95,
+            life: 0,
+            maxLife: 130 + Math.random() * 30,
+            isDragonScale: true
+          });
+        }
+      }
+
+      if (this.age % 2 === 0) {
+        const randomNode = this.nodes[Math.floor(Math.random() * this.numNodes)];
+        if (randomNode) {
+          emitParticleCallback({
+            x: randomNode.x + (Math.random() - 0.5) * 16 * this.scale,
+            y: randomNode.y + (Math.random() - 0.5) * 14 * this.scale,
+            vx: (Math.random() - 0.5) * 0.8,
+            vy: -(0.2 + Math.random() * 0.5),
+            radius: 1.1 + Math.random() * 1.5,
+            alpha: this.alpha * 0.90,
+            baseAlpha: 0.90,
+            life: 0,
+            maxLife: 48 + Math.random() * 22,
+            color: this.variant === 0 ? '#fef08a' : '#fb923c',
+            isGold: true,
+            shimmerPhase: Math.random() * Math.PI * 2,
+            shimmerSpeed: 0.22
+          });
+        }
+      }
+    }
+
+    return (this.age < this.maxAge && this.headY > ceilingY - 60 && this.alpha > 0.01);
   }
 
-  // 渲染金龙整躯与戏珠
   render(ctx) {
-    if (this.alpha <= 0.005 || !this.nodes.length) return;
+    if (this.alpha <= 0.01 || !this.nodes.length) return;
 
+    const s = this.scale;
+    const a = this.alpha;
+
+    // 1. 【背景清透如意祥云】
+    this._renderTranslucentClouds(ctx, s, a);
+
+    // 2. 【龙吐九霄瑞气光痕】
+    this._renderBreathBursts(ctx, s, a);
+
+    // 3. 【修长金身外层流光神辉】
+    this._renderSlenderDragonAura(ctx, s, a);
+
+    // 4. 【46 节修长健美金龙躯体与白金横腹甲】
+    this._renderSlenderDragonBody(ctx, s, a);
+
+    // 5. 【流线型纤细烈焰龙鬃与背脊金鳍】
+    this._renderFineDorsalFlames(ctx, s, a);
+
+    // 6. 【苍劲五爪金钩】
+    this._renderImperialClaws(ctx, s, a);
+
+    // 7. 【英武修长侧面龙首】
+    this._renderNobleSlenderHead(ctx, s, a);
+  }
+
+  // 1. 清透如意祥云
+  _renderTranslucentClouds(ctx, s, a) {
     ctx.save();
-    ctx.globalAlpha = this.alpha;
+    for (const c of this.clouds) {
+      const cx = this.headX + c.rx * s;
+      const cy = this.headY + c.ry * s;
 
-    // ==========================================
-    // 0. 戏龙金珠 (Celestial Flaming Dragon Pearl - 凌空引路)
-    // ==========================================
-    this.renderFlamingPearl(ctx);
+      ctx.beginPath();
+      ctx.arc(cx, cy, c.r * s, 0, Math.PI * 2);
+      ctx.fillStyle = `${c.col.replace(/[\d.]+\)$/, `${a * 0.28})`)}`;
+      ctx.fill();
 
-    // ==========================================
-    // 1. 金龙外层全息流体金光气晕 (Golden Aura Envelope - 精简细腻)
-    // ==========================================
+      ctx.beginPath();
+      ctx.arc(cx - 3 * s, cy - 2 * s, c.r * 0.65 * s, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 255, ${a * 0.35})`;
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // 2. 龙吐瑞气
+  _renderBreathBursts(ctx, s, a) {
+    if (!this.breathBursts.length) return;
+    ctx.save();
+    for (const b of this.breathBursts) {
+      const bAlpha = b.alpha * a;
+      if (bAlpha <= 0.01) continue;
+
+      ctx.save();
+      ctx.translate(b.x, b.y);
+      ctx.rotate(b.angle);
+
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.arc(0, 0, b.radius, -0.42, 0.42);
+      ctx.closePath();
+      ctx.fillStyle = `rgba(254, 240, 138, ${bAlpha * 0.32})`;
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.arc(0, 0, b.radius * 0.6, -0.25, 0.25);
+      ctx.closePath();
+      ctx.fillStyle = `rgba(255, 255, 255, ${bAlpha * 0.50})`;
+      ctx.fill();
+
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+
+  // 3. 修长金身外层流光神辉 (神圣曜金霞光)
+  _renderSlenderDragonAura(ctx, s, a) {
+    if (this.nodes.length < 2) return;
     ctx.save();
     ctx.beginPath();
     ctx.moveTo(this.nodes[0].x, this.nodes[0].y);
     for (let i = 1; i < this.numNodes; i++) {
       ctx.lineTo(this.nodes[i].x, this.nodes[i].y);
     }
-    ctx.lineWidth = 22; // 缩减光晕宽度，视觉更聚焦
+    ctx.lineWidth = 26 * s;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.strokeStyle = `rgba(245, 158, 11, ${0.16 * this.alpha})`;
+    ctx.strokeStyle = `${this.goldGlow}${a * 0.18})`;
+    ctx.stroke();
+
+    ctx.lineWidth = 14 * s;
+    ctx.strokeStyle = `${this.goldLight}${a * 0.28})`;
     ctx.stroke();
     ctx.restore();
+  }
 
-    // ==========================================
-    // 2. 龙躯层叠金色缎带管体 (Tapered Golden Body Segments)
-    // ==========================================
+  // 4. 曜金真龙游龙金身与灵动凤羽尾扇 (去除杂乱分段，呈现如丝绢划水般流畅金身)
+  _renderSlenderDragonBody(ctx, s, a) {
+    if (this.nodes.length < 2) return;
+    ctx.save();
+
+    // 1. 底层厚重 24K 曜金主身段 (沿骨骼平滑圆润连贯推进，体态修长健美)
     for (let i = this.numNodes - 1; i >= 1; i--) {
       const p1 = this.nodes[i - 1];
       const p2 = this.nodes[i];
-      const avgR = (p1.radius + p2.radius) * 0.5;
+      const avgR = (p1.radius + p2.radius) * 0.5 * s;
 
-      ctx.save();
-      // 外层深金琥珀底色
       ctx.beginPath();
       ctx.moveTo(p1.x, p1.y);
       ctx.lineTo(p2.x, p2.y);
-      ctx.lineWidth = avgR * 1.8;
+      ctx.lineWidth = avgR * 1.6;
       ctx.lineCap = 'round';
-      ctx.strokeStyle = 'rgba(217, 119, 6, 0.90)';
+      ctx.strokeStyle = `${this.goldMain}${a * 0.95})`;
       ctx.stroke();
 
-      // 中层帝王黄金缎体
       ctx.beginPath();
       ctx.moveTo(p1.x, p1.y);
       ctx.lineTo(p2.x, p2.y);
-      ctx.lineWidth = avgR * 1.30;
-      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = avgR * 1.15;
+      ctx.strokeStyle = `${this.goldGlow}${a * 0.98})`;
       ctx.stroke();
-
-      // 脊梁高光纯金炽线 (随身体自转在圆柱体表面滑动)
-      const roll1 = p1.roll || 0;
-      const roll2 = p2.roll || 0;
-      const rollOffset1 = Math.sin(roll1) * (avgR * 0.45);
-      const rollOffset2 = Math.sin(roll2) * (avgR * 0.45);
-      const p1Perp = p1.angle + Math.PI / 2;
-      const p2Perp = p2.angle + Math.PI / 2;
-
-      ctx.beginPath();
-      ctx.moveTo(p1.x + Math.cos(p1Perp) * rollOffset1, p1.y + Math.sin(p1Perp) * rollOffset1);
-      ctx.lineTo(p2.x + Math.cos(p2Perp) * rollOffset2, p2.y + Math.sin(p2Perp) * rollOffset2);
-      ctx.lineWidth = avgR * 0.55;
-      ctx.strokeStyle = '#fef08a';
-      ctx.stroke();
-
-      // 龙脊中心极细白金光刃
-      ctx.beginPath();
-      ctx.moveTo(p1.x + Math.cos(p1Perp) * rollOffset1, p1.y + Math.sin(p1Perp) * rollOffset1);
-      ctx.lineTo(p2.x + Math.cos(p2Perp) * rollOffset2, p2.y + Math.sin(p2Perp) * rollOffset2);
-      ctx.lineWidth = Math.max(0.8, avgR * 0.18);
-      ctx.strokeStyle = '#ffffff';
-      ctx.stroke();
-      ctx.restore();
     }
 
-    // ==========================================
-    // 3. 金龙璀璨弧形龙鳞纹理 (Golden Scale Textures)
-    // ==========================================
-    for (let i = 2; i < this.numNodes - 3; i += 2) {
-      const node = this.nodes[i];
-      const scaleW = node.radius * 0.78;
+    // 2. 龙腹温润白金横甲纹理 (每隔数节柔和衬映，无杂乱锯齿与蜈蚣腿感)
+    for (let i = 3; i < this.numNodes - 5; i += 3) {
+      const n = this.nodes[i];
+      if (!n) continue;
+      const bellyW = n.radius * 0.95 * s;
+      const perpAngle = n.angle + Math.PI / 2;
 
-      ctx.save();
-      ctx.translate(node.x, node.y);
-      ctx.rotate(node.angle + Math.PI / 2);
       ctx.beginPath();
-      ctx.arc(0, 0, scaleW, -0.65, 0.65);
-      ctx.lineWidth = 1.1;
-      ctx.strokeStyle = 'rgba(254, 240, 138, 0.72)';
+      ctx.moveTo(n.x - Math.cos(perpAngle) * bellyW * 0.45, n.y - Math.sin(perpAngle) * bellyW * 0.45);
+      ctx.lineTo(n.x + Math.cos(perpAngle) * bellyW * 0.45, n.y + Math.sin(perpAngle) * bellyW * 0.45);
+      ctx.lineWidth = 1.6 * s;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = `${this.goldLight}${a * 0.70})`;
       ctx.stroke();
-      ctx.restore();
     }
 
-    // ==========================================
-    // 4. 背脊炽火龙鳍 (Dorsal Flame Fins - 随身体自转 360° 翻滚回旋)
-    // ==========================================
-    for (let i = 2; i < this.numNodes - 4; i += 3) {
-      const node = this.nodes[i];
-      const finFlutter = Math.sin(this.age * 0.25 + i * 0.4) * 2.2;
-      const rollPhase = node.roll || (this.rollAngle + i * 0.26);
-      const rollSide = Math.sin(rollPhase); // 侧向翻转分量 (-1 ~ +1)
-      const rollDepth = Math.cos(rollPhase); // 空间深度分量 (+1 前景, -1 后景)
-
-      // 鳍的角度随身体自转在脊背两侧自如切换，产生逼真3D翻滚感
-      const finAngle = node.angle + Math.PI / 2 + rollSide * (Math.PI * 0.48);
-      const finLen = (node.radius * 1.35 + finFlutter) * (0.65 + Math.abs(rollSide) * 0.45);
-
-      ctx.save();
-      ctx.translate(node.x, node.y);
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.quadraticCurveTo(
-        Math.cos(finAngle) * finLen * 0.6,
-        Math.sin(finAngle) * finLen * 0.6,
-        Math.cos(finAngle) * finLen,
-        Math.sin(finAngle) * finLen
-      );
-      ctx.lineTo(Math.cos(finAngle - 0.25) * (finLen * 0.38), Math.sin(finAngle - 0.25) * (finLen * 0.38));
-      ctx.closePath();
-      // 在前景侧为纯金高光，在后景侧为深琥珀色
-      ctx.fillStyle = rollDepth > 0 ? '#fef08a' : '#d97706';
-      ctx.fill();
-      ctx.lineWidth = 0.8;
-      ctx.strokeStyle = rollDepth > 0 ? '#ffffff' : '#f59e0b';
-      ctx.stroke();
-      ctx.restore();
+    // 3. 贯穿背脊的高光白金流光刃 (连贯一气呵成的神龙光脊)
+    ctx.beginPath();
+    ctx.moveTo(this.nodes[0].x, this.nodes[0].y);
+    for (let i = 1; i < this.numNodes; i++) {
+      ctx.lineTo(this.nodes[i].x, this.nodes[i].y);
     }
+    ctx.lineWidth = 1.8 * s;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = `rgba(255, 255, 255, ${a * 0.95})`;
+    ctx.stroke();
 
-    // ==========================================
-    // 4.5 环绕金龙躯干的 3D 螺旋星尘缎带 (Corkscrew Orbiting Stardust Ribbon)
-    // ==========================================
-    this.renderCorkscrewStardustRibbon(ctx);
-
-    // ==========================================
-    // 5. 四足金龙利爪 (Four Divine Claws - 腾云划动)
-    // ==========================================
-    this.renderClaw(ctx, this.nodes[7], -1, 0.70); // 左前爪
-    this.renderClaw(ctx, this.nodes[7], 1, 0.70);  // 右前爪
-    this.renderClaw(ctx, this.nodes[18], -1, 0.62); // 左后爪
-    this.renderClaw(ctx, this.nodes[18], 1, 0.62);  // 右后爪
-
-    // ==========================================
-    // 6. 凤羽炽火龙尾 (Blazing Dragon Tail Tuft)
-    // ==========================================
-    const tailNode = this.nodes[this.numNodes - 1];
+    // 4. 灵动龙尾流光凤羽尾扇 (尾尖飘逸大金扇，神龙摆尾)
+    const tailTip = this.nodes[this.numNodes - 1];
     const tailPrev = this.nodes[this.numNodes - 2];
-    const tailAngle = Math.atan2(tailNode.y - tailPrev.y, tailNode.x - tailPrev.x);
-
-    ctx.save();
-    ctx.translate(tailNode.x, tailNode.y);
-    ctx.rotate(tailAngle);
-
-    const plumes = [-0.42, -0.14, 0.14, 0.42];
-    for (let k = 0; k < plumes.length; k++) {
-      const pAngle = plumes[k];
-      const plumeWiggle = Math.sin(this.age * 0.25 + k * 0.6) * 4.5;
-      const plumeLen = 18 + Math.abs(pAngle) * 6 + plumeWiggle;
-
+    if (tailTip && tailPrev) {
+      const tailAngle = Math.atan2(tailTip.y - tailPrev.y, tailTip.x - tailPrev.x);
       ctx.save();
-      ctx.rotate(pAngle);
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.bezierCurveTo(plumeLen * 0.4, -3, plumeLen * 0.75, 3, plumeLen, 0);
-      ctx.bezierCurveTo(plumeLen * 0.65, 4.5, plumeLen * 0.3, 2, 0, 0);
-      ctx.fillStyle = k % 2 === 0 ? '#f59e0b' : '#fef08a';
-      ctx.fill();
-      ctx.restore();
-    }
-    ctx.restore();
+      ctx.translate(tailTip.x, tailTip.y);
+      ctx.rotate(tailAngle);
 
-    // ==========================================
-    // 7. 威严游龙首级 (The Majestic Dragon Head - 带 3D 自转侧倾角)
-    // ==========================================
-    const headNode = this.nodes[0];
-    const neckNode = this.nodes[1];
-    const headAngleDirect = Math.atan2(headNode.y - neckNode.y, headNode.x - neckNode.x) + Math.PI / 2;
-    const headBank = Math.sin(this.rollAngle) * 0.28; // 龙首自转侧倾角
+      const plumes = [-0.38, -0.18, 0, 0.18, 0.38];
+      for (let pIdx = 0; pIdx < plumes.length; pIdx++) {
+        const tf = plumes[pIdx];
+        const flutter = Math.sin(this.age * 0.22 + pIdx * 0.8 + this.phaseOffset) * 0.18;
+        const pLen = (18 + Math.abs(2 - pIdx) * 6) * s;
 
-    ctx.save();
-    ctx.translate(headNode.x, headNode.y);
-    ctx.rotate(headAngleDirect + headBank * 0.25);
-    ctx.scale(1.0 - Math.abs(headBank) * 0.12, 1.0); // 3D 侧视轻微透视形变
-
-    // 7.1 分叉珊瑚金角 (Branching Golden Antlers)
-    this.renderAntler(ctx, -1); // 左角
-    this.renderAntler(ctx, 1);  // 右角
-
-    // 7.2 龙首面部轮廓与龙吻 (Dragon Snout, Jaws & Fangs)
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(-8, -1);
-    ctx.quadraticCurveTo(-10, -11, -5, -16); // 左腮至吻部
-    ctx.lineTo(5, -16); // 龙吻前端
-    ctx.quadraticCurveTo(10, -11, 8, -1);   // 右吻至右腮
-    ctx.quadraticCurveTo(0, 3, -8, -1);     // 龙颔底部
-    ctx.closePath();
-    ctx.fillStyle = '#f59e0b';
-    ctx.fill();
-    ctx.lineWidth = 1.0;
-    ctx.strokeStyle = '#fef08a';
-    ctx.stroke();
-
-    // 龙鼻孔微孔与呼吸流光
-    ctx.fillStyle = '#78350f';
-    ctx.beginPath();
-    ctx.ellipse(-2.5, -14, 1.0, 0.6, -0.2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(2.5, -14, 1.0, 0.6, 0.2, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 上下微露白金龙牙 (Fangs)
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.moveTo(-4, -15); ctx.lineTo(-3, -11); ctx.lineTo(-2, -15); ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(2, -15); ctx.lineTo(3, -11); ctx.lineTo(4, -15); ctx.fill();
-
-    // 额心炽焰神符
-    ctx.beginPath();
-    ctx.moveTo(0, -14);
-    ctx.lineTo(-2.2, -8);
-    ctx.lineTo(0, -3);
-    ctx.lineTo(2.2, -8);
-    ctx.closePath();
-    ctx.fillStyle = '#fef08a';
-    ctx.fill();
-
-    // 颔下龙髯 (Chin Beard)
-    ctx.beginPath();
-    ctx.moveTo(-3, 2);
-    ctx.quadraticCurveTo(0, 10 + Math.sin(this.age * 0.2) * 2, 3, 2);
-    ctx.fillStyle = '#fef08a';
-    ctx.fill();
-    ctx.restore();
-
-    // 7.3 金光龙目火瞳 (Piercing Golden Eyes)
-    ctx.save();
-    // 左目
-    ctx.beginPath();
-    ctx.ellipse(-4.5, -9.5, 2.6, 1.4, -0.3, 0, Math.PI * 2);
-    ctx.fillStyle = '#ffffff';
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(-4.5, -9.5, 0.8, 0, Math.PI * 2);
-    ctx.fillStyle = '#78350f';
-    ctx.fill();
-
-    // 右目
-    ctx.beginPath();
-    ctx.ellipse(4.5, -9.5, 2.6, 1.4, 0.3, 0, Math.PI * 2);
-    ctx.fillStyle = '#ffffff';
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(4.5, -9.5, 0.8, 0, Math.PI * 2);
-    ctx.fillStyle = '#78350f';
-    ctx.fill();
-    ctx.restore();
-
-    // 7.4 飘逸双长金须 (Long Fluid Golden Whiskers)
-    this.renderWhisker(ctx, -1);
-    this.renderWhisker(ctx, 1);
-
-    ctx.restore(); // 恢复龙首坐标系
-
-    ctx.restore(); // 恢复全图上下文
-  }
-
-  // 绘制凌空戏龙金珠 (Celestial Flaming Dragon Pearl)
-  renderFlamingPearl(ctx) {
-    ctx.save();
-    ctx.translate(this.pearlX, this.pearlY);
-    ctx.rotate(this.pearlRot);
-
-    // 1. 外层 4 瓣旋转炽焰流火 (Solar Prominence Flares)
-    for (let f = 0; f < 4; f++) {
-      ctx.save();
-      ctx.rotate((f * Math.PI) / 2);
-      ctx.beginPath();
-      ctx.moveTo(0, -6);
-      ctx.quadraticCurveTo(4, -12, 1, -18);
-      ctx.quadraticCurveTo(-1, -12, 0, -6);
-      ctx.fillStyle = 'rgba(245, 158, 11, 0.65)';
-      ctx.fill();
-      ctx.restore();
-    }
-
-    // 2. 核心炽金明珠光球
-    ctx.beginPath();
-    ctx.arc(0, 0, 7.5, 0, Math.PI * 2);
-    ctx.fillStyle = '#f59e0b';
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.arc(0, 0, 5.0, 0, Math.PI * 2);
-    ctx.fillStyle = '#fef08a';
-    ctx.fill();
-
-    // 3. 珠心纯白耀斑晶体
-    ctx.beginPath();
-    ctx.arc(-1.5, -1.5, 2.2, 0, Math.PI * 2);
-    ctx.fillStyle = '#ffffff';
-    ctx.fill();
-
-    // 4. 四芒星光芒 (Cross Diamond Flare)
-    ctx.beginPath();
-    ctx.moveTo(0, -10); ctx.lineTo(0, 10);
-    ctx.moveTo(-10, 0); ctx.lineTo(10, 0);
-    ctx.lineWidth = 1.0;
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
-    ctx.stroke();
-
-    ctx.restore();
-  }
-
-  // 绘制单只金爪 (随身体自转立体划动)
-  renderClaw(ctx, node, side, scale) {
-    if (!node) return;
-    const rollPhase = (node.roll || 0) + (side > 0 ? 0 : Math.PI);
-    const rollAngleOffset = Math.sin(rollPhase) * 0.32;
-    const clawAngle = node.angle + (side * Math.PI * 0.42) + rollAngleOffset;
-    const strokeWiggle = Math.sin(this.age * 0.22 + side) * 0.25;
-    const finalAngle = clawAngle + strokeWiggle;
-    const armLen = 13 * scale * (0.8 + Math.abs(Math.cos(rollPhase)) * 0.28);
-
-    ctx.save();
-    ctx.translate(node.x, node.y);
-    ctx.rotate(finalAngle);
-
-    // 上臂
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(armLen * 0.6, 0);
-    ctx.lineWidth = 2.8 * scale;
-    ctx.strokeStyle = '#d97706';
-    ctx.stroke();
-
-    // 前臂
-    ctx.beginPath();
-    ctx.moveTo(armLen * 0.6, 0);
-    ctx.lineTo(armLen, 1.5 * scale);
-    ctx.lineWidth = 2.2 * scale;
-    ctx.strokeStyle = '#f59e0b';
-    ctx.stroke();
-
-    // 3 趾弯钩金鹰利爪
-    const talons = [-0.35, 0, 0.35];
-    for (const t of talons) {
-      ctx.save();
-      ctx.translate(armLen, 1.5 * scale);
-      ctx.rotate(t);
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.quadraticCurveTo(3 * scale, 1 * scale, 5.5 * scale, 3 * scale);
-      ctx.lineWidth = 1.1 * scale;
-      ctx.strokeStyle = '#ffffff';
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    ctx.restore();
-  }
-
-  // 绘制单侧分叉金角
-  renderAntler(ctx, side) {
-    ctx.save();
-    ctx.translate(side * 4, 1);
-    ctx.rotate(side * 0.42);
-
-    // 主角干
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.bezierCurveTo(side * 5, 8, side * 8, 16, side * 11, 22);
-    ctx.lineWidth = 2.4;
-    ctx.strokeStyle = '#fef08a';
-    ctx.stroke();
-
-    // 次角分叉 (Coral tine)
-    ctx.beginPath();
-    ctx.moveTo(side * 5, 9);
-    ctx.quadraticCurveTo(side * 9, 11, side * 12, 14);
-    ctx.lineWidth = 1.5;
-    ctx.strokeStyle = '#ffffff';
-    ctx.stroke();
-
-    ctx.restore();
-  }
-
-  // 绘制单侧飘逸龙须
-  renderWhisker(ctx, side) {
-    const wave = Math.sin(this.age * 0.18 + side * 1.2) * 6;
-    const wave2 = Math.cos(this.age * 0.14) * 4.5;
-
-    ctx.save();
-    ctx.translate(side * 4, -14); // 须根位于龙吻鼻翼两侧
-
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.bezierCurveTo(
-      side * 11, -5 + wave2,
-      side * 18, 14 + wave,
-      side * 22 + wave, 42
-    );
-    ctx.lineWidth = 1.3;
-    ctx.strokeStyle = '#fef08a';
-    ctx.stroke();
-
-    // 细尖微须
-    ctx.beginPath();
-    ctx.moveTo(side * 16, 26 + wave * 0.5);
-    ctx.quadraticCurveTo(side * 20, 36, side * 22 + wave, 42);
-    ctx.lineWidth = 0.7;
-    ctx.strokeStyle = '#ffffff';
-    ctx.stroke();
-
-    ctx.restore();
-  }
-
-  // 环绕金龙躯干的 3D 螺旋星尘缎带 (Corkscrew Orbiting Stardust Ribbon)
-  renderCorkscrewStardustRibbon(ctx) {
-    if (!this.nodes || this.nodes.length < 5) return;
-    ctx.save();
-
-    const spiralPoints = [];
-    for (let i = 0; i < this.numNodes; i++) {
-      const node = this.nodes[i];
-      const spineAngle = node.angle;
-      const perpAngle = spineAngle + Math.PI / 2;
-
-      // 沿龙身行进的螺旋相位 (与身体自转角动量深度耦合)
-      const phase = (this.rollAngle || 0) * 2.0 + i * 0.42;
-      const radius = node.radius + 9.5;
-
-      const normalOffset = Math.sin(phase) * radius;
-      const depthZ = Math.cos(phase); // 3D 深度：>0 在龙身前方，<0 在龙身后方
-
-      const px = node.x + Math.cos(perpAngle) * normalOffset;
-      const py = node.y + Math.sin(perpAngle) * normalOffset;
-
-      spiralPoints.push({ x: px, y: py, z: depthZ, i: i });
-    }
-
-    // 绘制螺旋缎带流光
-    ctx.beginPath();
-    ctx.moveTo(spiralPoints[0].x, spiralPoints[0].y);
-    for (let i = 1; i < spiralPoints.length - 1; i++) {
-      const xc = (spiralPoints[i].x + spiralPoints[i + 1].x) / 2;
-      const yc = (spiralPoints[i].y + spiralPoints[i + 1].y) / 2;
-      ctx.quadraticCurveTo(spiralPoints[i].x, spiralPoints[i].y, xc, yc);
-    }
-    ctx.lineWidth = 1.8;
-    ctx.strokeStyle = `rgba(254, 240, 138, ${this.alpha * 0.85})`;
-    ctx.stroke();
-
-    // 在螺旋波峰节点点缀闪烁的四芒星钻
-    for (let i = 2; i < spiralPoints.length - 2; i += 3) {
-      const sp = spiralPoints[i];
-      if (sp.z > 0.25) { // 仅在龙身前方波峰闪耀，产生极强3D立体空间感
-        const starSize = 2.4 + Math.sin(this.age * 0.2 + i) * 1.0;
         ctx.save();
-        ctx.translate(sp.x, sp.y);
+        ctx.rotate(tf + flutter);
         ctx.beginPath();
-        ctx.arc(0, 0, starSize, 0, Math.PI * 2);
-        ctx.fillStyle = '#ffffff';
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(pLen * 0.5, -3 * s, pLen, 0);
+        ctx.quadraticCurveTo(pLen * 0.5, 3 * s, 0, 0);
+        ctx.closePath();
+        ctx.fillStyle = (pIdx % 2 === 0)
+          ? `${this.goldGlow}${a * 0.92})`
+          : `${this.goldLight}${a * 0.96})`;
         ctx.fill();
+        ctx.lineWidth = 1.0 * s;
+        ctx.strokeStyle = `rgba(255, 255, 255, ${a * 0.92})`;
+        ctx.stroke();
         ctx.restore();
       }
+      ctx.restore();
     }
+
+    ctx.restore();
+  }
+
+  // 5. 飘渺烈焰背鬃 (如丝绢流云般沿背脊自然翻腾，彻底剔除僵硬刺状结构)
+  _renderFineDorsalFlames(ctx, s, a) {
+    ctx.save();
+    // 沿龙颈与背脊关键部位渲染柔和翻腾的烈焰丝带
+    const maneNodes = [2, 4, 6, 8, 12, 16, 20, 24];
+    for (let idx = 0; idx < maneNodes.length; idx++) {
+      const nodeIdx = maneNodes[idx];
+      const node = this.nodes[nodeIdx];
+      if (!node) continue;
+
+      const wave = Math.sin(this.age * 0.20 + idx * 0.75 + this.phaseOffset) * 4.5 * s;
+      const maneLen = (12 + (8 - idx) * 0.8) * s;
+      const dorsalAngle = node.angle - Math.PI / 2; // 指向背侧
+
+      ctx.save();
+      ctx.translate(node.x, node.y);
+      ctx.rotate(dorsalAngle);
+
+      // 飘逸丝滑金焰火舌
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.quadraticCurveTo(maneLen * 0.4, -4 * s + wave, maneLen, wave);
+      ctx.quadraticCurveTo(maneLen * 0.6, 3 * s + wave * 0.5, 0, 0);
+      ctx.closePath();
+      ctx.fillStyle = (idx % 2 === 0)
+        ? `${this.goldLight}${a * 0.75})`
+        : `${this.goldGlow}${a * 0.65})`;
+      ctx.fill();
+
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+
+  // 6. 威严四足五爪金钩 (前双爪与后双爪，各踏祥云，张扬有力)
+  _renderImperialClaws(ctx, s, a) {
+    const clawConfigs = [
+      { nodeIdx: 8, side: -1, isFront: true },  // 前左爪
+      { nodeIdx: 12, side: 1, isFront: true },  // 前右爪
+      { nodeIdx: 24, side: -1, isFront: false }, // 后左爪
+      { nodeIdx: 28, side: 1, isFront: false }  // 后右爪
+    ];
+
+    for (const c of clawConfigs) {
+      const node = this.nodes[c.nodeIdx];
+      if (!node) continue;
+
+      const clawAngle = node.angle + c.side * (c.isFront ? 1.15 : 1.35);
+      const armLen = 18 * s;
+
+      ctx.save();
+      ctx.translate(node.x, node.y);
+      ctx.rotate(clawAngle);
+
+      // 爪底小团腾云
+      ctx.beginPath();
+      ctx.arc(armLen * 0.8, 0, 7 * s, 0, Math.PI * 2);
+      ctx.fillStyle = `${this.goldLight}${a * 0.35})`;
+      ctx.fill();
+
+      // 遒劲龙臂上臂
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(armLen * 0.55, -2.5 * s);
+      ctx.lineWidth = 3.6 * s;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = `${this.goldMain}${a * 0.95})`;
+      ctx.stroke();
+
+      // 遒劲龙臂前臂
+      ctx.beginPath();
+      ctx.moveTo(armLen * 0.55, -2.5 * s);
+      ctx.lineTo(armLen, 2 * s);
+      ctx.lineWidth = 2.6 * s;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = `${this.goldGlow}${a * 0.98})`;
+      ctx.stroke();
+
+      // 锐利五爪金钩
+      const talons = [-0.55, -0.28, 0, 0.28, 0.55];
+      for (const t of talons) {
+        ctx.save();
+        ctx.translate(armLen, 2 * s);
+        ctx.rotate(t);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(4.5 * s, 1.5 * s, 8.0 * s, 4.5 * s);
+        ctx.lineWidth = 1.3 * s;
+        ctx.strokeStyle = `rgba(255, 255, 255, ${a * 0.98})`;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      ctx.restore();
+    }
+  }
+
+  // 7. 英武修长侧面龙首与霸气张嘴大招
+  _renderNobleSlenderHead(ctx, s, a) {
+    const head = this.nodes[0];
+    if (!head) return;
+
+    ctx.save();
+    ctx.translate(head.x, head.y);
+    ctx.rotate(head.angle);
+
+    // 下颌下落位移 (长大嘴巴：mouthOpen 0.0 -> 1.0 时下颌向下张开)
+    const jawDrop = this.mouthOpen * 14.5 * s;
+
+    // A. 巍峨珊瑚双鹿角
+    for (const side of [-1, 1]) {
+      ctx.save();
+      ctx.translate(-3 * s, side * 6 * s);
+      ctx.rotate(side * 0.32);
+
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.bezierCurveTo(-8 * s, side * 7 * s, -18 * s, side * 15 * s, -28 * s, side * 22 * s);
+      ctx.lineWidth = 3.2 * s;
+      ctx.strokeStyle = `${this.goldLight}${a * 0.98})`;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(-8 * s, side * 7 * s);
+      ctx.quadraticCurveTo(-15 * s, side * 3 * s, -22 * s, side * 6 * s);
+      ctx.lineWidth = 2.0 * s;
+      ctx.strokeStyle = `rgba(255, 255, 255, ${a * 0.98})`;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // B. 脑后飘逸飞扬流金龙鬃
+    const maneLines = [-12, -7, -2, 3, 8];
+    for (let i = 0; i < maneLines.length; i++) {
+      const my = maneLines[i] * s;
+      const wave = Math.sin(this.age * 0.24 + i + this.phaseOffset) * 3.5 * s;
+      ctx.beginPath();
+      ctx.moveTo(-6 * s, my);
+      ctx.bezierCurveTo(-15 * s, my - 6 * s, -24 * s, my + wave, -32 * s, my - 10 * s + wave);
+      ctx.lineWidth = 2.6 * s;
+      ctx.strokeStyle = (i % 2 === 0)
+        ? `${this.goldGlow}${a * 0.95})`
+        : `${this.goldLight}${a * 0.98})`;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+    }
+
+    // C. 【核心需求：吐息大一点，持续0.5秒】宏大曜金龙息暴风 (在龙嘴张开时喷薄而出)
+    if (this.mouthOpen > 0.05 || this.breathIntensity > 0) {
+      this._renderMassiveDragonBreath(ctx, s, a, jawDrop);
+    }
+
+    // D. 口腔与深喉聚能烈焰 (张嘴时显现赤金烈喉)
+    if (this.mouthOpen > 0.04) {
+      ctx.beginPath();
+      ctx.moveTo(17 * s, -0.5 * s);
+      ctx.quadraticCurveTo(6 * s, 1 * s, -4 * s, 2 * s);
+      ctx.quadraticCurveTo(5 * s, 1.5 * s + jawDrop * 0.5, 17 * s, 0.5 * s + jawDrop);
+      ctx.closePath();
+      ctx.fillStyle = `rgba(153, 27, 27, ${a * 0.95})`; // 深赤红口腔底色
+      ctx.fill();
+
+      // 咽喉深处凝聚的炽热曜白金耀斑
+      const throatFlare = Math.min(1.0, this.mouthOpen * 1.2);
+      ctx.beginPath();
+      ctx.arc(2 * s, 1.5 * s + jawDrop * 0.4, (4 + throatFlare * 5) * s, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 255, ${a * throatFlare * 0.98})`;
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(2 * s, 1.5 * s + jawDrop * 0.4, (7 + throatFlare * 7) * s, 0, Math.PI * 2);
+      ctx.fillStyle = `${this.goldLight}${a * throatFlare * 0.65})`;
+      ctx.fill();
+    }
+
+    // E. 尊贵修长龙首上颅与上吻
+    ctx.beginPath();
+    ctx.moveTo(18 * s, -2 * s); // 上吻尖
+    ctx.quadraticCurveTo(12 * s, -10 * s, -6 * s, -9 * s); // 额头
+    ctx.quadraticCurveTo(-14 * s, -5 * s, -13 * s, 2 * s); // 枕部
+    ctx.lineTo(-4 * s, 2 * s); // 颅底/下颌关节
+    ctx.quadraticCurveTo(6 * s, 1 * s, 17 * s, -0.5 * s); // 上颚线
+    ctx.closePath();
+    ctx.fillStyle = `${this.goldMain}${a * 0.98})`;
+    ctx.fill();
+    ctx.strokeStyle = `${this.goldLight}${a * 0.96})`;
+    ctx.lineWidth = 1.4 * s;
+    ctx.stroke();
+
+    // 隆起鼻梁 (使用安全无崩绘制)
+    safeDrawEllipse(ctx, 13 * s, -3.5 * s, 5.0 * s, 3.0 * s, 0.15);
+    ctx.fillStyle = `${this.goldGlow}${a * 0.98})`;
+    ctx.fill();
+
+    // F. 【核心需求：长大嘴巴】刚劲下颌骨 (张合铰链跟随 jawDrop 下落)
+    ctx.beginPath();
+    ctx.moveTo(-4 * s, 2 * s); // 关节
+    ctx.quadraticCurveTo(4 * s, 5 * s + jawDrop * 0.6, 17 * s, 1.5 * s + jawDrop); // 下颌底线
+    ctx.lineTo(17 * s, 0.5 * s + jawDrop); // 下唇尖
+    ctx.quadraticCurveTo(5 * s, 1.5 * s + jawDrop * 0.5, -4 * s, 2 * s); // 下颚内缘
+    ctx.closePath();
+    ctx.fillStyle = `${this.goldMain}${a * 0.98})`;
+    ctx.fill();
+    ctx.strokeStyle = `${this.goldLight}${a * 0.96})`;
+    ctx.lineWidth = 1.3 * s;
+    ctx.stroke();
+
+    // G. 上下排森然锋利白金龙牙
+    // 上排利齿 (向下)
+    ctx.beginPath();
+    ctx.moveTo(15 * s, 0);
+    ctx.lineTo(13.5 * s, 6.2 * s);
+    ctx.lineTo(12 * s, 0);
+    ctx.fillStyle = `rgba(255, 255, 255, ${a * 0.98})`;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(10.5 * s, 0.5 * s);
+    ctx.lineTo(9.5 * s, 4.6 * s);
+    ctx.lineTo(8.5 * s, 0.5 * s);
+    ctx.fillStyle = `rgba(255, 255, 255, ${a * 0.95})`;
+    ctx.fill();
+
+    // 下排利齿 (向上刺出，跟随下颌张合)
+    ctx.beginPath();
+    ctx.moveTo(14.5 * s, 1.5 * s + jawDrop);
+    ctx.lineTo(13.2 * s, -4.0 * s + jawDrop * 0.7);
+    ctx.lineTo(12.0 * s, 1.5 * s + jawDrop);
+    ctx.fillStyle = `rgba(255, 255, 255, ${a * 0.98})`;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(10.0 * s, 2.0 * s + jawDrop);
+    ctx.lineTo(9.0 * s, -2.2 * s + jawDrop * 0.7);
+    ctx.lineTo(8.0 * s, 2.0 * s + jawDrop);
+    ctx.fillStyle = `rgba(255, 255, 255, ${a * 0.95})`;
+    ctx.fill();
+
+    // H. 龙目日曜金辉 (安全椭圆绘制)
+    safeDrawEllipse(ctx, 2 * s, -4 * s, 4.4 * s, 2.8 * s, -0.15);
+    ctx.fillStyle = `rgba(220, 38, 38, ${a * 0.92})`;
+    ctx.fill();
+
+    safeDrawEllipse(ctx, 2 * s, -4 * s, 3.2 * s, 2.0 * s, -0.15);
+    ctx.fillStyle = `${this.goldLight}${a * 0.98})`;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(2.5 * s, -4.5 * s, 1.0 * s, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+
+    // I. 迎风猎猎飞扬的两道长龙须与下颌金髯 (金髯跟随下颌张合)
+    const wave1 = Math.sin(this.age * 0.22 + this.phaseOffset) * 6 * s;
+    const wave2 = Math.cos(this.age * 0.20 + this.phaseOffset) * 5 * s;
+
+    ctx.beginPath();
+    ctx.moveTo(13 * s, -2 * s);
+    ctx.bezierCurveTo(24 * s, -12 * s, 14 * s, -24 * s + wave1, 34 * s + wave1, -32 * s);
+    ctx.lineWidth = 1.8 * s;
+    ctx.strokeStyle = `${this.goldLight}${a * 0.98})`;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(11 * s, 2 * s);
+    ctx.bezierCurveTo(20 * s, 12 * s, 10 * s, 22 * s + wave2, 30 * s + wave2, 30 * s);
+    ctx.lineWidth = 1.5 * s;
+    ctx.strokeStyle = `rgba(255, 255, 255, ${a * 0.95})`;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(5 * s, 6 * s + jawDrop * 0.7);
+    ctx.bezierCurveTo(2 * s, 14 * s + jawDrop, -3 * s, 18 * s + jawDrop, -6 * s + wave1 * 0.4, 24 * s + jawDrop);
+    ctx.lineWidth = 1.6 * s;
+    ctx.strokeStyle = `${this.goldGlow}${a * 0.95})`;
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  // 8. 【核心需求：吐息大一点，持续0.5秒】宏大曜金龙息暴风 (100% 崩溃防护与震撼等离子光柱)
+  _renderMassiveDragonBreath(ctx, s, a, jawDrop) {
+    const bInt = this.breathIntensity;
+    if (bInt <= 0.02) return;
+
+    const startX = 14 * s;
+    const startY = 1.5 * s + jawDrop * 0.45;
+
+    // 宏大吐息尺度：长度 195 ~ 235px，外围扩散宽度 92 ~ 118px
+    const breathLen = (195 + Math.sin(this.age * 0.7) * 22) * s * bInt;
+    const spreadW = (92 + Math.sin(this.age * 0.9) * 14) * s * bInt;
+
+    ctx.save();
+
+    // 1. 外层翻滚日冕龙焰气浪 (Outer Solar Flare Plume)
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.quadraticCurveTo(
+      startX + breathLen * 0.42,
+      startY - spreadW * 0.38 + Math.sin(this.age * 0.8) * 9 * s,
+      startX + breathLen,
+      startY - spreadW * 0.50
+    );
+    // 龙焰前锋舌状卷曲
+    ctx.quadraticCurveTo(
+      startX + breathLen + 22 * s,
+      startY + Math.sin(this.age * 1.1) * 6 * s,
+      startX + breathLen,
+      startY + spreadW * 0.50
+    );
+    ctx.quadraticCurveTo(
+      startX + breathLen * 0.42,
+      startY + spreadW * 0.38 + Math.cos(this.age * 0.8) * 9 * s,
+      startX,
+      startY
+    );
+    ctx.closePath();
+    ctx.fillStyle = `rgba(234, 88, 12, ${a * bInt * 0.45})`;
+    ctx.fill();
+
+    // 2. 中层纯正曜金烈焰狂涛 (Mid 24K Gold Flame Torrent)
+    ctx.beginPath();
+    ctx.moveTo(startX + 2 * s, startY);
+    ctx.quadraticCurveTo(
+      startX + breathLen * 0.45,
+      startY - spreadW * 0.25 + Math.cos(this.age * 0.9) * 6 * s,
+      startX + breathLen * 0.88,
+      startY - spreadW * 0.32
+    );
+    ctx.quadraticCurveTo(
+      startX + breathLen * 0.95,
+      startY,
+      startX + breathLen * 0.88,
+      startY + spreadW * 0.32
+    );
+    ctx.quadraticCurveTo(
+      startX + breathLen * 0.45,
+      startY + spreadW * 0.25 + Math.sin(this.age * 0.9) * 6 * s,
+      startX + 2 * s,
+      startY
+    );
+    ctx.closePath();
+    ctx.fillStyle = `${this.goldGlow}${a * bInt * 0.72})`;
+    ctx.fill();
+
+    // 3. 内核耀世白金等离子烈光柱 (Hyper-bright White-Hot Plasma Core Beam)
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(startX + breathLen * 0.82, startY);
+    ctx.lineWidth = (13 + Math.sin(this.age * 1.3) * 3.5) * s * bInt;
+    ctx.strokeStyle = `rgba(255, 255, 255, ${a * bInt * 0.96})`;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    // 极细白金色贯穿主轴
+    ctx.beginPath();
+    ctx.moveTo(startX - 2 * s, startY);
+    ctx.lineTo(startX + breathLen * 0.92, startY);
+    ctx.lineWidth = 5 * s * bInt;
+    ctx.strokeStyle = `${this.goldLight}${a * bInt * 0.98})`;
+    ctx.stroke();
+
+    // 4. 音爆激波震环 / 烈焰马赫环 (Mach Shockwave Rings - 100% 安全缩放绘制，彻底避免 native 异常)
+    const ringRatios = [0.24, 0.48, 0.72];
+    for (let i = 0; i < ringRatios.length; i++) {
+      const rRatio = ringRatios[i];
+      const ringX = startX + breathLen * rRatio;
+      const ringH = (18 + rRatio * 42) * s * bInt;
+      const ringPulse = Math.sin(this.age * 1.4 + i * 2.0) * 3 * s;
+      const safeRy = Math.max(1, (ringH + ringPulse) * 0.5);
+
+      safeDrawEllipse(ctx, ringX, startY, 4.5 * s, safeRy);
+      ctx.lineWidth = 2.2 * s;
+      ctx.strokeStyle = `rgba(255, 255, 255, ${a * bInt * 0.92})`;
+      ctx.stroke();
+
+      safeDrawEllipse(ctx, ringX, startY, 7.5 * s, safeRy * 1.5);
+      ctx.lineWidth = 1.2 * s;
+      ctx.strokeStyle = `${this.goldGlow}${a * bInt * 0.65})`;
+      ctx.stroke();
+    }
+
+    // 5. 龙吻烈火爆轰光晕 (Muzzle Blast Corona)
+    const blastPulse = Math.sin(this.age * 1.5) * 5 * s;
+    ctx.beginPath();
+    ctx.arc(startX, startY, (24 * s + blastPulse) * bInt, 0, Math.PI * 2);
+    ctx.fillStyle = `${this.goldLight}${a * bInt * 0.65})`;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.arc(startX, startY, (12 * s + blastPulse * 0.5) * bInt, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255, 255, 255, ${a * bInt * 0.98})`;
+    ctx.fill();
 
     ctx.restore();
   }

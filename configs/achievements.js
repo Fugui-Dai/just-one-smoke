@@ -284,10 +284,17 @@ export const ACHIEVEMENTS = [
     category: '赛博玩家',
     icon: '🔥',
     description: '登峰造极，在主页成功召唤盘旋神龙腾空或南明离火神凰展翅',
-    conditionDesc: '体验或装配龙腾九天或凤舞九天',
+    conditionDesc: '体验或装配神龙/神凰/青莲/佛光/八卦等神品特效',
     targetType: 'mythic_vfx',
     targetVal: 1,
-    check: (stats) => !!stats.hasSummonedMythic || (Array.isArray(stats.unlockedEffects) && (stats.unlockedEffects.includes('dragon_breath') || stats.unlockedEffects.includes('phoenix_nirvana') || stats.unlockedEffects.includes('buddha_light') || stats.unlockedEffects.includes('bagua_taichi')))
+    check: (stats) => !!stats.hasSummonedMythic || (Array.isArray(stats.unlockedEffects) && (
+      stats.unlockedEffects.includes('dragon_breath') || 
+      stats.unlockedEffects.includes('phoenix_nirvana') || 
+      stats.unlockedEffects.includes('lotus_zen') || 
+      stats.unlockedEffects.includes('buddha_light') || 
+      stats.unlockedEffects.includes('bagua_taichi') ||
+      stats.unlockedEffects.includes('auspicious_river')
+    ))
   }
 ];
 
