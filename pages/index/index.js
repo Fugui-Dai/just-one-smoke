@@ -55,6 +55,8 @@ Page({
     ashLength: 0,
     ashProgress: 0,
     ashPercent: 0,
+    ashDeg: 0,
+    ashProgressStyle: 'background: rgba(255, 255, 255, 0.14);',
     isSparking: false,
     isAshTapping: false, // 抖灰物理阻尼与特效执行中锁定状态
 
@@ -477,6 +479,8 @@ Page({
     const dpr = this.dpr || 2;
     const w = this.cWidth;
     const h = this.cHeight;
+    let curAsh = 0;
+    let curState = this.fsm ? this.fsm.getState() : 'UNLIT';
 
     ctx.save();
     try {
@@ -486,8 +490,8 @@ Page({
       const isInhaling = this.fsm.getState() === 'INHALING';
 
       const burnRes = this.fsm.burn(dt, isInhaling, this.data.currentCigarette);
-      const curAsh = this.fsm.getAshLength();
-      const curState = this.fsm.getState();
+      curAsh = this.fsm.getAshLength ? this.fsm.getAshLength() : 0;
+      curState = this.fsm.getState();
 
       // 现实物理规律：静置或吸烟时烟灰积满自重断落
       if (burnRes && burnRes.ashDropped) {
@@ -545,13 +549,33 @@ Page({
     const curAshRatio = this.fsm.getAshRatio ? this.fsm.getAshRatio() : 0;
     const ashProgress = Number(curAshRatio.toFixed(3));
     const ashPercent = Math.round(curAshRatio * 100);
+    const ashDeg = curAshRatio > 0 ? Math.max(10, Math.min(360, Math.round(curAshRatio * 360))) : 0;
     const curAshInt = Math.floor(curAsh);
 
-    if (ashPercent !== this.data.ashPercent || curState !== this.data.simulatorState) {
+    let ashProgressStyle = '';
+    if (ashDeg > 0) {
+      if (ashPercent >= 70) {
+        const midDeg = Math.round(ashDeg * 0.45);
+        ashProgressStyle = `background: conic-gradient(#fbbf24 0deg, #f59e0b ${midDeg}deg, #ef4444 ${ashDeg}deg, rgba(255, 255, 255, 0.14) ${ashDeg}deg 360deg);`;
+      } else {
+        const midDeg = Math.round(ashDeg * 0.6);
+        ashProgressStyle = `background: conic-gradient(#fbbf24 0deg, #f59e0b ${midDeg}deg, #f97316 ${ashDeg}deg, rgba(255, 255, 255, 0.14) ${ashDeg}deg 360deg);`;
+      }
+    } else {
+      ashProgressStyle = 'background: rgba(255, 255, 255, 0.14);';
+    }
+
+    if (
+      ashPercent !== this.data.ashPercent ||
+      Math.abs(ashDeg - (this.data.ashDeg || 0)) >= 2 ||
+      curState !== this.data.simulatorState
+    ) {
       this.setData({
         ashLength: curAshInt,
         ashProgress: ashProgress,
         ashPercent: ashPercent,
+        ashDeg: ashDeg,
+        ashProgressStyle: ashProgressStyle,
         simulatorState: curState
       });
     }
@@ -657,8 +681,16 @@ Page({
       }, 160);
       this.exhaleEffectTimers.push(timer);
     } else if (effectId === 'heart_double') {
-      // 6. 双爱心烟：浪漫同心双心形涡流环，平滑浮游舒展并柔美羽化（单次自然喷发，杜绝二次重写闪动）
+      // 2. 双爱心烟：浪漫同心双心形涡流环，平滑浮游舒展并柔美羽化（单次自然喷发，杜绝二次重写闪动）
       this.particles.emitHeartDouble(mx, my - 20);
+    } else if (effectId === 'lotus_zen') {
+      // 3. 青莲化境 · 步步生莲：凝脂青碧宝莲破晓初绽，九瓣祥和花瓣自云烟中层层舒展，晨露甘霖与温润金蕊微光流转
+      this.particles.emitLotusZen(mx, my - 20);
+      const timer = setTimeout(() => {
+        if (!this.particles) return;
+        this.particles.emitLotusZen(mx, my - 26);
+      }, 180);
+      this.exhaleEffectTimers.push(timer);
     } else if (effectId === 'dragon_breath') {
       // 7. 金龙吐息：浓金祥云破雾而出，神龙腾云驾雾盘旋九天
       this.particles.emitDragonBreath(mx, my - 20, true);
@@ -779,7 +811,6 @@ Page({
     // 未点燃时点击屏幕: 自动为用户点燃香烟，无缝开启吸烟流程
     if (this.fsm.getState() === 'UNLIT') {
       this.triggerIgnite();
-      toast.flame('已为您点燃香烟', '沉浸呼吸 · 舒缓身心');
       return;
     }
 
@@ -893,7 +924,6 @@ Page({
       this.setData({
         simulatorState: this.fsm.getState()
       });
-      toast.info('已掐灭香烟');
     }
   },
 
@@ -1037,7 +1067,6 @@ Page({
     }
 
     this.setData({ isBeadPopped: true });
-    toast.success(`咔啪！已捏爆【${curCig.beadName || '爆珠'}】`, '真香原液已浸润滤芯');
   },
 
   // 手动弹烟灰 (腾讯总监设计级：物理阻尼弹性轻弹微振、复合断裂火星光波特效、全局互斥锁定)
@@ -1067,7 +1096,14 @@ Page({
       return;
     }
 
-    // 2. 状态机尝试抖灰并重置烟灰长度
+    // 2. 状态机检查积灰量：若完全无积灰则温和提示
+    const curAshRatio = this.fsm ? (this.fsm.getAshRatio ? this.fsm.getAshRatio() : 0) : 0;
+    if (curAshRatio <= 0.001) {
+      toast.info('暂无积灰，吸两口再弹灰吧~');
+      triggerHaptic('light');
+      return;
+    }
+
     const prevAshH = this.fsm ? this.fsm.getAshLength() : 0;
     const tapSuccess = this.fsm && this.fsm.tapAsh();
 
@@ -1078,7 +1114,9 @@ Page({
         isAshTapping: true,
         ashLength: 0,
         ashProgress: 0,
-        ashPercent: 0
+        ashPercent: 0,
+        ashDeg: 0,
+        ashProgressStyle: 'background: rgba(255, 255, 255, 0.14);'
       });
 
       // 双段拟真指节轻弹触感与音效反馈 (0ms 指节轻弹 + 70ms 烟身微振回弹)
@@ -1238,6 +1276,8 @@ Page({
       ashLength: 0,
       ashProgress: 0,
       ashPercent: 0,
+      ashDeg: 0,
+      ashProgressStyle: 'background: rgba(255, 255, 255, 0.14);',
       isBeadPopped: false
     });
   },
@@ -1735,8 +1775,6 @@ Page({
   acceptGiftAndIgnite() {
     audioManager.unlockAudio();
     this.closeGiftModal();
-    const cigName = this.data.giftCigarette?.name || this.data.currentCigarette?.name || '名烟';
-    toast.flame('🔥 点燃【' + cigName + '】', '收下老哥敬意，替烟健康+1！');
     if (this.data.simulatorState !== 'UNLIT') {
       this.restartCigarette();
     }

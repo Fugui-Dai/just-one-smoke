@@ -459,7 +459,7 @@
         <view class="cal-month-center">
           <text class="cal-month-text">{{ calendarYear }}年{{ calendarMonth }}月</text>
         </view>
-        <view class="cal-arrow-btn right-arrow" bindtap="onNextMonth">
+        <view class="cal-arrow-btn right-arrow {{ isNextMonthDisabled ? 'is-disabled' : '' }}" bindtap="onNextMonth">
           <text class="cal-arrow-icon">›</text>
         </view>
       </view>

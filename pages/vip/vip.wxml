@@ -49,7 +49,6 @@
 
         <!-- 3D 皇冠与尊贵徽章 -->
         <view class="hero-crown-wrapper">
-          <view class="crown-ring-halo"></view>
           <view class="crown-emblem">
             <text class="crown-emoji">👑</text>
           </view>

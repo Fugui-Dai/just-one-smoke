@@ -454,20 +454,6 @@ page {
   margin-bottom: 20rpx;
 }
 
-.crown-ring-halo {
-  position: absolute;
-  top: -8rpx;
-  width: 120rpx;
-  height: 120rpx;
-  border-radius: 50%;
-  border: 2rpx dashed rgba(251, 191, 36, 0.4);
-  animation: rotateRing 12s linear infinite;
-}
-
-@keyframes rotateRing {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
 
 .crown-emblem {
   width: 108rpx;
@@ -1626,10 +1612,6 @@ page {
   box-shadow: 0 10rpx 32rpx rgba(16, 185, 129, 0.55), inset 0 2rpx 6rpx rgba(255, 255, 255, 0.6);
 }
 
-.theme-day .crown-ring-halo {
-  border-color: rgba(52, 211, 153, 0.55);
-}
-
 .theme-day .crown-level-badge {
   background: linear-gradient(90deg, #a7f3d0, #10b981);
   color: #022c22;
@@ -1641,10 +1623,6 @@ page {
   box-shadow: 0 10rpx 32rpx rgba(168, 85, 247, 0.6), inset 0 2rpx 6rpx rgba(255, 255, 255, 0.6);
 }
 
-.theme-month .crown-ring-halo {
-  border-color: rgba(192, 132, 252, 0.55);
-}
-
 .theme-month .crown-level-badge {
   background: linear-gradient(90deg, #f3e8ff, #a855f7);
   color: #3b0764;
@@ -1654,10 +1632,6 @@ page {
 .theme-lifetime .crown-emblem {
   background: radial-gradient(circle at 35% 35%, #fef08a 0%, #f59e0b 60%, #78350f 100%);
   box-shadow: 0 10rpx 36rpx rgba(245, 158, 11, 0.65), inset 0 2rpx 8rpx rgba(255, 255, 255, 0.7);
-}
-
-.theme-lifetime .crown-ring-halo {
-  border-color: rgba(251, 191, 36, 0.6);
 }
 
 .theme-lifetime .crown-level-badge {

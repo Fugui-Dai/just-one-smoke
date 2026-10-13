@@ -2083,6 +2083,12 @@ button.user-avatar-btn::after,
   background: rgba(255, 255, 255, 0.16);
 }
 
+.cal-arrow-btn.is-disabled {
+  opacity: 0.25;
+  pointer-events: none;
+  border-color: rgba(255, 255, 255, 0.04);
+}
+
 .cal-arrow-icon {
   font-size: 32rpx;
   color: #cbd5e1;

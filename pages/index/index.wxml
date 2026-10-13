@@ -63,9 +63,8 @@
 
         <view 
           class="dock-circle-btn smoke-effect-btn" 
-          style="border-color: {{ currentSmokeEffect.accentBorder }}; box-shadow: 0 0 16rpx {{ currentSmokeEffect.glowColor }};"
+          style="border-color: {{ currentSmokeEffect.accentBorder }};"
         >
-          <view class="dashed-effect-ring"></view>
           <image class="dock-img-icon" wx:if="{{ currentSmokeEffect.iconImage }}" src="{{ currentSmokeEffect.iconImage }}" mode="aspectFit" />
           <text class="dock-char-icon effect-char-icon" wx:else>{{ currentSmokeEffect.icon || '雾' }}</text>
           <!-- 30秒试抽倒计时角标 -->
@@ -74,14 +73,15 @@
         <text class="dock-title">烟雾特效</text>
       </view>
 
-      <!-- 4. 抖灰 (外层圆圈显示烟灰积累进度条 + 灰 + 点击抖落烟灰) -->
+      <!-- 4. 抖灰 (圆形烟灰进度条 + 灰图标) -->
       <view class="dock-btn-wrap" bindtap="manualTapAsh">
-        <view class="dock-circle-btn ash-btn-circle {{ ashPercent >= 80 ? 'alert-ash' : (ashPercent > 0 ? 'has-ash' : '') }}">
-          <!-- 动态烟灰积累进度圆环 (一整根烟整体的灰为一整个圆圈) -->
+        <view class="dock-circle-btn ash-btn-circle {{ isAshTapping ? 'is-tapping' : '' }} {{ ashPercent >= 70 ? 'alert-ash' : (ashPercent > 0 ? 'has-ash' : '') }}">
+          <!-- 圆形烟灰进度条 (根据当前烟灰长度顺时针环绕) -->
           <view 
             class="ash-progress-ring" 
-            style="background: conic-gradient(#f59e0b 0deg, #f97316 {{ ashProgress * 220 }}deg, #ef4444 {{ ashProgress * 360 }}deg, rgba(255, 255, 255, 0.14) {{ ashProgress * 360 }}deg 360deg);"
+            style="{{ ashProgressStyle }}"
           ></view>
+          <!-- 内核灰按钮实体 -->
           <view class="ash-btn-inner">
             <text class="dock-char-icon ash-char">灰</text>
           </view>

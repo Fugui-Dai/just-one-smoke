@@ -123,6 +123,7 @@ Component({
     // 打卡签到与日历数据 (真实主动盖印自律状态)
     isTodayPunched: false,
     isStamping: false,
+    isNextMonthDisabled: true,
     calendarYear: 2026,
     calendarMonth: 10,
     calendarDays: [],
@@ -245,16 +246,29 @@ Component({
         m = 12;
         y--;
       }
+      const now = new Date();
+      if (y < now.getFullYear() - 5) {
+        return;
+      }
       try {
         if (wx.vibrateShort) wx.vibrateShort({ type: 'light' });
       } catch (e) {}
       this.buildCalendarData(y, m);
     },
 
-    // 下个月打卡
+    // 下个月打卡 (带大厂自然月边界拦截，禁止翻向未来)
     onNextMonth() {
-      let y = this.data.calendarYear;
-      let m = this.data.calendarMonth + 1;
+      const now = new Date();
+      const currentYear = this.data.calendarYear;
+      const currentMonth = this.data.calendarMonth;
+      if (currentYear > now.getFullYear() || (currentYear === now.getFullYear() && currentMonth >= (now.getMonth() + 1))) {
+        try {
+          if (wx.vibrateShort) wx.vibrateShort({ type: 'light' });
+        } catch (e) {}
+        return;
+      }
+      let y = currentYear;
+      let m = currentMonth + 1;
       if (m > 12) {
         m = 1;
         y++;
@@ -391,9 +405,11 @@ Component({
       }
 
       const totalPunchedDays = allPunchedDateKeySet.size;
+      const isNextMonthDisabled = (currentYear > now.getFullYear()) || (currentYear === now.getFullYear() && currentMonth >= (now.getMonth() + 1));
 
       this.setData({
         isTodayPunched,
+        isNextMonthDisabled,
         calendarYear: currentYear,
         calendarMonth: currentMonth,
         calendarDays,

@@ -84,7 +84,6 @@ function measureSafeAreaSync() {
 }
 
 function computeMineStatsPayload() {
-  storageService.recordDailyCheckIn();
   const profile = storageService.getProfile();
   const records = storageService.getRecords();
   const totalSubs = records.length;
