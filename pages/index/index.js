@@ -306,13 +306,23 @@ Page({
       this.startRenderLoop();
     }
     const app = typeof getApp === 'function' ? getApp() : null;
-    const shouldShow = app && app.globalData ? app.globalData.shouldShowLaunchGuide : true;
-    if (shouldShow) {
+    const isShown = (app && app.globalData && app.globalData.hasShownGuideInSession) || this._hasShownGuideInSession;
+    if (!isShown) {
       if (app && app.globalData) {
-        app.globalData.shouldShowLaunchGuide = false;
+        app.globalData.hasShownGuideInSession = true;
       }
+      this._hasShownGuideInSession = true;
       this.checkSmokeGuide();
       this.checkSceneGuide();
+    } else {
+      // 本次进入程序已显示过一次：无论进入商店、排行榜再如何返回，坚决不再提示长按，并强制关闭气泡
+      this._clearGuideTimers();
+      this.setData({
+        showSmokeEffectGuide: false,
+        showSceneGuide: false,
+        isGuideFading: false,
+        isSceneGuideFading: false
+      });
     }
   },
 
@@ -424,7 +434,11 @@ Page({
     this.screenFogAlpha = 0;
     const resetPatch = {
       isSparking: false,
-      isAshTapping: false
+      isAshTapping: false,
+      showSmokeEffectGuide: false,
+      showSceneGuide: false,
+      isGuideFading: false,
+      isSceneGuideFading: false
     };
     if (wasTrial) {
       resetPatch.isTrialActive = false;
@@ -1531,28 +1545,46 @@ Page({
     });
   },
 
-  // ================= 抽烟环境长按引导微气泡管线 (每次进入小程序均触发引导，3.8s后自动渐隐) =================
+  _clearGuideTimers() {
+    if (this.smokeGuideTimer) {
+      clearTimeout(this.smokeGuideTimer);
+      this.smokeGuideTimer = null;
+    }
+    if (this._guideTimer) {
+      clearTimeout(this._guideTimer);
+      this._guideTimer = null;
+    }
+    if (this.sceneGuideDismissTimer) {
+      clearTimeout(this.sceneGuideDismissTimer);
+      this.sceneGuideDismissTimer = null;
+    }
+    if (this._sceneGuideTimer) {
+      clearTimeout(this._sceneGuideTimer);
+      this._sceneGuideTimer = null;
+    }
+  },
+
+  // ================= 抽烟环境长按引导微气泡管线 (仅单次会话进入程序展示一次，3.2s后自动渐隐) =================
   checkSceneGuide() {
     try {
       if (!this.data.showSceneGuide) {
         if (this._sceneGuideTimer) clearTimeout(this._sceneGuideTimer);
-        // 延迟 800ms 优雅弹出，避开主页首屏渲染争抢
+        // 延迟 600ms 优雅弹出，避开主页首屏渲染争抢
         this._sceneGuideTimer = setTimeout(() => {
           this._sceneGuideTimer = null;
           this.setData({ showSceneGuide: true, isSceneGuideFading: false });
           if (this.sceneGuideDismissTimer) clearTimeout(this.sceneGuideDismissTimer);
-          // 3.8 秒后优雅渐隐消失
+          // 3.2 秒后优雅渐隐消失
           this.sceneGuideDismissTimer = setTimeout(() => {
             this.sceneGuideDismissTimer = null;
             this.dismissSceneGuide();
-          }, 3800);
-        }, 800);
+          }, 3200);
+        }, 600);
       }
     } catch (e) {}
   },
 
   dismissSceneGuide() {
-    if (!this.data.showSceneGuide) return;
     if (this.sceneGuideDismissTimer) {
       clearTimeout(this.sceneGuideDismissTimer);
       this.sceneGuideDismissTimer = null;
@@ -1565,7 +1597,7 @@ Page({
     this._sceneGuideTimer = setTimeout(() => {
       this._sceneGuideTimer = null;
       this.setData({ showSceneGuide: false, isSceneGuideFading: false });
-    }, 400);
+    }, 350);
   },
 
   onTapSceneGuideTooltip() {
@@ -1600,28 +1632,27 @@ Page({
     toast.info(`已切换至【${nextScene.name}】`);
   },
 
-  // ================= 烟雾特效长按引导微气泡管线 (每次进入小程序均触发引导，3.8s后自动渐隐) =================
+  // ================= 烟雾特效长按引导微气泡管线 (仅单次会话进入程序展示一次，3.2s后自动渐隐) =================
   checkSmokeGuide() {
     try {
       if (!this.data.showSmokeEffectGuide) {
         if (this._guideTimer) clearTimeout(this._guideTimer);
-        // 延迟 800ms 优雅弹出，避开主页首屏渲染争抢
+        // 延迟 600ms 优雅弹出，避开主页首屏渲染争抢
         this._guideTimer = setTimeout(() => {
           this._guideTimer = null;
           this.setData({ showSmokeEffectGuide: true, isGuideFading: false });
           if (this.smokeGuideTimer) clearTimeout(this.smokeGuideTimer);
-          // 3.8 秒后优雅渐隐消失
+          // 3.2 秒后优雅渐隐消失
           this.smokeGuideTimer = setTimeout(() => {
             this.smokeGuideTimer = null;
             this.dismissSmokeGuide();
-          }, 3800);
-        }, 800);
+          }, 3200);
+        }, 600);
       }
     } catch (e) {}
   },
 
   dismissSmokeGuide() {
-    if (!this.data.showSmokeEffectGuide) return;
     if (this.smokeGuideTimer) {
       clearTimeout(this.smokeGuideTimer);
       this.smokeGuideTimer = null;
@@ -1634,7 +1665,7 @@ Page({
     this._guideTimer = setTimeout(() => {
       this._guideTimer = null;
       this.setData({ showSmokeEffectGuide: false, isGuideFading: false });
-    }, 400);
+    }, 350);
   },
 
   onTapSmokeGuideTooltip() {
