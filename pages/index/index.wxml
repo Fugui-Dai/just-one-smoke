@@ -1,51 +1,75 @@
 <!-- pages/index/index.wxml -->
 <view class="app-container {{ vipTheme ? 'theme-' + vipTheme : '' }}">
 
-  <!-- ==================== 顶部统一导航栏 (安全避让微信原生胶囊按钮) ==================== -->
-  <view class="custom-navbar" style="padding-top: {{ statusBarHeight }}px; height: {{ statusBarHeight + navBarHeight }}px;">
-    <view class="navbar-content" style="height: {{ navBarHeight }}px; padding-right: {{ capsuleRightSpace }}px;">
-      
-      <!-- 顶栏胶囊按钮 (抽烟环境) -->
-      <view class="top-capsule-single" bindtap="openSceneModal">
-        <text class="capsule-dots">···</text>
-        <text class="capsule-label">抽烟环境</text>
-      </view>
-    </view>
-  </view>
+  <!-- ==================== 沉浸式模拟器主页 ==================== -->
+  <view class="tab-page simulator-tab active">
 
-
-  <!-- ==================== TAB 1: 沉浸式模拟器主页 ==================== -->
-  <view 
-    class="tab-page simulator-tab {{ currentTab === 'simulator' ? 'active' : '' }}" 
-    hidden="{{ currentTab !== 'simulator' }}"
-  >
-
-    <!-- 右上角音效开关 (悬浮顶层，上移避让右侧Dock栏) -->
-    <view class="top-right-mute-btn" style="top: {{ statusBarHeight + navBarHeight + 10 }}px;" bindtap="toggleMute">
-      <text class="mute-icon">{{ isMuted ? '🔇' : '🔊' }}</text>
-    </view>
-
-    <!-- ==================== 右侧半月弧形主控 DOCK 栏 (实机截图 1:1 像素级复刻) ==================== -->
+    <!-- ==================== 右侧主控 DOCK 栏 (一体化极光星轨 · 贯通单线 · 零接缝) ==================== -->
     <view class="right-arc-dock">
       
-      <!-- 1. 点燃 / 掐灭 (删除重置，抽完直接显示点燃) -->
+      <!-- 🌊 一体化数学相切流体外壳背景 (凹圆角与凸圆角在拐点一阶相切 · 顶底零直角 · 完美顺滑贴边) -->
+      <image class="dock-fluid-shell-bg" src="{{ dockFluidShellUri }}" mode="scaleToFill" />
+
+      <!-- 1. 声音 (喇叭静音/声音开关 · 顶层声学主控) -->
+      <view class="dock-btn-wrap" bindtap="toggleMute">
+        <view class="dock-circle-btn sound-btn-circle {{ isMuted ? 'is-muted-btn' : '' }}">
+          <image class="dock-svg-icon sound-svg-icon" src="{{ isMuted ? soundMuteIconUri : soundOnIconUri }}" mode="aspectFit" />
+        </view>
+        <text class="dock-title">{{ isMuted ? '静音' : '声音' }}</text>
+      </view>
+
+      <!-- 2. 点燃 / 掐灭 (第一核心操作，点火起烟) -->
       <view class="dock-btn-wrap" bindtap="triggerIgnite">
         <view class="dock-circle-btn ignite-btn {{ (simulatorState !== 'UNLIT' && simulatorState !== 'FINISHED') ? 'is-lit' : '' }}">
-          <image class="dock-svg-icon" src="{{ extinguishIconUri }}" mode="aspectFit" wx:if="{{ simulatorState !== 'UNLIT' && simulatorState !== 'FINISHED' }}" />
-          <text class="dock-icon" wx:else>🔥</text>
+          <image class="dock-svg-icon extinguish-svg-icon" src="{{ extinguishIconUri }}" mode="aspectFit" wx:if="{{ simulatorState !== 'UNLIT' && simulatorState !== 'FINISHED' }}" />
+          <image class="dock-svg-icon ignite-svg-icon" src="{{ igniteIconUri }}" mode="aspectFit" wx:else />
         </view>
         <text class="dock-title">{{ (simulatorState === 'UNLIT' || simulatorState === 'FINISHED') ? '点燃' : '掐灭' }}</text>
       </view>
 
-      <!-- 2. 猛吸 -->
-      <view class="dock-btn-wrap" bindtap="triggerInhale">
-        <view class="dock-circle-btn inhale-btn {{ simulatorState === 'INHALING' ? 'is-active-inhale' : '' }}">
-          <text class="dock-icon">💨</text>
+      <!-- 3. 抖灰 (圆形烟灰进度条 + 顺时针烟灰环 + 灰图标) -->
+      <view class="dock-btn-wrap" bindtap="manualTapAsh">
+        <view class="dock-circle-btn ash-btn-circle {{ isAshTapping ? 'is-tapping' : '' }} {{ ashPercent >= 70 ? 'alert-ash' : (ashPercent > 0 ? 'has-ash' : '') }}">
+          <!-- 圆形烟灰进度条 (根据当前烟灰长度顺时针环绕) -->
+          <view 
+            class="ash-progress-ring" 
+            style="{{ ashProgressStyle }}"
+          ></view>
+          <!-- 内核灰按钮实体 -->
+          <view class="ash-btn-inner">
+            <image class="dock-svg-icon ash-svg-icon" src="{{ ashTapIconUri }}" mode="aspectFit" />
+          </view>
         </view>
-        <text class="dock-title">{{ simulatorState === 'INHALING' ? '呼出' : '猛吸' }}</text>
+        <text class="dock-title">抖灰</text>
       </view>
 
-      <!-- 3. 烟雾特效 (分段刻度环 + 动态字/图标 + 试抽角标) -->
+      <!-- 4. 抽烟环境 (单击快速切换环境 · 长按开启列表 · 首次气泡引导) -->
+      <view 
+        class="dock-btn-wrap scene-dock-wrap" 
+        bindtap="toggleScene" 
+        bindlongpress="openSceneModal"
+      >
+        <!-- 💡 首次新手引导呼吸微气泡 -->
+        <view 
+          class="smoke-guide-tooltip scene-guide-tooltip {{ isSceneGuideFading ? 'guide-fade-out' : '' }}" 
+          wx:if="{{ showSceneGuide }}"
+          catchtap="onTapSceneGuideTooltip"
+        >
+          <text class="sgt-text">💡 长按环境开启列表</text>
+          <view class="sgt-arrow"></view>
+        </view>
+
+        <view 
+          class="dock-circle-btn scene-btn-circle" 
+          style="{{ currentSceneInfo.accentColor ? ('border-color: ' + currentSceneInfo.accentColor + '; box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.65), 0 0 14rpx ' + currentSceneInfo.accentColor + '44;') : '' }}"
+        >
+          <text class="dock-char-icon scene-char-icon" wx:if="{{ currentSceneInfo.id !== 'obsidian' && currentSceneInfo.icon }}">{{ currentSceneInfo.icon }}</text>
+          <image class="dock-svg-icon scene-svg-icon" wx:else src="{{ sceneAmbientIconUri }}" mode="aspectFit" />
+        </view>
+        <text class="dock-title">环境</text>
+      </view>
+
+      <!-- 5. 烟雾特效 (分段刻度环 + 动态字/图标 + 试抽角标) -->
       <view 
         class="dock-btn-wrap smoke-dock-wrap" 
         bindtap="toggleSmokeEffect" 
@@ -66,31 +90,16 @@
           style="border-color: {{ currentSmokeEffect.accentBorder }};"
         >
           <image class="dock-img-icon" wx:if="{{ currentSmokeEffect.iconImage }}" src="{{ currentSmokeEffect.iconImage }}" mode="aspectFit" />
-          <text class="dock-char-icon effect-char-icon" wx:else>{{ currentSmokeEffect.icon || '雾' }}</text>
+          <image class="dock-svg-icon vfx-svg-icon" wx:elif="{{ currentSmokeEffect.id === 'ring_classic' || !currentSmokeEffect.icon || currentSmokeEffect.icon === '⭕' || currentSmokeEffect.icon === '雾' }}" src="{{ smokeVfxIconUri }}" mode="aspectFit" />
+          <text class="dock-char-icon effect-char-icon" wx:else>{{ currentSmokeEffect.icon }}</text>
           <!-- 30秒试抽倒计时角标 -->
           <view class="trial-dock-badge" wx:if="{{ isTrialActive }}">{{ trialSecondsLeft }}s</view>
         </view>
         <text class="dock-title">烟雾特效</text>
       </view>
 
-      <!-- 4. 抖灰 (圆形烟灰进度条 + 灰图标) -->
-      <view class="dock-btn-wrap" bindtap="manualTapAsh">
-        <view class="dock-circle-btn ash-btn-circle {{ isAshTapping ? 'is-tapping' : '' }} {{ ashPercent >= 70 ? 'alert-ash' : (ashPercent > 0 ? 'has-ash' : '') }}">
-          <!-- 圆形烟灰进度条 (根据当前烟灰长度顺时针环绕) -->
-          <view 
-            class="ash-progress-ring" 
-            style="{{ ashProgressStyle }}"
-          ></view>
-          <!-- 内核灰按钮实体 -->
-          <view class="ash-btn-inner">
-            <text class="dock-char-icon ash-char">灰</text>
-          </view>
-        </view>
-        <text class="dock-title">抖灰</text>
-      </view>
-
-      <!-- 5. 递烟 (微信原生分享 + 动态烟盒余量进度环 + 🤲 + 点击递出一支) -->
-      <button class="dock-btn-wrap share-dock-item" open-type="share" bindtap="giveCigarette">
+      <!-- 6. 递烟 (微信原生分享 + 动态烟盒余量进度环 + 🤲 + 点击递出一支) -->
+      <button class="dock-btn-wrap share-dock-item" open-type="{{ currentPackRemaining > 0 ? 'share' : '' }}" bindtap="giveCigarette">
         <view class="dock-circle-btn share-btn-circle">
           <!-- 动态烟盒余量进度圆环 -->
           <view 
@@ -98,14 +107,13 @@
             style="background: conic-gradient(#34d399 0deg, #10b981 {{ (currentPackRemaining / (currentCigarette.packCapacity || (currentCigarette.isCigar ? 5 : 20))) * 360 }}deg, rgba(255, 255, 255, 0.14) {{ (currentPackRemaining / (currentCigarette.packCapacity || (currentCigarette.isCigar ? 5 : 20))) * 360 }}deg 360deg);"
           ></view>
           <view class="share-btn-inner">
-            <text class="dock-icon">🤲</text>
-            <view class="pack-remain-dock-badge {{ currentPackRemaining <= 0 ? 'is-empty' : '' }}" wx:if="{{ currentPackRemaining !== undefined }}">{{ currentPackRemaining }}</view>
+            <image class="dock-svg-icon share-svg-icon" src="{{ giveCigIconUri }}" mode="aspectFit" />
           </view>
         </view>
         <text class="dock-title">递烟</text>
       </button>
 
-      <!-- 6. 商店 (纯净无24字样矢量图标 + 仅显示“商店”) -->
+      <!-- 7. 商店 (纯净无24字样矢量图标 + 仅显示“商店”) -->
       <view class="dock-btn-wrap store-dock-wrap" bindtap="openCigarettePicker">
         <view class="dock-circle-btn store-btn-circle">
           <image class="dock-svg-icon store-svg-icon" src="{{ storeIconUri }}" mode="aspectFit" />
@@ -113,18 +121,18 @@
         <text class="dock-title">商店</text>
       </view>
 
-      <!-- 7. 排行榜 (曜金奖杯图标 + 下方“排行榜”) -->
+      <!-- 8. 排行榜 (曜金奖杯图标 + 下方“排行榜”) -->
       <view class="dock-btn-wrap rank-dock-wrap" bindtap="switchToLeaderboard">
         <view class="dock-circle-btn rank-btn-circle">
-          <text class="dock-icon rank-trophy-icon">🏆</text>
+          <image class="dock-svg-icon rank-svg-icon" src="{{ leaderboardIconUri }}" mode="aspectFit" />
         </view>
         <text class="dock-title">排行榜</text>
       </view>
 
-      <!-- 8. 我的 (金字“我” + 下方“我的”) -->
+      <!-- 9. 我的 (金字“我” + 下方“我的”) -->
       <view class="dock-btn-wrap" bindtap="switchToStats">
         <view class="dock-circle-btn my-btn-circle {{ vipTheme ? 'is-vip-my-btn' : '' }}">
-          <text class="dock-char-icon my-char">我</text>
+          <image class="dock-svg-icon my-svg-icon" src="{{ myProfileIconUri }}" mode="aspectFit" />
         </view>
         <text class="dock-title {{ vipTheme ? 'gold-title' : '' }}">我的</text>
       </view>
@@ -192,19 +200,19 @@
       <text class="dialog-title">战胜心魔！成功替瘾 1 支</text>
       <text class="dialog-subtitle">阻断焦油与尼古丁侵袭 · 身体自愈力 UP!</text>
 
-      <!-- 趣味 1 元纸币入账条 (深度联动钱包 1元搞笑纸币概念) -->
+      <!-- 尊享自律金券入账条 (深度联动钱包自律储备金券概念) -->
       <view class="reward-bill-deposit-box">
-        <!-- 迷你调皮纸币图片 -->
+        <!-- 迷你自律金券 -->
         <view class="rb-mini-bill-wrap">
           <image 
             class="rb-banknote-img" 
-            src="/images/banknote_1yuan.jpg" 
+            src="{{ goldVoucherSvgUri || '/images/cyber_gold_voucher.png' }}" 
             mode="aspectFit" 
           />
         </view>
         <!-- 入账文案 -->
         <view class="rb-deposit-desc">
-          <text class="rb-deposit-title">自律纸币入账！</text>
+          <text class="rb-deposit-title">自律金券入账！</text>
           <text class="rb-deposit-sub">少抽 1 支真烟，成功省下</text>
         </view>
         <!-- 入账金额高亮 -->
@@ -257,10 +265,10 @@
         </view>
       </view>
 
-      <!-- 累计里程碑 -->
+      <!-- 累计里程碑与排位战报 -->
       <view class="reward-milestone-box">
         <text class="rmb-icon">🌟</text>
-        <text class="rmb-text">累计替烟 {{ totalSubstituted }} 次 · 累计已省 ¥{{ totalSavedMoney }}</text>
+        <text class="rmb-text">累计替烟 {{ totalSubstituted }} 次 · 累计已省 ¥{{ totalSavedMoney }}<block wx:if="{{ myRankInfo }}"> · 英雄榜第{{ myRankInfo.rank }}席</block></text>
       </view>
 
       <!-- 调皮搞笑鼓励金句气泡 -->
@@ -292,7 +300,7 @@
       <view class="sheet-top-handle"></view>
       <view class="sheet-title-row">
         <view class="sheet-title-left">
-          <text class="sheet-main-title">🌿 抽烟环境 · 16大典藏声景</text>
+          <text class="sheet-main-title">🌿 抽烟环境 · 18大典藏声景</text>
           <text class="sheet-sub-title-tag">支持「吸烟火光映照」实时联动</text>
         </view>
         <view class="sheet-close-btn" bindtap="closeSceneModal">✕</view>
@@ -499,7 +507,7 @@
         <button class="primary-gold-btn gift-accept-btn" bindtap="acceptGiftAndIgnite">
           <text class="btn-main-text">🔥 点燃品吸 · 收下敬意</text>
         </button>
-        <button class="secondary-dark-btn gift-return-btn" open-type="share" bindtap="giveCigarette">
+        <button class="secondary-dark-btn gift-return-btn" open-type="{{ currentPackRemaining > 0 ? 'share' : '' }}" bindtap="giveCigarette">
           <text class="btn-sub-text">🤝 回敬老哥 · 再递一支</text>
         </button>
       </view>

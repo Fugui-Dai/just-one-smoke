@@ -248,7 +248,7 @@ Page({
         });
 
         triggerHaptic('success');
-        toast.flame(`【iOS自律专享】已开启${tier.name}！`);
+        toast.flame(`【自律专享】已开启${tier.name}！`);
       }, 500);
       return;
     }
@@ -312,7 +312,7 @@ Page({
     if (pages.length > 1) {
       wx.navigateBack();
     } else {
-      wx.reLaunch({ url: '/pages/index/index' });
+      wx.redirectTo({ url: '/pages/index/index' });
     }
   },
 

@@ -234,7 +234,7 @@ console.log(`  ✓ 成功加载 ${pagesLoaded}/${pages.length} 个页面逻辑�
 
 // 5. 校验核心业务服务 storageService 完整性
 console.log('\n[步骤 5/5] 校验核心业务数据与本地存储方法闭环...');
-const { storageService } = require('../utils/storageService.js');
+const { storageService } = require('../services/storageService.js');
 const profile = storageService.getProfile();
 assert(profile && profile.nickName, 'storageService.getProfile 必须返回合法用户档案');
 const updatedProfile = storageService.updateProfile({ cigsPerDay: 20 });

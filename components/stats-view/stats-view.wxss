@@ -74,16 +74,16 @@
 /* 0. 个人微信头像与昵称名片卡片 (自适应全宽排版，无多余图标，展示打开第几天) */
 /* 0. 个人微信头像、昵称与打卡卡片 (左侧头像，中间两行信息，右侧打卡方卡) */
 .user-profile-header-card {
-  background: linear-gradient(135deg, rgba(22, 28, 42, 0.85) 0%, rgba(13, 17, 26, 0.94) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(20, 27, 42, 0.82) 0%, rgba(10, 14, 24, 0.94) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 28rpx;
   padding: 22rpx 24rpx;
   display: flex;
   flex-direction: column;
   gap: 16rpx;
-  box-shadow: 0 12rpx 36rpx rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 14rpx 38rpx rgba(0, 0, 0, 0.52), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   box-sizing: border-box;
   width: 100%;
   transition: all 0.35s ease;
@@ -193,60 +193,138 @@ button.user-avatar-btn::after,
 .user-nickname-row {
   display: flex;
   align-items: center;
-  gap: 10rpx;
-  width: 100%;
+  gap: 8rpx;
   min-width: 0;
+  max-width: 100%;
 }
 
-.user-nickname-input {
+.user-nickname-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  max-width: 260rpx;
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.user-nickname-display {
   font-size: 34rpx;
   font-weight: 700;
   color: #ffffff;
-  caret-color: transparent !important;
   line-height: 46rpx;
-  height: 46rpx;
-  min-height: 46rpx;
   letter-spacing: 0.5rpx;
-  background: transparent;
-  border: none;
-  outline: none;
-  padding: 0;
-  margin: 0;
-  max-width: 250rpx;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex-shrink: 1;
+  max-width: 260rpx;
+  display: block;
 }
 
-.user-nickname-input.vip-nickname-gold {
+.user-nickname-display.vip-nickname-gold {
   color: #fde68a;
   text-shadow: 0 2rpx 10rpx rgba(245, 208, 128, 0.25);
 }
 
+.user-nickname-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  z-index: 2;
+  caret-color: transparent !important;
+}
+
 .profile-vip-nameplate {
+  position: relative;
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
   gap: 4rpx;
   flex-shrink: 0;
-  padding: 3rpx 14rpx;
+  padding: 2rpx 10rpx;
   border-radius: 999rpx;
-  background: linear-gradient(90deg, rgba(245, 208, 128, 0.22) 0%, rgba(212, 175, 55, 0.08) 100%);
-  border: 1px solid rgba(245, 208, 128, 0.45);
-  font-size: 21rpx;
-  font-weight: 700;
-  color: #f5d080;
-  letter-spacing: 0.5rpx;
-  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.35);
+  background: linear-gradient(90deg, #3b2a10 0%, #1c150a 100%);
+  border: 1px solid rgba(251, 191, 36, 0.75);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.55), 0 0 10rpx rgba(251, 191, 36, 0.25);
   transition: all 0.25s ease;
   white-space: nowrap;
+}
+
+.profile-vip-nameplate .pvn-crown,
+.profile-vip-nameplate .pvn-text {
+  position: relative;
+  z-index: 1;
+}
+
+.profile-vip-nameplate .pvn-crown {
+  font-size: 18rpx;
+  line-height: 1;
+}
+
+.profile-vip-nameplate .pvn-text {
+  font-size: 22rpx;
+  font-weight: 800;
+  color: #fde68a;
+  line-height: 1.1;
+  letter-spacing: 0.5rpx;
+}
+
+/* VIP 尊荣流光扫光动效 (与替烟艺术展柜完全一致的 10s 高奢金芒流光) */
+.profile-vip-nameplate.is-vip::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -80%;
+  width: 50%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    transparent 46%,
+    rgba(245, 158, 11, 0.30) 49%,
+    rgba(254, 240, 138, 0.85) 50%,
+    rgba(245, 158, 11, 0.30) 51%,
+    transparent 54%,
+    transparent 100%
+  );
+  transform: rotate(12deg);
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: vipSweepLight 10s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes vipSweepLight {
+  0%, 35% {
+    transform: translateX(0) rotate(12deg);
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  68% {
+    transform: translateX(380%) rotate(12deg);
+    opacity: 1;
+  }
+  74%, 100% {
+    transform: translateX(380%) rotate(12deg);
+    opacity: 0;
+  }
 }
 
 .profile-vip-nameplate.is-vip-inactive {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.16);
-  color: #94a3b8;
   box-shadow: none;
+}
+
+.profile-vip-nameplate.is-vip-inactive .pvn-text {
+  color: #94a3b8;
+  font-size: 20rpx;
+  font-weight: 600;
 }
 
 .profile-vip-nameplate.is-vip-inactive .pvn-crown {
@@ -613,15 +691,15 @@ button.user-avatar-btn::after,
   line-height: 1;
 }
 
-/* ==================== 3. 钱包 (一张纸币是一元 × 金额，调皮搞笑微缩纸币) ==================== */
+/* ==================== 3. 钱包 (24K 曜世黑金高定自律金券，黑曜金库底座) ==================== */
 .wallet-section-card {
-  background: linear-gradient(135deg, rgba(16, 36, 26, 0.92) 0%, rgba(9, 20, 15, 0.96) 100%);
-  border: 1px solid rgba(52, 211, 153, 0.3);
+  background: linear-gradient(145deg, rgba(26, 20, 12, 0.92) 0%, rgba(13, 10, 6, 0.98) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.35);
   border-radius: 28rpx;
   padding: 24rpx 28rpx;
-  box-shadow: 0 12rpx 36rpx rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 14rpx 38rpx rgba(0, 0, 0, 0.58), 0 0 24rpx rgba(245, 158, 11, 0.08), inset 0 1px 0 rgba(254, 240, 138, 0.18);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   box-sizing: border-box;
 }
 
@@ -665,13 +743,13 @@ button.user-avatar-btn::after,
   transform: scale(0.92) rotate(-2deg);
 }
 
-/* 3D 叠纸堆叠背板效果 (厚度与立体感) */
+/* 3D 叠纸堆叠背板效果 (厚度与立体感 · 24K 黑金奢华色调) */
 .bill-stack-back {
   position: absolute;
   border-radius: 10rpx;
-  background: #154530;
-  border: 1px solid rgba(52, 211, 153, 0.3);
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.4);
+  background: #251a08;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.6);
 }
 
 .bill-stack-back.layer-2 {
@@ -690,16 +768,16 @@ button.user-avatar-btn::after,
   opacity: 0.75;
 }
 
-/* 钞票图片容器 */
+/* 钞票图片容器 (曜石黑金纯净背景与金光微晕) */
 .bill-img-container {
   position: relative;
   width: 100%;
   height: 100%;
   border-radius: 10rpx;
   overflow: hidden;
-  box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.5), 0 0 10rpx rgba(52, 211, 153, 0.35);
-  border: 1.5rpx solid rgba(52, 211, 153, 0.6);
-  background: #0f2c1f;
+  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.6), 0 0 16rpx rgba(245, 158, 11, 0.3);
+  border: 1.5rpx solid rgba(245, 158, 11, 0.7);
+  background: #0b101b;
 }
 
 .funny-banknote-img {
@@ -717,12 +795,12 @@ button.user-avatar-btn::after,
 }
 
 .formula-multiply {
-  color: #34d399;
-  text-shadow: 0 0 8rpx rgba(52, 211, 153, 0.4);
+  color: #fbbf24;
+  text-shadow: 0 0 10rpx rgba(245, 158, 11, 0.5);
 }
 
 .formula-equal {
-  color: #64748b;
+  color: #94a3b8;
 }
 
 /* 乘数金额 */
@@ -737,7 +815,8 @@ button.user-avatar-btn::after,
 .multiplier-num {
   font-size: 40rpx;
   font-weight: 900;
-  color: #f8fafc;
+  color: #fef08a;
+  text-shadow: 0 0 12rpx rgba(245, 158, 11, 0.35);
   font-family: monospace;
   line-height: 1;
 }
@@ -788,7 +867,8 @@ button.user-avatar-btn::after,
 .wallet-humor-footer {
   margin-top: 14rpx;
   padding: 10rpx 14rpx;
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(245, 158, 11, 0.18);
   border-radius: 14rpx;
   display: flex;
   align-items: center;
@@ -801,19 +881,19 @@ button.user-avatar-btn::after,
 
 .whf-text {
   font-size: 20rpx;
-  color: #6ee7b7;
+  color: #fde68a;
   font-weight: 500;
 }
 
 /* ==================== 5. 系统统计 (3项关键数据 + 7天累计折线图) ==================== */
 .system-stats-card {
-  background: rgba(22, 28, 40, 0.78);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: linear-gradient(180deg, rgba(20, 27, 42, 0.82) 0%, rgba(10, 14, 24, 0.94) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-radius: 28rpx;
   padding: 24rpx;
-  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.35);
+  box-shadow: 0 14rpx 38rpx rgba(0, 0, 0, 0.52), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .stats-top-four-grid {
@@ -924,13 +1004,13 @@ button.user-avatar-btn::after,
 
 /* WHO 临床时间轴 */
 .who-section-card {
-  background: rgba(22, 28, 40, 0.78);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: linear-gradient(180deg, rgba(20, 27, 42, 0.82) 0%, rgba(10, 14, 24, 0.94) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-radius: 28rpx;
   padding: 28rpx;
-  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.35);
+  box-shadow: 0 14rpx 38rpx rgba(0, 0, 0, 0.52), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .who-medical-spine {
@@ -1093,10 +1173,11 @@ button.user-avatar-btn::after,
 
 /* 医生寄语卡片 */
 .doctor-quote-card {
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.85) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(22, 30, 46, 0.82) 0%, rgba(12, 17, 28, 0.94) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 26rpx;
   padding: 26rpx;
+  box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.10);
 }
 
 .quote-header {
@@ -1497,14 +1578,14 @@ button.user-avatar-btn::after,
   100% { transform: translate(12rpx, -90rpx); opacity: 0; }
 }
 
-/* HUD 数据引出框 (半透明磨砂科技卡片) */
+/* HUD 数据引出框 (半透明磨砂科技卡片 · 自适应小屏无换行) */
 .hud-card {
   position: absolute;
-  width: 184rpx;
-  background: rgba(6, 15, 30, 0.85);
+  width: 186rpx;
+  background: rgba(6, 15, 30, 0.88);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 14rpx;
-  padding: 10rpx 12rpx;
+  padding: 8rpx 10rpx;
   box-sizing: border-box;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -1561,10 +1642,10 @@ button.user-avatar-btn::after,
   transform: scale(1.02);
 }
 
-.hud-card-tl { top: 48rpx; left: 14rpx; }
-.hud-card-bl { bottom: 94rpx; left: 14rpx; }
-.hud-card-tr { top: 48rpx; right: 14rpx; }
-.hud-card-br { bottom: 94rpx; right: 14rpx; }
+.hud-card-tl { top: 48rpx; left: 12rpx; }
+.hud-card-bl { bottom: 94rpx; left: 12rpx; }
+.hud-card-tr { top: 48rpx; right: 12rpx; }
+.hud-card-br { bottom: 94rpx; right: 12rpx; }
 
 .hud-card-header {
   display: flex;
@@ -1598,9 +1679,10 @@ button.user-avatar-btn::after,
 .dot-blood { background: #34d399; box-shadow: 0 0 8rpx #34d399; }
 
 .hud-card-title {
-  font-size: 24rpx;
+  font-size: 23rpx;
   font-weight: 700;
   line-height: 1.2;
+  white-space: nowrap;
 }
 
 /* 器官专属高亮标题 */
@@ -1610,11 +1692,15 @@ button.user-avatar-btn::after,
 .title-blood { color: #6ee7b7; text-shadow: 0 0 8rpx rgba(52, 211, 153, 0.45); }
 
 .hud-card-en {
-  font-size: 19rpx;
-  font-family: monospace;
+  font-size: 16rpx;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
   text-transform: uppercase;
-  letter-spacing: 0.5rpx;
+  letter-spacing: 0.3rpx;
   margin-top: 2rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 .en-lungs { color: rgba(56, 189, 248, 0.7); }
 .en-heart { color: rgba(245, 158, 11, 0.7); }
@@ -1632,8 +1718,9 @@ button.user-avatar-btn::after,
   align-items: center;
 }
 .hud-metric-label {
-  font-size: 22rpx;
+  font-size: 21rpx;
   font-weight: 500;
+  white-space: nowrap;
 }
 .label-lungs { color: #bae6fd; }
 .label-heart { color: #fef08a; }
@@ -1641,9 +1728,10 @@ button.user-avatar-btn::after,
 .label-blood { color: #a7f3d0; }
 
 .hud-metric-val {
-  font-size: 23rpx;
+  font-size: 22rpx;
   font-weight: 700;
   font-family: monospace;
+  white-space: nowrap;
 }
 .hud-metric-val.cyan { color: #38bdf8; text-shadow: 0 0 8rpx rgba(56, 189, 248, 0.6); }
 .hud-metric-val.orange { color: #f59e0b; text-shadow: 0 0 8rpx rgba(245, 158, 11, 0.6); }
@@ -1681,8 +1769,8 @@ button.user-avatar-btn::after,
 /* 左上指向左肺叶 (胸腔左中部) */
 .hud-lead-line.to-lung {
   top: 104rpx;
-  left: 194rpx;
-  width: 70rpx;
+  left: 198rpx;
+  width: 66rpx;
   height: 92rpx;
   border-top: 2rpx solid rgba(56, 189, 248, 0.55);
   border-right: 2rpx solid rgba(56, 189, 248, 0.55);
@@ -1712,8 +1800,8 @@ button.user-avatar-btn::after,
 /* 右上指向心脏 (正中偏左纵隔心区) */
 .hud-lead-line.to-heart {
   top: 104rpx;
-  right: 194rpx;
-  width: 110rpx;
+  right: 198rpx;
+  width: 106rpx;
   height: 112rpx;
   border-top: 2rpx solid rgba(245, 158, 11, 0.55);
   border-left: 2rpx solid rgba(245, 158, 11, 0.55);
@@ -1740,12 +1828,12 @@ button.user-avatar-btn::after,
   transform: scale(1.3);
 }
 
-/* 左下指向迷走神经/太阳神经丛中枢 */
+/* 左下指向迷走神经/太阳神经丛中枢 (无缝贴合自律神经卡片右边缘中轴) */
 .hud-lead-line.to-visceral {
-  bottom: 245rpx;
-  left: 194rpx;
-  width: 112rpx;
-  height: 70rpx;
+  bottom: 140rpx;
+  left: 198rpx;
+  width: 108rpx;
+  height: 165rpx;
   border-bottom: 2rpx solid rgba(192, 132, 252, 0.55);
   border-right: 2rpx solid rgba(192, 132, 252, 0.55);
 }
@@ -2027,13 +2115,13 @@ button.user-avatar-btn::after,
 
 /* ==================== 6. 紧凑无烟自律打卡日历 ==================== */
 .calendar-section-card.mini-calendar {
-  background: rgba(22, 28, 40, 0.78);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: linear-gradient(180deg, rgba(20, 27, 42, 0.82) 0%, rgba(10, 14, 24, 0.94) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-radius: 28rpx;
   padding: 24rpx;
-  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.35);
+  box-shadow: 0 14rpx 38rpx rgba(0, 0, 0, 0.52), inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .cal-top-header {
@@ -2222,11 +2310,13 @@ button.user-avatar-btn::after,
 
 /* ==================== 8. 意见反馈 (严格左对齐，杜绝居中) ==================== */
 .feedback-section-card {
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(180deg, rgba(20, 27, 42, 0.75) 0%, rgba(10, 14, 24, 0.90) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 24rpx;
   overflow: hidden;
-  box-shadow: 0 8rpx 28rpx rgba(0, 0, 0, 0.3);
+  box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   text-align: left;
 }
 
@@ -2326,9 +2416,10 @@ button.user-avatar-btn::after,
 /* ==================== 官方免责声明与健康指引 ==================== */
 .disclaimer-footer-card {
   padding: 24rpx 28rpx;
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(10, 14, 22, 0.65);
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 24rpx;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .disclaimer-header {
@@ -2376,11 +2467,13 @@ button.user-avatar-btn::after,
 
 /* ==================== 🏆 荣耀勋章殿堂 · 赛博成就展柜 (Tencent Games 曜石展柜标准) ==================== */
 .honor-wall-card {
-  background: linear-gradient(145deg, rgba(24, 20, 16, 0.92) 0%, rgba(15, 12, 10, 0.97) 100%);
-  border: 1px solid rgba(245, 158, 11, 0.28);
+  background: linear-gradient(145deg, rgba(26, 20, 12, 0.92) 0%, rgba(13, 10, 6, 0.98) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.35);
   border-radius: 28rpx;
   padding: 24rpx;
-  box-shadow: 0 12rpx 36rpx rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(245, 158, 11, 0.15);
+  box-shadow: 0 14rpx 38rpx rgba(0, 0, 0, 0.58), 0 0 24rpx rgba(245, 158, 11, 0.08), inset 0 1px 0 rgba(254, 240, 138, 0.18);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   box-sizing: border-box;
   width: 100%;
 }
@@ -2491,6 +2584,29 @@ button.user-avatar-btn::after,
   background: linear-gradient(135deg, rgba(244, 63, 94, 0.25) 0%, rgba(225, 29, 72, 0.12) 100%);
 }
 
+.honor-badge-item.is-unlocked.tier-mythic .badge-emblem-shell {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.28) 0%, rgba(168, 85, 247, 0.2) 50%, rgba(245, 158, 11, 0.15) 100%);
+}
+
+/* 正在冲刺点亮的下一个称号 (isNext 呼吸微光动效) */
+.honor-badge-item.is-next .badge-emblem-shell {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.16) 0%, rgba(14, 165, 233, 0.08) 100%);
+  border: 1.5rpx dashed rgba(56, 189, 248, 0.75);
+  box-shadow: 0 0 16rpx rgba(56, 189, 248, 0.45);
+  animation: nextEmblemBreathing 2.4s ease-in-out infinite;
+}
+
+@keyframes nextEmblemBreathing {
+  0%, 100% {
+    border-color: rgba(56, 189, 248, 0.6);
+    box-shadow: 0 0 12rpx rgba(56, 189, 248, 0.35);
+  }
+  50% {
+    border-color: rgba(56, 189, 248, 0.95);
+    box-shadow: 0 0 24rpx rgba(56, 189, 248, 0.65);
+  }
+}
+
 .badge-lock-tag {
   position: absolute;
   top: 6rpx;
@@ -2520,12 +2636,42 @@ button.user-avatar-btn::after,
   box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.5);
 }
 
+.badge-tier-tag.badge-equipped-tag {
+  background: linear-gradient(135deg, #fef08a, #f59e0b);
+  color: #111827;
+  border: 1px solid rgba(254, 240, 138, 0.9);
+  box-shadow: 0 0 14rpx rgba(245, 158, 11, 0.75);
+  font-weight: 900;
+  padding: 2rpx 8rpx;
+}
+
+.badge-tier-tag.badge-next-tag {
+  background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 10rpx rgba(56, 189, 248, 0.6);
+  font-weight: 800;
+  padding: 2rpx 8rpx;
+}
+
+.honor-badge-item.is-equipped .badge-emblem-shell {
+  border: 2rpx solid #fbbf24 !important;
+  box-shadow: 0 0 22rpx rgba(251, 191, 36, 0.65), inset 0 0 14rpx rgba(254, 240, 138, 0.3) !important;
+}
+
 .badge-icon-emoji {
   font-size: 52rpx;
   transition: transform 0.2s ease;
 }
 
-.locked-emoji {
+.badge-icon-svg {
+  width: 66rpx;
+  height: 66rpx;
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.locked-emoji,
+.badge-icon-svg.locked-svg {
   filter: grayscale(1) opacity(0.35);
   transform: scale(0.9);
 }
@@ -2540,6 +2686,17 @@ button.user-avatar-btn::after,
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 124rpx;
+}
+
+.badge-name.equipped-name {
+  color: #fbbf24;
+  font-weight: 900;
+  text-shadow: 0 0 10rpx rgba(251, 191, 36, 0.4);
+}
+
+.badge-name.next-name {
+  color: #38bdf8;
+  font-weight: 800;
 }
 
 .honor-badge-item.is-locked .badge-name {
@@ -2563,16 +2720,31 @@ button.user-avatar-btn::after,
   font-weight: 700;
 }
 
-/* ==================== 荣耀勋章详情弹窗 (证书海报规范) ==================== */
+.badge-sub-progress.equipped-text {
+  color: #fbbf24;
+  font-weight: 800;
+}
+
+.badge-sub-progress.next-text {
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+.badge-sub-progress.locked-text {
+  color: #475569;
+  font-size: 19rpx;
+}
+
+/* ==================== 荣耀称号殿堂 · 殿堂典藏证书详情弹窗 (高定沉浸卡牌·情绪价值) ==================== */
 .achievement-modal-backdrop {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.78);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(3, 4, 7, 0.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   z-index: 999;
   display: flex;
   align-items: center;
@@ -2583,120 +2755,287 @@ button.user-avatar-btn::after,
 
 .achievement-cert-card {
   width: 100%;
-  max-width: 600rpx;
-  background: linear-gradient(150deg, #1c1815 0%, #120e0b 100%);
-  border: 1.5rpx solid rgba(245, 158, 11, 0.5);
-  border-radius: 36rpx;
-  padding: 40rpx 32rpx;
+  max-width: 620rpx;
+  background: linear-gradient(160deg, #181512 0%, #0e0c0a 100%);
+  border-radius: 40rpx;
+  padding: 36rpx 32rpx 38rpx;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.9), 0 0 30rpx rgba(245, 158, 11, 0.2);
   box-sizing: border-box;
-  animation: popCertCard 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: popCertCard 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 24rpx 70rpx rgba(0, 0, 0, 0.95);
 }
 
 @keyframes popCertCard {
-  from { transform: scale(0.85); opacity: 0; }
+  from { transform: scale(0.86); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
 
-.cert-close-btn {
-  position: absolute;
-  top: 24rpx;
-  right: 24rpx;
-  width: 48rpx;
-  height: 48rpx;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  color: #94a3b8;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24rpx;
-  font-weight: 700;
-  cursor: pointer;
+/* 1. 启蒙 (翠绿 · Lv.1 ~ Lv.3) - 翡翠生机·破土新生 */
+.achievement-cert-card.tier-green {
+  background: radial-gradient(circle at 50% -10%, rgba(16, 185, 129, 0.35) 0%, rgba(6, 78, 59, 0.25) 40%, rgba(8, 20, 15, 0.98) 75%, #050e09 100%);
+  border: 1.5rpx solid rgba(52, 211, 153, 0.55);
+  box-shadow: 0 24rpx 70rpx rgba(0, 0, 0, 0.95), 0 0 50rpx rgba(16, 185, 129, 0.3), inset 0 1px 0 rgba(110, 231, 183, 0.35);
 }
 
-.cert-halo-wrap {
+/* 2. 进阶 (苍蓝 · Lv.4 ~ Lv.6) - 苍澜破浪·海阔天青 */
+.achievement-cert-card.tier-blue {
+  background: radial-gradient(circle at 50% -10%, rgba(14, 165, 233, 0.35) 0%, rgba(3, 105, 161, 0.25) 40%, rgba(7, 20, 36, 0.98) 75%, #040d18 100%);
+  border: 1.5rpx solid rgba(56, 189, 248, 0.55);
+  box-shadow: 0 24rpx 70rpx rgba(0, 0, 0, 0.95), 0 0 50rpx rgba(56, 189, 248, 0.3), inset 0 1px 0 rgba(125, 211, 252, 0.35);
+}
+
+/* 3. 稀有 (幽紫 · Lv.7 ~ Lv.9) - 紫霞淬火·意志如钢 */
+.achievement-cert-card.tier-purple {
+  background: radial-gradient(circle at 50% -10%, rgba(168, 85, 247, 0.36) 0%, rgba(107, 33, 168, 0.25) 40%, rgba(20, 11, 32, 0.98) 75%, #0d0616 100%);
+  border: 1.5rpx solid rgba(192, 132, 252, 0.55);
+  box-shadow: 0 24rpx 70rpx rgba(0, 0, 0, 0.95), 0 0 50rpx rgba(192, 132, 252, 0.32), inset 0 1px 0 rgba(216, 180, 254, 0.35);
+}
+
+/* 4. 史诗 (琥珀金 · Lv.10 ~ Lv.12) - 曜岩暖金·习惯重塑 */
+.achievement-cert-card.tier-gold {
+  background: radial-gradient(circle at 50% -10%, rgba(245, 158, 11, 0.4) 0%, rgba(180, 83, 9, 0.26) 40%, rgba(26, 18, 7, 0.98) 75%, #120b03 100%);
+  border: 1.5rpx solid rgba(251, 191, 36, 0.68);
+  box-shadow: 0 24rpx 70rpx rgba(0, 0, 0, 0.95), 0 0 55rpx rgba(245, 158, 11, 0.38), inset 0 1px 0 rgba(254, 240, 138, 0.4);
+}
+
+/* 5. 传说 (离火绯 · Lv.13 ~ Lv.14) - 离火涅槃·百日重生 */
+.achievement-cert-card.tier-red {
+  background: radial-gradient(circle at 50% -10%, rgba(244, 63, 94, 0.42) 0%, rgba(159, 18, 57, 0.28) 40%, rgba(26, 9, 15, 0.98) 75%, #13050a 100%);
+  border: 1.5rpx solid rgba(251, 113, 133, 0.68);
+  box-shadow: 0 24rpx 70rpx rgba(0, 0, 0, 0.95), 0 0 60rpx rgba(244, 63, 94, 0.4), inset 0 1px 0 rgba(254, 205, 211, 0.4);
+}
+
+/* 6. 神话 (曜世金 · Lv.15 ~ Lv.16) - 曜世黑金·宇宙流光 */
+.achievement-cert-card.tier-mythic {
+  background: radial-gradient(circle at 50% -15%, rgba(251, 191, 36, 0.52) 0%, rgba(168, 85, 247, 0.3) 32%, rgba(17, 13, 28, 0.98) 72%, #0b0714 100%);
+  border: 1.5rpx solid rgba(251, 191, 36, 0.88);
+  box-shadow: 0 24rpx 80rpx rgba(0, 0, 0, 0.95), 0 0 70rpx rgba(251, 191, 36, 0.5), inset 0 1px 0 rgba(254, 240, 138, 0.5);
+}
+
+/* 顶部奢华抬眉与关闭键 */
+.cert-top-bar {
+  width: 100%;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  margin-top: 10rpx;
+  justify-content: space-between;
   margin-bottom: 12rpx;
 }
 
+.cert-royal-crest {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.crc-star {
+  font-size: 20rpx;
+  color: #fbbf24;
+  opacity: 0.85;
+}
+
+.crc-title {
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #cbd5e1;
+  letter-spacing: 2rpx;
+}
+
+.cert-close-btn {
+  width: 46rpx;
+  height: 46rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22rpx;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cert-close-btn:active {
+  transform: scale(0.9);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+/* 中央图腾徽章与光环 */
+.cert-halo-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 8rpx 0 16rpx;
+}
+
 .cert-emblem-core {
-  width: 140rpx;
-  height: 140rpx;
+  width: 136rpx;
+  height: 136rpx;
   border-radius: 36rpx;
   background: rgba(255, 255, 255, 0.05);
   border: 2rpx solid rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16rpx;
+  position: relative;
+  z-index: 2;
+  margin-bottom: 14rpx;
 }
 
 .cert-icon-emoji {
   font-size: 72rpx;
+  filter: drop-shadow(0 4rpx 12rpx rgba(0, 0, 0, 0.6));
+}
+
+.cert-icon-svg {
+  width: 86rpx;
+  height: 86rpx;
+  filter: drop-shadow(0 6rpx 16rpx rgba(0, 0, 0, 0.5));
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.cert-icon-svg.locked-svg {
+  filter: grayscale(1) opacity(0.35);
+  transform: scale(0.9);
 }
 
 .cert-tier-pill {
-  font-size: 22rpx;
+  font-size: 21rpx;
   font-weight: 800;
-  padding: 4rpx 16rpx;
-  border-radius: 20rpx;
+  padding: 4rpx 20rpx;
+  border-radius: 999px;
   border: 1px solid;
+  letter-spacing: 1rpx;
 }
 
+/* 称号宏名 */
 .cert-title {
-  font-size: 34rpx;
+  font-size: 38rpx;
   font-weight: 900;
   color: #f8fafc;
-  letter-spacing: 1rpx;
-  margin-bottom: 8rpx;
-  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.8);
+  letter-spacing: 2rpx;
+  margin-bottom: 10rpx;
+  text-align: center;
+  text-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.9);
+}
+
+/* 居中状态胶囊容器 (解决居中对齐要求) */
+.cert-status-center-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 6rpx 0 20rpx;
 }
 
 .cert-status-badge {
   font-size: 24rpx;
   font-weight: 800;
-  padding: 4rpx 18rpx;
-  border-radius: 12rpx;
-  margin-bottom: 24rpx;
+  padding: 8rpx 24rpx;
+  border-radius: 999px;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.8rpx;
+  box-sizing: border-box;
+  transition: transform 0.16s ease;
 }
 
-.cert-status-badge.badge-passed {
-  background: rgba(16, 185, 129, 0.16);
-  color: #10b981;
-  border: 1px solid rgba(16, 185, 129, 0.4);
+.cert-status-badge:active {
+  transform: scale(0.96);
+}
+
+.cert-status-badge.badge-equipped {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.28) 0%, rgba(217, 119, 6, 0.2) 100%);
+  color: #fef08a;
+  border: 1.5rpx solid rgba(251, 191, 36, 0.7);
+  box-shadow: 0 0 18rpx rgba(251, 191, 36, 0.35);
+}
+
+.cert-status-badge.badge-unlocked-equipable {
+  background: rgba(16, 185, 129, 0.22);
+  color: #34d399;
+  border: 1.5rpx solid rgba(52, 211, 153, 0.6);
+  box-shadow: 0 0 16rpx rgba(16, 185, 129, 0.32);
+  cursor: pointer;
+}
+
+.cert-status-badge.badge-next-status {
+  background: rgba(56, 189, 248, 0.2);
+  color: #38bdf8;
+  border: 1.5rpx solid rgba(56, 189, 248, 0.65);
+  box-shadow: 0 0 18rpx rgba(56, 189, 248, 0.38);
+  animation: pulseNextStatus 2s infinite ease-in-out;
+}
+
+@keyframes pulseNextStatus {
+  0%, 100% { box-shadow: 0 0 14rpx rgba(56, 189, 248, 0.3); }
+  50% { box-shadow: 0 0 24rpx rgba(56, 189, 248, 0.65); }
 }
 
 .cert-status-badge.badge-progress {
   background: rgba(255, 255, 255, 0.08);
   color: #94a3b8;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1.5rpx solid rgba(255, 255, 255, 0.15);
 }
 
-.cert-desc {
-  font-size: 25rpx;
-  color: #cbd5e1;
-  text-align: center;
-  line-height: 1.5;
-  margin-bottom: 24rpx;
-  padding: 0 16rpx;
-}
-
-.cert-progress-box {
+/* 情绪价值箴言金句框 (高逼格灵魂寄语) */
+.cert-emotion-quote-box {
   width: 100%;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 20rpx;
   padding: 18rpx 22rpx;
-  box-sizing: border-box;
   margin-bottom: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ceq-mark {
+  font-size: 34rpx;
+  font-weight: 900;
+  color: #fbbf24;
+  opacity: 0.7;
+  line-height: 1;
+  padding: 0 6rpx;
+}
+
+.ceq-quote-text {
+  font-size: 24rpx;
+  color: #f1f5f9;
+  line-height: 1.55;
+  text-align: center;
+  font-weight: 500;
+  font-style: italic;
+  letter-spacing: 0.6rpx;
+}
+
+/* 典故说明 */
+.cert-desc {
+  font-size: 23rpx;
+  color: #94a3b8;
+  text-align: center;
+  line-height: 1.5;
+  margin-bottom: 22rpx;
+  padding: 0 12rpx;
+  box-sizing: border-box;
+}
+
+/* 极简高定数据展台 */
+.cert-progress-box {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18rpx;
+  padding: 16rpx 22rpx;
 }
 
 .cp-row {
@@ -2709,6 +3048,7 @@ button.user-avatar-btn::after,
 
 .cp-label {
   color: #94a3b8;
+  font-weight: 500;
 }
 
 .cp-val {
@@ -2730,42 +3070,234 @@ button.user-avatar-btn::after,
   transition: width 0.4s ease;
 }
 
-.cert-quote-box {
+/* ========================================================================= */
+/* 自律打卡日历 · 每日历史战报详情弹窗 (Calendar Day Detail Modal)            */
+/* ========================================================================= */
+.calendar-day-dialog-card {
+  width: 620rpx;
+  max-width: 90vw;
+  background: linear-gradient(165deg, rgba(20, 28, 44, 0.96) 0%, rgba(10, 15, 26, 0.98) 100%);
+  border: 1.5rpx solid rgba(251, 191, 36, 0.38);
+  border-radius: 32rpx;
+  padding: 36rpx 32rpx 32rpx;
+  box-sizing: border-box;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.85), 0 0 32rpx rgba(245, 158, 11, 0.15);
+  animation: dayModalPop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@keyframes dayModalPop {
+  0% { transform: scale(0.85); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.cdd-top-bar {
   width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.cdd-date-pill {
   display: flex;
   align-items: center;
   gap: 12rpx;
-  padding: 14rpx 18rpx;
-  background: rgba(245, 158, 11, 0.08);
-  border: 1px solid rgba(245, 158, 11, 0.2);
-  border-radius: 18rpx;
-  margin-bottom: 28rpx;
-  box-sizing: border-box;
-}
-
-.cq-icon {
-  font-size: 26rpx;
-}
-
-.cq-text {
-  font-size: 24rpx;
-  color: #fbbf24;
-  line-height: 1.4;
-}
-
-.cert-confirm-btn {
-  width: 100%;
-  height: 80rpx;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 8rpx 18rpx;
   border-radius: 24rpx;
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  color: #1e1204;
-  font-size: 26rpx;
-  font-weight: 800;
+  border: 1rpx solid rgba(255, 255, 255, 0.1);
+}
+
+.cdd-icon {
+  font-size: 24rpx;
+}
+
+.cdd-date-text {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.cdd-tag {
+  font-size: 20rpx;
+  font-weight: 700;
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+}
+.cdd-tag.tag-punched {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1rpx solid rgba(52, 211, 153, 0.4);
+}
+.cdd-tag.tag-future {
+  background: rgba(56, 189, 248, 0.15);
+  color: #7dd3fc;
+  border: 1rpx solid rgba(56, 189, 248, 0.35);
+}
+.cdd-tag.tag-unpunched {
+  background: rgba(148, 163, 184, 0.15);
+  color: #94a3b8;
+  border: 1rpx solid rgba(148, 163, 184, 0.3);
+}
+
+.cdd-close-btn {
+  width: 52rpx;
+  height: 52rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
-  box-shadow: 0 6rpx 20rpx rgba(245, 158, 11, 0.4);
+  font-size: 28rpx;
+  color: #94a3b8;
+  transition: all 0.2s ease;
 }
+.cdd-close-btn:active {
+  transform: scale(0.9);
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+.cdd-crest-box {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 12rpx 0 28rpx;
+}
+
+.cdd-halo {
+  position: absolute;
+  top: -10rpx;
+  width: 110rpx;
+  height: 110rpx;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.35) 0%, rgba(251, 191, 36, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.cdd-emoji {
+  font-size: 64rpx;
+  margin-bottom: 12rpx;
+  position: relative;
+  z-index: 1;
+}
+
+.cdd-headline {
+  font-size: 32rpx;
+  font-weight: 800;
+  color: #fef08a;
+  text-shadow: 0 2rpx 10rpx rgba(245, 158, 11, 0.5);
+  text-align: center;
+}
+
+/* 4宫格数据矩阵 */
+.cdd-metrics-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16rpx;
+  margin-bottom: 24rpx;
+}
+
+.cdd-metric-item {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1rpx solid rgba(255, 255, 255, 0.08);
+  border-radius: 20rpx;
+  padding: 16rpx 14rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6rpx;
+}
+
+.cdd-m-val {
+  font-size: 34rpx;
+  font-weight: 900;
+  font-family: monospace;
+}
+.cdd-m-val.gold { color: #fde047; }
+.cdd-m-val.emerald { color: #34d399; }
+.cdd-m-val.green { color: #4ade80; }
+.cdd-m-val.purple { color: #c084fc; }
+
+.cdd-m-unit {
+  font-size: 20rpx;
+  font-weight: 500;
+  margin-left: 4rpx;
+}
+
+.cdd-m-lbl {
+  font-size: 20rpx;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* 箴言气泡 */
+.cdd-quote-box {
+  width: 100%;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1rpx solid rgba(245, 158, 11, 0.22);
+  border-radius: 20rpx;
+  padding: 18rpx 22rpx;
+  box-sizing: border-box;
+  margin-bottom: 28rpx;
+}
+
+.cdd-quote {
+  font-size: 23rpx;
+  color: #fef08a;
+  line-height: 1.5;
+  text-align: center;
+  display: block;
+}
+
+/* 操作按钮 */
+.cdd-action-box {
+  width: 100%;
+}
+
+.cdd-punch-btn {
+  width: 100%;
+  height: 84rpx;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #0c1017;
+  font-size: 28rpx;
+  font-weight: 800;
+  border-radius: 42rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 24rpx rgba(245, 158, 11, 0.45);
+  border: none;
+}
+.cdd-punch-btn:active {
+  transform: scale(0.97);
+  opacity: 0.92;
+}
+
+.cdd-confirm-btn {
+  width: 100%;
+  height: 80rpx;
+  background: rgba(255, 255, 255, 0.09);
+  color: #e2e8f0;
+  font-size: 26rpx;
+  font-weight: 600;
+  border-radius: 40rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cdd-confirm-btn:active {
+  transform: scale(0.97);
+  background: rgba(255, 255, 255, 0.16);
+}
+
 
 

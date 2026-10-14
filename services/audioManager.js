@@ -1194,9 +1194,12 @@ class AudioManager {
       } else if (sceneType === 'underground_garage' || sceneType === 'stairwell' || sceneType === 'convenience_store') {
         cutoffFreq = 220;
         targetGain = 0.046;
-      } else if (sceneType === 'solar_system' || sceneType === 'deep_cosmos' || sceneType === 'lunar_planet') {
-        cutoffFreq = 240;
-        targetGain = 0.045;
+      } else if (sceneType === 'solar_system' || sceneType === 'deep_cosmos' || sceneType === 'lunar_planet' || sceneType === 'starship_bridge') {
+        cutoffFreq = sceneType === 'starship_bridge' ? 190 : 240;
+        targetGain = 0.048;
+      } else if (sceneType === 'sakura_night') {
+        cutoffFreq = 280;
+        targetGain = 0.052;
       }
 
       if (!this._ambientBuffers) {
@@ -1230,6 +1233,32 @@ class AudioManager {
             b1 = 0.988 * b1 + b0 * 0.16;
             const breath = 0.80 + 0.20 * Math.sin((i / bufferLength) * Math.PI * 2);
             raw[i] = b1 * 0.52 * breath;
+          }
+        } else if (sceneType === 'sakura_night') {
+          // 落樱夜庭：春夜微风拂落樱花瓣 + 极轻柔空灵夜音
+          let b0 = 0, b1 = 0;
+          for (let i = 0; i < totalGen; i++) {
+            const white = Math.random() * 2 - 1;
+            b0 = 0.9962 * b0 + white * 0.023;
+            b1 = 0.989 * b1 + b0 * 0.16;
+            const sakuraBreeze = 0.65 + 0.35 * Math.sin((i / bufferLength) * Math.PI * 2);
+            // 极微弱檐下空灵微音 (980Hz 微和弦)
+            const chime = 0.035 * Math.sin((i / sampleRate) * 2 * Math.PI * 987.77) * Math.exp(-((i % (sampleRate * 2)) / (sampleRate * 0.4)));
+            raw[i] = (b1 * 0.52 + chime) * sakuraBreeze;
+          }
+        } else if (sceneType === 'starship_bridge' || sceneType === 'starship_launch') {
+          // 星港巨舰：海湾远距离火箭猛禽低频轰鸣 (42Hz 超重低音次声波共振) + 远处海湾潮汐微风
+          let b0 = 0, b1 = 0;
+          for (let i = 0; i < totalGen; i++) {
+            const white = Math.random() * 2 - 1;
+            b0 = 0.9972 * b0 + white * 0.022;
+            b1 = 0.9910 * b1 + b0 * 0.16;
+            // 42Hz 与 84Hz 猛禽火箭推进剂燃烧震撼次重低音
+            const rocketRumble = 0.16 * Math.sin((i / sampleRate) * 2 * Math.PI * 42.0) +
+                                 0.08 * Math.sin((i / sampleRate) * 2 * Math.PI * 84.0);
+            // 墨西哥湾慢潮汐海风流动
+            const gulfSurf = 0.78 + 0.22 * Math.sin((i / bufferLength) * Math.PI * 2);
+            raw[i] = (b1 * 0.44 + rocketRumble) * gulfSurf;
           }
         } else if (sceneType === 'midnight_balcony' || sceneType === 'midnight_rooftop' || sceneType === 'ocean' || sceneType === 'zen_bamboo') {
           // 楼顶晚风 / 蔚蓝深海 / 禅院竹海：6秒一呼一吸的慢周期远方潮汐、晚风与竹浪清风

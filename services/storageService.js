@@ -2,11 +2,13 @@
 import { DEFAULT_USER_AVATAR_SVG } from '../utils/vectorIcons.js';
 import { getRandomNickname } from '../utils/nicknamePool.js';
 import { getRandomAvatarSvg } from '../utils/avatarGenerator.js';
+import { getAchievementById, getTitleWeight } from '../configs/achievements.js';
 
 const PROFILE_KEY = 'SMOKEFREE_PROFILE';
 const RECORDS_KEY = 'SMOKEFREE_RECORDS';
 const SELECTED_CIGARETTE_KEY = 'SMOKEFREE_SELECTED_CIGARETTE';
 const ACHIEVEMENTS_KEY = 'SMOKEFREE_UNLOCKED_ACHIEVEMENTS';
+const EQUIPPED_TITLE_KEY = 'SMOKEFREE_EQUIPPED_TITLE';
 const PACK_INVENTORY_KEY = 'SMOKEFREE_PACK_INVENTORY';
 const PACK_SLOTS_KEY = 'SMOKEFREE_PACK_SLOTS';
 const HOME_STICK_DIGESTED_KEY = 'SMOKEFREE_HOME_STICK_DIGESTED';
@@ -278,6 +280,29 @@ export const storageService = {
     if (!current.includes(id)) {
       current.push(id);
       this.saveUnlockedAchievements(current);
+      // 自动佩戴检测：若新解锁成就拥有更高品阶权重，自动装备最高称号
+      try {
+        const ach = getAchievementById(id);
+        if (ach) {
+          const currentEquipped = this.getEquippedTitle();
+          if (!currentEquipped || ach.weight > getTitleWeight(currentEquipped)) {
+            this.setEquippedTitle(ach.name);
+          }
+        }
+      } catch (err) {}
+    }
+  },
+
+  getEquippedTitle() {
+    const title = getItem(EQUIPPED_TITLE_KEY);
+    return typeof title === 'string' ? title : '';
+  },
+
+  setEquippedTitle(title) {
+    if (title) {
+      setItem(EQUIPPED_TITLE_KEY, title);
+    } else {
+      removeItem(EQUIPPED_TITLE_KEY);
     }
   },
 

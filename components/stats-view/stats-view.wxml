@@ -34,18 +34,21 @@
           <!-- 昵称紧随头像：微信官方昵称选择控件 + VIP 荣耀身份铭牌 -->
           <view class="user-info-col">
             <view class="user-nickname-row">
-              <input 
-                class="user-nickname-input {{ vipInfo.isVip ? 'vip-nickname-gold' : '' }}" 
-                type="nickname" 
-                value="{{ profile.nickName || '无烟觉醒者' }}" 
-                bindinput="onNicknameChange"
-                bindchange="onNicknameChange" 
-                bindblur="onNicknameBlur" 
-                cursor-color="transparent"
-              />
-              <view class="profile-vip-nameplate {{ vipInfo.isVip ? '' : 'is-vip-inactive' }}" catchtap="onGoToVip">
+              <view class="user-nickname-wrap">
+                <text class="user-nickname-display {{ (isVip || vipInfo.isVip) ? 'vip-nickname-gold' : '' }}">{{ profile.nickName || '无烟觉醒者' }}</text>
+                <input 
+                  class="user-nickname-input" 
+                  type="nickname" 
+                  value="{{ profile.nickName || '无烟觉醒者' }}" 
+                  bindinput="onNicknameChange"
+                  bindchange="onNicknameChange" 
+                  bindblur="onNicknameBlur" 
+                  cursor-color="transparent"
+                />
+              </view>
+              <view class="profile-vip-nameplate {{ (isVip || vipInfo.isVip) ? 'is-vip' : 'is-vip-inactive' }}" catchtap="onGoToVip">
                 <text class="pvn-crown">👑</text>
-                <text class="pvn-text">{{ vipInfo.isVip ? (vipInfo.isLifetime ? '至尊VIP' : '尊贵VIP') : '尊贵VIP' }}</text>
+                <text class="pvn-text">{{ (isVip || vipInfo.isVip) ? 'VIP' : '开通VIP' }}</text>
               </view>
             </view>
             <view class="user-meta-subrow" bindtap="onOpenProfileModal">
@@ -171,7 +174,7 @@
               <view class="hud-organ-dot dot-lungs"></view>
               <text class="hud-card-title title-lungs">双肺自愈</text>
             </view>
-            <text class="hud-card-en en-lungs">PULMONARY</text>
+            <text class="hud-card-en en-lungs">PULMONARY CILIA</text>
           </view>
           <view class="hud-card-body">
             <view class="hud-metric-row">
@@ -184,7 +187,7 @@
           </view>
         </view>
 
-        <!-- 右上方 HUD 引出数据框：心血管系统 (精准指向右侧胸腔心脏) -->
+        <!-- 右上方 HUD 引出数据框：心血管系统 (精准指向胸腔心肌供氧与主动脉) -->
         <view class="hud-card hud-card-tr hud-card-heart {{ activeOrgan === 'heart' ? 'is-active' : '' }}" bindtap="onSelectOrgan" data-organ="heart">
           <view class="hud-card-header">
             <view class="hud-title-badge-row">
@@ -204,18 +207,18 @@
           </view>
         </view>
 
-        <!-- 左下方 HUD 引出数据框：自律神经系统 (精准指向腹部植物神经中枢/肠脑轴) -->
+        <!-- 左下方 HUD 引出数据框：自律神经系统 (精准指向腹部植物神经中枢与肠脑交感轴) -->
         <view class="hud-card hud-card-bl hud-card-brain {{ activeOrgan === 'brain' ? 'is-active' : '' }}" bindtap="onSelectOrgan" data-organ="brain">
           <view class="hud-card-header">
             <view class="hud-title-badge-row">
               <view class="hud-organ-dot dot-brain"></view>
               <text class="hud-card-title title-brain">自律神经</text>
             </view>
-            <text class="hud-card-en en-brain">AUTONOMIC</text>
+            <text class="hud-card-en en-brain">AUTONOMIC AXIS</text>
           </view>
           <view class="hud-card-body">
             <view class="hud-metric-row">
-              <text class="hud-metric-label label-brain">交感舒缓</text>
+              <text class="hud-metric-label label-brain">交感平抑</text>
               <text class="hud-metric-val purple">{{ brainPercent }}%</text>
             </view>
             <view class="hud-progress-track track-brain">
@@ -224,14 +227,14 @@
           </view>
         </view>
 
-        <!-- 右下方 HUD 引出数据框：血液循环网络 (精准指向全身微血管与携氧循环) -->
+        <!-- 右下方 HUD 引出数据框：血液循环网络 (精准指向全身微循环网络) -->
         <view class="hud-card hud-card-br hud-card-blood {{ activeOrgan === 'blood' ? 'is-active' : '' }}" bindtap="onSelectOrgan" data-organ="blood">
           <view class="hud-card-header">
             <view class="hud-title-badge-row">
               <view class="hud-organ-dot dot-blood"></view>
-              <text class="hud-card-title title-blood">血液循环</text>
+              <text class="hud-card-title title-blood">血液微循环</text>
             </view>
-            <text class="hud-card-en en-blood">CIRCULATION</text>
+            <text class="hud-card-en en-blood">MICROCIRCULATION</text>
           </view>
           <view class="hud-card-body">
             <view class="hud-metric-row">
@@ -294,25 +297,25 @@
         <view class="section-name-wrap">
           <text class="sec-dot green"></text>
           <text class="sec-heading">钱包</text>
-          <text class="sec-pill-tag">自律存钱罐</text>
+          <text class="sec-pill-tag gold-pill">自律金库</text>
         </view>
       </view>
 
-      <!-- 核心算式展台：[调皮1元小纸币] × 金额 = 累计省下 -->
+      <!-- 核心算式展台：[自律金券] × 金额 = 累计省下 -->
       <view class="wallet-formula-stage">
         
-        <!-- 调皮搞笑 1 元微缩纸币 (支持轻触弹跳互动) -->
+        <!-- 24K 黑金自律储备金券 (支持轻触弹跳互动) -->
         <view class="funny-mini-bill-wrap" bindtap="onTapBanknote">
           <!-- 3D 叠纸堆叠背板效果 (厚度与立体感) -->
           <view class="bill-stack-back layer-2"></view>
           <view class="bill-stack-back layer-1"></view>
 
-          <!-- 真实绘制的调皮1元钞票图片 (狗狗币墨镜+赛博戒烟银行+真香印章) -->
+          <!-- 真实矢量绘制的 24K 自律储备金券 (黑曜石+鎏金防伪纹+朱砂印鉴) -->
           <view class="bill-img-container">
             <image 
               class="funny-banknote-img" 
-              src="/images/banknote_1yuan.jpg" 
-              mode="aspectFill" 
+              src="{{ goldVoucherSvgUri || '/images/cyber_gold_voucher.png' }}" 
+              mode="aspectFit" 
             />
           </view>
         </view>
@@ -323,7 +326,7 @@
         <!-- 乘数金额 (例如: 10) -->
         <view class="formula-multiplier-box">
           <text class="multiplier-num">{{ totalSavedYuan }}</text>
-          <text class="multiplier-label">自律钞票 (张)</text>
+          <text class="multiplier-label">自律金券 (张)</text>
         </view>
 
         <!-- 等号 -->
@@ -347,16 +350,15 @@
       </view>
     </view>
 
-    <!-- 3.5 🏆 荣耀勋章殿堂 · 赛博成就展柜 (Tencent Games 曜石展柜标准) -->
+    <!-- 3.5 🏆 荣耀称号殿堂 · 赛博展柜 (按最高品阶自动佩戴，支持自由切换) -->
     <view class="honor-wall-card">
       <view class="section-top-header honor-top-header">
         <view class="section-name-wrap">
           <text class="sec-dot gold"></text>
-          <text class="sec-heading">荣耀勋章殿堂</text>
-          <text class="sec-pill-tag gold-pill">战功墙</text>
+          <text class="sec-heading">荣耀称号殿堂</text>
         </view>
         <view class="honor-header-rate">
-          <text class="hhr-text">已达成 {{ unlockedAchievementsCount }}/{{ achievementsList.length }}</text>
+          <text class="hhr-text">已解锁 {{ unlockedAchievementsCount }}/{{ achievementsList.length }}</text>
           <text class="hhr-percent">({{ achievementsCompletionRate }}%)</text>
         </view>
       </view>
@@ -366,38 +368,49 @@
         <view class="honor-progress-fill" style="width: {{ achievementsCompletionRate }}%;"></view>
       </view>
 
-      <!-- 4 列流式曜石勋章橱窗网格 -->
+      <!-- 4 列流式曜石称号橱窗网格 (严格从低到高 Lv.1 ~ Lv.16 排列) -->
       <view class="honor-grid">
         <view 
-          class="honor-badge-item {{ item.unlocked ? ('is-unlocked tier-' + item.tier) : 'is-locked' }}"
+          class="honor-badge-item {{ item.isEquipped ? 'is-equipped' : '' }} {{ item.unlocked ? ('is-unlocked tier-' + item.tier) : (item.isNext ? 'is-next' : 'is-locked') }}"
           wx:for="{{ achievementsList }}"
           wx:key="id"
           bindtap="onSelectAchievement"
           data-item="{{ item }}"
         >
-          <!-- 徽章本体外壳 (带品阶动态微光与曜石底座) -->
+          <!-- 称号本体外壳 (带品阶动态微光与曜石底座) -->
           <view 
             class="badge-emblem-shell" 
             style="{{ item.unlocked ? ('box-shadow: 0 4rpx 16rpx ' + item.glowColor + '; border-color: ' + item.borderColor + ';') : '' }}"
           >
-            <!-- 锁头标记 (未解锁状态) -->
-            <view class="badge-lock-tag" wx:if="{{ !item.unlocked }}">
+            <!-- 佩戴中专属皇冠标签 -->
+            <view class="badge-tier-tag badge-equipped-tag" wx:if="{{ item.isEquipped }}">
+              👑 佩戴中
+            </view>
+            <!-- 已点亮品阶与等级标签 -->
+            <view class="badge-tier-tag" wx:elif="{{ item.unlocked }}" style="background: {{ item.badgeBg }}; color: {{ item.tagColor }};">
+              Lv.{{ item.level }}
+            </view>
+            <!-- 紧随其后的当前冲刺点亮目标 (isNext) -->
+            <view class="badge-tier-tag badge-next-tag" wx:elif="{{ item.isNext }}">
+              🎯 待点亮
+            </view>
+            <!-- 锁头标记 (未达成前序称号，严格锁定) -->
+            <view class="badge-lock-tag" wx:else>
               <text class="lock-icon">🔒</text>
             </view>
-            <!-- 品阶标签 (已解锁状态) -->
-            <view class="badge-tier-tag" wx:else style="background: {{ item.badgeBg }}; color: {{ item.tagColor }};">
-              {{ item.tierTag }}
-            </view>
 
-            <!-- 勋章立体图标 (未解锁时半透明灰度) -->
-            <text class="badge-icon-emoji {{ !item.unlocked ? 'locked-emoji' : '' }}">{{ item.icon }}</text>
+            <!-- 勋章立体图标 (高定矢量 SVG 图标，未点亮时半透明灰度) -->
+            <image class="badge-icon-svg {{ !item.unlocked ? 'locked-svg' : '' }}" src="{{ item.iconSvg }}" mode="aspectFit" wx:if="{{ item.iconSvg }}" />
+            <text class="badge-icon-emoji {{ !item.unlocked ? 'locked-emoji' : '' }}" wx:else>{{ item.icon }}</text>
           </view>
 
-          <!-- 勋章四字定名 -->
-          <text class="badge-name">{{ item.name }}</text>
+          <!-- 称号四字定名 -->
+          <text class="badge-name {{ item.isEquipped ? 'equipped-name' : (item.isNext ? 'next-name' : '') }}">{{ item.name }}</text>
 
-          <!-- 简要进度或已达成标识 -->
-          <text class="badge-sub-progress {{ item.unlocked ? 'done-text' : '' }}">{{ item.unlocked ? '已达成 ✓' : item.progress.progressText }}</text>
+          <!-- 简要进度或已点亮标识 -->
+          <text class="badge-sub-progress {{ item.isEquipped ? 'equipped-text' : (item.unlocked ? 'done-text' : (item.isNext ? 'next-text' : 'locked-text')) }}">
+            {{ item.isEquipped ? '👑 佩戴中' : (item.unlocked ? '已点亮 ✓' : (item.isNext ? item.progress.progressText : '待前序点亮')) }}
+          </text>
         </view>
       </view>
     </view>
@@ -605,54 +618,135 @@
   </view>
 </scroll-view>
 
-<!-- 荣耀勋章成就证书详情弹窗 (Tencent Games 沉浸式高奢海报卡) -->
-<view class="glass-modal-backdrop achievement-modal-backdrop" wx:if="{{ showAchievementModal }}" catchtouchmove="preventTouchMove">
-  <view class="achievement-cert-card {{ selectedAchievement.unlocked ? ('tier-' + selectedAchievement.tier) : 'cert-locked' }}">
-    <!-- 关闭按钮 -->
-    <view class="cert-close-btn" bindtap="closeAchievementModal">✕</view>
+<!-- 荣耀称号殿堂 · 殿堂典藏证书详情弹窗 (高定沉浸卡牌·情绪价值·无底部按钮) -->
+<view class="glass-modal-backdrop achievement-modal-backdrop" wx:if="{{ showAchievementModal }}" bindtap="closeAchievementModal" catchtouchmove="preventTouchMove">
+  <view 
+    class="achievement-cert-card tier-{{ selectedAchievement.tier }} level-{{ selectedAchievement.level }} {{ selectedAchievement.isEquipped ? 'is-equipped' : '' }} {{ selectedAchievement.unlocked ? 'is-unlocked' : (selectedAchievement.isNext ? 'is-next' : 'is-locked') }}"
+    catchtap="preventBubble"
+  >
+    <!-- 顶部奢华典藏抬眉与独立关闭键 -->
+    <view class="cert-top-bar">
+      <view class="cert-royal-crest">
+        <text class="crc-star">✦</text>
+        <text class="crc-title">殿堂典藏 · 荣耀印鉴</text>
+        <text class="crc-star">✦</text>
+      </view>
+      <view class="cert-close-btn" catchtap="closeAchievementModal">✕</view>
+    </view>
 
-    <!-- 顶部品阶徽标与光晕 -->
+    <!-- 顶层图腾徽章与光环 -->
     <view class="cert-halo-wrap">
+      <view class="cert-halo-ring"></view>
       <view 
         class="cert-emblem-core" 
-        style="{{ selectedAchievement.unlocked ? ('box-shadow: 0 0 36rpx ' + selectedAchievement.glowColor + '; border-color: ' + selectedAchievement.borderColor + ';') : '' }}"
+        style="{{ selectedAchievement.unlocked ? ('box-shadow: 0 0 46rpx ' + selectedAchievement.glowColor + '; border-color: ' + selectedAchievement.borderColor + ';') : '' }}"
       >
-        <text class="cert-icon-emoji {{ !selectedAchievement.unlocked ? 'locked-emoji' : '' }}">{{ selectedAchievement.icon }}</text>
+        <image class="cert-icon-svg {{ !selectedAchievement.unlocked ? 'locked-svg' : '' }}" src="{{ selectedAchievement.iconSvg }}" mode="aspectFit" wx:if="{{ selectedAchievement.iconSvg }}" />
+        <text class="cert-icon-emoji {{ !selectedAchievement.unlocked ? 'locked-emoji' : '' }}" wx:else>{{ selectedAchievement.icon }}</text>
       </view>
       <view class="cert-tier-pill" style="background: {{ selectedAchievement.badgeBg }}; color: {{ selectedAchievement.tagColor }}; border-color: {{ selectedAchievement.borderColor }};">
-        {{ selectedAchievement.category }} · {{ selectedAchievement.tierTag }}
+        Lv.{{ selectedAchievement.level }} · {{ selectedAchievement.category }} · {{ selectedAchievement.tierTag }}
       </view>
     </view>
 
-    <!-- 勋章全称与状态 -->
-    <text class="cert-title">{{ selectedAchievement.name }}</text>
-    <text class="cert-status-badge {{ selectedAchievement.unlocked ? 'badge-passed' : 'badge-progress' }}">
-      {{ selectedAchievement.unlocked ? '✨ 荣耀已解锁' : '🔒 努力达成中' }}
-    </text>
+    <!-- 称号大写宏名 -->
+    <text class="cert-title">【 {{ selectedAchievement.name }} 】</text>
 
-    <!-- 成就详述与典故 -->
+    <!-- 核心状态标识 (严格居中显示，已点亮可轻触直接佩戴) -->
+    <view class="cert-status-center-wrap">
+      <view 
+        class="cert-status-badge {{ selectedAchievement.isEquipped ? 'badge-equipped' : (selectedAchievement.unlocked ? 'badge-unlocked-equipable' : (selectedAchievement.isNext ? 'badge-next-status' : 'badge-progress')) }}"
+        catchtap="{{ (selectedAchievement.unlocked && !selectedAchievement.isEquipped) ? 'onEquipTitle' : '' }}"
+        data-title="{{ selectedAchievement.name }}"
+      >
+        <block wx:if="{{ selectedAchievement.isEquipped }}">👑 正在佩戴中 · 全国英雄榜闪耀</block>
+        <block wx:elif="{{ selectedAchievement.unlocked }}">✨ 称号已点亮 · 点击佩戴</block>
+        <block wx:elif="{{ selectedAchievement.isNext }}">🎯 当前冲刺目标 · 达成即刻点亮</block>
+        <block wx:else>🔒 序列封印中 · 待前序点亮</block>
+      </view>
+    </view>
+
+    <!-- 情绪价值箴言金句 (替换枯燥点亮规则，直击心灵) -->
+    <view class="cert-emotion-quote-box">
+      <text class="ceq-mark left">“</text>
+      <text class="ceq-quote-text">{{ selectedAchievement.quote }}</text>
+      <text class="ceq-mark right">”</text>
+    </view>
+
+    <!-- 科学自愈身心典故 -->
     <text class="cert-desc">{{ selectedAchievement.description }}</text>
 
-    <!-- 达成目标与进度条 -->
+    <!-- 极简高定数据展台 -->
     <view class="cert-progress-box">
       <view class="cp-row">
-        <text class="cp-label">解锁条件：{{ selectedAchievement.conditionDesc }}</text>
+        <text class="cp-label">获取条件：{{ selectedAchievement.conditionDesc }}</text>
         <text class="cp-val" style="color: {{ selectedAchievement.tagColor }};">{{ selectedAchievement.progress.progressText }}</text>
       </view>
       <view class="cp-track">
-        <view class="cp-bar" style="width: {{ selectedAchievement.progress.percent }}%; background: {{ selectedAchievement.tagColor }};"></view>
+        <view class="cp-bar" style="width: {{ selectedAchievement.progress.percent }}%; background: {{ selectedAchievement.tagColor }}; box-shadow: 0 0 12rpx {{ selectedAchievement.glowColor }};"></view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 自律打卡日历 · 每日历史战报详情弹窗 (腾讯黑金微光沉浸卡片) -->
+<view class="glass-modal-backdrop" wx:if="{{ showDayDetailModal }}" bindtap="closeDayDetailModal" catchtouchmove="preventTouchMove">
+  <view class="calendar-day-dialog-card" catchtap="preventBubble">
+    <view class="cdd-top-bar">
+      <view class="cdd-date-pill">
+        <text class="cdd-icon">📅</text>
+        <text class="cdd-date-text">{{ selectedCalendarDay.formattedDate }}</text>
+        <view class="cdd-tag {{ selectedCalendarDay.isPunched ? 'tag-punched' : (selectedCalendarDay.isFuture ? 'tag-future' : 'tag-unpunched') }}">
+          {{ selectedCalendarDay.statusTag }}
+        </view>
+      </view>
+      <view class="cdd-close-btn" catchtap="closeDayDetailModal">✕</view>
+    </view>
+
+    <!-- 核心成就徽章 -->
+    <view class="cdd-crest-box">
+      <view class="cdd-halo"></view>
+      <text class="cdd-emoji">{{ selectedCalendarDay.statusEmoji }}</text>
+      <text class="cdd-headline">{{ selectedCalendarDay.headline }}</text>
+    </view>
+
+    <!-- 战报四宫格数据 (若是已打卡或有替烟) -->
+    <view class="cdd-metrics-grid" wx:if="{{ selectedCalendarDay.isPunched || selectedCalendarDay.count > 0 }}">
+      <view class="cdd-metric-item">
+        <text class="cdd-m-val gold">{{ selectedCalendarDay.count }}<text class="cdd-m-unit">支</text></text>
+        <text class="cdd-m-lbl">少抽真烟</text>
+      </view>
+      <view class="cdd-metric-item">
+        <text class="cdd-m-val emerald">¥{{ selectedCalendarDay.savedMoney }}</text>
+        <text class="cdd-m-lbl">省下烟资</text>
+      </view>
+      <view class="cdd-metric-item">
+        <text class="cdd-m-val green">{{ selectedCalendarDay.tarAvoided }}<text class="cdd-m-unit">mg</text></text>
+        <text class="cdd-m-lbl">免受焦油</text>
+      </view>
+      <view class="cdd-metric-item">
+        <text class="cdd-m-val purple">+{{ selectedCalendarDay.lifeRegained }}<text class="cdd-m-unit">分</text></text>
+        <text class="cdd-m-lbl">夺回寿命</text>
       </view>
     </view>
 
-    <!-- 激励箴言底栏 -->
-    <view class="cert-quote-box">
-      <text class="cq-icon">🎖️</text>
-      <text class="cq-text">{{ selectedAchievement.unlocked ? '每一枚自律勋章，都是你战胜心魔、重塑生命的坚毅见证。' : '微小的自律持续累积，终将汇聚成重获纯净新生的汪洋大海。' }}</text>
+    <!-- 温暖金句 -->
+    <view class="cdd-quote-box">
+      <text class="cdd-quote">“{{ selectedCalendarDay.quote }}”</text>
     </view>
 
-    <button class="cert-confirm-btn" bindtap="closeAchievementModal">
-      {{ selectedAchievement.unlocked ? '心怀荣耀 · 继续前行' : '我知道了 · 立即行动' }}
-    </button>
+    <!-- 操作区：若今日且未打卡，支持直接一键打卡 -->
+    <view class="cdd-action-box" wx:if="{{ selectedCalendarDay.isToday && !selectedCalendarDay.isPunched }}">
+      <button class="cdd-punch-btn" catchtap="onQuickPunchFromModal">
+        <text>✦ 立即盖印今日自律打卡 ✦</text>
+      </button>
+    </view>
+    <view class="cdd-action-box" wx:else>
+      <button class="cdd-confirm-btn" catchtap="closeDayDetailModal">
+        <text>保持纯净呼吸</text>
+      </button>
+    </view>
   </view>
 </view>
+
 

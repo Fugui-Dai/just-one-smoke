@@ -551,57 +551,40 @@
 
 
 
-/* ==================== 6. 右侧半月弧形主控 DOCK 栏 (轻透流光毛玻璃质感 · 紧凑贴合图标) ==================== */
+/* ==================== 6. 右侧暗黑奇幻异形 DOCK 栏 (古典 S 形曲线 · 纤巧双层金线 · 完美裹覆) ==================== */
 .right-arc-dock {
   position: absolute;
   right: 0;
   top: 50%;
   transform: translateY(-48%);
-  width: 92rpx;
-  background: rgba(12, 16, 26, 0.40);
-  border: 1rpx solid rgba(255, 255, 255, 0.12);
-  border-right: none;
-  border-top-left-radius: 46rpx;
-  border-bottom-left-radius: 46rpx;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: -6rpx 0 24rpx rgba(0, 0, 0, 0.35), inset 1rpx 1rpx 0 rgba(255, 255, 255, 0.10);
+  width: 116rpx;
+  box-sizing: border-box;
+  background: transparent;
+  border: none;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 16rpx 0 18rpx 0;
+  padding: 86rpx 0 78rpx 14rpx;
   gap: 12rpx;
   z-index: 45;
+  overflow: visible;
 }
 
-.right-arc-dock::before {
-  content: '';
+/* 一体化数学相切流体外壳底衬 (SVG 矢量精确贴合 · 绝对零接缝) */
+.dock-fluid-shell-bg {
   position: absolute;
-  top: -20rpx;
+  top: 0;
   right: 0;
-  width: 20rpx;
-  height: 20rpx;
-  background: transparent;
-  border-bottom-right-radius: 20rpx;
-  box-shadow: 6rpx 6rpx 0 0 rgba(12, 16, 26, 0.40);
+  width: 116rpx;
+  height: 100%;
   pointer-events: none;
-}
-
-.right-arc-dock::after {
-  content: '';
-  position: absolute;
-  bottom: -20rpx;
-  right: 0;
-  width: 20rpx;
-  height: 20rpx;
-  background: transparent;
-  border-top-right-radius: 20rpx;
-  box-shadow: 6rpx -6rpx 0 0 rgba(12, 16, 26, 0.40);
-  pointer-events: none;
+  z-index: 1;
 }
 
 /* 每一个操作按钮胶囊单元 */
 .dock-btn-wrap {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -621,28 +604,36 @@
 
 /* 针对微信 button.share-dock-item 的样式重置 */
 button.dock-btn-wrap.share-dock-item {
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  outline: none;
+  width: 100% !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  outline: none !important;
+  line-height: normal !important;
+  font-weight: normal;
 }
 button.dock-btn-wrap.share-dock-item::after {
-  border: none;
+  border: none !important;
 }
 
-/* 圆形按钮实体 */
+/* 圆形按钮实体 (新一代高质感黑曜晶碟 · 1.5px 凝光微倒角丝印 · 实体色彩防透明) */
 .dock-circle-btn {
-  width: 76rpx;
-  height: 76rpx;
+  width: 72rpx;
+  height: 72rpx;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(22, 28, 42, 0.96);
+  border: 1.5rpx solid rgba(255, 255, 255, 0.22);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.45);
-  transition: all 0.22s ease;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.55), inset 0 1rpx 1rpx rgba(255, 255, 255, 0.20);
+  transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .dock-icon {
@@ -651,10 +642,77 @@ button.dock-btn-wrap.share-dock-item::after {
 }
 
 .dock-svg-icon {
-  width: 52rpx;
-  height: 52rpx;
+  width: 48rpx;
+  height: 48rpx;
   display: block;
-  transition: transform 0.22s ease, filter 0.22s ease;
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.22s ease;
+  pointer-events: none;
+}
+
+.dock-svg-icon.sound-svg-icon {
+  width: 44rpx;
+  height: 44rpx;
+  filter: drop-shadow(0 2rpx 10rpx rgba(56, 189, 248, 0.55));
+}
+
+.dock-svg-icon.scene-svg-icon {
+  width: 46rpx;
+  height: 46rpx;
+  filter: drop-shadow(0 2rpx 10rpx rgba(52, 211, 153, 0.55));
+}
+
+.dock-svg-icon.ignite-svg-icon {
+  width: 48rpx;
+  height: 48rpx;
+  filter: drop-shadow(0 2rpx 12rpx rgba(245, 158, 11, 0.65));
+}
+
+.dock-svg-icon.extinguish-svg-icon {
+  width: 48rpx;
+  height: 48rpx;
+  filter: drop-shadow(0 2rpx 12rpx rgba(244, 63, 94, 0.75));
+}
+
+.dock-svg-icon.inhale-svg-icon {
+  width: 46rpx;
+  height: 46rpx;
+  filter: drop-shadow(0 2rpx 10rpx rgba(56, 189, 248, 0.50));
+}
+
+.dock-svg-icon.vfx-svg-icon {
+  width: 46rpx;
+  height: 46rpx;
+  filter: drop-shadow(0 2rpx 12rpx rgba(192, 132, 252, 0.60));
+}
+
+.dock-svg-icon.ash-svg-icon {
+  width: 42rpx;
+  height: 42rpx;
+  filter: drop-shadow(0 2rpx 10rpx rgba(245, 158, 11, 0.45));
+}
+
+.dock-svg-icon.share-svg-icon {
+  width: 44rpx;
+  height: 44rpx;
+  filter: drop-shadow(0 2rpx 10rpx rgba(52, 211, 153, 0.50));
+}
+
+.dock-svg-icon.store-svg-icon {
+  width: 44rpx;
+  height: 44rpx;
+  filter: drop-shadow(0 2rpx 10rpx rgba(251, 191, 36, 0.45));
+}
+
+.dock-svg-icon.rank-svg-icon {
+  width: 46rpx;
+  height: 46rpx;
+  filter: drop-shadow(0 2rpx 12rpx rgba(251, 191, 36, 0.60));
+}
+
+.dock-svg-icon.my-svg-icon {
+  width: 46rpx;
+  height: 46rpx;
+  filter: drop-shadow(0 2rpx 12rpx rgba(192, 132, 252, 0.55));
 }
 
 .dock-char-icon {
@@ -662,6 +720,13 @@ button.dock-btn-wrap.share-dock-item::after {
   font-weight: 800;
   color: #e2e8f0;
   line-height: 1;
+}
+
+.dock-char-icon.scene-char-icon {
+  font-size: 32rpx;
+  line-height: 1;
+  display: block;
+  filter: drop-shadow(0 2rpx 8rpx rgba(0, 0, 0, 0.65));
 }
 
 .dock-char-icon.my-char {
@@ -689,12 +754,12 @@ button.dock-btn-wrap.share-dock-item::after {
 
 
 .dock-title {
-  font-size: 20rpx;
-  font-weight: 600;
-  color: #f1f5f9;
-  margin-top: 4rpx;
-  letter-spacing: 0.2rpx;
-  text-shadow: 0 1rpx 3rpx rgba(0, 0, 0, 0.85);
+  font-size: 19rpx;
+  font-weight: 500;
+  color: rgba(248, 242, 230, 0.92);
+  margin-top: 3rpx;
+  letter-spacing: 0.6rpx;
+  text-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.95);
   white-space: nowrap;
 }
 
@@ -705,11 +770,17 @@ button.dock-btn-wrap.share-dock-item::after {
   letter-spacing: 0.3rpx;
 }
 
-/* 1. 点燃 / 掐灭状态 (余烬呼吸与掐熄微光) */
+/* 1. 点燃 / 掐灭状态 (温润炽焰金晶 · 燃时余烬呼吸与掐熄微光) */
+.dock-circle-btn.ignite-btn {
+  border: 1.5rpx solid rgba(251, 191, 36, 0.75);
+  background: radial-gradient(circle at 35% 28%, #fbbf24 0%, #ea580c 48%, #431407 100%);
+  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.60), 0 0 18rpx rgba(234, 88, 12, 0.45), inset 0 2rpx 3rpx rgba(254, 240, 138, 0.55);
+}
+
 .dock-circle-btn.ignite-btn.is-lit {
   border-color: rgba(239, 68, 68, 0.85);
   box-shadow: 0 0 20rpx rgba(239, 68, 68, 0.65), inset 0 0 10rpx rgba(245, 158, 11, 0.35);
-  background: radial-gradient(circle, rgba(239, 68, 68, 0.28) 0%, rgba(245, 158, 11, 0.12) 65%, rgba(15, 15, 20, 0.85) 100%);
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.32) 0%, rgba(245, 158, 11, 0.15) 50%, rgba(20, 22, 32, 0.96) 100%);
   animation: extinguish-breathe 2.4s infinite ease-in-out;
 }
 
@@ -741,25 +812,25 @@ button.dock-btn-wrap.share-dock-item::after {
   transform: scale(1.08);
 }
 
-/* 3. 烟雾特效：虚线刻度环 (实机分段刻度) */
+/* 3. 烟雾特效：幻境星云紫晶宝玉 (高奢幻紫与星光微晕) */
 .dock-circle-btn.smoke-effect-btn {
-  border-color: rgba(255, 255, 255, 0.2);
+  border: 1.5rpx solid rgba(192, 132, 252, 0.75);
+  background: radial-gradient(circle at 35% 28%, #c084fc 0%, #7c3aed 48%, #2e0854 100%);
+  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.60), 0 0 16rpx rgba(124, 58, 237, 0.40), inset 0 2rpx 3rpx rgba(255, 255, 255, 0.50);
 }
 
-
-
-/* 4. 抖灰：圆形烟灰进度条 (根据当前烟灰长度顺时针展示高精度圆弧进度) */
+/* 4. 抖灰：圆形烟灰进度条 (黑曜实色底盘 · 防透明 · 顺时针高精度圆弧进度) */
 .dock-circle-btn.ash-btn-circle {
   position: relative;
-  width: 76rpx;
-  height: 76rpx;
+  width: 72rpx;
+  height: 72rpx;
   border-radius: 50%;
-  border: none;
-  background: rgba(255, 255, 255, 0.04);
+  border: 1.5rpx solid rgba(255, 255, 255, 0.24);
+  background: rgba(20, 26, 40, 0.96);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 4rpx 14rpx rgba(0, 0, 0, 0.45);
+  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.55), inset 0 1rpx 1rpx rgba(255, 255, 255, 0.18);
   transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -777,8 +848,18 @@ button.dock-btn-wrap.share-dock-item::after {
   transition: background 0.25s ease-out, box-shadow 0.25s ease-out;
 }
 
+.dock-circle-btn.ash-btn-circle.has-ash {
+  border-color: rgba(245, 158, 11, 0.60);
+  box-shadow: 0 0 16rpx rgba(245, 158, 11, 0.40);
+}
+
 .dock-circle-btn.ash-btn-circle.has-ash .ash-progress-ring {
   box-shadow: 0 0 16rpx rgba(245, 158, 11, 0.65);
+}
+
+.dock-circle-btn.ash-btn-circle.alert-ash {
+  border-color: rgba(239, 68, 68, 0.85);
+  box-shadow: 0 0 20rpx rgba(239, 68, 68, 0.65);
 }
 
 .dock-circle-btn.ash-btn-circle.alert-ash .ash-progress-ring {
@@ -792,21 +873,21 @@ button.dock-btn-wrap.share-dock-item::after {
   width: 58rpx;
   height: 58rpx;
   border-radius: 50%;
-  background: rgba(14, 18, 26, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: radial-gradient(circle at 35% 28%, #475569 0%, #1e293b 48%, #090d16 100%);
+  border: 1px solid rgba(148, 163, 184, 0.55);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: inset 0 2rpx 6rpx rgba(0, 0, 0, 0.6);
+  box-shadow: inset 0 2rpx 4rpx rgba(255, 255, 255, 0.25);
   transition: all 0.22s ease;
 }
 
 .dock-circle-btn.ash-btn-circle.has-ash .ash-btn-inner {
-  border-color: rgba(245, 158, 11, 0.50);
+  border-color: rgba(245, 158, 11, 0.60);
 }
 
 .dock-circle-btn.ash-btn-circle.alert-ash .ash-btn-inner {
-  border-color: rgba(239, 68, 68, 0.80);
+  border-color: rgba(239, 68, 68, 0.85);
 }
 
 .dock-char-icon.ash-char {
@@ -827,25 +908,24 @@ button.dock-btn-wrap.share-dock-item::after {
   text-shadow: 0 0 14rpx rgba(239, 68, 68, 0.85);
 }
 
-
-
 @keyframes pulseAsh {
   from { transform: scale(1); }
   to { transform: scale(1.06); }
 }
 
-/* 5. 递烟：外层根据烟盒余量动态展示翡翠绿圆圈进度环 */
+/* 5. 递烟：纯净黑曜晶碟 · 仅外圈进度环显示烟盒余量 · 就跟抖灰完全一致 */
 .dock-circle-btn.share-btn-circle {
   position: relative;
-  width: 76rpx;
-  height: 76rpx;
+  width: 72rpx;
+  height: 72rpx;
   border-radius: 50%;
-  border: none;
-  background: transparent;
+  border: 1.5rpx solid rgba(255, 255, 255, 0.24);
+  background: rgba(20, 26, 40, 0.96);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.45);
+  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.55), inset 0 1rpx 1rpx rgba(255, 255, 255, 0.18);
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .share-progress-ring {
@@ -853,81 +933,64 @@ button.dock-btn-wrap.share-dock-item::after {
   inset: 0;
   border-radius: 50%;
   pointer-events: none;
-  box-shadow: 0 0 16rpx rgba(16, 185, 129, 0.55);
+  box-shadow: 0 0 14rpx rgba(52, 211, 153, 0.35);
   transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .share-btn-inner {
   position: relative;
   z-index: 2;
-  width: 66rpx;
-  height: 66rpx;
+  width: 58rpx;
+  height: 58rpx;
   border-radius: 50%;
-  background: rgba(14, 18, 26, 0.94);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: radial-gradient(circle at 35% 28%, #2dd4bf 0%, #0d9488 48%, #042f2e 100%);
+  border: 1px solid rgba(94, 234, 212, 0.65);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: inset 0 2rpx 6rpx rgba(0, 0, 0, 0.6);
+  box-shadow: inset 0 2rpx 3rpx rgba(255, 255, 255, 0.45);
+  transition: all 0.22s ease;
 }
 
-.pack-remain-dock-badge {
-  position: absolute;
-  top: -6rpx;
-  right: -6rpx;
-  z-index: 6;
-  min-width: 24rpx;
-  height: 22rpx;
-  padding: 0 6rpx;
-  border-radius: 12rpx;
-  background: #10b981;
-  color: #ffffff;
-  font-size: 19rpx;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1.5rpx solid rgba(255, 255, 255, 0.65);
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.6);
+/* 1. 音效：深海蓝宝微光晶碟 */
+.dock-circle-btn.sound-btn-circle {
+  border: 1.5rpx solid rgba(56, 189, 248, 0.45);
+  background: radial-gradient(circle at 50% 35%, rgba(56, 189, 248, 0.22) 0%, rgba(15, 23, 42, 0.94) 80%);
+  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.65), 0 0 14rpx rgba(56, 189, 248, 0.22), inset 0 1rpx 1.5rpx rgba(255, 255, 255, 0.20);
 }
 
-.pack-remain-dock-badge.is-empty {
-  background: #ef4444;
+.dock-circle-btn.sound-btn-circle.is-muted-btn {
+  border: 1.5rpx solid rgba(148, 163, 184, 0.35);
+  background: radial-gradient(circle at 50% 35%, rgba(148, 163, 184, 0.12) 0%, rgba(15, 23, 42, 0.94) 80%);
+  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.65), inset 0 1rpx 1.5rpx rgba(255, 255, 255, 0.12);
 }
 
-/* 6. 商店：典雅金珀微光 (与全局黑曜琉璃底托谐调，克制高级，不喧宾夺主) */
+/* 2. 抽烟环境：黑曜灵动晶碟 (微光内晕 + 呼吸光环) */
+.dock-circle-btn.scene-btn-circle {
+  border: 1.5rpx solid rgba(52, 211, 153, 0.45);
+  background: radial-gradient(circle at 50% 35%, rgba(52, 211, 153, 0.20) 0%, rgba(15, 23, 42, 0.94) 80%);
+  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.65), 0 0 14rpx rgba(52, 211, 153, 0.22), inset 0 1rpx 1.5rpx rgba(255, 255, 255, 0.20);
+}
+
+/* 6. 商店：黑曜琥珀微金晶碟 (高阶温润琥珀微晕) */
 .dock-circle-btn.store-btn-circle {
-  border: 1px solid rgba(245, 158, 11, 0.32);
-  background: rgba(245, 158, 11, 0.08);
-  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.45), inset 0 1rpx 0 rgba(254, 240, 138, 0.15);
+  border: 1.5rpx solid rgba(245, 158, 11, 0.50);
+  background: radial-gradient(circle at 50% 35%, rgba(245, 158, 11, 0.22) 0%, rgba(20, 24, 38, 0.94) 80%);
+  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.65), 0 0 14rpx rgba(245, 158, 11, 0.25), inset 0 1rpx 1.5rpx rgba(255, 255, 255, 0.20);
 }
 
-.dock-svg-icon.store-svg-icon {
-  width: 42rpx;
-  height: 42rpx;
-}
-
-.dock-title.gold-title {
-  color: #fbbf24;
-}
-
-/* 7. 排行榜：曜金奖杯高光微晕 (名流勋章，金芒微绽) */
+/* 7. 排行榜：星夜曜石黑紫天鹅绒 (高对比度深邃底盘，冠军金杯熠熠生辉) */
 .dock-circle-btn.rank-btn-circle {
-  border: 1px solid rgba(251, 191, 36, 0.36);
-  background: rgba(251, 191, 36, 0.08);
-  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.45), 0 0 14rpx rgba(251, 191, 36, 0.22);
+  border: 1.5rpx solid rgba(251, 191, 36, 0.65);
+  background: radial-gradient(circle at 50% 30%, rgba(129, 140, 248, 0.30) 0%, rgba(49, 46, 129, 0.40) 45%, rgba(15, 20, 36, 0.96) 85%);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.70), 0 0 18rpx rgba(129, 140, 248, 0.32), inset 0 1rpx 2rpx rgba(254, 240, 138, 0.45);
 }
 
-.dock-icon.rank-trophy-icon {
-  font-size: 32rpx;
-  line-height: 1;
-}
-
-/* 8. 我的 */
+/* 8. 我的：深曜玄金晶碟 */
 .dock-circle-btn.my-btn-circle {
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(255, 255, 255, 0.06);
-  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.45);
+  border: 1.5rpx solid rgba(251, 191, 36, 0.50);
+  background: radial-gradient(circle at 50% 35%, rgba(254, 240, 138, 0.15) 0%, rgba(24, 22, 34, 0.94) 80%);
+  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.65), 0 0 14rpx rgba(251, 191, 36, 0.22), inset 0 1rpx 1.5rpx rgba(255, 255, 255, 0.20);
 }
 
 
@@ -1435,19 +1498,19 @@ button.dock-btn-wrap.share-dock-item::after {
   margin-bottom: 24rpx;
 }
 
-/* 趣味 1 元纸币入账条 (深度联动钱包 1元搞笑纸币概念) */
+/* 尊享 24K 黑金自律储备金券入账条 (深度联动钱包自律金库概念) */
 .reward-bill-deposit-box {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(135deg, rgba(16, 42, 28, 0.88) 0%, rgba(9, 24, 16, 0.95) 100%);
-  border: 1.5rpx solid rgba(52, 211, 153, 0.45);
+  background: linear-gradient(135deg, rgba(35, 24, 10, 0.92) 0%, rgba(18, 13, 6, 0.96) 100%);
+  border: 1.5rpx solid rgba(245, 158, 11, 0.55);
   border-radius: 24rpx;
   padding: 16rpx 20rpx;
   margin-bottom: 22rpx;
   box-sizing: border-box;
-  box-shadow: inset 0 0 16rpx rgba(52, 211, 153, 0.15), 0 6rpx 20rpx rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 0 18rpx rgba(245, 158, 11, 0.18), 0 6rpx 20rpx rgba(0, 0, 0, 0.5);
 }
 
 .rb-mini-bill-wrap {
@@ -1456,9 +1519,9 @@ button.dock-btn-wrap.share-dock-item::after {
   flex-shrink: 0;
   border-radius: 8rpx;
   overflow: hidden;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.45), 0 0 8rpx rgba(52, 211, 153, 0.35);
-  border: 1.5rpx solid rgba(52, 211, 153, 0.6);
-  background: #0f2c1f;
+  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.6), 0 0 10rpx rgba(245, 158, 11, 0.35);
+  border: 1.5rpx solid rgba(245, 158, 11, 0.7);
+  background: #0b101b;
 }
 
 .rb-banknote-img {
@@ -1479,7 +1542,7 @@ button.dock-btn-wrap.share-dock-item::after {
 .rb-deposit-title {
   font-size: 22rpx;
   font-weight: 800;
-  color: #6ee7b7;
+  color: #fde047;
 }
 
 .rb-deposit-sub {
@@ -1862,6 +1925,7 @@ button.dock-btn-wrap.share-dock-item::after {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 4rpx;
   margin: 0 auto 20rpx auto;
+  flex-shrink: 0;
 }
 
 .sheet-title-row {
@@ -1869,6 +1933,7 @@ button.dock-btn-wrap.share-dock-item::after {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 24rpx;
+  flex-shrink: 0;
 }
 
 .sheet-main-title {
@@ -2312,24 +2377,34 @@ button.dock-btn-wrap.share-dock-item::after {
   left: 0;
   right: 0;
   bottom: 0;
+  height: 80vh;
+  max-height: 80vh;
+  min-height: 80vh;
   background: rgba(15, 12, 10, 0.96);
   border-top: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 36rpx 36rpx 0 0;
-  padding: 24rpx 28rpx;
-  padding-bottom: calc(40rpx + env(safe-area-inset-bottom, 0px));
+  padding: 24rpx 28rpx 0 28rpx;
   box-shadow: 0 -12rpx 40rpx rgba(0, 0, 0, 0.85);
   box-sizing: border-box;
   animation: slideUpSheet 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-  max-height: 86vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+}
+
+.skill-bottom-sheet.scene-bottom-sheet {
+  height: 80vh;
+  max-height: 80vh;
+  min-height: 80vh;
 }
 
 .scene-sheet-scroll {
   width: 100%;
-  max-height: 72vh;
+  flex: 1;
+  height: 0;
+  min-height: 0;
   box-sizing: border-box;
-  padding-bottom: 40rpx;
+  padding-bottom: calc(44rpx + env(safe-area-inset-bottom, 0px));
 }
 
 @keyframes slideUpSheet {
@@ -2349,26 +2424,31 @@ button.dock-btn-wrap.share-dock-item::after {
   font-weight: 500;
 }
 
-/* 场景分类快筛胶囊栏 */
+/* 场景分类快筛胶囊栏 (单行等宽自适应 · 严禁被内容弹性压扁变形) */
 .scene-category-pills-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12rpx;
   margin-bottom: 20rpx;
-  overflow-x: auto;
-  white-space: nowrap;
+  width: 100%;
+  flex-shrink: 0;
+  min-height: 60rpx;
+  box-sizing: border-box;
 }
 
 .scene-cat-pill {
-  display: inline-flex;
+  flex: 1;
+  display: flex;
   align-items: center;
-  gap: 8rpx;
+  justify-content: center;
+  gap: 6rpx;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 28rpx;
-  padding: 10rpx 20rpx;
+  padding: 12rpx 0;
   transition: all 0.2s ease;
-  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .scene-cat-pill:active {
@@ -2383,12 +2463,15 @@ button.dock-btn-wrap.share-dock-item::after {
 
 .scp-icon {
   font-size: 22rpx;
+  line-height: 1;
 }
 
 .scp-text {
   font-size: 22rpx;
   font-weight: 700;
   color: #e2e8f0;
+  white-space: nowrap;
+  line-height: 1;
 }
 
 .scene-cat-pill.active-cat-pill .scp-text {
@@ -2760,6 +2843,19 @@ button.dock-btn-wrap.share-dock-item::after {
   border-left: 10rpx solid rgba(245, 158, 11, 0.85);
 }
 
+.scene-guide-tooltip {
+  border-color: rgba(52, 211, 153, 0.75);
+  box-shadow: 0 8rpx 28rpx rgba(0, 0, 0, 0.8), 0 0 16rpx rgba(52, 211, 153, 0.35);
+}
+
+.scene-guide-tooltip .sgt-text {
+  color: #6ee7b7;
+}
+
+.scene-guide-tooltip .sgt-arrow {
+  border-left-color: rgba(52, 211, 153, 0.85);
+}
+
 @keyframes floatBreathingLeft {
   0%, 100% {
     transform: translateY(-50%) translateX(0);
@@ -2815,7 +2911,9 @@ button.dock-btn-wrap.share-dock-item::after {
   left: 0;
   right: 0;
   bottom: 0;
-  max-height: 85vh;
+  height: 80vh;
+  max-height: 80vh;
+  min-height: 80vh;
   background: rgba(15, 12, 10, 0.97);
   border-top: 1px solid rgba(245, 158, 11, 0.35);
   border-radius: 36rpx 36rpx 0 0;
@@ -2877,8 +2975,9 @@ button.dock-btn-wrap.share-dock-item::after {
 
 .effects-cards-scroll {
   width: 100%;
-  height: 58vh;
-  max-height: 58vh;
+  flex: 1;
+  height: 0;
+  min-height: 0;
   overflow-y: auto;
   box-sizing: border-box;
   margin-bottom: 16rpx;

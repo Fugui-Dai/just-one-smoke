@@ -137,9 +137,13 @@ Page({
   onLeaderboardLike(e) {
     const id = e.detail.id;
     audioManager.unlockAudio();
-    leaderboardService.toggleLike(id);
-    audioManager.playLikeHeartSound();
-    triggerHaptic('medium');
+    const res = leaderboardService.toggleLike(id);
+    if (res && res.isLiked) {
+      audioManager.playLikeHeartSound();
+      triggerHaptic('medium');
+    } else {
+      triggerHaptic('light');
+    }
     this.refreshLeaderboard();
   },
 

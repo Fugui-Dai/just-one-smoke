@@ -16,9 +16,10 @@ function checkDir(dir) {
         // Strip ES module syntax to check purely executable syntax via vm.Script
         const clean = code
           .replace(/import\s+[^;]+?;/g, '')
+          .replace(/export\s+\*\s+from\s+[^;]+?;/g, '')
           .replace(/export\s+default\s+/g, '')
           .replace(/export\s+(const|let|var|function|class)\s+/g, '$1 ')
-          .replace(/export\s+\{[^}]*\};?/g, '');
+          .replace(/export\s+\{[^}]*\}\s*(from\s+[^;]+?)?;/g, '');
         new vm.Script(clean);
         count++;
       } catch (err) {

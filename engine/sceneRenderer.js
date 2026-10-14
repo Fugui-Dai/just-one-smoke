@@ -4,7 +4,7 @@
  * 腾讯获奖级 · 生活灵感沉浸声景与光影交互渲染引擎 (Atmospheric Life Scenes Engine V2)
  * 纯原生 Canvas 2D 物理与光学渲染，100% 离线、零外部贴图依赖，支持「吸烟火光映境」实时动态交互
  *
- * 16 大典藏级沉浸环境分为三大主题系列：
+ * 18 大典藏级沉浸环境分为三大主题系列：
  * 一、🏙️ 人间烟火系列 (category: 'life')：
  *   1. convenience_store: 便利店门口 (24H 霓虹门头、暖黄橱窗货架、关东煮热气与湿润街角倒影)
  *   2. stairwell: 楼道安全通道 (高窗斜射丁达尔光束、微尘浮动、绿光 EXIT 与混凝泥土阶梯)
@@ -19,18 +19,20 @@
  *   10. rainy_camp: 雨夜露营 (防雨天幕斜檐、随风轻晃暖光马灯、远山云雾与热咖啡白汽)
  *   11. ocean: 蔚蓝深海 (海上升明月、神秘岛屿剪影、月光波光大道与三层涌浪飞沫)
  *   12. campfire: 森林篝火 (层叠暗夜松林剪影、交叉柴堆跳动火苗与升腾炭火星)
+ *   13. sakura_night: 落樱夜庭 (东方物哀、绯月薄雾、和风悬铃纸灯、3D物理飘落樱花与水镜涟漪)
  * 三、🌌 奇幻星宇系列 (category: 'cosmos')：
- *   13. solar_system: 浩瀚太阳系 (中心恒星日冕、八大行星椭圆公转、小行星带与土星/天王星环)
- *   14. deep_cosmos: 深空宇宙 (猎户紫粉与礁湖青蓝双星云、旋涡星系与周期性浪漫流星)
- *   15. lunar_planet: 荒原星球 (环形山月表剪影、地平线壮丽巨型气态母星升起与蓝色大气弧)
- *   16. obsidian: 极简黑曜 (专注一呼一吸 · 侘寂纯黑微距摄影棚背景)
+ *   14. solar_system: 浩瀚太阳系 (中心恒星日冕、八大行星椭圆公转、小行星带与土星/天王星环)
+ *   15. deep_cosmos: 深空宇宙 (猎户紫粉与礁湖青蓝双星云、旋涡星系与周期性浪漫流星)
+ *   16. lunar_planet: 荒原星球 (环形山月表剪影、地平线壮丽巨型气态母星升起与蓝色大气弧)
+ *   17. starship_bridge: 星舰舰桥 (环带巨型气态行星、钛合金装甲立柱、吸烟跃迁星流与全息战术星图)
+ *   18. obsidian: 极简黑曜 (专注一呼一吸 · 侘寂纯黑微距摄影棚背景)
  */
 
 export const SCENE_CATEGORIES = [
-  { id: 'all', name: '全部环境', icon: '✨' },
-  { id: 'life', name: '人间烟火', icon: '🏙️' },
-  { id: 'nature', name: '自然治愈', icon: '🌧️' },
-  { id: 'cosmos', name: '奇幻星宇', icon: '🌌' }
+  { id: 'all', name: '全部', icon: '✨' },
+  { id: 'life', name: '烟火', icon: '🏙️' },
+  { id: 'nature', name: '自然', icon: '🌧️' },
+  { id: 'cosmos', name: '星空', icon: '🌌' }
 ];
 
 export const ATMOSPHERE_SCENES = [
@@ -169,6 +171,17 @@ export const ATMOSPHERE_SCENES = [
     ambientDesc: '木柴轻柔温暖呼吸声',
     badge: '温暖围炉'
   },
+  {
+    id: 'sakura_night',
+    name: '落樱夜庭',
+    subtitle: '绯月薄雾 · 3D物理落樱与水镜涟漪',
+    icon: '🌸',
+    category: 'nature',
+    accentColor: '#f472b6',
+    soundType: 'sakura',
+    ambientDesc: '春夜微风抚枝与幽弦夜音',
+    badge: '极致物哀'
+  },
 
   // ================= 3. 🌌 奇幻星宇系列 (Cosmic Wonders & Pure Studio) =================
   {
@@ -203,6 +216,17 @@ export const ATMOSPHERE_SCENES = [
     soundType: 'cosmos',
     ambientDesc: '异星地平线寂静微风',
     badge: '孤寂异境'
+  },
+  {
+    id: 'starship_bridge',
+    name: '星港巨舰',
+    subtitle: '暮色海湾 · 星舰发射与机械臂捕获回收',
+    icon: '🚀',
+    category: 'cosmos',
+    accentColor: '#38bdf8',
+    soundType: 'starship',
+    ambientDesc: '猛禽低频轰鸣与筷子臂精准回收',
+    badge: '马斯克星舰'
   },
   {
     id: 'obsidian',
@@ -243,6 +267,12 @@ export class SceneRenderer {
     this.fireflies = [];
     this.snowflakes = [];
     this.bambooStalks = [];
+    this.sakuraPetals = [];
+    this.starshipStars = [];
+    // 星舰交互状态机: 'IDLE' -> 'HOLD_MID_AIR' (长按在半空点火等待) -> 'RELEASE_ORBIT' (松手直插云霄发射出屏幕) -> 'RE_ENTRY' (反推扎入) -> 'CATCH' (筷子臂捕获)
+    this.starshipState = 'IDLE';
+    this.starshipStateTime = 0;
+    this.lastInhaling = false;
     this.initialized = false;
   }
 
@@ -452,6 +482,38 @@ export class SceneRenderer {
       { x: w * 0.81, width: 4.8, swayFactor: 1.15, alpha: 0.68, side: 'right' }
     ];
 
+    // 12. 落樱夜庭 3D 物理景深落樱花瓣粒子
+    this.sakuraPetals = [];
+    for (let i = 0; i < 38; i++) {
+      this.sakuraPetals.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        size: 7.0 + Math.random() * 8.5,
+        speedY: 26 + Math.random() * 34,
+        speedX: 8 + Math.random() * 16,
+        swayAmp: 10 + Math.random() * 18,
+        swayFreq: 0.9 + Math.random() * 1.6,
+        phase: Math.random() * Math.PI * 2,
+        rot: Math.random() * Math.PI * 2,
+        rotSpeed: 0.7 + Math.random() * 1.5,
+        flipSpeed: 1.1 + Math.random() * 2.2,
+        depth: 0.45 + Math.random() * 0.55,
+        color: Math.random() < 0.35 ? '#fbcfe8' : (Math.random() < 0.7 ? '#f472b6' : '#fdf2f8')
+      });
+    }
+
+    // 13. 星舰舰桥深空繁星
+    this.starshipStars = [];
+    for (let i = 0; i < 56; i++) {
+      this.starshipStars.push({
+        x: Math.random() * w,
+        y: Math.random() * (h * 0.85),
+        size: 0.8 + Math.random() * 1.6,
+        freq: 0.6 + Math.random() * 2.2,
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+
     this.initialized = true;
     this.lastW = w;
     this.lastH = h;
@@ -511,6 +573,13 @@ export class SceneRenderer {
         break;
       case 'campfire':
         this.renderCampfire(ctx, w, h, dt, totalTime);
+        break;
+      case 'sakura_night':
+        this.renderSakuraNight(ctx, w, h, dt, totalTime, emberIntensity);
+        break;
+      case 'starship_launch':
+      case 'starship_bridge':
+        this.renderStarshipLaunch(ctx, w, h, dt, totalTime, emberIntensity);
         break;
       case 'obsidian':
       default:
@@ -1950,6 +2019,20 @@ export class SceneRenderer {
       ctx.beginPath();
       ctx.moveTo(0, h * 0.72); ctx.lineTo(w, h * 0.72);
       ctx.stroke();
+    } else if (sceneType === 'sakura_night') {
+      // 照亮庭院木质回廊水镜边缘与飞掠近处樱花
+      ctx.strokeStyle = `rgba(244, 114, 182, ${alpha * 0.75})`;
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.moveTo(0, h * 0.84); ctx.lineTo(w, h * 0.84);
+      ctx.stroke();
+    } else if (sceneType === 'starship_bridge') {
+      // 照亮钛合金舷窗装甲边缘与全息控制台
+      ctx.strokeStyle = `rgba(56, 189, 248, ${alpha * 0.85})`;
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(0, h * 0.88); ctx.lineTo(w, h * 0.88);
+      ctx.stroke();
     }
 
     ctx.restore();
@@ -2374,6 +2457,762 @@ export class SceneRenderer {
     }
 
     ctx.restore();
+  }
+
+  // ==========================================
+  // 16. 落樱夜庭：东方物哀美学 · 绯月薄雾、古雅檐廊、和风纸灯、水镜涟漪与3D物理落樱
+  // ==========================================
+  renderSakuraNight(ctx, w, h, dt, t, emberIntensity = 0) {
+    // 16.1 深邃春夜星空渐变 (Deep Indigo-Plum Night Sky)
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, h);
+    skyGrad.addColorStop(0, '#060614');
+    skyGrad.addColorStop(0.38, '#130a28');
+    skyGrad.addColorStop(0.72, '#1e0c32');
+    skyGrad.addColorStop(1, '#090412');
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    // 16.2 绯月与浪漫月晕 (Crimson Sakura Moon & Soft Corona)
+    const moonX = w * 0.78;
+    const moonY = h * 0.16;
+
+    // 外层漫射绯月光晕
+    const moonHalo = ctx.createRadialGradient(moonX, moonY, 10, moonX, moonY, 82);
+    moonHalo.addColorStop(0, 'rgba(253, 242, 248, 0.32)');
+    moonHalo.addColorStop(0.35, 'rgba(244, 114, 182, 0.18)');
+    moonHalo.addColorStop(0.75, 'rgba(168, 85, 247, 0.05)');
+    moonHalo.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = moonHalo;
+    ctx.beginPath();
+    ctx.arc(moonX, moonY, 82, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 绯月本体
+    ctx.fillStyle = '#fff1f2';
+    ctx.beginPath();
+    ctx.arc(moonX, moonY, 15, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 16.3 远山与夜樱林海雾霭 (Misty Mountain Silhouettes & Cherry Canopy)
+    ctx.fillStyle = 'rgba(22, 11, 42, 0.82)';
+    ctx.beginPath();
+    ctx.moveTo(0, h * 0.52);
+    ctx.quadraticCurveTo(w * 0.28, h * 0.45, w * 0.58, h * 0.50);
+    ctx.quadraticCurveTo(w * 0.82, h * 0.54, w, h * 0.48);
+    ctx.lineTo(w, h * 0.75);
+    ctx.lineTo(0, h * 0.75);
+    ctx.closePath();
+    ctx.fill();
+
+    // 远方朦胧夜樱花团雾气 (Soft Sakura Clouds)
+    for (let c = 0; c < 4; c++) {
+      const cx = w * (0.15 + c * 0.26);
+      const cy = h * (0.47 + (c % 2) * 0.04);
+      const cGrad = ctx.createRadialGradient(cx, cy, 4, cx, cy, 38);
+      cGrad.addColorStop(0, 'rgba(244, 114, 182, 0.14)');
+      cGrad.addColorStop(0.6, 'rgba(190, 24, 93, 0.06)');
+      cGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = cGrad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 38, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 16.4 左上方和风古雅木檐与立柱 (Japanese Traditional Eaves & Pillar)
+    ctx.save();
+    // 左侧木柱
+    ctx.fillStyle = '#080310';
+    ctx.fillRect(0, 0, w * 0.05, h * 0.84);
+    ctx.strokeStyle = 'rgba(251, 191, 36, 0.15)';
+    ctx.lineWidth = 1.0;
+    ctx.beginPath();
+    ctx.moveTo(w * 0.05, 0); ctx.lineTo(w * 0.05, h * 0.84);
+    ctx.stroke();
+
+    // 上方优美飞檐
+    ctx.fillStyle = '#0a0414';
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(w * 0.42, 0);
+    ctx.quadraticCurveTo(w * 0.28, h * 0.08, 0, h * 0.13);
+    ctx.closePath();
+    ctx.fill();
+
+    // 檐下微雕木梁线
+    ctx.strokeStyle = 'rgba(251, 191, 36, 0.22)';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(0, h * 0.125);
+    ctx.quadraticCurveTo(w * 0.27, h * 0.076, w * 0.41, 0);
+    ctx.stroke();
+
+    // 悬挂和风纸提灯 (Suspended Paper Lantern with Warm Amber Spill)
+    const lanternX = w * 0.22;
+    const lanternCordTopY = h * 0.07;
+    const lanternY = h * 0.18;
+    const sway = Math.sin(t * 1.2) * 3;
+
+    // 吊绳
+    ctx.strokeStyle = 'rgba(120, 53, 15, 0.7)';
+    ctx.lineWidth = 1.0;
+    ctx.beginPath();
+    ctx.moveTo(lanternX, lanternCordTopY);
+    ctx.lineTo(lanternX + sway, lanternY - 14);
+    ctx.stroke();
+
+    // 提灯暖光外晕
+    const lanternGlow = ctx.createRadialGradient(lanternX + sway, lanternY, 3, lanternX + sway, lanternY, 48);
+    lanternGlow.addColorStop(0, 'rgba(251, 191, 36, 0.38)');
+    lanternGlow.addColorStop(0.5, 'rgba(245, 158, 11, 0.12)');
+    lanternGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = lanternGlow;
+    ctx.beginPath();
+    ctx.arc(lanternX + sway, lanternY, 48, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 提灯纸本体 (红木顶座 + 暖黄纸身)
+    ctx.fillStyle = '#78350f';
+    ctx.fillRect(lanternX + sway - 8, lanternY - 15, 16, 3);
+    ctx.fillStyle = '#fef08a';
+    ctx.beginPath();
+    ctx.arc(lanternX + sway, lanternY, 9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#78350f';
+    ctx.fillRect(lanternX + sway - 6, lanternY + 8, 12, 2.5);
+    ctx.restore();
+
+    // 16.5 底部水镜微澜倒影与木质回廊 (Pond Water Mirror & Ripples)
+    const pondY = h * 0.84;
+    const pondGrad = ctx.createLinearGradient(0, pondY, 0, h);
+    pondGrad.addColorStop(0, 'rgba(10, 4, 20, 0.85)');
+    pondGrad.addColorStop(1, '#040208');
+    ctx.fillStyle = pondGrad;
+    ctx.fillRect(0, pondY, w, h - pondY);
+
+    // 水面月影倒映
+    const moonReflectGrad = ctx.createRadialGradient(moonX, pondY + (h - pondY) * 0.4, 2, moonX, pondY + (h - pondY) * 0.4, 32);
+    moonReflectGrad.addColorStop(0, 'rgba(244, 114, 182, 0.22)');
+    moonReflectGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = moonReflectGrad;
+    ctx.beginPath();
+    ctx.arc(moonX, pondY + (h - pondY) * 0.4, 32, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 微弱水面涟漪
+    for (let r = 0; r < 2; r++) {
+      const ripProg = (t * 0.35 + r * 0.5) % 1.0;
+      const ripAlpha = (1 - ripProg) * 0.25;
+      const ripW = 20 + ripProg * 50;
+      const ripH = 4 + ripProg * 8;
+      ctx.strokeStyle = `rgba(244, 114, 182, ${ripAlpha})`;
+      ctx.lineWidth = 1.0;
+      ctx.save();
+      ctx.translate(w * 0.45 + r * 60, pondY + 24 + r * 16);
+      ctx.scale(1, ripH / ripW);
+      ctx.beginPath();
+      ctx.arc(0, 0, ripW, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 16.6 3D 物理景深落樱粒子系统 (3D Depth-Sorted Sakura Petals)
+    const petals = this.sakuraPetals || [];
+    for (let i = 0; i < petals.length; i++) {
+      const p = petals[i];
+      // 物理位移与微风扰动
+      p.y += p.speedY * dt;
+      p.x += (p.speedX + Math.sin(t * p.swayFreq + p.phase) * p.swayAmp) * dt;
+
+      // 边界循环重置
+      if (p.y > h + 15) {
+        p.y = -15;
+        p.x = Math.random() * w;
+      }
+      if (p.x > w + 20) p.x = -20;
+      if (p.x < -20) p.x = w + 20;
+
+      // 3D 空间翻滚模拟 (3D Tumble)
+      const flipScale = Math.cos(t * p.flipSpeed + p.phase);
+      const absFlip = Math.abs(flipScale);
+      if (absFlip < 0.08) continue; // 侧面极薄不可见
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot + t * p.rotSpeed);
+      ctx.scale(p.depth, p.depth * flipScale);
+
+      // 靠近烟头火光时的映红光效联动 (Ember SSS Illumination)
+      const distToEmber = Math.hypot(p.x - w * 0.5, p.y - h * 0.56);
+      let petalFill = p.color;
+      if (emberIntensity > 0.1 && distToEmber < 140) {
+        const warmFactor = (1 - distToEmber / 140) * emberIntensity;
+        petalFill = warmFactor > 0.4 ? '#fca5a5' : '#fbcfe8';
+      }
+
+      // 精致落樱花瓣双贝塞尔曲线几何轮廓 (True Sakura Petal with Notch)
+      const sz = p.size;
+      ctx.fillStyle = petalFill;
+      ctx.globalAlpha = p.depth * 0.88;
+      ctx.beginPath();
+      ctx.moveTo(0, -sz);
+      ctx.bezierCurveTo(sz * 0.85, -sz * 0.8, sz * 0.95, sz * 0.35, 0, sz);
+      ctx.bezierCurveTo(-sz * 0.95, sz * 0.35, -sz * 0.85, -sz * 0.8, 0, -sz);
+      ctx.fill();
+
+      // 花瓣中心微细叶脉反光
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(0, -sz * 0.65);
+      ctx.lineTo(0, sz * 0.5);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+  }
+
+  // ==========================================
+  // 17. 星港巨舰：海湾远眺观礼台 · 马斯克星舰 (Starship + Super Heavy) 发射与机械臂捕获回收全流程
+  // ==========================================
+  renderStarshipLaunch(ctx, w, h, dt, t, emberIntensity = 0) {
+    // 17.1 墨西哥湾暮色深空渐变 (Gulf Coast Twilight Sky)
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, h * 0.65);
+    skyGrad.addColorStop(0, '#030611');
+    skyGrad.addColorStop(0.5, '#08112b');
+    skyGrad.addColorStop(0.85, '#132147');
+    skyGrad.addColorStop(1, '#1e293b');
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, w, h * 0.65);
+
+    // 17.2 繁星微光闪烁
+    for (let i = 0; i < 45; i++) {
+      const sx = (Math.sin(i * 99 + 1) * 0.5 + 0.5) * w;
+      const sy = (Math.cos(i * 33 + 2) * 0.5 + 0.5) * (h * 0.52);
+      const salpha = 0.2 + 0.6 * (0.5 + 0.5 * Math.sin(t * (1.2 + (i % 5) * 0.4) + i));
+      ctx.fillStyle = `rgba(224, 242, 254, ${salpha})`;
+      ctx.beginPath();
+      ctx.arc(sx, sy, (i % 3 === 0) ? 1.4 : 0.8, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 17.3 对岸平缓地平线与星港工业剪影 (Starbase Horizon)
+    const coastY = h * 0.62;
+    ctx.fillStyle = '#0a0f1d';
+    ctx.beginPath();
+    ctx.moveTo(0, coastY + 4);
+    ctx.lineTo(w * 0.4, coastY + 1);
+    ctx.lineTo(w * 0.62, coastY);
+    ctx.lineTo(w, coastY + 2);
+    ctx.lineTo(w, h * 0.68);
+    ctx.lineTo(0, h * 0.68);
+    ctx.closePath();
+    ctx.fill();
+
+    // 远方星港基地微弱暖黄与幽蓝工程灯光带 (Industrial Lights)
+    for (let i = 0; i < 16; i++) {
+      const lx = w * 0.45 + i * (w * 0.035);
+      const ly = coastY + Math.sin(i * 1.5) * 2;
+      ctx.fillStyle = i % 3 === 0 ? 'rgba(56, 189, 248, 0.7)' : 'rgba(251, 191, 36, 0.75)';
+      ctx.beginPath();
+      ctx.arc(lx, ly, 1.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 17.4 海湾水面 (Gulf Water Bay)
+    const waterGrad = ctx.createLinearGradient(0, coastY, 0, h);
+    waterGrad.addColorStop(0, '#040817');
+    waterGrad.addColorStop(0.35, '#070f26');
+    waterGrad.addColorStop(0.7, '#0b142d');
+    waterGrad.addColorStop(1, '#02040a');
+    ctx.fillStyle = waterGrad;
+    ctx.fillRect(0, coastY, w, h - coastY);
+
+    // 17.5 发射台与塔架基准
+    const padX = w * 0.72;
+    const padY = coastY;
+    const towerHeight = 145;
+    const towerWidth = 14;
+
+    // =========================================================================
+    // 🛸 腾讯总监级星舰动力学：单击正常平滑起飞 · 长按半空登台悬停 · 松手全推力破穹
+    // =========================================================================
+    const isTouching = emberIntensity > 0.42; // 长按吸烟/触控判定
+    const midAirHoverDist = 145; // 半空悬停高度 (发射台机械捕获塔架上方)
+
+    if (typeof this.starshipAlt !== 'number') this.starshipAlt = 0;
+    if (typeof this.starshipReleaseAlt !== 'number') this.starshipReleaseAlt = 0;
+
+    // 状态流转与动力学更新
+    if (this.starshipState === 'IDLE') {
+      this.starshipAlt = 0;
+      if (isTouching) {
+        // 用户按下手指：进入起飞/蓄力爬升状态
+        this.starshipState = 'HOLD_MID_AIR';
+        this.starshipStateTime = 0;
+      }
+    } else if (this.starshipState === 'HOLD_MID_AIR') {
+      this.starshipStateTime += dt;
+      if (!isTouching) {
+        // 用户松开手指：无缝捕获当前高度，立即切换至轨道冲刺状态！
+        this.starshipReleaseAlt = this.starshipAlt;
+        this.starshipState = 'RELEASE_ORBIT';
+        this.starshipStateTime = 0;
+      }
+    } else if (this.starshipState === 'RELEASE_ORBIT') {
+      this.starshipStateTime += dt;
+      // 升空发射到完全飞出屏幕并完成外太空热分离后，转入反推返航
+      const startAlt = this.starshipReleaseAlt || 0;
+      const climbDuration = 2.0 + (1.0 - Math.min(1.0, startAlt / midAirHoverDist)) * 1.5;
+      if (this.starshipStateTime > (climbDuration + 2.8)) {
+        this.starshipState = 'RE_ENTRY';
+        this.starshipStateTime = 0;
+      }
+    } else if (this.starshipState === 'RE_ENTRY') {
+      this.starshipStateTime += dt;
+      // 破空扎入返航 + 悬停持续 6.0 秒后转入筷子臂抓捕
+      if (this.starshipStateTime > 6.0) {
+        this.starshipState = 'CATCH';
+        this.starshipStateTime = 0;
+      }
+    } else if (this.starshipState === 'CATCH') {
+      this.starshipStateTime += dt;
+      // 抓捕锁定展示 3.5 秒后回归发射台待机
+      if (this.starshipStateTime > 3.5) {
+        this.starshipState = 'IDLE';
+        this.starshipStateTime = 0;
+        this.starshipAlt = 0;
+      }
+    }
+
+    let boosterX = padX;
+    let boosterY = padY - 22;
+    let boosterAngle = 0;
+    let boosterFlame = 0;
+    let boosterVapor = false;
+
+    let shipX = padX;
+    let shipY = padY - 22;
+    let shipVisible = true;
+    let shipFlame = 0;
+
+    let chopstickClamped = 0;
+    let missionPhaseName = '';
+
+    if (this.starshipState === 'IDLE') {
+      // 待机状态：低温液氧排气，筷子臂微张
+      boosterVapor = true;
+      chopstickClamped = 0.2;
+      this.starshipAlt = 0;
+      boosterY = padY - 22;
+      shipY = boosterY;
+      missionPhaseName = 'T-00:03 · 发射就绪 (单击起飞 / 长按半空登台)';
+    } else if (this.starshipState === 'HOLD_MID_AIR') {
+      // 按住屏幕阶段：
+      // 从发射台平滑点火爬升至半空 (1.3s)，若继续按住，则稳稳悬停在半空登台！
+      const riseProgress = Math.min(1.0, this.starshipStateTime / 1.3);
+      this.starshipAlt = Math.sin(riseProgress * Math.PI * 0.5) * midAirHoverDist;
+      chopstickClamped = 0.0;
+
+      if (riseProgress >= 1.0) {
+        // 已到达半空：稳定悬停登台，伴随真实猛禽微气动震颤
+        const hoverWobble = Math.sin(t * 7.5) * 2.2;
+        boosterY = (padY - 22) - this.starshipAlt + hoverWobble;
+        shipY = boosterY;
+        boosterFlame = 0.95 + Math.sin(t * 15) * 0.15;
+        missionPhaseName = 'RAPTOR HOVER // 半空悬停登台 · 松手破穹起飞！';
+      } else {
+        // 正在从地面爬升向半空
+        boosterY = (padY - 22) - this.starshipAlt;
+        shipY = boosterY;
+        boosterFlame = 1.15 + Math.sin(t * 15) * 0.15;
+        missionPhaseName = 'LIFTOFF // 点火升空爬升中...';
+      }
+    } else if (this.starshipState === 'RELEASE_ORBIT') {
+      // 释放发射阶段：
+      // 从用户松手时的绝对真实高度 (startAlt) 连续无跳帧加速，直接穿透天顶冲入深空！
+      const launchT = this.starshipStateTime;
+      const startAlt = this.starshipReleaseAlt || 0;
+      const totalExitDist = (padY - 22 - startAlt) - (-280); // 飞出屏幕顶端外 280px
+      const climbDuration = 2.0 + (1.0 - Math.min(1.0, startAlt / midAirHoverDist)) * 1.5;
+      chopstickClamped = 0.0;
+
+      if (launchT < climbDuration) {
+        // 连续动力学：launchT = 0 时 climb = 0，与松手前一帧位置绝对零像素偏差！
+        const prog = Math.min(1.0, launchT / climbDuration);
+        const climb = Math.pow(prog, 1.65) * totalExitDist;
+        this.starshipAlt = startAlt + climb;
+        boosterY = (padY - 22) - this.starshipAlt;
+        shipY = boosterY;
+        boosterFlame = 1.38; // 满功率大尾焰
+        missionPhaseName = startAlt < 25 
+          ? 'NORMAL LIFTOFF // 正常起飞直插云霄！' 
+          : 'RAPTOR FULL POWER // 全功率冲破天顶！';
+      } else {
+        // 高空热分离！二级星舰拖着幽蓝焰尾从左上掠过深空轨道
+        const stageT = launchT - climbDuration;
+        const prog = Math.min(1.0, stageT / 2.8);
+        shipY = -120 - prog * 260;
+        shipX = padX - 80 - prog * 200;
+        shipFlame = 1.25;
+
+        boosterY = -350; // 助推器已在屏幕极高空之外
+        boosterAngle = Math.PI * 0.15;
+        boosterFlame = 0.35;
+        missionPhaseName = 'HOT STAGING // 二级星舰飞入外太空轨道';
+      }
+    } else if (this.starshipState === 'RE_ENTRY') {
+      // 助推器反推返航：从天际极高空垂直扎入视野，减速悬停对准发射台塔架
+      const returnT = this.starshipStateTime;
+      shipVisible = false;
+
+      if (returnT < 3.5) {
+        // 从 -220px 天顶破空扎入，降至距地面 150px
+        const prog = returnT / 3.5;
+        boosterX = (padX + 25) * (1 - prog) + padX * prog;
+        boosterY = -220 + Math.pow(prog, 1.25) * (padY - 22 - 150 - (-220));
+        boosterFlame = 0.75 + Math.sin(t * 14) * 0.2;
+        chopstickClamped = 0.0;
+        missionPhaseName = 'BOOSTBACK // 助推器破空扎入返航';
+      } else {
+        // 最终悬停点火，减速对准筷子臂
+        const prog = (returnT - 3.5) / 2.5;
+        boosterX = padX;
+        boosterY = (padY - 22 - 150) + Math.sin(prog * Math.PI * 0.5) * (150 - 15);
+        boosterFlame = 0.9 * (1.0 - prog * 0.85);
+        chopstickClamped = prog * 0.7; // 筷子臂准备迎合
+        missionPhaseName = 'LANDING BURN // 悬停对准机械臂';
+      }
+    } else if (this.starshipState === 'CATCH') {
+      // 机械塔架筷子臂霸气合拢抓捕！
+      shipVisible = false;
+      boosterX = padX;
+      boosterY = padY - 37;
+      boosterFlame = 0;
+      chopstickClamped = 1.0;
+      missionPhaseName = 'MECHAZILLA CATCH // 筷子臂神级抓捕成功！';
+    }
+
+    // 17.5.1 发射台机械臂捕获塔 Mechazilla (高耸钢铁深灰桁架)
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(padX - 22, padY - towerHeight, towerWidth, towerHeight);
+    ctx.strokeStyle = '#334155';
+    ctx.lineWidth = 1.0;
+    for (let s = 0; s < 10; s++) {
+      const sy = padY - towerHeight + s * 14.5;
+      ctx.beginPath();
+      ctx.moveTo(padX - 22, sy);
+      ctx.lineTo(padX - 22 + towerWidth, sy + 14.5);
+      ctx.moveTo(padX - 22 + towerWidth, sy);
+      ctx.lineTo(padX - 22, sy + 14.5);
+      ctx.stroke();
+    }
+
+    // 机械捕获筷子臂 (Chopsticks): 随状态动态张开与夹紧
+    const chopstickY = padY - towerHeight * 0.58;
+    const armLen = 22;
+    const openAngle = (1.0 - chopstickClamped) * 0.35;
+    ctx.save();
+    ctx.strokeStyle = chopstickClamped > 0.8 ? '#38bdf8' : '#94a3b8';
+    ctx.lineWidth = 2.8;
+    // 上筷子臂
+    ctx.beginPath();
+    ctx.moveTo(padX - 22 + towerWidth, chopstickY);
+    ctx.lineTo(padX + armLen * 0.6, chopstickY - openAngle * 12);
+    ctx.stroke();
+    // 下筷子臂（双臂夹持）
+    ctx.beginPath();
+    ctx.moveTo(padX - 22 + towerWidth, chopstickY + 5);
+    ctx.lineTo(padX + armLen * 0.6, chopstickY + 5 + openAngle * 12);
+    ctx.stroke();
+    ctx.restore();
+
+    // 塔顶航空警示红灯闪烁 (Flashing Red Beacon)
+    const beaconBlink = Math.sin(t * 3.5) > 0 ? 1 : 0.2;
+    ctx.fillStyle = `rgba(239, 68, 68, ${beaconBlink})`;
+    ctx.beginPath();
+    ctx.arc(padX - 15, padY - towerHeight - 2, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 探照灯由下而上照亮镜面箭体 (Ground Spotlights)
+    ctx.save();
+    const spotGrad = ctx.createRadialGradient(padX - 35, padY, 4, padX - 10, padY - 60, 90);
+    spotGrad.addColorStop(0, 'rgba(255, 255, 255, 0.45)');
+    spotGrad.addColorStop(0.5, 'rgba(186, 230, 253, 0.12)');
+    spotGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = spotGrad;
+    ctx.beginPath();
+    ctx.moveTo(padX - 35, padY);
+    ctx.lineTo(padX - 5, padY - 140);
+    ctx.lineTo(padX + 25, padY - 140);
+    ctx.lineTo(padX + 5, padY);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    // 17.5.2 猛禽发动机炽烈尾焰与排气水浪 (Exhaust Plume & Deluge Cloud)
+    const isLifting = boosterFlame > 0.1 || emberIntensity > 0.08;
+    if (isLifting) {
+      const flameLen = (35 + Math.random() * 12) * (boosterFlame + emberIntensity * 0.5);
+      const flameW = 11 + Math.random() * 3;
+
+      ctx.save();
+      ctx.translate(boosterX, boosterY);
+      ctx.rotate(boosterAngle);
+
+      const flameGrad = ctx.createLinearGradient(0, 0, 0, flameLen);
+      flameGrad.addColorStop(0, '#ffffff'); // 喉部极白
+      flameGrad.addColorStop(0.18, 'rgba(56, 189, 248, 0.95)'); // 甲烷幽蓝
+      flameGrad.addColorStop(0.45, 'rgba(251, 146, 60, 0.95)'); // 膨胀炽橙
+      flameGrad.addColorStop(0.85, 'rgba(239, 68, 68, 0.7)'); // 尾翼暗红
+      flameGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+      ctx.fillStyle = flameGrad;
+      ctx.beginPath();
+      ctx.moveTo(-flameW * 0.5, 0);
+      ctx.quadraticCurveTo(-flameW * 0.8, flameLen * 0.5, 0, flameLen);
+      ctx.quadraticCurveTo(flameW * 0.8, flameLen * 0.5, flameW * 0.5, 0);
+      ctx.closePath();
+      ctx.fill();
+
+      // 马赫环节点 (Shock Diamonds)
+      ctx.fillStyle = '#ffffff';
+      for (let d = 1; d <= 3; d++) {
+        ctx.beginPath();
+        ctx.arc(0, d * (flameLen * 0.22), 1.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+
+      // 发射台排山倒海的水蒸气巨云 (Deluge Steam Cloud)
+      if (boosterY > padY - 120) {
+        ctx.save();
+        for (let c = 0; c < 8; c++) {
+          const puffX = padX + (c - 3.5) * 16 + Math.sin(t * 4 + c) * 4;
+          const puffY = padY - (Math.abs(c - 3.5) * 4) + Math.cos(t * 3 + c) * 3;
+          const puffR = 14 + (c % 3) * 6;
+          const puffGrad = ctx.createRadialGradient(puffX, puffY, 3, puffX, puffY, puffR);
+          puffGrad.addColorStop(0, 'rgba(255, 237, 213, 0.75)');
+          puffGrad.addColorStop(0.4, 'rgba(254, 215, 170, 0.45)');
+          puffGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          ctx.fillStyle = puffGrad;
+          ctx.beginPath();
+          ctx.arc(puffX, puffY, puffR, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      // 强光照亮海面与夜空 (Sea Deluge Reflection)
+      const seaGlow = ctx.createRadialGradient(boosterX, padY + 12, 5, boosterX, padY + 25, 140);
+      seaGlow.addColorStop(0, 'rgba(251, 146, 60, 0.65)');
+      seaGlow.addColorStop(0.5, 'rgba(234, 88, 12, 0.25)');
+      seaGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = seaGlow;
+      ctx.beginPath();
+      ctx.arc(boosterX, padY + 25, 140, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (boosterVapor) {
+      // 待机状态：低温液氧排放白色冷蒸汽云
+      ctx.save();
+      for (let v = 0; v < 4; v++) {
+        const vy = padY - 35 - v * 18;
+        const vx = padX - 8 - Math.sin(t * 1.5 + v) * 12;
+        const vr = 6 + v * 4;
+        ctx.fillStyle = `rgba(224, 242, 254, ${0.28 - v * 0.05})`;
+        ctx.beginPath();
+        ctx.arc(vx, vy, vr, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // 17.5.3 助推器箭体渲染 (Super Heavy Booster)
+    const rocketW = 12;
+    const boosterH = 68;
+
+    ctx.save();
+    ctx.translate(boosterX, boosterY);
+    ctx.rotate(boosterAngle);
+
+    // 一级助推器: 304L 不锈钢圆柱
+    const boosterGrad = ctx.createLinearGradient(-rocketW * 0.5, 0, rocketW * 0.5, 0);
+    boosterGrad.addColorStop(0, '#64748b');
+    boosterGrad.addColorStop(0.35, '#f8fafc');
+    boosterGrad.addColorStop(0.75, '#cbd5e1');
+    boosterGrad.addColorStop(1, '#475569');
+    ctx.fillStyle = boosterGrad;
+    ctx.fillRect(-rocketW * 0.5, -boosterH, rocketW, boosterH);
+
+    // 栅格舵 (Grid Fins) - 在回收俯冲时更明显展开
+    ctx.fillStyle = '#0f172a';
+    const finSpread = (this.starshipState === 'RE_ENTRY') ? 5 : 3;
+    ctx.fillRect(-rocketW * 0.5 - finSpread, -boosterH + 2, finSpread, 5);
+    ctx.fillRect(rocketW * 0.5, -boosterH + 2, finSpread, 5);
+
+    // 级间段分离环 (Interstage Ring)
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(-rocketW * 0.5, -boosterH - 4, rocketW, 4);
+
+    // 筷子臂捕获销钉 (Hardpoints)
+    if (chopstickClamped > 0.8) {
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(-rocketW * 0.5 - 1, -boosterH + 12, 1.8, 0, Math.PI * 2);
+      ctx.arc(rocketW * 0.5 + 1, -boosterH + 12, 1.8, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.restore();
+
+    // 17.5.4 二级星舰 Upper Stage (在发射前或发射后热分离阶段独立飞行)
+    if (shipVisible) {
+      const shipH = 46;
+      ctx.save();
+      ctx.translate(shipX, shipY);
+
+      // 热分离阶段：二级猛禽真空版点火冲向外层空间
+      if (shipFlame > 0.1) {
+        const sFlameLen = 28 + Math.random() * 8;
+        const sFlameGrad = ctx.createLinearGradient(0, -boosterH - 4, 0, -boosterH - 4 + sFlameLen);
+        sFlameGrad.addColorStop(0, '#ffffff');
+        sFlameGrad.addColorStop(0.3, 'rgba(56, 189, 248, 0.95)');
+        sFlameGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = sFlameGrad;
+        ctx.beginPath();
+        ctx.moveTo(-rocketW * 0.4, -boosterH - 4);
+        ctx.lineTo(0, -boosterH - 4 + sFlameLen);
+        ctx.lineTo(rocketW * 0.4, -boosterH - 4);
+        ctx.fill();
+      }
+
+      const shipGrad = ctx.createLinearGradient(-rocketW * 0.5, 0, rocketW * 0.5, 0);
+      shipGrad.addColorStop(0, '#94a3b8');
+      shipGrad.addColorStop(0.35, '#ffffff');
+      shipGrad.addColorStop(0.8, '#cbd5e1');
+      shipGrad.addColorStop(1, '#64748b');
+
+      // 星舰圆柱段
+      ctx.fillStyle = shipGrad;
+      ctx.fillRect(-rocketW * 0.5, -boosterH - shipH + 16, rocketW, shipH - 16);
+
+      // 星舰鼻锥气动弧线
+      ctx.beginPath();
+      ctx.moveTo(-rocketW * 0.5, -boosterH - shipH + 16);
+      ctx.quadraticCurveTo(-rocketW * 0.45, -boosterH - shipH + 4, 0, -boosterH - shipH);
+      ctx.quadraticCurveTo(rocketW * 0.45, -boosterH - shipH + 4, rocketW * 0.5, -boosterH - shipH + 16);
+      ctx.closePath();
+      ctx.fill();
+
+      // 前置俯冲翼 (Forward Aero Flaps)
+      ctx.fillStyle = '#334155';
+      ctx.beginPath();
+      ctx.moveTo(-rocketW * 0.5, -boosterH - shipH + 8);
+      ctx.lineTo(-rocketW * 0.5 - 4, -boosterH - shipH + 13);
+      ctx.lineTo(-rocketW * 0.5, -boosterH - shipH + 15);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(rocketW * 0.5, -boosterH - shipH + 8);
+      ctx.lineTo(rocketW * 0.5 + 4, -boosterH - shipH + 13);
+      ctx.lineTo(rocketW * 0.5, -boosterH - shipH + 15);
+      ctx.closePath();
+      ctx.fill();
+
+      // 后部主翼 (Aft Body Flaps)
+      ctx.beginPath();
+      ctx.moveTo(-rocketW * 0.5, -boosterH - 14);
+      ctx.lineTo(-rocketW * 0.5 - 5, -boosterH - 4);
+      ctx.lineTo(-rocketW * 0.5, -boosterH - 4);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(rocketW * 0.5, -boosterH - 14);
+      ctx.lineTo(rocketW * 0.5 + 5, -boosterH - 4);
+      ctx.lineTo(rocketW * 0.5, -boosterH - 4);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    // 17.6 海面微澜与发射台倒影 (Water Surface Waves & Glimmer)
+    for (let rw = 0; rw < 6; rw++) {
+      const wy = coastY + 18 + rw * 24;
+      const wWidth = 40 + rw * 18;
+      const wAlpha = (0.35 - rw * 0.04) * (isLifting ? 1.5 : 0.8);
+      const waveGrad = ctx.createLinearGradient(padX - wWidth, wy, padX + wWidth, wy);
+      waveGrad.addColorStop(0, 'rgba(0,0,0,0)');
+      waveGrad.addColorStop(0.5, isLifting ? `rgba(251, 146, 60, ${wAlpha})` : `rgba(186, 230, 253, ${wAlpha})`);
+      waveGrad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.strokeStyle = waveGrad;
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(padX - wWidth + Math.sin(t * 1.5 + rw) * 8, wy);
+      ctx.lineTo(padX + wWidth + Math.sin(t * 1.5 + rw) * 8, wy);
+      ctx.stroke();
+    }
+
+    // 17.7 近景海湾观景台与极细金属栏杆剪影 (Foreground Coastal Viewing Balcony)
+    const railY = h * 0.88;
+    ctx.fillStyle = '#03050c';
+    ctx.fillRect(0, railY, w, h - railY);
+
+    ctx.strokeStyle = isLifting ? 'rgba(251, 146, 60, 0.45)' : 'rgba(148, 163, 184, 0.25)';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(0, railY);
+    ctx.lineTo(w, railY);
+    ctx.stroke();
+
+    for (let r = 0; r < 7; r++) {
+      const rx = (r / 6) * w;
+      ctx.strokeStyle = 'rgba(71, 85, 105, 0.3)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(rx, railY);
+      ctx.lineTo(rx, h);
+      ctx.stroke();
+    }
+
+    // 17.8 航天遥测 HUD 微胶囊铭牌 (顶部半透明极细工业仪表)
+    if (missionPhaseName) {
+      ctx.save();
+      const hudY = h * 0.12;
+      ctx.font = '10px -apple-system, monospace';
+      const textMetrics = ctx.measureText(missionPhaseName);
+      const textW = textMetrics.width || 180;
+      const pillW = textW + 28;
+      const pillH = 22;
+      const pillX = w * 0.5 - pillW * 0.5;
+
+      // 磨砂半透明胶囊底
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.65)';
+      ctx.beginPath();
+      ctx.arc(pillX + pillH * 0.5, hudY, pillH * 0.5, Math.PI * 0.5, Math.PI * 1.5);
+      ctx.arc(pillX + pillW - pillH * 0.5, hudY, pillH * 0.5, -Math.PI * 0.5, Math.PI * 0.5);
+      ctx.closePath();
+      ctx.fill();
+
+      // 微光外边框
+      ctx.strokeStyle = isLifting ? 'rgba(251, 146, 60, 0.45)' : 'rgba(56, 189, 248, 0.35)';
+      ctx.lineWidth = 1.0;
+      ctx.stroke();
+
+      // 发光状态脉冲圆点
+      const dotColor = isLifting ? '#f97316' : '#38bdf8';
+      ctx.fillStyle = dotColor;
+      ctx.beginPath();
+      ctx.arc(pillX + 12, hudY, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 遥测阶段文字
+      ctx.fillStyle = isLifting ? '#fed7aa' : '#bae6fd';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(missionPhaseName, pillX + 20, hudY);
+      ctx.restore();
+    }
   }
 }
 

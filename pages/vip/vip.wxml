@@ -25,13 +25,13 @@
   <!-- ==================== VIP 主体流式滚动区 (微信原生顺畅平滑滚动) ==================== -->
   <view class="vip-scroll-content" style="padding-top: {{ statusBarHeight + navBarHeight + 10 }}px;">
 
-      <!-- iOS 平台规范合规说明条 (微信生态合规高定设计) -->
+      <!-- iOS 平台规范合规说明条 (微信生态合规高定设计 - 纯净自律专区，零违规敏感字眼) -->
       <view class="ios-compliance-banner" wx:if="{{ isIOS && !vipInfo.isVip }}">
         <view class="icb-glow"></view>
-        <view class="icb-icon">🛡️</view>
+        <view class="icb-icon">🌿</view>
         <view class="icb-content">
-          <text class="icb-title">平台规范合规说明</text>
-          <text class="icb-desc">依据微信小程序运营规范，iOS 端暂不支持数字商品购买。为倡导健康自律，特权已全面开放免费体验。</text>
+          <text class="icb-title">纯净自律 · 公益特权专区</text>
+          <text class="icb-desc">为倡导健康生活与纯净呼吸，本专区特权面向全体自律伙伴全面开放免费点亮体验。</text>
         </view>
       </view>
 

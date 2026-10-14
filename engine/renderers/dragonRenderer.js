@@ -557,6 +557,28 @@ export class GoldenDragon {
           });
         }
       }
+
+      // 腾讯总监设计级：飞升羽化消散阶段（prog > 0.75），龙身化作轻盈金青流烟弥散长空，形散神凝
+      if (prog > 0.75 && this.age % 2 === 0) {
+        const randNodeIdx = Math.floor(Math.random() * this.nodes.length);
+        const rn = this.nodes[randNodeIdx];
+        if (rn) {
+          emitParticleCallback({
+            x: rn.x + (Math.random() - 0.5) * 14 * this.scale,
+            y: rn.y + (Math.random() - 0.5) * 14 * this.scale,
+            vx: (Math.random() - 0.5) * 0.8,
+            vy: -0.4 - Math.random() * 0.6,
+            radius: 4.5 + Math.random() * 5.5,
+            alpha: this.alpha * 0.7,
+            baseAlpha: 0.7,
+            life: 0,
+            maxLife: 60 + Math.random() * 25,
+            color: Math.random() > 0.5 ? 'rgba(254, 240, 138, ' : 'rgba(217, 119, 6, ',
+            growRate: 0.2,
+            isVolumetricSmoke: true
+          });
+        }
+      }
     }
 
     return this.age < this.maxAge && this.alpha > 0.01;

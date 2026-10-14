@@ -76,10 +76,10 @@ export const SMOKE_EFFECTS = [
     tagColor: '#34d399',
     badgeBg: 'rgba(52, 211, 153, 0.18)',
     badgeBorder: 'rgba(16, 185, 129, 0.45)',
-    price: 0,
-    priceDisplay: '免费尊享',
-    requiredCount: 0,
-    requiredSavings: 0,
+    price: 8,
+    priceDisplay: '替烟6支解锁',
+    requiredCount: 6,
+    requiredSavings: 7.5,
     description: '凝脂青碧宝莲破晓初绽，九瓣祥和花瓣自云烟中层层舒展，晨露甘霖与温润金蕊微光流转，烦恼随烟尽散',
     themeColor: '#34d399',
     glowColor: 'rgba(52, 211, 153, 0.85)',
@@ -87,7 +87,7 @@ export const SMOKE_EFFECTS = [
     renderType: 'lotus_zen'
   },
 
-  // ================= 5. 泼天富贵 · 顶奢黑金（黑金史诗） =================
+  // ================= 4. 泼天富贵 · 顶奢黑金（黑金史诗） =================
   {
     id: 'gold_stardust',
     name: '曜世黑金 · 24K暴富金雨',
@@ -98,10 +98,10 @@ export const SMOKE_EFFECTS = [
     tagColor: '#fbbf24',
     badgeBg: 'rgba(251, 191, 36, 0.22)',
     badgeBorder: 'rgba(245, 158, 11, 0.55)',
-    price: 28,
-    priceDisplay: '¥28 / 替烟10支',
-    requiredCount: 10,
-    requiredSavings: 12.5,
+    price: 15,
+    priceDisplay: '替烟12支解锁',
+    requiredCount: 12,
+    requiredSavings: 15.0,
     description: '黑曜石丝绒烟雾席卷苍穹，核心瞬间爆发 24K 纯金箔与元宝金币流光暴风雨，金光万丈财运亨通',
     themeColor: '#fbbf24',
     glowColor: 'rgba(251, 191, 36, 0.85)',
@@ -109,7 +109,7 @@ export const SMOKE_EFFECTS = [
     renderType: 'gold_stardust'
   },
 
-  // ================= 6. 宇宙浩瀚 · 许愿流星（星芒史诗） =================
+  // ================= 5. 宇宙浩瀚 · 许愿流星（星芒史诗） =================
   {
     id: 'galaxy_stars',
     name: '星穹浩瀚 · 璀璨流星银河',
@@ -120,10 +120,10 @@ export const SMOKE_EFFECTS = [
     tagColor: '#67e8f9',
     badgeBg: 'rgba(103, 232, 249, 0.18)',
     badgeBorder: 'rgba(56, 189, 248, 0.45)',
-    price: 0,
-    priceDisplay: '免费尊享',
-    requiredCount: 0,
-    requiredSavings: 0,
+    price: 25,
+    priceDisplay: '替烟20支解锁',
+    requiredCount: 20,
+    requiredSavings: 25.0,
     description: '白金彗星破空划出破晓尾迹，二十四颗八芒钻星凌空点亮，深邃星河伴随呼吸星尘恒久流淌',
     themeColor: '#38bdf8',
     glowColor: 'rgba(56, 189, 248, 0.80)',
@@ -131,7 +131,7 @@ export const SMOKE_EFFECTS = [
     renderType: 'galaxy_stars'
   },
 
-  // ================= 7. 万福金印 · 功德护体（朱金传说） =================
+  // ================= 6. 万福金印 · 功德护体（朱金传说） =================
   {
     id: 'blessing_runes',
     name: '金玉满堂 · 迎祥纳福宝印',
@@ -142,10 +142,10 @@ export const SMOKE_EFFECTS = [
     tagColor: '#fde047',
     badgeBg: 'rgba(253, 224, 71, 0.18)',
     badgeBorder: 'rgba(234, 179, 8, 0.45)',
-    price: 0,
-    priceDisplay: '免费尊享',
-    requiredCount: 0,
-    requiredSavings: 0,
+    price: 38,
+    priceDisplay: '替烟30支解锁',
+    requiredCount: 30,
+    requiredSavings: 37.5,
     description: '沉香暖金凝结为立体浮雕烫金吉印【福·财·顺·康·暴富·喜】，金丝如意璎珞与护身光环护佑周全',
     themeColor: '#fef08a',
     glowColor: 'rgba(254, 240, 138, 0.88)',
@@ -153,7 +153,7 @@ export const SMOKE_EFFECTS = [
     renderType: 'blessing_runes'
   },
 
-  // ================= 8. 华夏欢庆 · 终极盛典（赤炎传说） =================
+  // ================= 7. 华夏欢庆 · 终极盛典（赤炎传说） =================
   {
     id: 'grand_fireworks',
     name: '华夏盛世 · 万家璀璨烟火',
@@ -164,10 +164,10 @@ export const SMOKE_EFFECTS = [
     tagColor: '#fb7185',
     badgeBg: 'rgba(251, 113, 133, 0.18)',
     badgeBorder: 'rgba(244, 63, 94, 0.45)',
-    price: 0,
-    priceDisplay: '免费尊享',
-    requiredCount: 0,
-    requiredSavings: 0,
+    price: 56,
+    priceDisplay: '替烟45支解锁',
+    requiredCount: 45,
+    requiredSavings: 56.25,
     description: '金芒火箭尖啸腾空直冲九霄，凌空绽放三级五彩牡丹锦簇，千丝垂杨金雨倾泻长夜',
     themeColor: '#fb7185',
     glowColor: 'rgba(251, 113, 133, 0.85)',
@@ -175,7 +175,7 @@ export const SMOKE_EFFECTS = [
     renderType: 'grand_fireworks'
   },
 
-  // ================= 9. 青云直上 · 乘风破浪（天阶祥瑞） =================
+  // ================= 8. 青云直上 · 乘风破浪（天阶祥瑞） =================
   {
     id: 'auspicious_river',
     name: '紫霄凌云 · 步步高升天河',
@@ -186,10 +186,10 @@ export const SMOKE_EFFECTS = [
     tagColor: '#f59e0b',
     badgeBg: 'rgba(245, 158, 11, 0.18)',
     badgeBorder: 'rgba(245, 158, 11, 0.45)',
-    price: 0,
-    priceDisplay: '免费尊享',
-    requiredCount: 0,
-    requiredSavings: 0,
+    price: 75,
+    priceDisplay: '替烟60支解锁',
+    requiredCount: 60,
+    requiredSavings: 75.0,
     description: '赤金与炽炎双螺旋天河直上九霄，步步高升·大吉大利金字凌空盘旋，破晓金光直透云海',
     themeColor: '#fbbf24',
     glowColor: 'rgba(251, 191, 36, 0.88)',
@@ -197,7 +197,7 @@ export const SMOKE_EFFECTS = [
     renderType: 'auspicious_river'
   },
 
-  // ================= 10. 道韵化境 · 掌控乾坤（神品玄道） =================
+  // ================= 9. 道韵化境 · 掌控乾坤（神品玄道） =================
   {
     id: 'bagua_taichi',
     name: '乾坤八卦 · 紫微天穹大阵',
@@ -208,10 +208,10 @@ export const SMOKE_EFFECTS = [
     tagColor: '#67e8f9',
     badgeBg: 'rgba(103, 232, 249, 0.18)',
     badgeBorder: 'rgba(56, 189, 248, 0.50)',
-    price: 0,
-    priceDisplay: '免费尊享',
-    requiredCount: 0,
-    requiredSavings: 0,
+    price: 100,
+    priceDisplay: '替烟80支解锁',
+    requiredCount: 80,
+    requiredSavings: 100.0,
     description: '320px 巨幅紫微天穹大阵恢弘铺展，昆仑玉与紫曜双鱼流转，八荒剑芒、六十四卦与二十八星宿激荡苍穹',
     themeColor: '#67e8f9',
     glowColor: 'rgba(103, 232, 249, 0.88)',
@@ -219,7 +219,7 @@ export const SMOKE_EFFECTS = [
     renderType: 'bagua_taichi'
   },
 
-  // ================= 11. 梵天圣境 · 慈悲普度（神品佛瑞） =================
+  // ================= 10. 梵天圣境 · 慈悲普度（神品佛瑞） =================
   {
     id: 'buddha_light',
     name: '佛光普照 · 梵天千叶金莲',
@@ -231,10 +231,10 @@ export const SMOKE_EFFECTS = [
     tagColor: '#fde047',
     badgeBg: 'rgba(253, 224, 71, 0.20)',
     badgeBorder: 'rgba(251, 191, 36, 0.55)',
-    price: 0,
-    priceDisplay: '免费尊享',
-    requiredCount: 0,
-    requiredSavings: 0,
+    price: 125,
+    priceDisplay: '替烟100支解锁',
+    requiredCount: 100,
+    requiredSavings: 125.0,
     description: '峨眉金顶五色佛光与十六道万丈日光破晓普照，三层千叶宝相金莲步步盛开，梵音真言与八宝金轮普度众生',
     themeColor: '#fde047',
     glowColor: 'rgba(253, 224, 71, 0.92)',
@@ -242,7 +242,7 @@ export const SMOKE_EFFECTS = [
     renderType: 'buddha_light'
   },
 
-  // ================= 12. 九五之尊 · 帝王气运（至臻神品） =================
+  // ================= 11. 九五之尊 · 帝王气运（至臻神品） =================
   {
     id: 'dragon_breath',
     name: '飞龙在天 · 曜金祥云真龙',
@@ -254,10 +254,10 @@ export const SMOKE_EFFECTS = [
     tagColor: '#fef08a',
     badgeBg: 'rgba(254, 240, 138, 0.20)',
     badgeBorder: 'rgba(234, 179, 8, 0.50)',
-    price: 0,
-    priceDisplay: '免费尊享',
-    requiredCount: 0,
-    requiredSavings: 0,
+    price: 160,
+    priceDisplay: '替烟130支解锁',
+    requiredCount: 130,
+    requiredSavings: 162.5,
     description: '纯正五爪曜金真龙昂首破云冲霄，万重祥云缭绕龙身，龙吐九霄瑞气与漫天龙鳞金雨',
     themeColor: '#fef08a',
     glowColor: 'rgba(254, 240, 138, 0.88)',
@@ -265,7 +265,7 @@ export const SMOKE_EFFECTS = [
     renderType: 'dragon_breath'
   },
 
-  // ================= 13. 绝境逆风 · 涅槃浴火（至臻神品） =================
+  // ================= 12. 绝境逆风 · 涅槃浴火（至臻神品） =================
   {
     id: 'phoenix_nirvana',
     name: '涅槃重光 · 赤金神凤降世',
@@ -277,10 +277,10 @@ export const SMOKE_EFFECTS = [
     tagColor: '#fb923c',
     badgeBg: 'rgba(251, 146, 60, 0.20)',
     badgeBorder: 'rgba(249, 115, 22, 0.50)',
-    price: 0,
-    priceDisplay: '免费尊享',
-    requiredCount: 0,
-    requiredSavings: 0,
+    price: 200,
+    priceDisplay: '替烟160支解锁',
+    requiredCount: 160,
+    requiredSavings: 200.0,
     description: '百鸟之王赤金神凰浴火展翼，烈焰回旋天际，流光凤羽洒下南明离火星尘',
     themeColor: '#fb923c',
     glowColor: 'rgba(251, 146, 60, 0.88)',
@@ -288,7 +288,7 @@ export const SMOKE_EFFECTS = [
     renderType: 'phoenix_nirvana'
   },
 
-  // ================= 14. 瑶池仙境 · 天女散花（传世神品） =================
+  // ================= 13. 瑶池仙境 · 天女散花（传世神品） =================
   {
     id: 'seven_fairies',
     name: '七仙降世 · 霓裳羽衣散花',
@@ -300,10 +300,10 @@ export const SMOKE_EFFECTS = [
     tagColor: '#f472b6',
     badgeBg: 'rgba(244, 114, 182, 0.20)',
     badgeBorder: 'rgba(236, 72, 153, 0.50)',
-    price: 0,
-    priceDisplay: '免费尊享',
-    requiredCount: 0,
-    requiredSavings: 0,
+    price: 250,
+    priceDisplay: '替烟200支解锁',
+    requiredCount: 200,
+    requiredSavings: 250.0,
     description: '七彩飞天彩带在云雾中曼妙起舞，瑶池仙乐涟漪荡漾，天女散花漫天琼花与仙桃纷飞飘落',
     themeColor: '#f472b6',
     glowColor: 'rgba(244, 114, 182, 0.90)',

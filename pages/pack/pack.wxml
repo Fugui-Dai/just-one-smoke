@@ -1,10 +1,11 @@
 <!-- pages/pack/pack.wxml -->
 <view class="pack-page-container {{ vipTheme ? 'theme-' + vipTheme : '' }}">
 
-  <!-- VIP 尊享动态极光天幕与 3D 烟盒背光星尘舞台 -->
-  <view wx:if="{{ vipTheme }}" class="vip-ambient-stage">
+  <!-- 动态奢华极光天幕与 3D 烟盒背光星尘舞台 (全员常驻基础轻奢氛围，VIP 增强专属色谱) -->
+  <view class="vip-ambient-stage">
     <view class="vip-aurora-orb orb-primary"></view>
     <view class="vip-aurora-orb orb-center-halo"></view>
+    <view class="vip-aurora-orb orb-bottom-glow"></view>
     <view class="vip-spark s1"></view>
     <view class="vip-spark s2"></view>
     <view class="vip-spark s3"></view>
@@ -167,10 +168,10 @@
             <view class="collar-card-rim"></view>
           </view>
 
-          <!-- 盒内整齐排布的立体香烟过滤嘴与延伸烟身 (前排+后排双排阶梯陈列，点到谁谁就出来且原位置留空) -->
-          <view class="cigarettes-matrix {{ currentCigarette.packType }}-matrix">
+          <!-- 盒内整齐排布的立体香烟过滤嘴与延伸烟身: 支持模式 A (6支宽幕轻奢单排) 与模式 B (20支双排阶梯，原20支代码无损保留备用) -->
+          <view class="cigarettes-matrix {{ (packLayoutMode === 'row6' && !currentCigarette.isCigar) ? 'row6-matrix' : (currentCigarette.packType + '-matrix') }}">
             <view 
-              class="cig-filter-slot {{ currentCigarette.isCigar ? 'cigar-row-slot' : (index < 10 ? 'back-row-slot' : 'front-row-slot') }} {{ (slotStates[index] && (pulledSlotIndex !== index || !isSlotEjected)) ? 'has-cigarette' : 'empty-slot' }} {{ (pulledSlotIndex === index && !isSlotEjected) ? 'is-slot-launching' : '' }}"
+              class="cig-filter-slot {{ currentCigarette.isCigar ? 'cigar-row-slot' : (packLayoutMode === 'row6' ? 'row6-slot' : (index < 10 ? 'back-row-slot' : 'front-row-slot')) }} {{ (slotStates[index] && (pulledSlotIndex !== index || !isSlotEjected)) ? 'has-cigarette' : 'empty-slot' }} {{ (pulledSlotIndex === index && !isSlotEjected) ? 'is-slot-launching' : '' }}"
               wx:for="{{ slotArray }}"
               wx:key="*this"
               catchtap="onTapCigaretteSlot"
@@ -489,10 +490,12 @@
           class="action-btn-card pull-btn {{ !isCurrentUnlocked ? 'btn-disabled' : '' }}" 
           bindtap="onTriggerPullCigarette"
         >
+          <!-- 底层背光呼吸炽金辉光 -->
+          <view class="pull-btn-backlight"></view>
           <view class="pull-btn-outer-ring"></view>
           <view class="btn-edge-flare flare-left">✦</view>
           <view class="btn-edge-flare flare-right">✦</view>
-          <view class="pull-btn-top-gloss"></view>
+          <view class="pull-btn-top-crest"></view>
           <view class="pull-btn-sheen"></view>
           <view class="btn-text-wrap">
             <text class="btn-main-title">{{ packCount > 0 ? '我抽一支' : '拆封新盒并抽出一支' }}</text>

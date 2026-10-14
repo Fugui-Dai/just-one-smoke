@@ -115,7 +115,11 @@ export class CanvasRenderer {
     // ==========================================
     // 0. 绘制沉浸生活场景背景 (雨夜车窗 / 威士忌吧 / 江湖夜钓 / 禅院听竹 / 浩瀚星宇，支持火光映境联动)
     // ==========================================
-    sceneRenderer.render(ctx, w, h, sceneType || 'rainy_car', delta, this.time, vipTheme, emberIntensity);
+    try {
+      sceneRenderer.render(ctx, w, h, sceneType || 'rainy_car', delta, this.time, vipTheme, emberIntensity);
+    } catch (sceneErr) {
+      console.error('[canvasRenderer] sceneRenderer render error:', sceneErr);
+    }
 
     const p = fsm ? fsm.getProgress() : 1.0;
     const progress = (typeof p === 'number' && !isNaN(p)) ? p : 1.0;
@@ -1154,7 +1158,6 @@ export class CanvasRenderer {
     // ==========================================
     // 6. 极致写实微距灰白蓬松烟灰柱 (原地燃烧成灰·世界坐标固化·绝不拉伸)
     // ==========================================
-    const isLit = (curState !== 'UNLIT' && curState !== 'FINISHED');
     const isAirCig = !!(curCig.id === 'pure_oxygen_zen' || curCig.isAirCig);
     // 真实可见烟灰高度：纯空气烟卷内部无烟丝，燃烧只烧纸不积灰，绝对无堆积烟灰柱！
     const displayAshH = isAirCig ? 0 : curAsh;
@@ -1258,10 +1261,8 @@ export class CanvasRenderer {
       }
       ctx.fill();
 
-      // B. 第 2 批：按主色调分组批量填充灰白鳞片 (3~4 次 Draw Call)
-      const colorGroups = isHandRolled
-        ? ['#ffffff', '#e4e4e7', '#a1a1aa', '#78350f']
-        : ['#ffffff', '#e4e4e7', '#a1a1aa'];
+      // B. 第 2 批：按主色调分组批量填充灰白鳞片 (3 次 Draw Call，消除不自然的杂色斑块)
+      const colorGroups = ['#ffffff', '#e4e4e7', '#a1a1aa'];
       for (let g = 0; g < colorGroups.length; g++) {
         const targetColor = colorGroups[g];
         ctx.fillStyle = targetColor;
@@ -1279,11 +1280,9 @@ export class CanvasRenderer {
           for (let col = 0; col < flakesCount; col++) {
             const flakeSeed = ((L * 17 + col * 37 + 11) % 1000) / 1000;
             let flakeColor;
-            if (isHandRolled && flakeSeed < 0.16) {
-              flakeColor = '#78350f';
-            } else if (distToFire < 7) {
-              flakeColor = (col === 1 || (isHandRolled && col === 2)) ? '#e4e4e7' : '#a1a1aa';
-            } else if (col === 1 || (isHandRolled && col === 2)) {
+            if (distToFire < 7) {
+              flakeColor = (col === 1 || (isHandRolled && (col === 2 || col === 3))) ? '#e4e4e7' : '#a1a1aa';
+            } else if (col === 1 || (isHandRolled && (col === 2 || col === 3))) {
               flakeColor = '#ffffff';
             } else if (col === 0 || col === flakesCount - 2) {
               flakeColor = '#e4e4e7';

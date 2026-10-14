@@ -10,12 +10,16 @@ import {
   BLOOD_ICON_SVG,
   BRAIN_ICON_SVG,
   DEFAULT_USER_AVATAR_SVG,
-  VIP_CROWN_ICON_SVG
+  VIP_CROWN_ICON_SVG,
+  CYBER_GOLD_VOUCHER_SVG
 } from '../../utils/vectorIcons.js';
 import {
   ACHIEVEMENTS,
   checkAchievementsToUnlock,
-  getAchievementProgress
+  getAchievementProgress,
+  getHighestUnlockedTitle,
+  getActiveUserTitle,
+  normalizeUnlockedIds
 } from '../../configs/achievements.js';
 
 Component({
@@ -105,10 +109,11 @@ Component({
     },
     defaultAvatarSvg: DEFAULT_USER_AVATAR_SVG,
     vipCrownSvg: VIP_CROWN_ICON_SVG,
+    goldVoucherSvgUri: CYBER_GOLD_VOUCHER_SVG,
     isVip: false,
     vipInfo: { isVip: false, isLifetime: false, formattedExpire: '' },
 
-    // 我的钱包 (1元纸币娱乐数据)
+    // 我的钱包 (自律金券储备数据)
     totalSavedYuan: 0,
 
     // 系统统计 7天每日抽烟折线图
@@ -120,13 +125,15 @@ Component({
     isWhoCollapsed: true,
     displayedWhoStages: [],
 
-    // 打卡签到与日历数据 (真实主动盖印自律状态)
+    // 打卡签到与日历数据 (真实主动盖印自律状态与历史战报)
     isTodayPunched: false,
     isStamping: false,
     isNextMonthDisabled: true,
     calendarYear: 2026,
     calendarMonth: 10,
     calendarDays: [],
+    showDayDetailModal: false,
+    selectedCalendarDay: null,
     calendarStats: {
       monthPunchedCount: 0,
       totalPunchedDays: 0,
@@ -134,10 +141,11 @@ Component({
       punchRate: 0
     },
 
-    // 荣耀勋章殿堂数据 (Tencent Games 曜石展柜)
+    // 荣耀称号殿堂数据 (Tencent Games 曜石展柜)
     achievementsList: [],
     unlockedAchievementsCount: 0,
     achievementsCompletionRate: 0,
+    equippedTitle: '无烟觉醒者',
     showAchievementModal: false,
     selectedAchievement: null
   },
@@ -313,6 +321,7 @@ Component({
         });
       }
 
+      const dayRecordCountMap = {};
       if (Array.isArray(records)) {
         records.forEach(r => {
           if (!r || !r.timestamp) return;
@@ -322,7 +331,9 @@ Component({
           const ry = d.getFullYear();
           const rm = d.getMonth() + 1;
           const rday = d.getDate();
-          allPunchedDateKeySet.add(formatYMD(ry, rm, rday));
+          const k = formatYMD(ry, rm, rday);
+          allPunchedDateKeySet.add(k);
+          dayRecordCountMap[k] = (dayRecordCountMap[k] || 0) + 1;
           if (ry === currentYear && rm === currentMonth) {
             punchDaySet.add(rday);
           }
@@ -350,13 +361,20 @@ Component({
           }
         }
 
+        const dateKey = formatYMD(currentYear, currentMonth, day);
+        const count = dayRecordCountMap[dateKey] || 0;
+
         calendarDays.push({
           empty: false,
           day,
           key: `d-${day}`,
           isToday,
           isFuture,
-          isPunched
+          isPunched,
+          year: currentYear,
+          month: currentMonth,
+          dateKey,
+          count
         });
       }
 
@@ -610,15 +628,79 @@ Component({
       try {
         if (wx.vibrateShort) wx.vibrateShort({ type: 'light' });
       } catch (err) {}
-      const y = this.data.calendarYear;
-      const m = this.data.calendarMonth;
+      try {
+        audioManager.playClick();
+      } catch (e) {}
+
+      const profile = this.data.profile || {};
+      const packPrice = Number(profile.packPrice) || 25;
+      const singlePrice = packPrice / 20;
+      const count = item.count || (item.isPunched ? 1 : 0);
+      const savedMoney = (count * singlePrice).toFixed(2);
+      const tarAvoided = count * 10;
+      const lifeRegained = count * 11;
+
+      let statusTag = '未打卡';
+      let statusEmoji = '🌱';
+      let headline = '保持自律初心';
+      let quote = '少抽一支真烟，肺部就多一次清澈自愈的机会。';
+
       if (item.isFuture) {
-        toast.info(`${y}年${m}月${item.day}日 · 未来自律可期`);
+        statusTag = '未来可期';
+        statusEmoji = '⏳';
+        headline = '待解锁的纯净之日';
+        quote = '每一个明天的纯净呼吸，都取决于今天脚踏实地的自律。';
+      } else if (item.isToday) {
+        if (item.isPunched) {
+          statusTag = '今日已打卡';
+          statusEmoji = '🎖️';
+          headline = '今日自律觉醒 · 战报达成';
+          quote = '今日已成功完成自律打卡，每一次对真烟的拒绝，都是对健康最深刻的尊重！';
+        } else {
+          statusTag = '今日待盖印';
+          statusEmoji = '✦';
+          headline = '今日自律印章等待盖下';
+          quote = '今天也是值得骄傲的一天，轻触下方一键敲章，点亮今日自律徽记！';
+        }
       } else if (item.isPunched) {
-        toast.success(`${y}年${m}月${item.day}日 · 坚持无烟打卡达成 ✓`);
+        statusTag = '自律已达成';
+        statusEmoji = '🏆';
+        headline = '历史胜利战报 · 功德圆满';
+        quote = '该日坚决战胜烟瘾心魔，每一分钟抢回的寿命都是您生命的无价资产！';
       } else {
-        toast.info(`${y}年${m}月${item.day}日 · 保持自律节奏`);
+        statusTag = '该日未记录';
+        statusEmoji = '☕';
+        headline = '过往已成序章';
+        quote = '过去的缺席无需懊恼，专注当下的每一缕纯净空气，身心自会报以充沛活力。';
       }
+
+      this.setData({
+        showDayDetailModal: true,
+        selectedCalendarDay: {
+          ...item,
+          formattedDate: `${item.year || this.data.calendarYear}年${item.month || this.data.calendarMonth}月${item.day}日`,
+          count,
+          savedMoney,
+          tarAvoided,
+          lifeRegained,
+          statusTag,
+          statusEmoji,
+          headline,
+          quote
+        }
+      });
+    },
+
+    closeDayDetailModal() {
+      try {
+        if (wx.vibrateShort) wx.vibrateShort({ type: 'light' });
+      } catch (err) {}
+      this.setData({ showDayDetailModal: false });
+    },
+
+    onQuickPunchFromModal() {
+      this.closeDayDetailModal();
+      this.onTapPunchCard();
     },
 
     onOpenProfileModal() {
@@ -698,40 +780,62 @@ Component({
       toast.success(randomQuote);
     },
 
-    // 荣耀勋章成就殿堂数据刷新与进度计算 (Tencent Games 曜石展柜标准)
+    // 荣耀称号殿堂数据刷新与严格顺序逐级点亮计算 (从低到高排列，按最高点亮称号自动佩戴)
     updateAchievementsData() {
       try {
-        let unlockedIds = storageService.getUnlockedAchievements() || [];
+        const rawUnlocked = storageService.getUnlockedAchievements() || [];
+        let unlockedIds = normalizeUnlockedIds(rawUnlocked);
+
         const totalSubs = Number(this.data.totalSubstituted) || 0;
         const totalSaved = Number(this.data.totalSavedMoney) || 0;
         const quitDays = (Number(this.data.quitDays) || 0) + 1;
-        const unlockedEffects = storageService.getUnlockedSmokeEffects() || [];
-        const summonedEffects = (storageService.getSummonedSmokeEffects && storageService.getSummonedSmokeEffects()) || [];
-        const allEffects = Array.from(new Set([...unlockedEffects, ...summonedEffects]));
 
         const statsObj = {
           totalSubstituted: totalSubs,
           totalSavedMoney: totalSaved,
-          quitDays,
-          unlockedEffects: allEffects,
-          unlockedEffectsCount: allEffects.length,
-          hasCustomEffect: allEffects.some(id => id !== 'ring_classic' && id !== 'auspicious_river'),
-          hasSummonedMythic: allEffects.includes('dragon_breath') || allEffects.includes('phoenix_nirvana') || allEffects.includes('lotus_zen') || allEffects.includes('buddha_light') || allEffects.includes('bagua_taichi') || allEffects.includes('auspicious_river')
+          quitDays
         };
 
         const newlyUnlocked = checkAchievementsToUnlock(statsObj, unlockedIds);
         if (Array.isArray(newlyUnlocked) && newlyUnlocked.length > 0) {
           newlyUnlocked.forEach(id => storageService.unlockAchievement(id));
-          unlockedIds = Array.from(new Set([...unlockedIds, ...newlyUnlocked]));
+          unlockedIds = normalizeUnlockedIds([...unlockedIds, ...newlyUnlocked]);
         }
 
-        const list = ACHIEVEMENTS.map(item => {
+        // 获取当前已点亮中最高等级的称号
+        const highestTitle = getHighestUnlockedTitle(unlockedIds);
+        let equippedTitle = storageService.getEquippedTitle();
+
+        // 核心规则：若未设置佩戴，或当前佩戴的称号不在已点亮列表中，或刚刚点亮了新的更高称号 -> 自动按最高佩戴
+        const isCurrentEquippedValid = unlockedIds.some(id => {
+          const a = ACHIEVEMENTS.find(item => item.id === id);
+          return a && a.name === equippedTitle;
+        });
+
+        if (!equippedTitle || !isCurrentEquippedValid || (newlyUnlocked && newlyUnlocked.length > 0)) {
+          equippedTitle = highestTitle;
+          storageService.setEquippedTitle(highestTitle);
+        }
+
+        // 从低到高 (Lv.1 -> Lv.16) 映射称号列表，计算 isNext, prevName, level, isEquipped
+        const list = ACHIEVEMENTS.map((item, index) => {
           const unlocked = unlockedIds.includes(item.id);
+          const isEquipped = item.name === equippedTitle;
           const progress = getAchievementProgress(item, statsObj);
+          
+          // 线性序列：第一个未点亮的即为当前待点亮目标 (isNext)
+          const isNext = !unlocked && (index === 0 || unlockedIds.includes(ACHIEVEMENTS[index - 1].id));
+          const prevItem = index > 0 ? ACHIEVEMENTS[index - 1] : null;
+
           return {
             ...item,
+            level: index + 1,
             unlocked,
-            progress
+            isNext,
+            isLocked: !unlocked && !isNext,
+            isEquipped,
+            progress,
+            prevName: prevItem ? prevItem.name : ''
           };
         });
 
@@ -742,7 +846,8 @@ Component({
         this.setData({
           achievementsList: list,
           unlockedAchievementsCount: unlockedCount,
-          achievementsCompletionRate: completionRate
+          achievementsCompletionRate: completionRate,
+          equippedTitle: equippedTitle || '无烟觉醒者'
         });
       } catch (e) {
         console.warn('updateAchievementsData error', e);
@@ -755,10 +860,33 @@ Component({
       try {
         if (wx.vibrateShort) wx.vibrateShort({ type: 'light' });
       } catch (err) {}
+      const equippedTitle = storageService.getEquippedTitle() || this.data.equippedTitle;
+      const fullItem = {
+        ...item,
+        isEquipped: item.name === equippedTitle
+      };
       this.setData({
-        selectedAchievement: item,
+        selectedAchievement: fullItem,
         showAchievementModal: true
       });
+    },
+
+    onEquipTitle(e) {
+      const title = e.currentTarget.dataset.title;
+      if (!title) return;
+      storageService.setEquippedTitle(title);
+      try {
+        if (wx.vibrateShort) wx.vibrateShort({ type: 'medium' });
+      } catch (err) {}
+      audioManager.unlockAudio();
+      audioManager.playZenChimeSound(880);
+      toast.flame(`👑 佩戴成功！称号【${title}】已同步全场与英雄榜！`);
+      this.setData({
+        showAchievementModal: false,
+        selectedAchievement: null
+      });
+      this.updateAchievementsData();
+      this.triggerEvent('titlechange', { title });
     },
 
     closeAchievementModal() {
@@ -770,6 +898,8 @@ Component({
         selectedAchievement: null
       });
     },
+
+    preventBubble() {},
 
     preventTouchMove() {}
   }

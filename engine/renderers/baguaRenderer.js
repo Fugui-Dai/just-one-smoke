@@ -120,6 +120,26 @@ export class BaguaMatrix {
       }
     }
 
+    // 5. 腾讯总监设计级：大阵终幕羽化散化青烟（age > 170），阵法化作层叠紫微云烟融入天幕
+    if (typeof emitParticleCallback === 'function' && this.age > 170 && this.age % 2 === 0) {
+      const pAngle = Math.random() * Math.PI * 2;
+      const pDist = curR * (0.6 + Math.random() * 0.4);
+      emitParticleCallback({
+        x: this.x + Math.cos(pAngle) * pDist,
+        y: this.y + Math.sin(pAngle) * (pDist * 0.68),
+        vx: Math.cos(pAngle) * 0.5,
+        vy: -0.5 - Math.random() * 0.5,
+        radius: 6.0 + Math.random() * 6.0,
+        alpha: this.alpha * 0.6,
+        baseAlpha: 0.6,
+        life: 0,
+        maxLife: 60 + Math.random() * 20,
+        color: Math.random() > 0.5 ? 'rgba(103, 232, 249, ' : 'rgba(216, 180, 254, ',
+        growRate: 0.25,
+        isVolumetricSmoke: true
+      });
+    }
+
     return (this.age < this.maxAge && this.alpha > 0.005);
   }
 

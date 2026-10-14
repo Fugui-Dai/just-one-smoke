@@ -10,6 +10,7 @@ import { storageService } from '../../services/storageService.js';
 import { toast } from '../../services/toastService.js';
 import { IGNITION_TOOLS, getActiveIgnitionTool } from '../../services/ignitionService.js';
 import { vipService } from '../../services/vipService.js';
+import { leaderboardService } from '../../services/leaderboardService.js';
 
 import {
   calculateSavings,
@@ -32,14 +33,47 @@ import {
   isSmokeEffectUnlocked
 } from '../../configs/smokeEffects.js';
 
-import { EXTINGUISH_ICON_SVG, STORE_ICON_SVG } from '../../utils/vectorIcons.js';
+import {
+  EXTINGUISH_ICON_SVG,
+  IGNITE_ICON_SVG,
+  INHALE_ICON_SVG,
+  SMOKE_VFX_ICON_SVG,
+  ASH_TAP_ICON_SVG,
+  GIVE_CIG_ICON_SVG,
+  VAULT_GALLERY_ICON_SVG,
+  LEADERBOARD_TROPHY_SVG,
+  DIGITAL_TWIN_USER_SVG,
+  SOUND_ON_ICON_SVG,
+  SOUND_MUTE_ICON_SVG,
+  SCENE_AMBIENT_ICON_SVG,
+  DOCK_FLUID_SHELL_SVG,
+  DOCK_AURORA_STREAM_SVG,
+  DOCK_AURORA_TOP_SVG,
+  DOCK_AURORA_BOTTOM_SVG,
+  CYBER_GOLD_VOUCHER_SVG
+} from '../../utils/vectorIcons.js';
 
 Page({
   data: {
     isVipUser: false,
     vipTheme: '',
+    goldVoucherSvgUri: CYBER_GOLD_VOUCHER_SVG,
+    dockFluidShellUri: DOCK_FLUID_SHELL_SVG,
+    dockAuroraStreamUri: DOCK_AURORA_STREAM_SVG,
+    dockAuroraTopUri: DOCK_AURORA_TOP_SVG,
+    dockAuroraBottomUri: DOCK_AURORA_BOTTOM_SVG,
+    soundOnIconUri: SOUND_ON_ICON_SVG,
+    soundMuteIconUri: SOUND_MUTE_ICON_SVG,
+    sceneAmbientIconUri: SCENE_AMBIENT_ICON_SVG,
     extinguishIconUri: EXTINGUISH_ICON_SVG,
-    storeIconUri: STORE_ICON_SVG,
+    igniteIconUri: IGNITE_ICON_SVG,
+    inhaleIconUri: INHALE_ICON_SVG,
+    smokeVfxIconUri: SMOKE_VFX_ICON_SVG,
+    ashTapIconUri: ASH_TAP_ICON_SVG,
+    giveCigIconUri: GIVE_CIG_ICON_SVG,
+    storeIconUri: VAULT_GALLERY_ICON_SVG,
+    leaderboardIconUri: LEADERBOARD_TROPHY_SVG,
+    myProfileIconUri: DIGITAL_TWIN_USER_SVG,
     // 导航与屏幕尺寸适配
     statusBarHeight: 44,
     navBarHeight: 44,
@@ -48,7 +82,6 @@ Page({
     windowWidth: 375,
     windowHeight: 812,
 
-    currentTab: 'simulator',
     currentCigarette: DEFAULT_CIGARETTE,
     simulatorState: 'UNLIT', // UNLIT | IDLE_BURNING | INHALING | EXHALING | FINISHED
     isMuted: false,
@@ -78,8 +111,10 @@ Page({
     currentSmokeEffect: DEFAULT_SMOKE_EFFECT,
     activeScrollEffectId: '', // 尊享展厅快速定位正在使用的特效卡片
     showSmokeEffectDrawer: false, // 烟雾特工坊 · 尊享展厅
-    showSmokeEffectGuide: false, // 💡 首次进入呼吸气泡长按引导
+    showSmokeEffectGuide: false, // 💡 首次进入呼吸气泡长按引导 (烟雾特效)
     isGuideFading: false,
+    showSceneGuide: false, // 💡 首次进入呼吸气泡长按引导 (抽烟环境)
+    isSceneGuideFading: false,
     isTrialActive: false, // 30秒尊享免费试抽
     trialSecondsLeft: 0,
     isBeadPopped: false, // 爆珠是否已捏碎
@@ -206,8 +241,9 @@ Page({
       if (needsRestart) wx.removeStorageSync('SMOKEFREE_NEEDS_RESTART');
     } catch (e) {}
 
+    const packRemaining = storageService.getPackCount(curCig.id, curCig.packCapacity || (curCig.isCigar ? 5 : 20));
+
     if (isDifferentCig || needsRestart) {
-      const packRemaining = storageService.getPackCount(curCig.id, curCig.packCapacity || (curCig.isCigar ? 5 : 20));
       this.setData({
         currentCigarette: curCig,
         currentPackRemaining: packRemaining,
@@ -218,6 +254,9 @@ Page({
         this.restartCigarette();
       }
     } else {
+      if (this.data.currentPackRemaining !== packRemaining) {
+        this.setData({ currentPackRemaining: packRemaining });
+      }
       // 腾讯总监设计级：时空流转与环境空气净空 (Atmospheric Air Cleansed & Living Ember)
       // 用户离开页面去商店（离开超过 400ms）后返回：
       // 1. 空中漂浮的旧呼出浓烟团、烟圈等自然扩散消解于空气中，视野重归通透高奢；
@@ -265,6 +304,7 @@ Page({
       this.startRenderLoop();
     }
     this.checkSmokeGuide();
+    this.checkSceneGuide();
   },
 
   measureSafeArea() {
@@ -327,6 +367,14 @@ Page({
     if (this._guideTimer) {
       clearTimeout(this._guideTimer);
       this._guideTimer = null;
+    }
+    if (this.sceneGuideDismissTimer) {
+      clearTimeout(this.sceneGuideDismissTimer);
+      this.sceneGuideDismissTimer = null;
+    }
+    if (this._sceneGuideTimer) {
+      clearTimeout(this._sceneGuideTimer);
+      this._sceneGuideTimer = null;
     }
     if (this._carLighterTimer) {
       clearTimeout(this._carLighterTimer);
@@ -565,11 +613,16 @@ Page({
       ashProgressStyle = 'background: rgba(255, 255, 255, 0.14);';
     }
 
-    if (
-      ashPercent !== this.data.ashPercent ||
-      Math.abs(ashDeg - (this.data.ashDeg || 0)) >= 2 ||
-      curState !== this.data.simulatorState
-    ) {
+    // 工业级性能优化：状态突变（点火/掐灭/抽吸切换）或烟灰抖落立即无延迟同步；
+    // 渐变烟灰环进度采用 120ms 节流 + 阈值联合控制，彻底消除 60FPS 帧循环中的桥接通信拥堵
+    const nowTs = Date.now();
+    const isStateChanged = curState !== this.data.simulatorState;
+    const isAshDropped = curAshInt === 0 && (this.data.ashLength || 0) > 0;
+    const isThrottleDue = !this._lastAshSetDataTime || (nowTs - this._lastAshSetDataTime >= 120);
+    const hasSignificantAshChange = Math.abs(ashPercent - (this.data.ashPercent || 0)) >= 2;
+
+    if (isStateChanged || isAshDropped || (isThrottleDue && hasSignificantAshChange)) {
+      this._lastAshSetDataTime = nowTs;
       this.setData({
         ashLength: curAshInt,
         ashProgress: ashProgress,
@@ -1181,7 +1234,7 @@ Page({
         if (ach) {
           const timer = setTimeout(() => {
             audioManager.playZenChimeSound(660);
-            toast.flame(`🏆 荣耀解锁！获得【${ach.name}】勋章！`);
+            toast.flame(`👑 荣耀晋升！获得称号【${ach.name}】！`);
           }, 600 + idx * 1200);
           this._achToastTimers.push(timer);
         }
@@ -1234,6 +1287,28 @@ Page({
     audioManager.playSuccessSound();
     triggerHaptic('heavy');
 
+    // 实时计算排行榜排位荣誉 (打通主包真实业务调用链，消除无引用告警)
+    const records = storageService.getRecords();
+    const totalSubs = records.length;
+    const grossSaved = calculateSavings(totalSubs, profile.packPrice);
+    const availableSaved = Math.max(0, Number((grossSaved - storageService.getSpentSavings()).toFixed(2)));
+    const quitDays = calculateQuitDays(profile.quitStartDate);
+    let myRankInfo = null;
+    let rankFeedback = '';
+    try {
+      const lbData = leaderboardService.getLeaderboard('substituted', {
+        substituted: totalSubs,
+        savedMoney: availableSaved,
+        days: quitDays
+      }, profile);
+      if (lbData && lbData.myRankInfo) {
+        myRankInfo = lbData.myRankInfo;
+        rankFeedback = `全国英雄榜第 ${myRankInfo.rank} 席 · 击败 ${myRankInfo.beatPercent}% 烟友`;
+      }
+    } catch (e) {
+      console.warn('Leaderboard rank evaluation fallback:', e);
+    }
+
     const PUNCHLINES = [
       '尼古丁骂骂咧咧地退出了群聊！',
       '你的双肺正在后台给你疯狂点赞 👍',
@@ -1251,8 +1326,10 @@ Page({
         tarAvoided: tar,
         lifeRegained: life,
         inhaleCount: inhales,
-        durationSeconds: duration
-      }
+        durationSeconds: duration,
+        rankFeedback
+      },
+      myRankInfo
     });
 
     this.refreshAllData();
@@ -1324,6 +1401,19 @@ Page({
 
     const singleStickPrice = (profile.packPrice ? profile.packPrice / 20 : 1.25).toFixed(2);
 
+    // 实时计算榜单排位 (打通主包静态依赖图谱与实时榜单排位同步)
+    let myRankInfo = null;
+    try {
+      const lbData = leaderboardService.getLeaderboard('substituted', {
+        substituted: totalSubs,
+        savedMoney: availableSaved,
+        days: quitDays
+      }, profile);
+      myRankInfo = lbData ? lbData.myRankInfo : null;
+    } catch (e) {
+      console.warn('Refresh leaderboard stats fallback:', e);
+    }
+
     this.setData({
       profile,
       totalSubstituted: totalSubs,
@@ -1331,7 +1421,8 @@ Page({
       singleStickSavedPrice: singleStickPrice,
       quitDays,
       currentPackRemaining: packRemaining,
-      smokeEffectsList
+      smokeEffectsList,
+      myRankInfo
     });
   },
 
@@ -1376,6 +1467,79 @@ Page({
         }, 500);
       }
     });
+  },
+
+  // ================= 抽烟环境新手长按引导微气泡管线 (Tencent UX Scene Tooltip Pipeline) =================
+  checkSceneGuide() {
+    try {
+      const seen = wx.getStorageSync('SCENE_GUIDE_SEEN');
+      if (!seen && !this.data.showSceneGuide) {
+        if (this._sceneGuideTimer) clearTimeout(this._sceneGuideTimer);
+        // 延迟 800ms 优雅弹出，避开主页首屏渲染争抢
+        this._sceneGuideTimer = setTimeout(() => {
+          this._sceneGuideTimer = null;
+          this.setData({ showSceneGuide: true, isSceneGuideFading: false });
+          if (this.sceneGuideDismissTimer) clearTimeout(this.sceneGuideDismissTimer);
+          // 3.8 秒后优雅渐隐消失
+          this.sceneGuideDismissTimer = setTimeout(() => {
+            this.sceneGuideDismissTimer = null;
+            this.dismissSceneGuide();
+          }, 3800);
+        }, 800);
+      }
+    } catch (e) {}
+  },
+
+  dismissSceneGuide() {
+    if (!this.data.showSceneGuide) return;
+    if (this.sceneGuideDismissTimer) {
+      clearTimeout(this.sceneGuideDismissTimer);
+      this.sceneGuideDismissTimer = null;
+    }
+    if (this._sceneGuideTimer) {
+      clearTimeout(this._sceneGuideTimer);
+      this._sceneGuideTimer = null;
+    }
+    this.setData({ isSceneGuideFading: true });
+    try {
+      wx.setStorageSync('SCENE_GUIDE_SEEN', true);
+    } catch (e) {}
+    this._sceneGuideTimer = setTimeout(() => {
+      this._sceneGuideTimer = null;
+      this.setData({ showSceneGuide: false, isSceneGuideFading: false });
+    }, 400);
+  },
+
+  onTapSceneGuideTooltip() {
+    this.dismissSceneGuide();
+    this.openSceneModal();
+  },
+
+  // 单击快速轮换下一个沉浸环境
+  toggleScene() {
+    audioManager.unlockAudio();
+    triggerHaptic('medium');
+    this.dismissSceneGuide();
+
+    if (!ATMOSPHERE_SCENES || !ATMOSPHERE_SCENES.length) return;
+
+    const curSceneId = this.data.currentScene || 'obsidian';
+    const curIdx = ATMOSPHERE_SCENES.findIndex(s => s.id === curSceneId);
+    const nextScene = ATMOSPHERE_SCENES[(curIdx + 1) % ATMOSPHERE_SCENES.length];
+
+    storageService.setAtmosphereScene(nextScene.id);
+    audioManager.playSwitchSound();
+
+    this.setData({
+      currentScene: nextScene.id,
+      currentSceneInfo: nextScene
+    });
+
+    if (this.data.isAmbientEnabled) {
+      audioManager.startAmbientSound(nextScene.id);
+    }
+
+    toast.info(`已切换至【${nextScene.name}】`);
   },
 
   // ================= 烟雾特效新手长按引导微气泡管线 (Tencent UX Tooltip Pipeline) =================
@@ -1684,7 +1848,7 @@ Page({
     }, duration);
   },
 
-  // 递烟专属交互：只要点了递烟就会消耗一支，扣减烟盒槽位与余量，外层圆圈实时显示进度条并提示
+  // 递烟专属交互：点击递烟消耗一支，外层圆圈实时显示余量进度环；平时静默无弹窗干扰，仅在没有烟了时才提示
   consumeOneStickForGive() {
     const now = Date.now();
     // 防止同一次点击同时触发 bindtap 与 onShareAppMessage(button) 导致双扣，300ms 内视为同一次点击
@@ -1695,13 +1859,28 @@ Page({
 
     const curCig = this.data.currentCigarette || CIGARETTE_CATALOG[0] || DEFAULT_CIGARETTE;
     const cap = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
-    let cur = storageService.getPackCount(curCig.id, cap);
+    const cur = storageService.getPackCount(curCig.id, cap);
 
-    // 若当前烟盒已空（0支），自动拆封全新一盒并立即消耗递出一支，确保“只要点了就会消耗一支”
-    let autoUnwrapped = false;
+    // 若当前烟盒已空（0支），弹窗指引前往商店挑选名烟或直接拆封新盒
     if (cur <= 0) {
-      storageService.resetPackCount(curCig.id, cap);
-      autoUnwrapped = true;
+      wx.showModal({
+        title: '📦 烟盒已空',
+        content: `当前【${curCig.name}】已全部递完。前往商店挑选名烟或直接拆封新盒？`,
+        confirmText: '去商店',
+        cancelText: '拆封新盒',
+        confirmColor: '#f59e0b',
+        cancelColor: '#94a3b8',
+        success: (res) => {
+          if (res.confirm) {
+            this.openCigarettePicker();
+          } else if (res.cancel) {
+            const count = storageService.resetPackCount(curCig.id, cap);
+            this.setData({ currentPackRemaining: count });
+            toast.success(`✨ 已拆封全新一盒【${curCig.name}】！`);
+          }
+        }
+      });
+      return 0;
     }
 
     const { remaining: next } = storageService.consumePackSlot(curCig.id, -1, cap);
@@ -1710,13 +1889,6 @@ Page({
       currentPackRemaining: next
     });
 
-    if (autoUnwrapped) {
-      toast.info(`已拆新盒并递出一支（余 ${next}/${cap}）`);
-    } else if (next === 0) {
-      toast.warn('🤝 递出最后一支！', '整盒已空，下次点击将自动拆新盒');
-    } else {
-      toast.info(`🤝 已递出一支【${curCig.name}】（余 ${next}/${cap}）`);
-    }
     return next;
   },
 
@@ -1805,6 +1977,7 @@ Page({
 
   // ================= 沉浸生活场景氛围切换 =================
   openSceneModal() {
+    this.dismissSceneGuide();
     audioManager.unlockAudio();
     audioManager.playSwitchSound();
     triggerHaptic('light');

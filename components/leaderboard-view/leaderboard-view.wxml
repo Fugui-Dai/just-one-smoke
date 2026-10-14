@@ -6,25 +6,30 @@
   bounces="{{ true }}" 
   show-scrollbar="{{ false }}"
 >
-  <view class="leaderboard-content {{ vipTheme ? 'theme-' + vipTheme : '' }}" style="padding-top: {{ topPadding }}px;">
+  <view class="leaderboard-content {{ vipTheme ? 'theme-' + vipTheme : '' }} {{ vipAnimPhase === 'a' ? 'vip-sweep-phase-a' : 'vip-sweep-phase-b' }}" style="padding-top: {{ topPadding }}px;">
     
     <!-- 我的排位尊贵卡片 (Sticky My Rank · VIP 尊享曜石黑金流光皮肤与皇冠铭牌) -->
     <view class="my-rank-card {{ isVip ? 'is-vip-rank-card' : '' }}">
       <view class="my-rank-top">
         <view class="my-rank-identity">
-          <view class="my-rank-badge-num">No.{{ myRankInfo.rank || 1 }}</view>
-          <view class="my-rank-avatar-wrap">
-            <image class="my-rank-avatar-img {{ isVip ? 'vip-avatar-ring' : '' }}" src="{{ profile.avatarUrl || defaultAvatarSvg }}" mode="aspectFill" binderror="onAvatarError" />
+          <view class="my-rank-avatar-col">
+            <view class="my-rank-avatar-wrap">
+              <image class="my-rank-avatar-img {{ isVip ? 'vip-avatar-ring' : '' }}" src="{{ profile.avatarUrl || defaultAvatarSvg }}" mode="aspectFill" binderror="onAvatarError" />
+            </view>
+            <view class="my-rank-badge-num">No.{{ myRankInfo.rank || 1 }}</view>
           </view>
           <view class="my-rank-text-wrap">
             <view class="my-rank-name-row">
               <text class="my-rank-name {{ isVip ? 'vip-gold-name' : '' }}">{{ profile.nickName || '微信烟友' }}</text>
               <view class="vip-noble-nameplate" wx:if="{{ isVip }}">
                 <text class="vnn-crown">👑</text>
-                <text class="vnn-txt">尊贵VIP</text>
+                <text class="vnn-txt">VIP</text>
               </view>
+              <text 
+                class="my-rank-title-tag tier-{{ myRankInfo.titleTier || 'green' }}"
+                style="{{ myRankInfo.titleBadgeBg ? ('background: ' + myRankInfo.titleBadgeBg + '; color: ' + myRankInfo.titleTagColor + '; border-color: ' + myRankInfo.titleBorderColor + ';') : '' }}"
+              >{{ myRankInfo.title || '无烟先锋' }}</text>
             </view>
-            <text class="my-rank-title">{{ myRankInfo.title || '无烟先锋' }}</text>
             <view class="my-rank-slogan-wrap" wx:if="{{ myRankInfo.quote || profile.customQuote }}">
               <text class="mr-slogan-text">{{ myRankInfo.quote || profile.customQuote }}</text>
             </view>
@@ -51,28 +56,35 @@
       </view>
     </view>
 
-    <!-- 3维荣耀分榜切换栏 -->
+    <!-- 4维荣耀分榜切换栏 (2字极简版) -->
     <view class="rank-category-tabs">
       <view 
         class="rank-cat-tab {{ currentCategory === 'substituted' ? 'active' : '' }}" 
         bindtap="onSwitchCategory" 
         data-category="substituted"
       >
-        <text class="rct-text">🔥 替烟英雄榜</text>
+        <text class="rct-text">🔥 替烟</text>
       </view>
       <view 
         class="rank-cat-tab {{ currentCategory === 'saved' ? 'active' : '' }}" 
         bindtap="onSwitchCategory" 
         data-category="saved"
       >
-        <text class="rct-text">💰 自律省钱榜</text>
+        <text class="rct-text">💰 省钱</text>
       </view>
       <view 
         class="rank-cat-tab {{ currentCategory === 'days' ? 'active' : '' }}" 
         bindtap="onSwitchCategory" 
         data-category="days"
       >
-        <text class="rct-text">🌲 无烟毅力榜</text>
+        <text class="rct-text">🌲 毅力</text>
+      </view>
+      <view 
+        class="rank-cat-tab {{ currentCategory === 'likes' ? 'active' : '' }}" 
+        bindtap="onSwitchCategory" 
+        data-category="likes"
+      >
+        <text class="rct-text">❤️ 人气</text>
       </view>
     </view>
 
@@ -98,8 +110,12 @@
         <view class="hero-info-main">
           <view class="hero-title-line">
             <text class="hero-name {{ item.isMe ? 'is-me-name' : '' }}">{{ item.nickname }}</text>
-            <text class="hero-vip-badge" wx:if="{{ item.isMe && isVip }}">👑 VIP</text>
-            <text class="hero-title-tag" wx:if="{{ item.title }}">{{ item.title }}</text>
+            <text class="hero-vip-badge" wx:if="{{ (item.isMe && isVip) || item.isVip }}">👑 VIP</text>
+            <text 
+              class="hero-title-tag tier-{{ item.titleTier || 'green' }}" 
+              wx:if="{{ item.title }}"
+              style="{{ item.titleBadgeBg ? ('background: ' + item.titleBadgeBg + '; color: ' + item.titleTagColor + '; border-color: ' + item.titleBorderColor + ';') : '' }}"
+            >{{ item.title }}</text>
             <text class="me-badge" wx:if="{{ item.isMe }}">我</text>
           </view>
           <view class="hero-slogan-wrap" wx:if="{{ item.quote }}">
@@ -127,7 +143,7 @@
     <!-- 底部已展示前50名英雄结语 -->
     <view class="list-end-footer" wx:if="{{ list.length >= 50 }}">
       <view class="footer-divider-line"></view>
-      <text class="footer-text">✦ 全国前 50 席英雄榜 · 顶峰相见 ✦</text>
+      <text class="footer-text">✦ 全国前 50 席英雄榜 · 每日均可点赞送心 ✦</text>
       <view class="footer-divider-line"></view>
     </view>
 

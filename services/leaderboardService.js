@@ -1,4 +1,6 @@
-// utils/leaderboardService.js
+// services/leaderboardService.js
+import { getActiveUserTitle, getTitleMetaByName } from '../configs/achievements.js';
+import { storageService } from './storageService.js';
 
 export const DEFAULT_LEADERBOARD_DATA = [
   {
@@ -11,6 +13,7 @@ export const DEFAULT_LEADERBOARD_DATA = [
     days: 92,
     title: '无烟圣尊',
     likes: 2841,
+    isVip: true,
     quote: '答应小公主的话，一定要做到！现在呼吸一身轻松。'
   },
   {
@@ -21,7 +24,7 @@ export const DEFAULT_LEADERBOARD_DATA = [
     substituted: 1260,
     savedMoney: 3780,
     days: 85,
-    title: '意志泰斗',
+    title: '金身不灭',
     likes: 2430,
     quote: '想抽了就用【我抽一支】过过干瘾，真的顶过去了。'
   },
@@ -33,8 +36,9 @@ export const DEFAULT_LEADERBOARD_DATA = [
     substituted: 1100,
     savedMoney: 2750,
     days: 78,
-    title: '金牌克制家',
+    title: '千支封神',
     likes: 2105,
+    isVip: true,
     quote: '咽炎和咳嗽全好了，这辈子最划算的投资。'
   },
   {
@@ -45,7 +49,7 @@ export const DEFAULT_LEADERBOARD_DATA = [
     substituted: 980,
     savedMoney: 3920,
     days: 70,
-    title: '孝心楷模',
+    title: '百日涅槃',
     likes: 1950,
     quote: '以前抽高档烟太烧钱，今年母亲节直接送老妈金镯子！'
   },
@@ -57,8 +61,9 @@ export const DEFAULT_LEADERBOARD_DATA = [
     substituted: 890,
     savedMoney: 2225,
     days: 64,
-    title: '坚毅行者',
+    title: '千元逆袭',
     likes: 1720,
+    isVip: true,
     quote: '不给肺泡增加一毫克焦油，坚持就是胜利。'
   },
   {
@@ -604,6 +609,38 @@ export const DEFAULT_LEADERBOARD_DATA = [
 ];
 
 const LIKES_KEY = 'just_one_smoke_leaderboard_likes';
+const DAILY_LIKES_KEY = 'just_one_smoke_leaderboard_daily_likes';
+const ACCUMULATED_LIKES_KEY = 'just_one_smoke_leaderboard_acc_likes';
+
+function getTodayDateStr() {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function getLikesData() {
+  const todayStr = getTodayDateStr();
+  let dailyLikes = {};
+  let accLikes = {};
+  try {
+    dailyLikes = wx.getStorageSync(DAILY_LIKES_KEY) || {};
+    accLikes = wx.getStorageSync(ACCUMULATED_LIKES_KEY) || {};
+    // 防御式向下兼容旧版单一 LIKES_KEY
+    const oldLikes = wx.getStorageSync(LIKES_KEY);
+    if (oldLikes && typeof oldLikes === 'object' && Object.keys(accLikes).length === 0) {
+      Object.keys(oldLikes).forEach(k => {
+        if (oldLikes[k]) {
+          accLikes[k] = 1;
+        }
+      });
+      wx.setStorageSync(ACCUMULATED_LIKES_KEY, accLikes);
+    }
+  } catch (e) {}
+
+  return { todayStr, dailyLikes, accLikes };
+}
 
 function getUserQuote(substituted = 0, days = 1) {
   if (days >= 30) return '跨过满月大关，呼吸如山风般纯净透亮！';
@@ -616,17 +653,13 @@ function getUserQuote(substituted = 0, days = 1) {
 function getCategoryKey(category) {
   if (category === 'saved') return 'savedMoney';
   if (category === 'days') return 'days';
+  if (category === 'likes') return 'likes';
   return 'substituted';
 }
 
 export const leaderboardService = {
   getLeaderboard(category = 'substituted', myStats = { substituted: 0, savedMoney: 0, days: 1 }, userProfile = null) {
-    let likesMap = {};
-    try {
-      likesMap = wx.getStorageSync(LIKES_KEY) || {};
-    } catch (e) {
-      likesMap = {};
-    }
+    const { todayStr, dailyLikes, accLikes } = getLikesData();
 
     // 解析当前用户资料（防御式回退支持持久化缓存）
     let profile = userProfile;
@@ -638,11 +671,20 @@ export const leaderboardService = {
       } catch (e) {}
     }
 
-    // 称号判定 (纯净中文称号，不带任何尾部图标与Emoji)
+    // 称号判定：获取当前已佩戴或最高品阶解锁的荣耀称号
     let myTitle = '无烟觉醒者';
-    if (myStats.substituted >= 100) myTitle = '黄金替瘾先锋';
-    else if (myStats.substituted >= 30) myTitle = '意志破茧者';
-    else if (myStats.substituted >= 10) myTitle = '健康启航者';
+    try {
+      const unlockedIds = storageService.getUnlockedAchievements() || [];
+      const equippedTitle = storageService.getEquippedTitle();
+      myTitle = getActiveUserTitle(unlockedIds, equippedTitle);
+    } catch (e) {
+      if (myStats.substituted >= 100) myTitle = '千支封神';
+      else if (myStats.substituted >= 30) myTitle = '整条奇迹';
+      else if (myStats.substituted >= 10) myTitle = '五盒大关';
+    }
+
+    // 获取用户称号对应专属品阶样式
+    const myTitleMeta = getTitleMetaByName(myTitle);
 
     // 构建当前用户榜单实体
     const meItem = {
@@ -655,17 +697,28 @@ export const leaderboardService = {
       savedMoney: myStats.savedMoney || 0,
       days: myStats.days || 1,
       title: myTitle,
-      likes: (50 + Math.min(50, myStats.substituted || 0)) + (likesMap['me'] ? 1 : 0),
-      isLiked: !!likesMap['me'],
+      titleTier: myTitleMeta.tier,
+      titleTagColor: myTitleMeta.tagColor,
+      titleBadgeBg: myTitleMeta.badgeBg,
+      titleBorderColor: myTitleMeta.borderColor,
+      likes: (50 + Math.min(50, myStats.substituted || 0)) + (accLikes['me'] || 0),
+      isLiked: dailyLikes['me'] === todayStr,
       quote: (profile && profile.customQuote) ? profile.customQuote : getUserQuote(myStats.substituted, myStats.days)
     };
 
-    // 复制基础数据并更新点赞
-    let mockList = DEFAULT_LEADERBOARD_DATA.map(item => ({
-      ...item,
-      likes: item.likes + (likesMap[item.id] ? 1 : 0),
-      isLiked: !!likesMap[item.id]
-    }));
+    // 复制基础数据并更新点赞与称号专属品阶样式
+    let mockList = DEFAULT_LEADERBOARD_DATA.map(item => {
+      const meta = getTitleMetaByName(item.title);
+      return {
+        ...item,
+        titleTier: meta.tier,
+        titleTagColor: meta.tagColor,
+        titleBadgeBg: meta.badgeBg,
+        titleBorderColor: meta.borderColor,
+        likes: item.likes + (accLikes[item.id] || 0),
+        isLiked: dailyLikes[item.id] === todayStr
+      };
+    });
 
     // 依据选定分类排序
     const metricKey = getCategoryKey(category);
@@ -705,10 +758,15 @@ export const leaderboardService = {
       myRankInfo: {
         rank: myRank,
         title: myTitle,
+        titleTier: myTitleMeta.tier,
+        titleTagColor: myTitleMeta.tagColor,
+        titleBadgeBg: myTitleMeta.badgeBg,
+        titleBorderColor: myTitleMeta.borderColor,
         beatPercent,
         substituted: myStats.substituted,
         savedMoney: myStats.savedMoney,
         days: myStats.days,
+        likes: meItem.likes,
         quote: meItem.quote
       }
     };
@@ -716,13 +774,26 @@ export const leaderboardService = {
 
   toggleLike(id) {
     try {
-      let likesMap = wx.getStorageSync(LIKES_KEY) || {};
-      let isLiked = !likesMap[id];
-      likesMap[id] = isLiked;
-      wx.setStorageSync(LIKES_KEY, likesMap);
-      return isLiked;
+      const { todayStr, dailyLikes, accLikes } = getLikesData();
+      const isLikedToday = dailyLikes[id] === todayStr;
+
+      if (!isLikedToday) {
+        // 今日未点赞 -> 执行今日点赞 (+1)
+        dailyLikes[id] = todayStr;
+        accLikes[id] = (accLikes[id] || 0) + 1;
+        wx.setStorageSync(DAILY_LIKES_KEY, dailyLikes);
+        wx.setStorageSync(ACCUMULATED_LIKES_KEY, accLikes);
+        return { isLiked: true, message: '今日点赞成功！每天都能为烟友点赞一次' };
+      } else {
+        // 今日已点赞 -> 取消今日点赞 (-1)
+        delete dailyLikes[id];
+        accLikes[id] = Math.max(0, (accLikes[id] || 1) - 1);
+        wx.setStorageSync(DAILY_LIKES_KEY, dailyLikes);
+        wx.setStorageSync(ACCUMULATED_LIKES_KEY, accLikes);
+        return { isLiked: false, message: '已取消今日点赞' };
+      }
     } catch (e) {
-      return false;
+      return { isLiked: false, message: '' };
     }
   }
 };

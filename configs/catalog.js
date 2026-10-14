@@ -2,6 +2,14 @@
 import { vipService } from '../services/vipService.js';
 import { storageService } from '../services/storageService.js';
 
+// =========================================================================================
+// 烟盒容量与陈列模式开关 (Pack Display & Layout Mode)
+// 模式 1: 'row6' (高频商业化·宽幕轻奢 6 支单排品鉴装 - 消耗快/高频触发看广告与开通会员/滤嘴特写极佳)
+// 模式 2: 'matrix20' (经典 20 支前后双排矩阵 - 10+10 阶梯陈列，代码与样式完整保留随时切回)
+// =========================================================================================
+export const PACK_DISPLAY_MODE = 'row6'; // 随时可切换为 'matrix20'
+export const DEFAULT_PACK_CAPACITY = PACK_DISPLAY_MODE === 'row6' ? 6 : 20;
+
 export const CIGARETTE_CATALOG = [
   // ==================== 价格从低到高梯度排序 (0元 ~ 680元) ====================
 
@@ -28,7 +36,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/pure_zen.png',
     requiredCount: 60,
     unlockDesc: '累计替烟 60 支解锁',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -71,7 +79,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/hand_rolled_hanyan.png',
     requiredCount: 0,
     unlockDesc: '初始默认解锁 · 岁月手卷',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -113,7 +121,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/baisha.png',
     requiredCount: 0,
     unlockDesc: '初始默认解锁 · 飞翔白沙',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -155,7 +163,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/hongtashan.png',
     requiredCount: 0,
     unlockDesc: '初始默认解锁 · 红塔经典',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -197,7 +205,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/shuangxi.png',
     requiredCount: 0,
     unlockDesc: '初始默认解锁 · 百年双喜',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -239,7 +247,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/zhongnanhai.png',
     requiredCount: 0,
     unlockDesc: '初始默认解锁 · 低焦先驱',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -281,7 +289,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/hong_nanjing.png',
     requiredCount: 0,
     unlockDesc: '初始默认解锁 · 经典红南京',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -323,7 +331,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/chaotianmen.png',
     requiredCount: 0,
     unlockDesc: '初始默认解锁 · 实机同款',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -365,7 +373,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/nanyang_shuangxi.png',
     requiredCount: 1,
     unlockDesc: '累计替烟 1 支解锁 · 港式经典',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -407,7 +415,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/liqun.png',
     requiredCount: 0,
     unlockDesc: '初始默认解锁 · 国民口粮',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -452,7 +460,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/xuanhemen.png',
     requiredCount: 0,
     unlockDesc: '初始默认解锁 · 细支传奇',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'slender',
     lidLine: 168,
     packTheme: {
@@ -494,7 +502,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/ruanlan.png',
     requiredCount: 1,
     unlockDesc: '累计替烟 1 支解锁',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -536,7 +544,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/yuxi_soft.png',
     requiredCount: 1,
     unlockDesc: '累计替烟 1 支解锁',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -581,7 +589,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/guiyan.png',
     requiredCount: 2,
     unlockDesc: '累计替烟 2 支解锁',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'slender',
     lidLine: 168,
     packTheme: {
@@ -623,7 +631,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/furongwang.png',
     requiredCount: 0,
     unlockDesc: '初始默认解锁 · 国民硬通货',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -668,7 +676,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/furongwang_slender.png',
     requiredCount: 2,
     unlockDesc: '累计替烟 2 支解锁',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'slender',
     lidLine: 168,
     packTheme: {
@@ -713,7 +721,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/jiangnan.png',
     requiredCount: 3,
     unlockDesc: '累计替烟 3 支解锁',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'slender',
     lidLine: 168,
     packTheme: {
@@ -758,7 +766,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/marlboro.png',
     requiredCount: 4,
     unlockDesc: '累计替烟 4 支解锁',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -803,7 +811,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/mevius_blueberry.png',
     requiredCount: 3,
     unlockDesc: '累计替烟 3 支解锁 · 港免爆款',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -845,7 +853,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/castor_vanilla.png',
     requiredCount: 4,
     unlockDesc: '累计替烟 4 支解锁 · 香草奶香',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -887,7 +895,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/hehua.png',
     requiredCount: 2,
     unlockDesc: '累计替烟 2 支解锁',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -929,7 +937,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/hongfangyin.png',
     requiredCount: 3,
     unlockDesc: '累计替烟 3 支解锁',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -971,7 +979,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/sobranie_black.png',
     requiredCount: 6,
     unlockDesc: '累计替烟 6 支解锁 · 欧洲潮玩',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -1016,7 +1024,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/kuanzhai.png',
     requiredCount: 5,
     unlockDesc: '累计替烟 5 支解锁',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -1058,7 +1066,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/chunghwa.png',
     requiredCount: 0,
     unlockDesc: '初始默认解锁 · 国烟经典',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -1104,7 +1112,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/niulai_cinema.png',
     requiredCount: 0,
     unlockDesc: '初始默认解锁 · 鸿运牛来',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -1150,7 +1158,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/ultraman_tiga.png',
     requiredCount: 0,
     unlockDesc: '初始默认解锁 · 化身为光',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -1195,7 +1203,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/chunghwa_double.png',
     requiredCount: 10,
     unlockDesc: '累计替烟 10 支解锁',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'slender',
     lidLine: 168,
     packTheme: {
@@ -1241,7 +1249,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/gf_happy_smile.png',
     requiredCount: 0,
     unlockDesc: '初始默认解锁 · 专属开心果',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -1283,7 +1291,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/hhl1916.png',
     requiredCount: 15,
     unlockDesc: '累计替烟 15 支解锁',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -1325,7 +1333,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/hetianxia.png',
     requiredCount: 20,
     unlockDesc: '累计替烟 20 支解锁',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'standard',
     lidLine: 168,
     packTheme: {
@@ -1371,7 +1379,7 @@ export const CIGARETTE_CATALOG = [
     packImage: '/images/packs/gf_moonlight_muse.png',
     requiredCount: 0,
     unlockDesc: '初始默认解锁 · 520限定挚爱',
-    packCapacity: 20,
+    packCapacity: DEFAULT_PACK_CAPACITY,
     packType: 'slender',
     lidLine: 168,
     packTheme: {

@@ -9,7 +9,9 @@ import {
   DEFAULT_CIGARETTE,
   getCigaretteById,
   isCigaretteUnlocked,
-  computeFlightStyles
+  computeFlightStyles,
+  PACK_DISPLAY_MODE,
+  DEFAULT_PACK_CAPACITY
 } from '../../configs/catalog.js';
 
 function measureSafeAreaSync() {
@@ -41,13 +43,16 @@ Page({
 
     vipTheme: '',
 
+    // 烟盒陈列模式 ('row6': 6支宽幕轻奢单排 | 'matrix20': 经典20支双排矩阵)
+    packLayoutMode: PACK_DISPLAY_MODE,
+
     // 当前选中的名烟与烟盒
     currentCigarette: DEFAULT_CIGARETTE,
     isCurrentUnlocked: true,
     isTrialMode: false,
-    packCapacity: 20, // 盒内总容量 (20支 / 雪茄5支)
-    packCount: 20, // 盒内剩余烟支数量
-    slotArray: [], // 槽位索引数组 [0..19] 或 [0..4]
+    packCapacity: DEFAULT_PACK_CAPACITY, // 盒内总容量 (6支品鉴装 / 20支标准装 / 雪茄5支)
+    packCount: DEFAULT_PACK_CAPACITY, // 盒内剩余烟支数量
+    slotArray: [], // 槽位索引数组 [0..5] 或 [0..19] 或 [0..4]
     slotStates: [], // 每个槽位是否有烟状态数组 [true, false, ...]
     pullVfxType: 'vfx2', // 'vfx1' (经典出鞘 360°) | 'vfx2' (九天游龙 720°)
     flightStyles: computeFlightStyles(DEFAULT_CIGARETTE),
@@ -68,7 +73,7 @@ Page({
     const targetId = (query && query.id) ? query.id : storageService.getSelectedCigaretteId();
     const curCig = getCigaretteById(targetId) || DEFAULT_CIGARETTE;
 
-    const capacity = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
+    const capacity = curCig.packCapacity || (curCig.isCigar ? 5 : DEFAULT_PACK_CAPACITY);
     // 读取真实剩余槽位状态与剩余数量（绝不强制重置未抽完的烟盒，保留被抽走后的空槽位置）
     const slotStates = storageService.getPackSlots(curCig.id, capacity);
     const count = slotStates.filter(Boolean).length;
@@ -98,6 +103,7 @@ Page({
     // 单次原子化 setData 直出目标名烟 3D 状态，包含完整 flightStyles 与独立槽位状态
     this.setData({
       vipTheme: vipService.getVipTheme(),
+      packLayoutMode: PACK_DISPLAY_MODE,
       currentCigarette: curCig,
       isCurrentUnlocked: unlocked,
       isTrialMode: this._fromTrial,
@@ -243,11 +249,12 @@ Page({
       });
       return;
     }
-    const capacity = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
+    const capacity = curCig.packCapacity || (curCig.isCigar ? 5 : DEFAULT_PACK_CAPACITY);
     const slotStates = storageService.getPackSlots(curCig.id, capacity);
     const count = slotStates.filter(Boolean).length;
     this.setData({
       vipTheme: vipService.getVipTheme(),
+      packLayoutMode: PACK_DISPLAY_MODE,
       isCurrentUnlocked: unlocked,
       isTrialMode: !!this._fromTrial,
       packCapacity: capacity,
@@ -304,7 +311,7 @@ Page({
       return;
     }
     const curCig = this.data.currentCigarette;
-    const capacity = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
+    const capacity = curCig.packCapacity || (curCig.isCigar ? 5 : DEFAULT_PACK_CAPACITY);
 
     // 若整盒已全部取空，自动拆封全新一盒并抽取所点位置
     if (this.data.packCount <= 0) {
@@ -341,7 +348,7 @@ Page({
       return;
     }
     const curCig = this.data.currentCigarette;
-    const capacity = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
+    const capacity = curCig.packCapacity || (curCig.isCigar ? 5 : DEFAULT_PACK_CAPACITY);
     let slots = Array.isArray(this.data.slotStates) && this.data.slotStates.length === capacity
       ? this.data.slotStates
       : storageService.getPackSlots(curCig.id, capacity);
@@ -384,7 +391,7 @@ Page({
     triggerHaptic('heavy');
 
     const curCig = this.data.currentCigarette;
-    const capacity = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
+    const capacity = curCig.packCapacity || (curCig.isCigar ? 5 : DEFAULT_PACK_CAPACITY);
     // 持久化当前槽位被抽空，并扣减盒内剩余数量
     const { slots: updatedSlots, remaining, consumedIndex } = storageService.consumePackSlot(curCig.id, slotIndex, capacity);
     const activeSlot = consumedIndex >= 0 ? consumedIndex : slotIndex;
@@ -407,11 +414,20 @@ Page({
 
     // 计算被点击槽位的水平偏移（用于从对应槽位垂直拔出并衔接 S 弧线起点）
     const isCigar = !!curCig.isCigar;
-    const col = isCigar ? (activeSlot % 5) : (activeSlot % 10);
-    const rowShift = isCigar ? 0 : (activeSlot < 10 ? 4 : -4);
-    const slotOffsetX = isCigar
-      ? Math.round((col - 2) * 32)
-      : Math.round((col - 4.5) * 28 + rowShift);
+    let slotOffsetX = 0;
+    if (isCigar) {
+      const col = activeSlot % 5;
+      slotOffsetX = Math.round((col - 2) * 32);
+    } else if (this.data.packLayoutMode === 'row6') {
+      // 6 支宽幕单排：0..5 对应 6 列，中心对称点为 2.5
+      const col = activeSlot % 6;
+      slotOffsetX = Math.round((col - 2.5) * 52);
+    } else {
+      // 原 20 支双排矩阵 (保留代码备用)
+      const col = activeSlot % 10;
+      const rowShift = activeSlot < 10 ? 4 : -4;
+      slotOffsetX = Math.round((col - 4.5) * 28 + rowShift);
+    }
 
     // 阶段 02 [点击触发] (0.00s ~ 0.24s)：盒底全息波纹 + 被点击的那支烟发光垂直拔升出仓
     this.setData({
@@ -488,11 +504,12 @@ Page({
     this.clearPullTimers();
 
     const curCig = this.data.currentCigarette;
-    const capacity = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
+    const capacity = curCig.packCapacity || (curCig.isCigar ? 5 : DEFAULT_PACK_CAPACITY);
     const count = storageService.resetPackCount(curCig.id, capacity);
     const slotStates = storageService.getPackSlots(curCig.id, capacity);
 
     this.setData({
+      packLayoutMode: PACK_DISPLAY_MODE,
       packCapacity: capacity,
       packCount: count,
       slotStates,
@@ -531,12 +548,21 @@ Page({
     } catch (e) {}
 
     const pages = getCurrentPages();
-    const indexPageIndex = pages.findIndex(p => p.route === 'pages/index/index');
+    const indexPageIndex = pages.findIndex(p => {
+      const route = (p.route || p.__route__ || '').replace(/^\//, '');
+      return route === 'pages/index/index';
+    });
     if (indexPageIndex !== -1) {
       const delta = pages.length - 1 - indexPageIndex;
-      wx.navigateBack({ delta });
+      if (delta > 0) {
+        wx.navigateBack({ delta });
+      }
     } else {
-      wx.reLaunch({ url: '/pages/index/index' });
+      if (pages.length > 1) {
+        wx.navigateBack({ delta: pages.length - 1 });
+      } else {
+        wx.redirectTo({ url: '/pages/index/index' });
+      }
     }
   },
 

@@ -46,10 +46,32 @@ Component({
   },
 
   data: {
-    defaultAvatarSvg: DEFAULT_USER_AVATAR_SVG
+    defaultAvatarSvg: DEFAULT_USER_AVATAR_SVG,
+    vipAnimPhase: 'a'
+  },
+
+  observers: {
+    'currentCategory, isVip': function(currentCategory, isVip) {
+      if (this._lastCategory !== currentCategory || this._lastIsVip !== isVip) {
+        this._lastCategory = currentCategory;
+        this._lastIsVip = isVip;
+        this.syncVipSweepAnimation();
+      }
+    }
+  },
+
+  lifetimes: {
+    ready() {
+      this.syncVipSweepAnimation();
+    }
   },
 
   methods: {
+    syncVipSweepAnimation() {
+      const nextPhase = this.data.vipAnimPhase === 'a' ? 'b' : 'a';
+      this.setData({ vipAnimPhase: nextPhase });
+    },
+
     onSwitchCategory(e) {
       const category = e.currentTarget.dataset.category;
       this.triggerEvent('changecategory', { category });
