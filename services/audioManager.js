@@ -17,6 +17,7 @@ class AudioManager {
     this._sharedNoiseBuffer = null;
     this._ambientBuffers = {};
     this._audioOptionInitialized = false;
+    this._localAudioPool = {};
     this.initWeChatAudioOption();
   }
 
@@ -50,26 +51,32 @@ class AudioManager {
     return this._sharedNoiseBuffer;
   }
 
-  // 播放本地高品质真实音效文件 (微信原生 InnerAudioContext 硬件加速播放)
+  // 播放本地高品质真实音效文件 (微信原生 InnerAudioContext 硬件加速播放 · 单例池复用保障 60FPS 零泄露)
   playLocalAudio(filePath, fallbackFn) {
     if (this.muted) return;
     this.initWeChatAudioOption();
     try {
       if (typeof wx !== 'undefined' && wx.createInnerAudioContext) {
-        const audio = wx.createInnerAudioContext();
-        audio.src = filePath;
+        if (!this._localAudioPool) this._localAudioPool = {};
+        let audio = this._localAudioPool[filePath];
+        if (!audio) {
+          audio = wx.createInnerAudioContext();
+          audio.src = filePath;
+          audio.onError((err) => {
+            console.warn('InnerAudioContext failed:', filePath, err);
+            try { audio.destroy(); } catch (e) {}
+            delete this._localAudioPool[filePath];
+            if (fallbackFn) fallbackFn.call(this);
+          });
+          this._localAudioPool[filePath] = audio;
+        }
         audio.volume = this.volume;
-        audio.onError((err) => {
-          console.warn('InnerAudioContext failed:', filePath, err);
-          if (fallbackFn) fallbackFn.call(this);
-          try { audio.destroy(); } catch (e) {}
-        });
-        audio.onEnded(() => {
-          try { audio.destroy(); } catch (e) {}
-        });
-        audio.onStop(() => {
-          try { audio.destroy(); } catch (e) {}
-        });
+        try {
+          audio.stop();
+          if (typeof audio.seek === 'function') {
+            audio.seek(0);
+          }
+        } catch (e) {}
         audio.play();
         return;
       }

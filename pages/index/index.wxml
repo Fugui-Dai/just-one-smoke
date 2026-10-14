@@ -4,27 +4,17 @@
   <!-- ==================== 沉浸式模拟器主页 ==================== -->
   <view class="tab-page simulator-tab active">
 
-    <!-- ==================== 右侧主控 DOCK 栏 (一体化极光星轨 · 贯通单线 · 零接缝) ==================== -->
+    <!-- ==================== 右侧主控 DOCK 栏 (极简无界 · 纯净通透悬浮 · 零外壳边框) ==================== -->
     <view class="right-arc-dock">
-      
-      <!-- 🌊 一体化数学相切流体外壳背景 (凹圆角与凸圆角在拐点一阶相切 · 顶底零直角 · 完美顺滑贴边) -->
-      <image class="dock-fluid-shell-bg" src="{{ dockFluidShellUri }}" mode="scaleToFill" />
 
-      <!-- 1. 声音 (喇叭静音/声音开关 · 顶层声学主控) -->
-      <view class="dock-btn-wrap" bindtap="toggleMute">
-        <view class="dock-circle-btn sound-btn-circle {{ isMuted ? 'is-muted-btn' : '' }}">
-          <image class="dock-svg-icon sound-svg-icon" src="{{ isMuted ? soundMuteIconUri : soundOnIconUri }}" mode="aspectFit" />
-        </view>
-        <text class="dock-title">{{ isMuted ? '静音' : '声音' }}</text>
-      </view>
-
-      <!-- 2. 点燃 / 掐灭 (第一核心操作，点火起烟) -->
+      <!-- 1. 点燃 / 掐灭 / 抽新烟 (第一核心操作：未点燃显示点燃，燃烧中显示掐灭，燃尽抽完显示抽新烟) -->
       <view class="dock-btn-wrap" bindtap="triggerIgnite">
-        <view class="dock-circle-btn ignite-btn {{ (simulatorState !== 'UNLIT' && simulatorState !== 'FINISHED') ? 'is-lit' : '' }}">
-          <image class="dock-svg-icon extinguish-svg-icon" src="{{ extinguishIconUri }}" mode="aspectFit" wx:if="{{ simulatorState !== 'UNLIT' && simulatorState !== 'FINISHED' }}" />
+        <view class="dock-circle-btn ignite-btn {{ simulatorState === 'FINISHED' ? 'is-draw-new' : ((simulatorState !== 'UNLIT') ? 'is-lit' : '') }}">
+          <image class="dock-svg-icon draw-svg-icon" src="{{ drawCigIconUri }}" mode="aspectFit" wx:if="{{ simulatorState === 'FINISHED' }}" />
+          <image class="dock-svg-icon extinguish-svg-icon" src="{{ extinguishIconUri }}" mode="aspectFit" wx:elif="{{ simulatorState !== 'UNLIT' }}" />
           <image class="dock-svg-icon ignite-svg-icon" src="{{ igniteIconUri }}" mode="aspectFit" wx:else />
         </view>
-        <text class="dock-title">{{ (simulatorState === 'UNLIT' || simulatorState === 'FINISHED') ? '点燃' : '掐灭' }}</text>
+        <text class="dock-title">{{ simulatorState === 'FINISHED' ? '抽新烟' : (simulatorState === 'UNLIT' ? '点燃' : '掐灭') }}</text>
       </view>
 
       <!-- 3. 抖灰 (圆形烟灰进度条 + 顺时针烟灰环 + 灰图标) -->
@@ -162,24 +152,11 @@
         bindtouchcancel="onTouchEnd"
       ></canvas>
 
-
-
-
-
-      <!-- 右上角音效开关已移至 simulator-tab 顶层 -->
-
     </view>
 
     <!-- 底部核心操作栏已移至右侧Dock -->
 
   </view>
-
-
-
-
-
-
-
 
   <!-- ==================== 弹窗 1: 抽完结算达成弹窗 (腾讯高品质游戏化胜利战报) ==================== -->
   <view class="glass-modal-backdrop reward-modal-backdrop" wx:if="{{ showRewardModal }}" catchtouchmove="preventTouchMove">
@@ -279,10 +256,10 @@
 
       <!-- 操作按钮阶梯 -->
       <view class="dialog-btn-stack">
-        <button class="primary-gold-btn reward-confirm-btn" bindtap="closeRewardModal">
+        <button class="primary-gold-btn reward-confirm-btn" catchtap="closeRewardModal">
           <text class="btn-main-text">💪 收下战果 · 功德+1</text>
         </button>
-        <button class="secondary-dark-btn reward-again-btn" bindtap="restartCigarette">
+        <button class="secondary-dark-btn reward-again-btn" catchtap="drawNewCigarette">
           <text class="btn-sub-text">🚬 意犹未尽 · 再抽一支</text>
         </button>
       </view>
@@ -323,10 +300,24 @@
 
       <!-- 可滚动区域 -->
       <scroll-view class="scene-sheet-scroll" scroll-y="true" enhanced="true" show-scrollbar="false" scroll-into-view="{{ activeScrollSceneId }}">
-        <!-- 白噪音与声景伴吸 -->
+        <!-- 声学系统主控 (全局吸烟/点火交互音效 + 环境声景伴吸) -->
         <view class="menu-tools-section">
-          <text class="menu-section-title">🎧 环境白噪音伴吸</text>
-          <view class="scene-sound-toggle-bar" bindtap="toggleAmbientSound">
+          <text class="menu-section-title">🔊 声学氛围与交互音效</text>
+          
+          <!-- 1. 全局交互音效开关 (点火、吸烟、抽烟呼吸声、爆珠、抖灰等) -->
+          <view class="scene-sound-toggle-bar" bindtap="toggleMute">
+            <view class="sst-left">
+              <image class="sst-svg-icon" src="{{ isMuted ? soundMuteIconUri : soundOnIconUri }}" mode="aspectFit" />
+              <view class="sst-info">
+                <text class="sst-title">真实抽吸与点火音效</text>
+                <text class="sst-desc">{{ !isMuted ? '已开启 · 真实烟丝燃烧声、深呼吸、抖灰' : '已静音 · 全局静音纯净抽烟' }}</text>
+              </view>
+            </view>
+            <switch checked="{{ !isMuted }}" color="#f59e0b" style="pointer-events: none;" />
+          </view>
+
+          <!-- 2. 环境声景白噪音开关 -->
+          <view class="scene-sound-toggle-bar scene-ambient-toggle-bar" bindtap="toggleAmbientSound">
             <view class="sst-left">
               <text class="sst-icon">{{ isAmbientEnabled ? '🎧' : '🔇' }}</text>
               <view class="sst-info">
@@ -421,7 +412,7 @@
               <text class="ec-desc">{{ item.description }}</text>
               <view class="ec-price-line">
                 <text class="ec-price-tag">{{ item.priceDisplay }}</text>
-                <text class="ec-need-note" wx:if="{{ !item.unlocked && item.requiredCount > 0 }}">需替烟 {{ item.requiredCount }} 支 (已替 {{ totalSubstituted }} 支)</text>
+                <text class="ec-need-note" wx:if="{{ !item.unlocked && item.requiredCount > 0 }}">还差 {{ item.requiredCount - totalSubstituted > 0 ? (item.requiredCount - totalSubstituted) : 1 }} 支即可免费点亮 (进度 {{ totalSubstituted }}/{{ item.requiredCount }})</text>
               </view>
             </view>
 

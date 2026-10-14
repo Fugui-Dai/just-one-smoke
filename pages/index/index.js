@@ -36,6 +36,7 @@ import {
 import {
   EXTINGUISH_ICON_SVG,
   IGNITE_ICON_SVG,
+  DRAW_CIG_ICON_SVG,
   INHALE_ICON_SVG,
   SMOKE_VFX_ICON_SVG,
   ASH_TAP_ICON_SVG,
@@ -67,6 +68,7 @@ Page({
     sceneAmbientIconUri: SCENE_AMBIENT_ICON_SVG,
     extinguishIconUri: EXTINGUISH_ICON_SVG,
     igniteIconUri: IGNITE_ICON_SVG,
+    drawCigIconUri: DRAW_CIG_ICON_SVG,
     inhaleIconUri: INHALE_ICON_SVG,
     smokeVfxIconUri: SMOKE_VFX_ICON_SVG,
     ashTapIconUri: ASH_TAP_ICON_SVG,
@@ -303,8 +305,15 @@ Page({
     if (this.canvas && !this.isLoopRunning) {
       this.startRenderLoop();
     }
-    this.checkSmokeGuide();
-    this.checkSceneGuide();
+    const app = typeof getApp === 'function' ? getApp() : null;
+    const shouldShow = app && app.globalData ? app.globalData.shouldShowLaunchGuide : true;
+    if (shouldShow) {
+      if (app && app.globalData) {
+        app.globalData.shouldShowLaunchGuide = false;
+      }
+      this.checkSmokeGuide();
+      this.checkSceneGuide();
+    }
   },
 
   measureSafeArea() {
@@ -834,9 +843,19 @@ Page({
     if (this.data.isAshTapping) {
       return;
     }
+    // 燃尽界面触碰屏幕：若盒内有烟则顺畅取出一支新烟拿在手中；若烟盒已空则仅 Toast 提示、不跳转页面，跟递烟效果完全一致
     if (this.fsm.getState() === 'FINISHED') {
-      this.restartCigarette();
-      this.triggerIgnite();
+      if (this.data.showRewardModal || this._isDrawingCigarette) return;
+      const curCig = this.data.currentCigarette || DEFAULT_CIGARETTE;
+      const maxCap = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
+      const remaining = storageService.getPackCount(curCig.id, maxCap);
+      if (remaining <= 0) {
+        // 盒内已无烟：仅底部 Toast 提示，绝对不跳转页面，跟点击递烟一样的效果
+        triggerHaptic('medium');
+        toast.info('烟盒已空，可前往商店挑选名烟');
+        return;
+      }
+      this.drawNewCigarette();
       return;
     }
 
@@ -1000,15 +1019,10 @@ Page({
       });
     }
 
+    // 燃尽状态下主控按键已切换为【抽新烟】：触发抽烟逻辑（校验烟盒余量并展示全新未点燃名烟）
     if (this.data.simulatorState === 'FINISHED') {
-      const cap = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
-      if (storageService.getPackCount(curCig.id, cap) <= 0) {
-        storageService.resetPackCount(curCig.id, cap);
-      }
-      const { remaining } = storageService.consumePackSlot(curCig.id, -1, cap);
-      storageService.setHomeStickDigested(true);
-      this.setData({ currentPackRemaining: remaining });
-      this.restartCigarette();
+      this.drawNewCigarette();
+      return;
     }
     // 如果当前处于点燃状态，点击直接掐灭
     if (this.data.simulatorState !== 'UNLIT') {
@@ -1132,27 +1146,15 @@ Page({
 
     const curCig = this.data.currentCigarette || {};
     if (curCig.id === 'pure_oxygen_zen' || curCig.isAirCig) {
-      toast.info('纯空气卷无烟丝与烟灰，无需弹灰');
       triggerHaptic('light');
       return;
     }
 
-    const curState = this.fsm ? this.fsm.getState() : 'UNLIT';
-    if (curState === 'UNLIT') {
-      toast.info('香烟尚未点燃，暂无烟灰');
-      triggerHaptic('light');
-      return;
-    }
-    if (curState === 'FINISHED') {
-      toast.info('本支已燃尽，点击可开启下一支');
-      triggerHaptic('light');
-      return;
-    }
-
-    // 2. 状态机检查积灰量：若完全无积灰则温和提示
+    // 检查积灰量：若完全无积灰（比如刚点燃或刚拆包一支全新烟），给予指节轻弹微振，不弹出 Toast 打扰
     const curAshRatio = this.fsm ? (this.fsm.getAshRatio ? this.fsm.getAshRatio() : 0) : 0;
     if (curAshRatio <= 0.001) {
-      toast.info('暂无积灰，吸两口再弹灰吧~');
+      // 真实指节轻弹轻微物理反馈
+      audioManager.playAshTapSound();
       triggerHaptic('light');
       return;
     }
@@ -1359,9 +1361,69 @@ Page({
     });
   },
 
+  // 关闭战报弹窗：仅关闭弹窗，保留在抽完烟的燃尽界面 (保持 FINISHED 状态与烟蒂烟灰真实物理感)
   closeRewardModal() {
     this.setData({ showRewardModal: false });
+  },
+
+  // 抽新烟专属核心动作：确保烟盒余量校验、空盒弹窗拦截保护、去商店选烟或一键拆新盒 (全局严格唯一弹窗保障)
+  drawNewCigarette() {
+    audioManager.unlockAudio();
+
+    // 1. 全局互斥防重锁：杜绝触摸穿透、多次连击导致弹出多个窗口
+    const now = Date.now();
+    if (this._isDrawingCigarette || (this._lastDrawCigTime && now - this._lastDrawCigTime < 800)) {
+      return;
+    }
+    this._isDrawingCigarette = true;
+    this._lastDrawCigTime = now;
+
+    // 2. 无论此前战报弹窗是否打开，立即关闭战报弹窗，确保屏幕上永远只有一个弹窗，杜绝多窗口重叠
+    if (this.data.showRewardModal) {
+      this.setData({ showRewardModal: false });
+    }
+
+    // 校验 1 支尝鲜试抽凭证与名烟解锁状态
+    let curCig = this.data.currentCigarette || DEFAULT_CIGARETTE;
+    const totalSubs = storageService.getRecords().length;
+    const trialInfo = storageService.getTrialCigaretteInfo();
+    if (!isCigaretteUnlocked(curCig.id, totalSubs) && !vipService.isVip() && (!trialInfo || trialInfo.id !== curCig.id)) {
+      const revertId = (trialInfo && trialInfo.prevId) ? trialInfo.prevId : 'chaotianmen_gold';
+      curCig = getCigaretteById(revertId) || DEFAULT_CIGARETTE;
+      storageService.setSelectedCigaretteId(curCig.id);
+      const revCap = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
+      this.setData({
+        currentCigarette: curCig,
+        currentPackRemaining: storageService.getPackCount(curCig.id, revCap),
+        isBeadPopped: false
+      });
+    }
+
+    const maxCap = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
+    const remaining = storageService.getPackCount(curCig.id, maxCap);
+
+    // 3. 烟盒已空：零弹框、不跳转，仅通过底部微胶囊 Toast 优雅提示
+    if (remaining <= 0) {
+      triggerHaptic('medium');
+      toast.info('烟盒已空，可前往商店挑选名烟');
+      setTimeout(() => {
+        this._isDrawingCigarette = false;
+      }, 500);
+      return;
+    }
+
+    // 4. 盒内有烟：正常取出一支新烟拿在手中 (重置为 UNLIT 未点燃全新香烟)
+    const { remaining: newRem } = storageService.consumePackSlot(curCig.id, -1, maxCap);
+    storageService.setHomeStickDigested(true);
+    audioManager.playPackOpenSound();
+    triggerHaptic('medium');
+    this.setData({
+      currentPackRemaining: newRem
+    });
     this.restartCigarette();
+    setTimeout(() => {
+      this._isDrawingCigarette = false;
+    }, 500);
   },
 
   toggleMute() {
@@ -1469,11 +1531,10 @@ Page({
     });
   },
 
-  // ================= 抽烟环境新手长按引导微气泡管线 (Tencent UX Scene Tooltip Pipeline) =================
+  // ================= 抽烟环境长按引导微气泡管线 (每次进入小程序均触发引导，3.8s后自动渐隐) =================
   checkSceneGuide() {
     try {
-      const seen = wx.getStorageSync('SCENE_GUIDE_SEEN');
-      if (!seen && !this.data.showSceneGuide) {
+      if (!this.data.showSceneGuide) {
         if (this._sceneGuideTimer) clearTimeout(this._sceneGuideTimer);
         // 延迟 800ms 优雅弹出，避开主页首屏渲染争抢
         this._sceneGuideTimer = setTimeout(() => {
@@ -1501,9 +1562,6 @@ Page({
       this._sceneGuideTimer = null;
     }
     this.setData({ isSceneGuideFading: true });
-    try {
-      wx.setStorageSync('SCENE_GUIDE_SEEN', true);
-    } catch (e) {}
     this._sceneGuideTimer = setTimeout(() => {
       this._sceneGuideTimer = null;
       this.setData({ showSceneGuide: false, isSceneGuideFading: false });
@@ -1542,11 +1600,10 @@ Page({
     toast.info(`已切换至【${nextScene.name}】`);
   },
 
-  // ================= 烟雾特效新手长按引导微气泡管线 (Tencent UX Tooltip Pipeline) =================
+  // ================= 烟雾特效长按引导微气泡管线 (每次进入小程序均触发引导，3.8s后自动渐隐) =================
   checkSmokeGuide() {
     try {
-      const seen = wx.getStorageSync('SMOKE_EFFECT_GUIDE_SEEN');
-      if (!seen && !this.data.showSmokeEffectGuide) {
+      if (!this.data.showSmokeEffectGuide) {
         if (this._guideTimer) clearTimeout(this._guideTimer);
         // 延迟 800ms 优雅弹出，避开主页首屏渲染争抢
         this._guideTimer = setTimeout(() => {
@@ -1574,9 +1631,6 @@ Page({
       this._guideTimer = null;
     }
     this.setData({ isGuideFading: true });
-    try {
-      wx.setStorageSync('SMOKE_EFFECT_GUIDE_SEEN', true);
-    } catch (e) {}
     this._guideTimer = setTimeout(() => {
       this._guideTimer = null;
       this.setData({ showSmokeEffectGuide: false, isGuideFading: false });
@@ -1861,25 +1915,10 @@ Page({
     const cap = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
     const cur = storageService.getPackCount(curCig.id, cap);
 
-    // 若当前烟盒已空（0支），弹窗指引前往商店挑选名烟或直接拆封新盒
+    // 若当前烟盒已空（0支）：零弹框、不跳转，仅通过底部微胶囊 Toast 优雅提示
     if (cur <= 0) {
-      wx.showModal({
-        title: '📦 烟盒已空',
-        content: `当前【${curCig.name}】已全部递完。前往商店挑选名烟或直接拆封新盒？`,
-        confirmText: '去商店',
-        cancelText: '拆封新盒',
-        confirmColor: '#f59e0b',
-        cancelColor: '#94a3b8',
-        success: (res) => {
-          if (res.confirm) {
-            this.openCigarettePicker();
-          } else if (res.cancel) {
-            const count = storageService.resetPackCount(curCig.id, cap);
-            this.setData({ currentPackRemaining: count });
-            toast.success(`✨ 已拆封全新一盒【${curCig.name}】！`);
-          }
-        }
-      });
+      triggerHaptic('medium');
+      toast.info('烟盒已空，可前往商店挑选名烟');
       return 0;
     }
 

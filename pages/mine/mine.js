@@ -290,11 +290,13 @@ Page({
 
   onLoad() {
     this._skipFirstShowRefresh = true;
+    this.measureSafeArea();
     this.refreshAllData();
   },
 
   onShow() {
     this._isNavigating = false;
+    this.measureSafeArea();
     if (this._skipFirstShowRefresh) {
       this._skipFirstShowRefresh = false;
       this.setData({ vipTheme: vipService.getVipTheme() });
@@ -310,7 +312,9 @@ Page({
 
   refreshAllData() {
     try {
+      const safeArea = measureSafeAreaSync();
       this.setData({
+        ...safeArea,
         ...computeMineStatsPayload(),
         vipTheme: vipService.getVipTheme()
       });
@@ -352,6 +356,14 @@ Page({
       toast.success('昵称已同步');
     } catch (err) {
       console.error('onUpdateNickname error:', err);
+    }
+  },
+
+  onTitleChange(e) {
+    try {
+      this.refreshAllData();
+    } catch (err) {
+      console.warn('onTitleChange error:', err);
     }
   },
 

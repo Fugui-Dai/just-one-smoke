@@ -54,7 +54,7 @@ export const SMOKE_EFFECTS = [
     badgeBg: 'rgba(236, 72, 153, 0.18)',
     badgeBorder: 'rgba(236, 72, 153, 0.45)',
     price: 6,
-    priceDisplay: '¥6 / 替烟3支',
+    priceDisplay: '替烟3支解锁',
     requiredCount: 3,
     requiredSavings: 3.75,
     description: '金粉丘比特爱神之箭破空贯穿，同心粉钻与玫瑰金双心旋转相拥，漫天垂落粉晶星屑与甜蜜微光',

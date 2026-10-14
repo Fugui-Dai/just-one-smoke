@@ -48,12 +48,13 @@
     todayCount="{{ todayCount }}"
     dailyTrends="{{ dailyTrends }}"
     whoStages="{{ whoStages }}"
-    topPadding="{{ statusBarHeight + navBarHeight }}"
+    topPadding="{{ (statusBarHeight || 44) + (navBarHeight || 44) }}"
     bindopenprofile="openProfileModal"
     bindupdateavatar="onUpdateAvatar"
     bindupdatenickname="onUpdateNickname"
     bindtoleaderboard="goToLeaderboard"
     bindgotoleaderboard="goToLeaderboard"
+    bindtitlechange="onTitleChange"
   />
 
   <!-- ==================== 偏好设置弹窗 (高定一屏无滑动全览) ==================== -->

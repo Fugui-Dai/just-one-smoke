@@ -11,10 +11,13 @@ const appOptions = {
     }
   },
   onShow() {
+    // 每次从小程序外部进入（启动/后台切回前台）时，重置引导标记
+    this.globalData.shouldShowLaunchGuide = true;
   },
   globalData: {
     appName: '我抽一支',
-    version: '1.0.0'
+    version: '1.0.0',
+    shouldShowLaunchGuide: true
   }
 };
 

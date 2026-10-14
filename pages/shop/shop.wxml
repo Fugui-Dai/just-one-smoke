@@ -245,9 +245,16 @@
             <text class="dpc-cat-tag">{{ dialogCigarette.brand }}</text>
           </view>
           <view class="dpc-price-line">
-            <text class="dpc-price-sym">指导零售价：¥</text>
-            <text class="dpc-price-val">{{ dialogCigarette.price }}</text>
-            <text class="dpc-price-unit">/ {{ dialogCigarette.isCigar ? '支' : '盒' }}</text>
+            <block wx:if="{{ isIOS }}">
+              <text class="dpc-price-sym">实体真烟参考：</text>
+              <text class="dpc-price-val">{{ dialogCigarette.price }}元</text>
+              <text class="dpc-price-unit">/ {{ dialogCigarette.isCigar ? '支' : '盒' }}（测算基准）</text>
+            </block>
+            <block wx:else>
+              <text class="dpc-price-sym">实体真烟参考价：¥</text>
+              <text class="dpc-price-val">{{ dialogCigarette.price }}</text>
+              <text class="dpc-price-unit">/ {{ dialogCigarette.isCigar ? '支' : '盒' }}</text>
+            </block>
           </view>
           <text class="dpc-slogan-line" wx:if="{{ dialogCigarette.slogan }}">“{{ dialogCigarette.slogan }}”</text>
         </view>

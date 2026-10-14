@@ -551,34 +551,29 @@
 
 
 
-/* ==================== 6. 右侧暗黑奇幻异形 DOCK 栏 (古典 S 形曲线 · 纤巧双层金线 · 完美裹覆) ==================== */
+/* ==================== 6. 右侧主控 DOCK 栏 (极简无界 · 纯净通透悬浮 · 零外壳边框) ==================== */
 .right-arc-dock {
   position: absolute;
   right: 0;
   top: 50%;
-  transform: translateY(-48%);
-  width: 116rpx;
+  transform: translateY(-50%);
+  width: 104rpx;
   box-sizing: border-box;
   background: transparent;
   border: none;
+  box-shadow: none;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 86rpx 0 78rpx 14rpx;
-  gap: 12rpx;
+  padding: 24rpx 0;
+  gap: 24rpx;
   z-index: 45;
   overflow: visible;
 }
 
-/* 一体化数学相切流体外壳底衬 (SVG 矢量精确贴合 · 绝对零接缝) */
+/* 一体化数学相切流体外壳底衬 (零边框极简模式下隐藏) */
 .dock-fluid-shell-bg {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 116rpx;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
+  display: none;
 }
 
 /* 每一个操作按钮胶囊单元 */
@@ -800,6 +795,29 @@ button.dock-btn-wrap.share-dock-item::after {
   }
   50% {
     box-shadow: 0 0 26rpx rgba(239, 68, 68, 0.85), inset 0 0 14rpx rgba(245, 158, 11, 0.45);
+    transform: scale(1.05);
+  }
+}
+
+/* 燃尽抽新烟状态：高奢曜金自律琉璃 · 呼吸流光 */
+.dock-circle-btn.ignite-btn.is-draw-new {
+  border: 1.5rpx solid rgba(251, 191, 36, 0.90);
+  background: radial-gradient(circle at 35% 28%, #fef08a 0%, #f59e0b 45%, #78350f 100%);
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.65), 0 0 20rpx rgba(245, 158, 11, 0.55), inset 0 2rpx 3rpx rgba(255, 255, 255, 0.60);
+  animation: draw-new-pulse 2.2s infinite ease-in-out;
+}
+
+.dock-circle-btn.ignite-btn.is-draw-new .dock-svg-icon {
+  filter: drop-shadow(0 2rpx 8rpx rgba(0, 0, 0, 0.45));
+}
+
+@keyframes draw-new-pulse {
+  0%, 100% {
+    box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.60), 0 0 16rpx rgba(245, 158, 11, 0.40);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.70), 0 0 24rpx rgba(251, 191, 36, 0.75);
     transform: scale(1.05);
   }
 }
@@ -2551,6 +2569,10 @@ button.dock-btn-wrap.share-dock-item::after {
   background: rgba(255, 255, 255, 0.08);
 }
 
+.scene-sound-toggle-bar.scene-ambient-toggle-bar {
+  margin-top: 12rpx;
+}
+
 .sst-left {
   display: flex;
   align-items: center;
@@ -2559,6 +2581,12 @@ button.dock-btn-wrap.share-dock-item::after {
 
 .sst-icon {
   font-size: 34rpx;
+}
+
+.sst-svg-icon {
+  width: 44rpx;
+  height: 44rpx;
+  flex-shrink: 0;
 }
 
 .sst-info {
@@ -2904,6 +2932,8 @@ button.dock-btn-wrap.share-dock-item::after {
   color: #fbbf24;
   font-weight: 700;
 }
+
+
 
 /* 烟雾特工坊 · 尊享展厅 (Smoke Effects Drawer) */
 .smoke-effects-drawer {

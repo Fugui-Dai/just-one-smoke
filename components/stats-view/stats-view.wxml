@@ -6,7 +6,7 @@
   bounces="{{ true }}" 
   show-scrollbar="{{ false }}"
 >
-  <view class="stats-content" style="padding-top: {{ topPadding }}px;">
+  <view class="stats-content" style="padding-top: calc({{ (topPadding && topPadding > 0) ? topPadding : 88 }}px + 24rpx);">
     
     <!-- 0. 个人微信头像、昵称与打卡卡片 (VIP 尊享曜石黑金名片 + 皇冠铭牌) -->
     <view class="user-profile-header-card {{ vipInfo.isVip ? 'is-vip-profile-card' : '' }}">
@@ -404,13 +404,8 @@
             <text class="badge-icon-emoji {{ !item.unlocked ? 'locked-emoji' : '' }}" wx:else>{{ item.icon }}</text>
           </view>
 
-          <!-- 称号四字定名 -->
+          <!-- 称号四字定名 (按要求称号名字底部不放任何文字) -->
           <text class="badge-name {{ item.isEquipped ? 'equipped-name' : (item.isNext ? 'next-name' : '') }}">{{ item.name }}</text>
-
-          <!-- 简要进度或已点亮标识 -->
-          <text class="badge-sub-progress {{ item.isEquipped ? 'equipped-text' : (item.unlocked ? 'done-text' : (item.isNext ? 'next-text' : 'locked-text')) }}">
-            {{ item.isEquipped ? '👑 佩戴中' : (item.unlocked ? '已点亮 ✓' : (item.isNext ? item.progress.progressText : '待前序点亮')) }}
-          </text>
         </view>
       </view>
     </view>

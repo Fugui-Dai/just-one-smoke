@@ -252,7 +252,7 @@
             <view class="lid-inner-foil-strip" style="background: {{ currentCigarette.packTheme.foilColor || '#f59e0b' }};"></view>
             <!-- 白卡纸立体凹槽内衬与品牌钢印 -->
             <view class="lid-inner-cardstock">
-              <view class="lid-inner-watermark">★ 20 FILTER CIGARETTES ★</view>
+              <view class="lid-inner-watermark">{{ packWatermarkText || '★ 20 FILTER CIGARETTES ★' }}</view>
               <view class="lid-dust-flap left"></view>
               <view class="lid-dust-flap right"></view>
               <view class="lid-hinge-shadow"></view>
@@ -498,8 +498,14 @@
           <view class="pull-btn-top-crest"></view>
           <view class="pull-btn-sheen"></view>
           <view class="btn-text-wrap">
-            <text class="btn-main-title">{{ packCount > 0 ? '我抽一支' : '拆封新盒并抽出一支' }}</text>
-            <text class="btn-sub-note">{{ packCount > 0 ? '点选盒内烟支 · 直接抽取' : '本盒已空 · 轻触立即拆开新盒' }}</text>
+            <block wx:if="{{ !isCurrentUnlocked }}">
+              <text class="btn-main-title">🔒 名烟待解锁</text>
+              <text class="btn-sub-note">{{ currentCigarette.unlockDesc }} · 前往展柜</text>
+            </block>
+            <block wx:else>
+              <text class="btn-main-title">{{ packCount > 0 ? '我抽一支' : '拆封新盒并抽出一支' }}</text>
+              <text class="btn-sub-note">{{ packCount > 0 ? '点选盒内烟支 · 直接抽取' : '本盒已空 · 轻触立即拆开新盒' }}</text>
+            </block>
           </view>
         </view>
       </view>

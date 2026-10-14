@@ -9,22 +9,20 @@ import { SevenFairies, drawFairyFlowerParticle } from './renderers/fairyRenderer
 
 /**
  * 赛博拟真烟雾物理粒子引擎 (ParticleSystem)
- * 支持 15 种高保真烟雾特效：
- * 1. 经典烟圈 (Toroidal Vortex Ring)
- * 2. 袅袅青烟 (Laminar-to-Turbulent Silk Stream)
- * 3. 舒缓白雾 (Volumetric Cloud Plume)
- * 4. 紫气东来 (Oriental Auspicious Purple Swirl)
- * 5. 黑金流沙 (24K Gold Stardust & Obsidian Flakes)
- * 6. 极光星云 (Aurora Borealis & Cosmic Magenta Waves)
- * 7. 双爱心烟圈 (Concentric Cardioid Heart Rings)
- * 8. 金龙吐息 (Golden Celestial Dragon & Volumetric Auspicious Gold Clouds)
- * 9. 漫天繁星 (Galaxy Stars & Meteor Streaks)
- * 10. 盛世华彩 (Grand Fireworks & Willow Golden Rain)
- * 11. 福愿金墨 (Blessing Runes & Ancient Seals)
- * 12. 赤焰神凰 (Celestial Fire Phoenix & Feathers)
- * 13. 步步高升 (Auspicious Word River)
- * 14. 乾坤八卦 (Bagua Taichi Grand Matrix)
- * 15. 佛光普照 (Buddha's Light & Celestial Thousand-Petal Golden Lotus)
+ * 支持 13 种高保真高定烟雾特效体系：
+ * 1. 经典空灵烟圈 (ring_classic: Toroidal Vortex Ring)
+ * 2. 丘比特星钻双心 (heart_double: Concentric Cardioid Heart Rings)
+ * 3. 青莲化境·步步生莲 (lotus_zen: Jade Lotus & Ethereal Mist)
+ * 4. 曜世黑金·暴富金雨 (gold_stardust: 24K Gold Stardust & Obsidian Flakes)
+ * 5. 星穹浩瀚·流星银河 (galaxy_stars: Galaxy Stars & Meteor Streaks)
+ * 6. 金玉满堂·迎祥纳福 (blessing_runes: Blessing Runes & Ancient Seals)
+ * 7. 华夏盛世·万家烟火 (grand_fireworks: Grand Fireworks & Willow Golden Rain)
+ * 8. 紫霄凌云·步步高升 (auspicious_river: Auspicious Word River)
+ * 9. 乾坤八卦·紫微天穹 (bagua_taichi: Bagua Taichi Grand Matrix)
+ * 10. 佛光普照·千叶金莲 (buddha_light: Buddha's Light & Thousand-Petal Lotus)
+ * 11. 飞龙在天·曜金真龙 (dragon_breath: Golden Celestial Dragon)
+ * 12. 涅槃重光·赤金神凤 (phoenix_nirvana: Celestial Fire Phoenix & Feathers)
+ * 13. 七仙降世·霓裳羽衣 (seven_fairies: Seven Fairies & Ethereal Petals)
  */
 function formatFillColor(color, defaultColor = '#ffffff') {
   if (!color || typeof color !== 'string') return defaultColor;
@@ -1012,64 +1010,6 @@ export class ParticleSystem {
       isVolumetricSmoke: true,
       isTipCombustion: true
     });
-  }
-
-  // 5. 袅袅丝绢柔情青烟 (Silk Pure Stream - 底部扇形向外自然舒展漫开)
-  emitSilkStream(x, y, color = 'rgba(203, 213, 225, ') {
-    for (let i = 0; i < 18; i++) {
-      const spread = (i / 17 - 0.5) * 2;
-      const angle = -Math.PI / 2 + spread * 0.70 + (Math.random() - 0.5) * 0.3;
-      const speed = Math.random() * 0.85 + 0.40;
-      const lateralPush = spread * (1.8 + Math.random() * 0.8);
-      this._pushParticle({
-        x: x + spread * 28 + (Math.random() - 0.5) * 16,
-        y: y + (Math.random() - 0.5) * 8,
-        vx: Math.cos(angle) * speed + lateralPush,
-        vy: -(0.78 + Math.random() * 0.35),
-        radius: 5.0 + Math.random() * 4.0,
-        alpha: 0.52,
-        baseAlpha: 0.52,
-        life: 0,
-        maxLife: 140 + Math.random() * 25,
-        color,
-        growRate: 0.25,
-        isExhaleCloud: true
-      });
-    }
-  }
-
-  // 6. 舒缓白雾 (Cloud Dense)
-  emitDenseCloud(x, y, color = 'rgba(241, 245, 249, ') {
-    this.emitExhalePlume(x, y, 22, color);
-  }
-
-  // 7. 紫气东来 (Purple Zen) - 暮霭紫与天青祥云广角发散 (宣德炉香气舒展)
-  emitPurpleZen(x, y) {
-    const colors = [
-      'rgba(192, 132, 252, ', // 暮霭紫
-      'rgba(168, 85, 247, ', // 帝王紫
-      'rgba(147, 197, 253, ', // 天青色
-      'rgba(216, 180, 254, '  // 浅紫云霞
-    ];
-    for (let i = 0; i < 20; i++) {
-      const spread = (i / 19 - 0.5) * 2;
-      const c = colors[i % colors.length];
-      const lateralPush = spread * (2.2 + Math.random() * 0.9);
-      this._pushParticle({
-        x: x + spread * 30 + (Math.random() - 0.5) * 16,
-        y: y + (Math.random() - 0.5) * 10,
-        vx: lateralPush,
-        vy: -(0.82 + Math.random() * 0.35),
-        radius: 7.0 + Math.random() * 7.0,
-        alpha: 0.62,
-        baseAlpha: 0.62,
-        life: 0,
-        maxLife: 140 + Math.random() * 25,
-        color: c,
-        growRate: 0.28,
-        isZen: true
-      });
-    }
   }
 
   // 3.1 青莲化境 · 步步生莲 (Lotus Zen) - 翡翠宝莲层层绽放 + 步步生水韵涟漪 + 晨露星尘 + 琉璃金蕊
@@ -2120,9 +2060,6 @@ export class ParticleSystem {
     switch (effectId) {
       case 'ring_classic':
         this.emitSmokeRing(x, y, baseColor || 'rgba(235, 240, 252, ');
-        break;
-      case 'silk_pure':
-        this.emitSilkStream(x, y, baseColor || 'rgba(203, 213, 225, ');
         break;
       case 'lotus_zen':
         this.emitLotusZen(x, y);

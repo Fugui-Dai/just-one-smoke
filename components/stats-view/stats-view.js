@@ -10,7 +10,6 @@ import {
   BLOOD_ICON_SVG,
   BRAIN_ICON_SVG,
   DEFAULT_USER_AVATAR_SVG,
-  VIP_CROWN_ICON_SVG,
   CYBER_GOLD_VOUCHER_SVG
 } from '../../utils/vectorIcons.js';
 import {
@@ -108,7 +107,6 @@ Component({
       brain: BRAIN_ICON_SVG
     },
     defaultAvatarSvg: DEFAULT_USER_AVATAR_SVG,
-    vipCrownSvg: VIP_CROWN_ICON_SVG,
     goldVoucherSvgUri: CYBER_GOLD_VOUCHER_SVG,
     isVip: false,
     vipInfo: { isVip: false, isLifetime: false, formattedExpire: '' },
@@ -671,7 +669,7 @@ Component({
         statusTag = '该日未记录';
         statusEmoji = '☕';
         headline = '过往已成序章';
-        quote = '过去的缺席无需懊恼，专注当下的每一缕纯净空气，身心自会报以充沛活力。';
+        quote = '断签不必自责，自律是一生的修行而非机械的连击。今日随时可以深呼吸，为生命重新盖下觉醒印章！';
       }
 
       this.setData({
@@ -876,9 +874,10 @@ Component({
       if (!title) return;
       storageService.setEquippedTitle(title);
       try {
-        if (wx.vibrateShort) wx.vibrateShort({ type: 'medium' });
+        if (wx.vibrateShort) wx.vibrateShort({ type: 'heavy' });
       } catch (err) {}
       audioManager.unlockAudio();
+      audioManager.playSwitchSound();
       audioManager.playZenChimeSound(880);
       toast.flame(`👑 佩戴成功！称号【${title}】已同步全场与英雄榜！`);
       this.setData({

@@ -90,8 +90,20 @@ function measureSafeAreaSync() {
   }
 }
 
+function detectIsIOS() {
+  try {
+    const sysInfo = wx.getSystemInfoSync ? wx.getSystemInfoSync() : {};
+    const platform = (sysInfo.platform || '').toLowerCase();
+    const system = (sysInfo.system || '').toLowerCase();
+    return platform === 'ios' || system.includes('ios') || system.includes('iphone') || system.includes('ipad');
+  } catch (e) {
+    return false;
+  }
+}
+
 const INITIAL_SAFE_AREA = measureSafeAreaSync();
 const INITIAL_CATALOG = buildInitialCatalogList();
+const IS_IOS_DEVICE = detectIsIOS();
 
 Page({
   data: {
@@ -99,6 +111,7 @@ Page({
     statusBarHeight: INITIAL_SAFE_AREA.statusBarHeight,
     navBarHeight: INITIAL_SAFE_AREA.navBarHeight,
     capsuleRightSpace: INITIAL_SAFE_AREA.capsuleRightSpace,
+    isIOS: IS_IOS_DEVICE,
 
     // 视图模式固定为货架整柜陈列视图
     viewMode: 'shelf',

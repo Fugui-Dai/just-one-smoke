@@ -32,6 +32,15 @@ function measureSafeAreaSync() {
   }
 }
 
+function computeLidWatermark(cig, capacity) {
+  if (!cig) return '★ 20 FILTER CIGARETTES ★';
+  if (cig.isCigar) return '★ 5 ROBUSTO CIGARS ★';
+  if (cig.isAirCig) return '★ PURE NATURE OXYGEN ★';
+  if (cig.widthType === 'hand_rolled') return '★ HAND-ROLLED HERITAGE ★';
+  if (cig.widthType === 'slender' || cig.hasBead) return '★ SLENDER SELECTION ★';
+  return `★ ${capacity || 20} FILTER CIGARETTES ★`;
+}
+
 const INITIAL_SAFE_AREA = measureSafeAreaSync();
 
 Page({
@@ -50,6 +59,7 @@ Page({
     currentCigarette: DEFAULT_CIGARETTE,
     isCurrentUnlocked: true,
     isTrialMode: false,
+    packWatermarkText: '★ 20 FILTER CIGARETTES ★',
     packCapacity: DEFAULT_PACK_CAPACITY, // 盒内总容量 (6支品鉴装 / 20支标准装 / 雪茄5支)
     packCount: DEFAULT_PACK_CAPACITY, // 盒内剩余烟支数量
     slotArray: [], // 槽位索引数组 [0..5] 或 [0..19] 或 [0..4]
@@ -107,6 +117,7 @@ Page({
       currentCigarette: curCig,
       isCurrentUnlocked: unlocked,
       isTrialMode: this._fromTrial,
+      packWatermarkText: computeLidWatermark(curCig, capacity),
       packCapacity: capacity,
       packCount: count,
       slotArray,
@@ -257,6 +268,7 @@ Page({
       packLayoutMode: PACK_DISPLAY_MODE,
       isCurrentUnlocked: unlocked,
       isTrialMode: !!this._fromTrial,
+      packWatermarkText: computeLidWatermark(curCig, capacity),
       packCapacity: capacity,
       packCount: count,
       slotStates
@@ -339,7 +351,22 @@ Page({
   onTriggerPullCigarette() {
     if (!this.data.isCurrentUnlocked) {
       triggerHaptic('medium');
-      toast.warn(this.data.currentCigarette.unlockDesc);
+      audioManager.playSwitchSound();
+      wx.showModal({
+        title: '🔒 名烟待解锁',
+        content: `【${this.data.currentCigarette.name}】尚未解锁（${this.data.currentCigarette.unlockDesc}）。是否前往替烟展柜挑选已解锁名烟或开通VIP直通畅享？`,
+        confirmText: '去展柜',
+        cancelText: '开通VIP',
+        confirmColor: '#f59e0b',
+        cancelColor: '#38bdf8',
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({ url: '/pages/shop/shop' });
+          } else if (res.cancel) {
+            wx.navigateTo({ url: '/pages/vip/vip' });
+          }
+        }
+      });
       return;
     }
     if (this._fromTrial && this._trialPullUsed) {

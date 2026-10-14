@@ -6,7 +6,7 @@
   bounces="{{ true }}" 
   show-scrollbar="{{ false }}"
 >
-  <view class="leaderboard-content {{ vipTheme ? 'theme-' + vipTheme : '' }} {{ vipAnimPhase === 'a' ? 'vip-sweep-phase-a' : 'vip-sweep-phase-b' }}" style="padding-top: {{ topPadding }}px;">
+  <view class="leaderboard-content {{ vipTheme ? 'theme-' + vipTheme : '' }} {{ vipAnimPhase === 'a' ? 'vip-sweep-phase-a' : 'vip-sweep-phase-b' }}" style="padding-top: calc({{ (topPadding && topPadding > 0) ? topPadding : 88 }}px + 24rpx);">
     
     <!-- 我的排位尊贵卡片 (Sticky My Rank · VIP 尊享曜石黑金流光皮肤与皇冠铭牌) -->
     <view class="my-rank-card {{ isVip ? 'is-vip-rank-card' : '' }}">

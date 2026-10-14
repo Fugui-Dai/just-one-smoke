@@ -184,38 +184,6 @@ export const VIP_CROWN_ICON_SVG = svgToUri(`
 </svg>
 `);
 
-// 7. 纯净精品商店图标 (去除 Emoji 自带的 "24" 字样，保留经典遮阳棚与暖光橱窗)
-export const STORE_ICON_SVG = svgToUri(`
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
-  <!-- 顶部纯净屋檐横梁 (彻底去除 24 小时字样) -->
-  <rect x="10" y="10" width="44" height="7" rx="2.5" fill="#f59e0b" stroke="#b45309" stroke-width="1.2"/>
-  <line x1="14" y1="13.5" x2="50" y2="13.5" stroke="#fef08a" stroke-width="1.5" stroke-linecap="round"/>
-
-  <!-- 店铺主体墙面 -->
-  <rect x="12" y="27" width="40" height="27" rx="1.5" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
-
-  <!-- 左侧玻璃店门 -->
-  <rect x="16" y="33" width="13" height="21" rx="1" fill="#38bdf8" stroke="#0284c7" stroke-width="1.2"/>
-  <line x1="22.5" y1="33" x2="22.5" y2="54" stroke="#0284c7" stroke-width="1.2"/>
-  <circle cx="20" cy="44" r="1.1" fill="#fef08a"/>
-  <circle cx="25" cy="44" r="1.1" fill="#fef08a"/>
-
-  <!-- 右侧明亮展示橱窗 -->
-  <rect x="33" y="33" width="15" height="14" rx="1.5" fill="#7dd3fc" stroke="#0284c7" stroke-width="1.2"/>
-  <line x1="36" y1="36" x2="41" y2="44" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" opacity="0.85"/>
-  <line x1="41" y1="36" x2="44" y2="41" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" opacity="0.75"/>
-
-  <!-- 经典红白相间波浪遮阳棚 -->
-  <path d="M 8 17 L 19 17 L 17 28 C 17 30.5 12.5 30.5 10.5 28 Z" fill="#ef4444" stroke="#b91c1c" stroke-width="1"/>
-  <path d="M 19 17 L 32 17 L 32 28 C 32 30.5 25.5 30.5 24.5 28 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
-  <path d="M 32 17 L 45 17 L 46.5 28 C 45.5 30.5 39 30.5 39 28 Z" fill="#ef4444" stroke="#b91c1c" stroke-width="1"/>
-  <path d="M 45 17 L 56 17 L 53.5 28 C 51.5 30.5 47 30.5 47 28 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="1"/>
-
-  <!-- 底部石阶基座 -->
-  <rect x="8" y="54" width="48" height="4.5" rx="2" fill="#94a3b8" stroke="#475569" stroke-width="1.2"/>
-</svg>
-`);
-
 // 10. 青莲化境 · 步步生莲 翡翠宝莲高定矢量图标 (高阶东方禅意·翡翠金蕊莲花)
 export const LOTUS_ICON_SVG = svgToUri(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
@@ -869,29 +837,18 @@ export const SCENE_AMBIENT_ICON_SVG = svgToUri(`
 export const DOCK_FLUID_SHELL_SVG = svgToUri(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 116 1000" preserveAspectRatio="none" width="100%" height="100%">
   <defs>
-    <!-- 深空黑曜微透底色 (暗黑奇幻质感 · 纯净深色吸光背景 · 贴合内部轮廓与右侧屏幕边缘) -->
-    <linearGradient id="dockPanelBg" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="rgba(18, 22, 34, 0.95)"/>
-      <stop offset="40%" stop-color="rgba(14, 18, 28, 0.92)"/>
-      <stop offset="100%" stop-color="rgba(8, 12, 20, 0.88)"/>
-    </linearGradient>
-
-    <!-- 古典香槟曜金流光主渐变 (自屏幕顶缘萌生 -> 弧弯明耀 -> 侧柱雅金 -> 底弯明耀 -> 柔和融隐) -->
+    <!-- 纯正香槟金统一金属微光渐变 (去除顶部和底部的透明衰减，全段亮度与色调饱满一致) -->
     <linearGradient id="goldSpineGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="rgba(245, 197, 120, 0.15)"/>
-      <stop offset="2%" stop-color="rgba(254, 240, 199, 0.88)"/>
-      <stop offset="6%" stop-color="rgba(245, 197, 120, 0.95)"/>
-      <stop offset="25%" stop-color="rgba(229, 184, 105, 0.90)"/>
-      <stop offset="50%" stop-color="rgba(255, 247, 218, 1.0)"/>
-      <stop offset="75%" stop-color="rgba(229, 184, 105, 0.90)"/>
-      <stop offset="94%" stop-color="rgba(245, 197, 120, 0.95)"/>
-      <stop offset="98%" stop-color="rgba(254, 240, 199, 0.88)"/>
-      <stop offset="100%" stop-color="rgba(245, 197, 120, 0.15)"/>
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="15%" stop-color="#f59e0b"/>
+      <stop offset="50%" stop-color="#fbbf24"/>
+      <stop offset="85%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#fef08a"/>
     </linearGradient>
 
-    <!-- 紧凑微弱金色晕光滤镜 (超微弱弥散，绝不发胀) -->
-    <filter id="goldTightGlow" x="-30%" y="-5%" width="160%" height="110%">
-      <feGaussianBlur stdDeviation="0.8" result="blur"/>
+    <!-- 柔和微晕滤镜 -->
+    <filter id="goldTightGlow" x="-20%" y="-2%" width="140%" height="104%">
+      <feGaussianBlur stdDeviation="1" result="blur"/>
       <feMerge>
         <feMergeNode in="blur"/>
         <feMergeNode in="SourceGraphic"/>
@@ -899,56 +856,15 @@ export const DOCK_FLUID_SHELL_SVG = svgToUri(`
     </filter>
   </defs>
 
-  <!-- 1. 精致微晕漫射层 (超轻柔暖金呼吸微晕，烘托暗夜空间层次) -->
-  <path d="M 116 0 C 95 24, 75 46, 55 55 C 35 62, 12 85, 12 115 L 12 885 C 12 915, 35 938, 55 945 C 75 954, 95 976, 116 1000" 
-        fill="none" stroke="url(#goldSpineGrad)" stroke-width="2.6" opacity="0.18" filter="url(#goldTightGlow)"/>
+  <!-- 1. 极致精雕超细香槟金轮廓线 (0.75px 极清细线 · 无杂质发胀 · 纯净通透) -->
+  <path d="M 116 0.8 L 70 0.8 Q 12 0.8, 12 85 L 12 915 Q 12 999.2, 70 999.2 L 116 999.2" 
+        fill="none" stroke="url(#goldSpineGrad)" stroke-width="0.75" stroke-linecap="round"/>
 
-  <!-- 2. 极细古铜金立体底线 (2.0px 真实物理深度，建立纤巧金属立体感) -->
-  <path d="M 116 0 C 95 24, 75 46, 55 55 C 35 62, 12 85, 12 115 L 12 885 C 12 915, 35 938, 55 945 C 75 954, 95 976, 116 1000" 
-        fill="none" stroke="#785226" stroke-width="2.0" stroke-linecap="round" opacity="0.55"/>
-
-  <!-- 3. 香槟金核心流光金属线 (1.3px 纤巧精工微雕 · 纯净极致圆润单轨 S 弯) -->
-  <path d="M 116 0 C 95 24, 75 46, 55 55 C 35 62, 12 85, 12 115 L 12 885 C 12 915, 35 938, 55 945 C 75 954, 95 976, 116 1000" 
-        fill="none" stroke="url(#goldSpineGrad)" stroke-width="1.3" stroke-linecap="round"/>
-
-  <!-- 4. 镜面纯白金高光丝 (0.5px 超纤细丝光脊线) -->
-  <path d="M 116 0 C 95 24, 75 46, 55 55 C 35 62, 12 85, 12 115 L 12 885 C 12 915, 35 938, 55 945 C 75 954, 95 976, 116 1000" 
-        fill="none" stroke="#ffffff" stroke-width="0.5" stroke-linecap="round" opacity="0.92"/>
-
-  <!-- 5. 顶端古典流云微雕与灵动星芒花纹装饰 (Oriental Cloud Swirl & Starlight Crest) -->
-  <g>
-    <!-- 顶端贴边伴行虚线微雕丝 -->
-    <path d="M 106 14 C 95 28, 85 36, 75 42 C 65 47, 60 48, 55 55" fill="none" stroke="rgba(254, 240, 199, 0.45)" stroke-width="0.8" stroke-dasharray="2,3"/>
-    <!-- 伴行内沿微金丝 -->
-    <path d="M 116 8 C 102 30, 80 48, 60 56" fill="none" stroke="rgba(251, 191, 36, 0.65)" stroke-width="0.8"/>
-    <!-- 古典流云涡轮卷纹微雕 -->
-    <path d="M 88 33 C 85 30, 80 32, 82 36 C 84 39, 89 38, 90 35" fill="none" stroke="#fde047" stroke-width="1.0" stroke-linecap="round"/>
-    <circle cx="82" cy="35" r="1.2" fill="#ffffff"/>
-    <!-- 弧顶灵动四芒微星 -->
-    <path d="M 66 50 L 68 53 L 72 53.5 L 68 54 L 66 57 L 64 54 L 60 53.5 L 64 53 Z" fill="#ffffff" opacity="0.95"/>
-    <circle cx="66" cy="53.5" r="0.8" fill="#facc15"/>
-    <!-- 渐近收束星尘微粒 -->
-    <circle cx="98" cy="20" r="1.3" fill="#ffffff" opacity="0.85"/>
-    <circle cx="108" cy="10" r="1.0" fill="#fde047" opacity="0.75"/>
-  </g>
-
-  <!-- 6. 底端古典流云微雕与灵动星芒花纹装饰 (镜像对称 Oriental Cloud Swirl) -->
-  <g>
-    <!-- 底端贴边伴行虚线微雕丝 -->
-    <path d="M 106 986 C 95 972, 85 964, 75 958 C 65 953, 60 952, 55 945" fill="none" stroke="rgba(254, 240, 199, 0.45)" stroke-width="0.8" stroke-dasharray="2,3"/>
-    <!-- 伴行内沿微金丝 -->
-    <path d="M 116 992 C 102 970, 80 952, 60 944" fill="none" stroke="rgba(251, 191, 36, 0.65)" stroke-width="0.8"/>
-    <!-- 古典流云涡轮卷纹微雕 -->
-    <path d="M 88 967 C 85 970, 80 968, 82 964 C 84 961, 89 962, 90 965" fill="none" stroke="#fde047" stroke-width="1.0" stroke-linecap="round"/>
-    <circle cx="82" cy="965" r="1.2" fill="#ffffff"/>
-    <!-- 弧底灵动四芒微星 -->
-    <path d="M 66 950 L 68 947 L 72 946.5 L 68 946 L 66 943 L 64 946 L 60 946.5 L 64 947 Z" fill="#ffffff" opacity="0.95"/>
-    <circle cx="66" cy="946.5" r="0.8" fill="#facc15"/>
-    <!-- 渐近收束星尘微粒 -->
-    <circle cx="98" cy="980" r="1.3" fill="#ffffff" opacity="0.85"/>
-    <circle cx="108" cy="990" r="1.0" fill="#fde047" opacity="0.75"/>
-  </g>
+  <!-- 2. 超细镜面流光丝 (0.25px 极微白金高光，提升精工金属质感) -->
+  <path d="M 116 0.8 L 70 0.8 Q 12 0.8, 12 85 L 12 915 Q 12 999.2, 70 999.2 L 116 999.2" 
+        fill="none" stroke="#ffffff" stroke-width="0.25" stroke-linecap="round" opacity="0.80"/>
 </svg>
+
 
 `);
 
@@ -1087,6 +1003,45 @@ export const DOCK_AURORA_BOTTOM_SVG = svgToUri(`
 // 46. 赛博自律储备金券 · 24K黑金典藏版 (替换原搞笑狗头纸币，符合大厂获奖级轻奢质感)
 // 采用高清原生资产路径，完美规避小程序对富文本复杂 SVG Data URI 的解析缺陷，全端 100% 满帧渲染
 export const CYBER_GOLD_VOUCHER_SVG = '/images/cyber_gold_voucher.png';
+
+// 47. 抽新烟/续一支图标：自烟盒向上抽出一支崭新名烟 · 曜金星芒与提取动势 (Draw New Cigarette)
+export const DRAW_CIG_ICON_SVG = svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
+  <defs>
+    <linearGradient id="drawCigBody" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="50%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#cbd5e1"/>
+    </linearGradient>
+    <linearGradient id="drawCigFilter" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fde68a"/>
+      <stop offset="50%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <linearGradient id="drawGoldArrow" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#fef08a"/>
+    </linearGradient>
+  </defs>
+  <!-- 烟盒轮廓微光托底 -->
+  <rect x="18" y="34" width="28" height="24" rx="4" fill="rgba(255,255,255,0.08)" stroke="rgba(245,158,11,0.35)" stroke-width="1.2"/>
+  <!-- 向上抽出的崭新直立香烟 (倾斜12度向上拔出动态) -->
+  <g transform="rotate(-12 32 32)">
+    <!-- 烟支白杆 -->
+    <rect x="29" y="8" width="6" height="28" rx="1.5" fill="url(#drawCigBody)"/>
+    <!-- 过滤嘴黄嘴 -->
+    <rect x="29" y="36" width="6" height="14" rx="1.5" fill="url(#drawCigFilter)"/>
+    <!-- 金色钢印圆环 -->
+    <line x1="29" y1="36" x2="35" y2="36" stroke="#fbbf24" stroke-width="1"/>
+  </g>
+  <!-- 向上提取动势微光箭头 -->
+  <path d="M 44 20 L 48 15 L 52 20" fill="none" stroke="url(#drawGoldArrow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="48" y1="15" x2="48" y2="28" stroke="url(#drawGoldArrow)" stroke-width="2" stroke-linecap="round"/>
+  <!-- 闪耀新烟微星芒 -->
+  <polygon points="20,14 21.5,17 24.5,18 21.5,19 20,22 18.5,19 15.5,18 18.5,17" fill="#fbbf24"/>
+</svg>
+`);
+
 
 
 
