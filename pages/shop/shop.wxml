@@ -313,11 +313,11 @@
           <text class="cta-arrow-glyph">➔</text>
         </view>
 
-        <!-- 2. 次行动点 (Secondary CTA): 免费尝鲜 1 支 -->
+        <!-- 2. 次行动点 (Secondary CTA): 免费解锁今日整盒畅吸 (静默生效，无需扰民提示) -->
         <view class="dialog-cta-secondary" bindtap="onTrialSmokeFromDialog">
           <text class="cta-sec-icon">✨</text>
-          <text class="cta-sec-text">免费尝鲜品吸 1 支</text>
-          <text class="cta-sec-tag">抢先体验</text>
+          <text class="cta-sec-text">免费解锁今日整盒畅抽</text>
+          <text class="cta-sec-tag">今日限免</text>
         </view>
 
         <!-- 3. 第三行动点 (Tertiary CTA): 继续坚持健康替烟 -->

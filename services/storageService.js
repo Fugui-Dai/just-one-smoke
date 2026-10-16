@@ -253,6 +253,68 @@ export const storageService = {
     removeItem(TRIAL_CIGARETTE_KEY);
   },
 
+  // ==========================================
+  // 单品烟盒看广告当日免费畅抽通行证 (Daily Cigarette Pass)
+  // 过了午夜 12 点自动重置，静默生效，无需烦扰提示用户
+  // ==========================================
+  getDailyUnlockedCigarettes() {
+    const raw = getItem('SMOKEFREE_DAILY_UNLOCKED_CIGARETTES');
+    const todayKey = new Date().toISOString().slice(0, 10);
+    if (!raw) return { dateKey: todayKey, ids: [] };
+    try {
+      const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      if (!parsed || parsed.dateKey !== todayKey || !Array.isArray(parsed.ids)) {
+        return { dateKey: todayKey, ids: [] };
+      }
+      return parsed;
+    } catch {
+      return { dateKey: todayKey, ids: [] };
+    }
+  },
+
+  isCigaretteUnlockedToday(cigaretteId) {
+    if (!cigaretteId) return false;
+    const passes = this.getDailyUnlockedCigarettes();
+    return Array.isArray(passes.ids) && passes.ids.includes(cigaretteId);
+  },
+
+  unlockCigaretteForToday(cigaretteId) {
+    if (!cigaretteId) return [];
+    const todayKey = new Date().toISOString().slice(0, 10);
+    const passes = this.getDailyUnlockedCigarettes();
+    const idSet = new Set(Array.isArray(passes.ids) ? passes.ids : []);
+    idSet.add(cigaretteId);
+    const updated = {
+      dateKey: todayKey,
+      ids: Array.from(idSet)
+    };
+    setItem('SMOKEFREE_DAILY_UNLOCKED_CIGARETTES', updated);
+    return updated.ids;
+  },
+
+  // ==========================================
+  // 运营后台赠送 / 永久解锁名烟 (Custom Unlocked Cigarettes)
+  // ==========================================
+  getCustomUnlockedCigarettes() {
+    const raw = getItem('SMOKEFREE_CUSTOM_UNLOCKED_CIGARETTES');
+    if (!raw) return [];
+    try {
+      return typeof raw === 'string' ? JSON.parse(raw) : (Array.isArray(raw) ? raw : []);
+    } catch {
+      return [];
+    }
+  },
+
+  unlockCigarette(cigaretteId) {
+    if (!cigaretteId) return [];
+    const list = this.getCustomUnlockedCigarettes();
+    if (!list.includes(cigaretteId)) {
+      list.push(cigaretteId);
+      setItem('SMOKEFREE_CUSTOM_UNLOCKED_CIGARETTES', list);
+    }
+    return list;
+  },
+
   getSelectedCigaretteId() {
     return getItem(SELECTED_CIGARETTE_KEY) || DEFAULT_CIGARETTE_ID;
   },

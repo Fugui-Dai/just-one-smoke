@@ -204,8 +204,6 @@
                   >
                     <!-- 顶部圆形滤嘴切面光泽 -->
                     <view class="filter-top-bevel"></view>
-                    <!-- 东方鎏金云纹微雕装饰圈 -->
-                    <view class="filter-oriental-swirl"></view>
                     <!-- 滤嘴金箍饰圈 -->
                     <view class="filter-mini-band" style="background: {{ currentCigarette.bandColor }};"></view>
                     <!-- 爆珠专属微型发光晶体点 -->
@@ -406,14 +404,6 @@
           <view class="thruster-side-streak ts-right"></view>
         </view>
 
-        <!-- 剑气星芒环绕法阵 -->
-        <view class="ssr-sword-orbit-system">
-          <text class="ssr-blade-sigil sigil-1">✦</text>
-          <text class="ssr-blade-sigil sigil-2">❖</text>
-          <text class="ssr-blade-sigil sigil-3">✦</text>
-          <text class="ssr-blade-sigil sigil-4">❖</text>
-        </view>
-
         <!-- 定格瞬间刀光十字寒芒斩 (X-Slash Starburst Flare) -->
         <view class="ssr-cross-slash">
           <view class="slash-beam beam-a"></view>
@@ -432,7 +422,6 @@
                 <view class="ssr-hanyan-spiral-seam"></view>
                 <view class="ssr-hanyan-spiral-seam seam-lower"></view>
                 <text class="ssr-hanyan-red-stamp">{{ currentCigarette.stampText || '老辈旱烟' }}</text>
-                <view class="ssr-blade-sheen"></view>
               </view>
             </view>
           </block>
@@ -455,9 +444,6 @@
               <view class="ssr-paper-cylinder-shine"></view>
               <text class="ssr-paper-brand-stamp" wx:if="{{ currentCigarette.stampText }}">{{ currentCigarette.stampText }}</text>
             </view>
-
-            <!-- 贯穿全烟身的宝刀寒芒流光 -->
-            <view class="ssr-blade-sheen"></view>
           </block>
         </view>
       </view>
@@ -476,7 +462,7 @@
         </view>
         <view class="ssr-banner-sub-hint">
           <text class="ssr-ignite-dot">✦</text>
-          <text class="ssr-ignite-text">轻触屏幕任意位置 · 携烟进入品吸席</text>
+          <text class="ssr-ignite-text">正在携烟进入品吸席 · 轻触屏幕立即直达</text>
           <text class="ssr-ignite-dot">✦</text>
         </view>
       </view>

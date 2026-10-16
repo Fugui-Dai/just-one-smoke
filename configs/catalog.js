@@ -1458,6 +1458,20 @@ export function isCigaretteUnlocked(id, totalCount) {
     }
   } catch (e) {}
 
+  // 1.5 单品烟盒看广告当日通行证：当天免看广告免门槛直接开抽，过了12点自动过期
+  try {
+    if (storageService && storageService.isCigaretteUnlockedToday && storageService.isCigaretteUnlockedToday(id)) {
+      return true;
+    }
+  } catch (e) {}
+
+  // 1.6 运营后台赠送永久解锁名烟
+  try {
+    if (storageService && storageService.getCustomUnlockedCigarettes && storageService.getCustomUnlockedCigarettes().includes(id)) {
+      return true;
+    }
+  } catch (e) {}
+
   const item = getCigaretteById(id);
   if (!item) return false;
   

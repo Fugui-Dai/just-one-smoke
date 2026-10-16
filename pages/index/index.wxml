@@ -547,6 +547,35 @@
     </view>
   </view>
 
+  <!-- ==================== 弹窗 4.5: 运营后台专属赠礼与系统奖励 ==================== -->
+  <view class="glass-modal-backdrop" wx:if="{{ showSystemRewardModal }}" catchtouchmove="preventTouchMove">
+    <view class="gift-dialog-card">
+      <view class="gift-glow-halo"></view>
+      <view class="gift-top-banner">
+        <text class="gtb-badge">🎁 专属礼遇 · 掌柜心意</text>
+        <view class="gift-close-icon" bindtap="onCloseSystemRewardModal">✕</view>
+      </view>
+
+      <view class="gift-showcase">
+        <view class="sys-reward-icon-wrap" style="font-size: 110rpx; text-align: center; margin: 30rpx 0;">
+          {{ pendingSystemReward.icon || '🎁' }}
+        </view>
+      </view>
+
+      <view class="gift-headline">
+        <text class="gift-sender-tag">{{ pendingSystemReward.title || '掌柜送来一份专属谢礼' }}</text>
+        <text class="gift-cig-name">【{{ pendingSystemReward.rewardDetail || '神秘惊喜礼遇' }}】</text>
+      </view>
+      <text class="gift-quote">“{{ pendingSystemReward.message || '感谢老哥的支持，特为你奉上专属心意！' }}”</text>
+
+      <view class="dialog-btn-stack" style="margin-top: 40rpx;">
+        <button class="primary-gold-btn gift-accept-btn" bindtap="onClaimSystemReward">
+          <text class="btn-main-text">🎉 开心收下 · 立即点亮</text>
+        </button>
+      </view>
+    </view>
+  </view>
+
   <!-- ==================== 💎 创新点火工坊 · 掌心 EDC 机巧把玩所 (Tactile Fidget Lab) ==================== -->
   <view class="glass-modal-backdrop matrix-vault-backdrop" wx:if="{{ showIgnitionToolDrawer }}" catchtouchmove="preventTouchMove" bindtap="closeIgnitionToolDrawer">
     <view class="matrix-vault-container" catchtap="stopBubble">

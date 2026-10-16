@@ -181,12 +181,6 @@ Page({
           { slotOffsetX: pxOffset, vfxTier: this.data.currentVfxTier || 'lifetime' }
         );
       }
-      if (elapsedSec >= 4.5) {
-        this._flightStartTime = 0;
-        this._flightRafId = null;
-        this._flightRafTimer = null;
-        return;
-      }
       if (this._flightStartTime) {
         if (this._flightCanvas && typeof this._flightCanvas.requestAnimationFrame === 'function') {
           this._flightRafId = this._flightCanvas.requestAnimationFrame(step);
@@ -497,7 +491,7 @@ Page({
       triggerHaptic('medium');
     }, 1120);
 
-    // 阶段 06 [屏幕呈现]：未点燃东方流云金纹烟支 22° 悬停定格 + 等待用户点击屏幕跳转 (经典出鞘 1.28s 定格)
+    // 阶段 06 [屏幕呈现]：未点燃东方流云金纹烟支 22° 悬停定格 (1.28s 定格)
     const settleDelay = 1280;
     this._pullTimer4 = setTimeout(() => {
       triggerHaptic('heavy');

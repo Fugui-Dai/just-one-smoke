@@ -248,5 +248,34 @@ export const vipService = {
     }
 
     return vipData;
+  },
+
+  /**
+   * 从云端权威档案同步 VIP 状态 (支持后台运营一键发奖/云端改库即时点亮)
+   * @param {Object} cloudVipStatus 云端 users.vipStatus 字段
+   */
+  syncFromCloud(cloudVipStatus) {
+    if (!cloudVipStatus || typeof cloudVipStatus !== 'object') return null;
+    const now = Date.now();
+    const isLifetime = !!cloudVipStatus.isLifetime || cloudVipStatus.tier === 'lifetime';
+    const expireTime = Number(cloudVipStatus.expireTime) || 0;
+    const isVip = isLifetime || (expireTime > now);
+
+    const vipData = {
+      isVip,
+      tierId: cloudVipStatus.tier || (isVip ? 'month' : ''),
+      tierName: isLifetime ? '至尊永久卡' : (cloudVipStatus.tier === 'day' ? '畅玩日卡' : '尊享月卡'),
+      customTheme: cloudVipStatus.activeThemeId || (cloudVipStatus.tier || 'month'),
+      activatedAt: Number(cloudVipStatus.activatedAt) || now,
+      expireTime,
+      isLifetime
+    };
+
+    try {
+      wx.setStorageSync(STORAGE_KEY_VIP, vipData);
+    } catch (e) {
+      console.error('[vipService] syncFromCloud error', e);
+    }
+    return vipData;
   }
 };

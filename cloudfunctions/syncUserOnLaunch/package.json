@@ -1,0 +1,9 @@
+{
+  "name": "syncUserOnLaunch",
+  "version": "1.0.0",
+  "description": "用户冷启动鉴权与数据合流云函数",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

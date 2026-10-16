@@ -368,18 +368,19 @@ Page({
 
     this.setData({ showUnlockDialog: false });
 
-    const prevId = storageService.getSelectedCigaretteId();
-    storageService.setTrialCigaretteInfo({
-      id: cig.id,
-      prevId: prevId && prevId !== cig.id ? prevId : 'chaotianmen_gold',
-      remaining: 1
-    });
+    // 静默发放单品烟盒当日免费畅抽通行证 (今日整盒畅吸，过了12点自动重置，不弹扰民提示)
+    storageService.unlockCigaretteForToday(cig.id);
 
-    toast.success(`开启【${cig.name}】1支尝鲜体验！`);
+    // 补齐一整盒初始库存
+    const cap = cig.packCapacity || (cig.isCigar ? 5 : 6);
+    storageService.resetPackCount(cig.id, cap);
 
-    // 导航至 3D 深度开盒页面尝鲜抽取体验（仅在实际抽出尝鲜烟支时切换装备）
+    // 切换当前装配
+    storageService.setSelectedCigaretteId(cig.id);
+
+    // 导航至 3D 深度开盒页面
     wx.navigateTo({
-      url: `/pages/pack/pack?id=${cig.id}&from=trial`,
+      url: `/pages/pack/pack?id=${cig.id}&from=daily_unlock`,
       fail: () => {
         this._isNavigatingToPack = false;
       },

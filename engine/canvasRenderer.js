@@ -278,21 +278,18 @@ export class CanvasRenderer {
         }
         ctx.restore();
 
-        // 顶端纯白接纸圈 (Tipping Paper White Collar - 1:1对标参考图实机细节)
-        const collarH = 5.5;
-        ctx.fillStyle = '#f8fafc';
-        ctx.fillRect(cx - cigW / 2, cy, cigW, collarH);
-        const collarGrad = ctx.createLinearGradient(cx - cigW / 2, 0, cx + cigW / 2, 0);
-        collarGrad.addColorStop(0, 'rgba(0, 0, 0, 0.28)');
-        collarGrad.addColorStop(0.2, 'rgba(255, 255, 255, 0.7)');
-        collarGrad.addColorStop(0.55, 'rgba(255, 255, 255, 0.15)');
-        collarGrad.addColorStop(1, 'rgba(0, 0, 0, 0.32)');
-        ctx.fillStyle = collarGrad;
-        ctx.fillRect(cx - cigW / 2, cy, cigW, collarH);
-
-        // 细致金/银色分隔线 (Accent Line)
+        // 过滤嘴与烟身交界处精细饰线/金箍 (Accent Band Line - 贴合接缝 cy，1:1 对标真烟与呈现页)
+        const bandH = 2.0;
         ctx.fillStyle = curCig.bandColor || 'rgba(217, 119, 6, 0.90)';
-        ctx.fillRect(cx - cigW / 2, cy + collarH, cigW, 1.2);
+        ctx.fillRect(cx - cigW / 2, cy, cigW, bandH);
+        // 微弱圆柱立体高光，使饰线质感纯正立体
+        const bandShineGrad = ctx.createLinearGradient(cx - cigW / 2, 0, cx + cigW / 2, 0);
+        bandShineGrad.addColorStop(0, 'rgba(0, 0, 0, 0.25)');
+        bandShineGrad.addColorStop(0.3, 'rgba(255, 255, 255, 0.45)');
+        bandShineGrad.addColorStop(0.65, 'rgba(255, 255, 255, 0.05)');
+        bandShineGrad.addColorStop(1, 'rgba(0, 0, 0, 0.35)');
+        ctx.fillStyle = bandShineGrad;
+        ctx.fillRect(cx - cigW / 2, cy, cigW, bandH);
 
         // 过滤嘴上的烫金英文字体与金色微颗粒 (实机同款: CHAOTIANMEN / CHUNGHWA)
         ctx.save();
@@ -2715,7 +2712,8 @@ export class PackFlightVfxRenderer {
   }
 
   // ===========================================================================
-  // 4. 至尊永久特效 【曜世真龙 · 奇点坍缩】(黑金帝王、3D双螺旋真龙盘柱、超新星全屏音爆)
+  // ===========================================================================
+  // 4. 至尊永久特效 【紫薇曜金 · 终极帝星】(升华月卡高级感 · 曜金深空紫薇 · 三维三阶多重进动星环 & 双向流星)
   // ===========================================================================
   renderLifetime(ctx, w, h, elapsedSec, options = {}) {
     const cx = w * 0.5;
@@ -2724,98 +2722,92 @@ export class PackFlightVfxRenderer {
 
     ctx.save();
 
-    // 第一幕 [0.00s ~ 0.48s 奇点引力坍缩 ➔ 烈焰真龙破鞘十字斩]
+    // 第一幕 [0.00s ~ 0.48s 紫薇破晓 · 曜金双极裂匣斩]
     if (elapsedSec < 0.48) {
-      const slashP = Math.min(1, elapsedSec / 0.44);
-      const slashAlpha = Math.sin(slashP * Math.PI);
-      const sheathX = cx + slotOffsetX * 0.5;
-      const sheathY = h * 0.42;
+      const p = Math.min(1, elapsedSec / 0.44);
+      const alpha = Math.sin(p * Math.PI);
+      const sx = cx + slotOffsetX * 0.5;
+      const sy = h * 0.42;
 
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
 
-      // 0.00s~0.12s 奇点微引力透镜内聚
-      if (elapsedSec < 0.14) {
-        const singP = elapsedSec / 0.14;
-        const singR = 32 * (1 - singP);
-        ctx.fillStyle = 'rgba(251, 191, 36, 0.4)';
-        ctx.beginPath();
-        ctx.arc(sheathX, sheathY + 16, singR, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      // 仓口三层超音速金芒震波环
-      for (let rIdx = 0; rIdx < 3; rIdx++) {
-        const subP = Math.max(0, Math.min(1, (elapsedSec - rIdx * 0.05) / 0.36));
-        if (subP <= 0) continue;
-        const rx = 54 + subP * (w * 0.46);
-        const a = (1 - subP) * 0.94;
-        ctx.strokeStyle = rIdx === 0
-          ? `rgba(253, 224, 71, ${a})`
-          : (rIdx === 1 ? `rgba(245, 158, 11, ${a * 0.9})` : `rgba(56, 189, 248, ${a * 0.8})`);
-        ctx.lineWidth = 3.4 * (1 - subP * 0.5);
-        ctx.beginPath();
-        drawEllipse(ctx, sheathX, sheathY + 18, rx, rx * 0.30);
-        ctx.stroke();
-      }
-
-      // 破鞘双十字焚天金龙斩
-      const angles = [-0.20, 0.24];
-      for (let aIdx = 0; aIdx < angles.length; aIdx++) {
+      // 双极交错弧光斩 (帝曜纯金 + 紫薇晶芒)
+      for (let sIdx = 0; sIdx < 2; sIdx++) {
         ctx.save();
-        ctx.translate(sheathX, sheathY);
-        ctx.rotate(angles[aIdx]);
-        const bladeSpan = w * ((aIdx === 0 ? 0.44 : 0.30) + slashP * 0.64);
-        const bladeThick = (1 - slashP * 0.65) * (aIdx === 0 ? 16 : 10);
-        const slashGrad = ctx.createLinearGradient(-bladeSpan, 0, bladeSpan, 0);
-        slashGrad.addColorStop(0, 'rgba(245, 158, 11, 0)');
-        slashGrad.addColorStop(0.2, `rgba(245, 158, 11, ${slashAlpha * 0.88})`);
-        slashGrad.addColorStop(0.45, `rgba(253, 224, 71, ${slashAlpha * 0.98})`);
-        slashGrad.addColorStop(0.50, `rgba(255, 255, 255, ${slashAlpha})`);
-        slashGrad.addColorStop(0.55, `rgba(253, 224, 71, ${slashAlpha * 0.98})`);
-        slashGrad.addColorStop(0.8, `rgba(245, 158, 11, ${slashAlpha * 0.85})`);
-        slashGrad.addColorStop(1, 'rgba(245, 158, 11, 0)');
-
-        ctx.fillStyle = slashGrad;
+        ctx.translate(sx, sy);
+        ctx.rotate((sIdx === 0 ? -0.28 : 0.28) + (sIdx === 0 ? p * 0.12 : -p * 0.12));
+        const span = w * (0.38 + p * 0.60);
+        const grad = ctx.createLinearGradient(-span, 0, span, 0);
+        if (sIdx === 0) {
+          // 曜金光刃
+          grad.addColorStop(0, 'rgba(253, 224, 71, 0)');
+          grad.addColorStop(0.3, `rgba(245, 158, 11, ${alpha * 0.85})`);
+          grad.addColorStop(0.5, `rgba(255, 255, 255, ${alpha})`);
+          grad.addColorStop(0.7, `rgba(253, 224, 71, ${alpha * 0.9})`);
+          grad.addColorStop(1, 'rgba(253, 224, 71, 0)');
+        } else {
+          // 紫薇星刃
+          grad.addColorStop(0, 'rgba(192, 132, 252, 0)');
+          grad.addColorStop(0.3, `rgba(168, 85, 247, ${alpha * 0.90})`);
+          grad.addColorStop(0.5, `rgba(255, 255, 255, ${alpha})`);
+          grad.addColorStop(0.7, `rgba(56, 189, 248, ${alpha * 0.85})`);
+          grad.addColorStop(1, 'rgba(56, 189, 248, 0)');
+        }
+        ctx.fillStyle = grad;
         ctx.beginPath();
-        ctx.moveTo(-bladeSpan, 0);
-        ctx.quadraticCurveTo(0, -bladeThick, bladeSpan, 0);
-        ctx.quadraticCurveTo(0, bladeThick, -bladeSpan, 0);
+        ctx.moveTo(-span, 0);
+        ctx.quadraticCurveTo(0, -13 * (1 - p * 0.6), span, 0);
+        ctx.quadraticCurveTo(0, 13 * (1 - p * 0.6), -span, 0);
         ctx.closePath();
         ctx.fill();
         ctx.restore();
       }
+
+      // 帝星引力扩散涟漪
+      for (let r = 0; r < 2; r++) {
+        const rp = Math.max(0, Math.min(1, (elapsedSec - r * 0.08) / 0.36));
+        if (rp <= 0) continue;
+        const rx = 48 + rp * (w * 0.44);
+        ctx.strokeStyle = r === 0 ? `rgba(254, 240, 138, ${(1 - rp) * 0.95})` : `rgba(192, 132, 252, ${(1 - rp) * 0.88})`;
+        ctx.lineWidth = 2.8 * (1 - rp * 0.5);
+        ctx.beginPath();
+        drawEllipse(ctx, sx, sy + 16, rx, rx * 0.30);
+        ctx.stroke();
+      }
+
       ctx.restore();
     }
 
-    // 第二幕 [0.12s ~ 0.72s 焚天相对论真龙喷流光柱]
+    // 第二幕 [0.12s ~ 0.72s 帝星冲霄 · 双色极光天柱]
     if (elapsedSec >= 0.12 && elapsedSec < 0.72) {
-      const ascendP = Math.min(1, (elapsedSec - 0.12) / 0.54);
-      const ascendAlpha = Math.sin(ascendP * Math.PI);
-      const beamX = cx + slotOffsetX * (1 - ascendP);
-      const headY = h * 0.44 - ascendP * (h * 0.34);
+      const p = Math.min(1, (elapsedSec - 0.12) / 0.54);
+      const alpha = Math.sin(p * Math.PI);
+      const beamX = cx + slotOffsetX * (1 - p);
+      const headY = h * 0.44 - p * (h * 0.34);
 
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
 
       const pillarGrad = ctx.createLinearGradient(beamX, headY, beamX, h * 0.76);
-      pillarGrad.addColorStop(0, `rgba(255, 255, 255, ${ascendAlpha * 0.98})`);
-      pillarGrad.addColorStop(0.25, `rgba(253, 224, 71, ${ascendAlpha * 0.92})`);
-      pillarGrad.addColorStop(0.60, `rgba(245, 158, 11, ${ascendAlpha * 0.65})`);
+      pillarGrad.addColorStop(0, `rgba(255, 255, 255, ${alpha * 0.98})`);
+      pillarGrad.addColorStop(0.28, `rgba(254, 240, 138, ${alpha * 0.90})`);
+      pillarGrad.addColorStop(0.55, `rgba(168, 85, 247, ${alpha * 0.75})`);
+      pillarGrad.addColorStop(0.85, `rgba(56, 189, 248, ${alpha * 0.40})`);
       pillarGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = pillarGrad;
       ctx.fillRect(beamX - 28, headY, 56, h * 0.76 - headY);
 
-      for (let i = 0; i < this.speedLines.length; i++) {
+      // 紫薇金芒加速线
+      for (let i = 0; i < 20; i++) {
         const sl = this.speedLines[i];
-        const lx = beamX + sl.offsetX;
+        const lx = beamX + sl.offsetX * 0.88;
         const travel = ((elapsedSec * sl.speed * 620 + sl.phase * 340) % 400);
-        const ly = h * 0.74 - travel;
-        if (ly < headY - 24) continue;
-
-        ctx.strokeStyle = i % 2 === 0 ? '#fde047' : '#fb923c';
-        ctx.lineWidth = sl.width * 1.2;
-        ctx.globalAlpha = ascendAlpha * 0.94;
+        const ly = h * 0.75 - travel;
+        if (ly < headY - 20) continue;
+        ctx.strokeStyle = i % 3 === 0 ? '#ffffff' : (i % 3 === 1 ? '#fde047' : '#c084fc');
+        ctx.lineWidth = sl.width * 1.15;
+        ctx.globalAlpha = alpha * 0.92;
         ctx.beginPath();
         ctx.moveTo(lx, ly - sl.len);
         ctx.lineTo(lx, ly);
@@ -2824,11 +2816,11 @@ export class PackFlightVfxRenderer {
       ctx.restore();
     }
 
-    // 第三幕 [0.22s ~ 2.25s 九天真龙莫比乌斯星河大回环]
+    // 第三幕 [0.22s ~ 2.25s 紫薇曜金莫比乌斯星河大回环]
     if (elapsedSec >= 0.22 && elapsedSec < 2.25) {
       const curveHeadU = Math.min(1.0, (elapsedSec - 0.22) / 1.16);
       const ribbonFade = elapsedSec > 1.38 ? Math.max(0, 1 - (elapsedSec - 1.38) / 0.82) : 1.0;
-      const count = Math.min(110, Math.max(10, Math.floor(curveHeadU * 110)));
+      const count = Math.min(105, Math.max(10, Math.floor(curveHeadU * 105)));
 
       if (ribbonFade > 0.01) {
         ctx.save();
@@ -2837,16 +2829,16 @@ export class PackFlightVfxRenderer {
         const tailStartU = Math.max(0, curveHeadU - 0.68);
         let ptCount = 0;
         for (let i = 0; i <= count; i++) {
-          const u = i / 110;
+          const u = i / 105;
           if (u < tailStartU || u > curveHeadU) continue;
           this.sampleSCurve(u, w, h, slotOffsetX, this.scratchPts[ptCount]);
           ptCount++;
         }
 
         if (ptCount > 2) {
-          // 宽幅帝皇流金光瀑
-          ctx.strokeStyle = `rgba(251, 191, 36, ${0.32 * ribbonFade})`;
-          ctx.lineWidth = 34;
+          // 紫薇深空外道天幕
+          ctx.strokeStyle = `rgba(168, 85, 247, ${0.36 * ribbonFade})`;
+          ctx.lineWidth = 32;
           ctx.lineCap = 'round';
           ctx.beginPath();
           ctx.moveTo(this.scratchPts[0].x, this.scratchPts[0].y);
@@ -2855,12 +2847,17 @@ export class PackFlightVfxRenderer {
           }
           ctx.stroke();
 
-          // 四股交织真龙龙鳞丝带
+          // 曜金内道
+          ctx.strokeStyle = `rgba(253, 224, 71, ${0.45 * ribbonFade})`;
+          ctx.lineWidth = 16;
+          ctx.stroke();
+
+          // 四股交织量子丝带 (纯白、曜金、紫薇、电光青)
           const strands = [
-            { col: '#fef08a', amp: 16.0, freq: 18, phase: 0, w: 6.0 },
-            { col: '#f59e0b', amp: 18.0, freq: 15, phase: 2.1, w: 5.0 },
-            { col: '#38bdf8', amp: 13.0, freq: 20, phase: 4.2, w: 4.0 },
-            { col: '#ffffff', amp: 4.0, freq: 12, phase: 1.0, w: 2.8 }
+            { col: '#ffffff', amp: 15.0, freq: 16, phase: 0, w: 4.2 },
+            { col: '#fef08a', amp: 18.0, freq: 14, phase: 1.8, w: 4.5 },
+            { col: '#c084fc', amp: 16.0, freq: 17, phase: 3.5, w: 3.8 },
+            { col: '#38bdf8', amp: 12.0, freq: 15, phase: 5.2, w: 3.0 }
           ];
           for (let sIdx = 0; sIdx < strands.length; sIdx++) {
             const st = strands[sIdx];
@@ -2872,7 +2869,7 @@ export class PackFlightVfxRenderer {
             for (let i = 0; i < ptCount; i++) {
               const p = this.scratchPts[i];
               const prog = i / ptCount;
-              const wave = Math.sin(p.u * st.freq - elapsedSec * 14 + st.phase) * st.amp * Math.sin(prog * Math.PI * 0.9);
+              const wave = Math.sin(p.u * st.freq - elapsedSec * 15 + st.phase) * st.amp * Math.sin(prog * Math.PI);
               const wx = p.x + p.nx * wave;
               const wy = p.y + p.ny * wave;
               if (!started) { ctx.moveTo(wx, wy); started = true; } else { ctx.lineTo(wx, wy); }
@@ -2880,47 +2877,49 @@ export class PackFlightVfxRenderer {
             ctx.stroke();
           }
 
-          // 炽阳彗星光首 (8角锐利金芒)
+          // 帝星耀核彗星光首 (双层八角星芒)
           if (curveHeadU < 0.99 && ptCount > 0) {
             const headPt = this.scratchPts[ptCount - 1];
             ctx.globalAlpha = ribbonFade;
-            const headGrad = ctx.createRadialGradient(headPt.x, headPt.y, 2, headPt.x, headPt.y, 56);
+            const headGrad = ctx.createRadialGradient(headPt.x, headPt.y, 2, headPt.x, headPt.y, 52);
             headGrad.addColorStop(0, '#ffffff');
-            headGrad.addColorStop(0.25, '#fde047');
-            headGrad.addColorStop(0.55, 'rgba(245, 158, 11, 0.85)');
+            headGrad.addColorStop(0.28, '#fef08a');
+            headGrad.addColorStop(0.60, 'rgba(192, 132, 252, 0.75)');
             headGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
             ctx.fillStyle = headGrad;
             ctx.beginPath();
-            ctx.arc(headPt.x, headPt.y, 56, 0, Math.PI * 2);
+            ctx.arc(headPt.x, headPt.y, 52, 0, Math.PI * 2);
             ctx.fill();
 
-            // 8角炽金星芒
+            // 双层八角棱镜星芒
             ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 2.4;
+            ctx.lineWidth = 2.2;
             ctx.beginPath();
-            ctx.moveTo(headPt.x - 38, headPt.y); ctx.lineTo(headPt.x + 38, headPt.y);
-            ctx.moveTo(headPt.x, headPt.y - 38); ctx.lineTo(headPt.x, headPt.y + 38);
+            ctx.moveTo(headPt.x - 34, headPt.y); ctx.lineTo(headPt.x + 34, headPt.y);
+            ctx.moveTo(headPt.x, headPt.y - 34); ctx.lineTo(headPt.x, headPt.y + 34);
             ctx.stroke();
-            ctx.strokeStyle = 'rgba(253, 224, 71, 0.9)';
-            ctx.lineWidth = 1.6;
+
+            ctx.strokeStyle = '#fef08a';
+            ctx.lineWidth = 1.4;
             ctx.beginPath();
-            ctx.moveTo(headPt.x - 24, headPt.y - 24); ctx.lineTo(headPt.x + 24, headPt.y + 24);
-            ctx.moveTo(headPt.x + 24, headPt.y - 24); ctx.lineTo(headPt.x - 24, headPt.y + 24);
+            const dLen = 22;
+            ctx.moveTo(headPt.x - dLen, headPt.y - dLen); ctx.lineTo(headPt.x + dLen, headPt.y + dLen);
+            ctx.moveTo(headPt.x - dLen, headPt.y + dLen); ctx.lineTo(headPt.x + dLen, headPt.y - dLen);
             ctx.stroke();
           }
 
-          // 漫天龙鳞碎金星尘
-          for (let i = 0; i < this.stardust.length; i++) {
+          // 36 颗曜金紫薇星尘
+          for (let i = 0; i < 36; i++) {
             const sd = this.stardust[i];
             if (sd.u > curveHeadU) continue;
             const sample = this.sampleSCurve(sd.u, w, h, slotOffsetX);
-            const drift = Math.sin(elapsedSec * 3.6 + sd.phase) * 6;
-            const sx = sample.x + sample.nx * (sd.normalSpread * 36 + drift);
-            const sy = sample.y + sample.ny * (sd.normalSpread * 36 + drift);
-            ctx.fillStyle = i % 2 === 0 ? '#fef08a' : '#fbbf24';
-            ctx.globalAlpha = 0.95 * ribbonFade;
+            const drift = Math.sin(elapsedSec * 3.6 + sd.phase) * 5;
+            const sx = sample.x + sample.nx * (sd.normalSpread * 26 + drift);
+            const sy = sample.y + sample.ny * (sd.normalSpread * 26 + drift);
+            ctx.fillStyle = i % 3 === 0 ? '#ffffff' : (i % 3 === 1 ? '#fef08a' : '#c084fc');
+            ctx.globalAlpha = 0.92 * ribbonFade;
             ctx.beginPath();
-            ctx.arc(sx, sy, sd.size * 1.3, 0, Math.PI * 2);
+            ctx.arc(sx, sy, sd.size * 1.25, 0, Math.PI * 2);
             ctx.fill();
           }
         }
@@ -2928,102 +2927,176 @@ export class PackFlightVfxRenderer {
       }
     }
 
-    // 第四幕 [1.18s ~ 常驻 三龙盘柱·3D双螺旋真龙守护法阵]
+    // =========================================================================
+    // 第四幕 [1.18s ~ 常驻核心：【紫薇曜金 · 三维三阶多重进动星环 & 双向流星】]
+    // =========================================================================
+    // 视觉核心：融合月卡广受好评的 3D 星环美感，升华至至尊帝王级！
+    // 1. 紫薇帝星深空呼吸辐射光冕 (金紫双色光晕深邃脉动)
+    // 2. 三阶进动天体星环 (42° 曜金主环 + -38° 紫薇主环 + 8° 天赤道星辉微环)
+    // 3. 星环双向对冲流星伴星 (带拖尾微光彗尾，不再是死板小圆点，而是活的轨道流星)
+    // 4. 32 颗紫薇曜金浮游星萤 (呼吸明灭闪烁，空气层次感拉满)
+    // 5. 周期性帝星引力微澜
     if (elapsedSec >= 1.18) {
-      const auraFadeIn = Math.min(1, (elapsedSec - 1.18) / 0.36);
+      const fadeIn = Math.min(1, (elapsedSec - 1.18) / 0.36);
       const centerFocusY = h * 0.43;
-      const tiltRad = 22 * Math.PI / 180;
-      const cosT = Math.cos(tiltRad);
-      const sinT = Math.sin(tiltRad);
 
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
 
-      // 居中帝皇赤金天元神环
-      const pulseR = 152 + Math.sin(elapsedSec * 3.5) * 16;
-      const auraGrad = ctx.createRadialGradient(cx, centerFocusY, 12, cx, centerFocusY, pulseR);
-      auraGrad.addColorStop(0, `rgba(254, 240, 138, ${0.44 * auraFadeIn})`);
-      auraGrad.addColorStop(0.35, `rgba(251, 191, 36, ${0.30 * auraFadeIn})`);
-      auraGrad.addColorStop(0.70, `rgba(245, 158, 11, ${0.18 * auraFadeIn})`);
+      // 1. 紫薇帝星深空呼吸辐射光冕 (柔和深邃，绝不喧宾夺主，烟身清晰尊贵)
+      const pulseR = 160 + Math.sin(elapsedSec * 2.8) * 16;
+      const auraGrad = ctx.createRadialGradient(cx, centerFocusY, 14, cx, centerFocusY, pulseR);
+      auraGrad.addColorStop(0, `rgba(255, 255, 255, ${0.35 * fadeIn})`);
+      auraGrad.addColorStop(0.25, `rgba(254, 240, 138, ${0.28 * fadeIn})`);
+      auraGrad.addColorStop(0.55, `rgba(168, 85, 247, ${0.18 * fadeIn})`);
+      auraGrad.addColorStop(0.82, `rgba(126, 34, 206, ${0.08 * fadeIn})`);
       auraGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = auraGrad;
       ctx.beginPath();
       ctx.arc(cx, centerFocusY, pulseR, 0, Math.PI * 2);
       ctx.fill();
 
-      // 三龙盘柱 3D 螺旋环绕
-      const dragonConfigs = [
-        { phaseOffset: 0, mainColor: '#fef08a', glowColor: 'rgba(251, 191, 36, ', coreWidth: 3.4, glowWidth: 9.5 },
-        { phaseOffset: (Math.PI * 2) / 3, mainColor: '#f59e0b', glowColor: 'rgba(245, 158, 11, ', coreWidth: 3.0, glowWidth: 8.5 },
-        { phaseOffset: (Math.PI * 4) / 3, mainColor: '#38bdf8', glowColor: 'rgba(56, 189, 248, ', coreWidth: 2.6, glowWidth: 7.5 }
+      // 2. 三阶三维多重进动星环
+      const ringsConfig = [
+        {
+          // 一阶：42° 曜金主星环 (顺时针进动，顺行流星)
+          baseAngle: 0.42,
+          wobbleFreq: 1.2,
+          wobbleAmp: 0.07,
+          rx: 96,
+          ry: 36,
+          strokeCol: 'rgba(254, 240, 138, 0.85)',
+          glowCol: 'rgba(245, 158, 11, 0.35)',
+          glowWidth: 9,
+          strokeWidth: 3.2,
+          cometSpeed: 2.8,
+          cometCol: '#ffffff',
+          cometGlow: '#fef08a',
+          cometR: 4.8
+        },
+        {
+          // 二阶：-38° 紫薇主星环 (逆时针进动，逆行流星)
+          baseAngle: -0.38,
+          wobbleFreq: 1.4,
+          wobbleAmp: 0.08,
+          rx: 118,
+          ry: 42,
+          strokeCol: 'rgba(192, 132, 252, 0.80)',
+          glowCol: 'rgba(168, 85, 247, 0.30)',
+          glowWidth: 10,
+          strokeWidth: 3.0,
+          cometSpeed: -2.4,
+          cometCol: '#ffffff',
+          cometGlow: '#c084fc',
+          cometR: 4.5
+        },
+        {
+          // 三阶：8° 赤道微星环 (微倾角，轻盈外环，两极平衡)
+          baseAngle: 0.08,
+          wobbleFreq: 0.8,
+          wobbleAmp: 0.04,
+          rx: 142,
+          ry: 48,
+          strokeCol: 'rgba(56, 189, 248, 0.55)',
+          glowCol: 'rgba(56, 189, 248, 0.18)',
+          glowWidth: 6,
+          strokeWidth: 1.8,
+          cometSpeed: 1.6,
+          cometCol: '#e0f2fe',
+          cometGlow: '#38bdf8',
+          cometR: 3.8
+        }
       ];
 
-      const helixHalfH = Math.min(156, h * 0.195);
-      const helixRadiusX = Math.min(84, w * 0.22);
-      const segCount = 48;
+      for (let rIdx = 0; rIdx < ringsConfig.length; rIdx++) {
+        const rc = ringsConfig[rIdx];
+        ctx.save();
+        ctx.translate(cx, centerFocusY);
+        const rotAngle = rc.baseAngle + Math.sin(elapsedSec * rc.wobbleFreq + rIdx * 1.5) * rc.wobbleAmp;
+        ctx.rotate(rotAngle);
 
-      for (let dIdx = 0; dIdx < dragonConfigs.length; dIdx++) {
-        const dc = dragonConfigs[dIdx];
+        // 环体柔光外晕
+        ctx.strokeStyle = rc.glowCol;
+        ctx.lineWidth = rc.glowWidth;
         ctx.beginPath();
-        let headX = 0, headY = 0, headR = 0;
+        drawEllipse(ctx, 0, 0, rc.rx, rc.ry);
+        ctx.stroke();
 
-        for (let s = 0; s <= segCount; s++) {
-          const u = s / segCount;
-          const axisY = (0.5 - u) * 2 * helixHalfH;
-          const theta = u * Math.PI * 3.8 - elapsedSec * 4.6 + dc.phaseOffset;
-          const env = Math.sin(u * Math.PI);
-          const perpX = Math.sin(theta) * helixRadiusX * (0.45 + 0.55 * env);
-          const depthZ = Math.cos(theta);
+        // 环体锐利本体光丝
+        ctx.strokeStyle = rc.strokeCol;
+        ctx.lineWidth = rc.strokeWidth;
+        ctx.stroke();
 
-          const sx = cx + perpX * cosT - axisY * sinT;
-          const sy = centerFocusY + perpX * sinT + axisY * cosT;
-          if (s === 0) ctx.moveTo(sx, sy); else ctx.lineTo(sx, sy);
+        // 轨道上的流星伴星（带有 5 节平滑彗星流光拖尾）
+        const cometTheta = elapsedSec * rc.cometSpeed + rIdx * 2.2;
+        const trailSteps = 5;
+        for (let t = trailSteps; t >= 0; t--) {
+          const stepTheta = cometTheta - (t * 0.04 * (rc.cometSpeed > 0 ? 1 : -1));
+          const sx = Math.cos(stepTheta) * rc.rx;
+          const sy = Math.sin(stepTheta) * rc.ry;
+          const stepAlpha = (1.0 - (t / (trailSteps + 1)) * 0.82) * fadeIn;
+          const stepR = (t === 0 ? rc.cometR : rc.cometR * (0.8 - t * 0.12));
 
-          if (s === Math.floor(segCount * 0.84)) {
-            headX = sx;
-            headY = sy;
-            headR = 7.0 * (0.6 + 0.4 * depthZ);
+          if (t === 0) {
+            // 流星核与星芒
+            const cGrad = ctx.createRadialGradient(sx, sy, 1, sx, sy, rc.cometR * 2.6);
+            cGrad.addColorStop(0, '#ffffff');
+            cGrad.addColorStop(0.4, rc.cometGlow);
+            cGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = cGrad;
+            ctx.beginPath();
+            ctx.arc(sx, sy, rc.cometR * 2.6, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = rc.cometCol;
+            ctx.beginPath();
+            ctx.arc(sx, sy, rc.cometR, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            // 彗尾粒子
+            ctx.fillStyle = rc.cometGlow;
+            ctx.globalAlpha = stepAlpha * 0.65;
+            ctx.beginPath();
+            ctx.arc(sx, sy, stepR, 0, Math.PI * 2);
+            ctx.fill();
           }
         }
 
-        ctx.strokeStyle = `${dc.glowColor}${0.55 * auraFadeIn})`;
-        ctx.lineWidth = dc.glowWidth;
-        ctx.lineCap = 'round';
-        ctx.stroke();
-
-        ctx.strokeStyle = dc.mainColor;
-        ctx.globalAlpha = 1.0 * auraFadeIn;
-        ctx.lineWidth = dc.coreWidth;
-        ctx.stroke();
-
-        // 龙头十字圣光
-        if (headR > 0) {
-          ctx.fillStyle = '#ffffff';
-          ctx.beginPath();
-          ctx.arc(headX, headY, headR, 0, Math.PI * 2);
-          ctx.fill();
-        }
+        ctx.restore();
       }
 
-      // 28 颗 24K 黄金神印星尘与流萤
+      // 3. 周期性帝星引力微澜 (向外扩散的优雅金紫光环)
+      for (let wIdx = 0; wIdx < 2; wIdx++) {
+        const waveT = ((elapsedSec * 0.55 + wIdx * 0.50) % 1.0);
+        const waveR = 50 + waveT * 125;
+        const waveAlpha = (1 - waveT) * 0.40 * fadeIn;
+        ctx.strokeStyle = wIdx % 2 === 0 ? `rgba(254, 240, 138, ${waveAlpha})` : `rgba(192, 132, 252, ${waveAlpha})`;
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        drawEllipse(ctx, cx, centerFocusY, waveR, waveR * 0.35);
+        ctx.stroke();
+      }
+
+      // 4. 32 颗紫薇曜金浮游星萤 (如细碎钻石与曜金粉尘在空间中呼吸微闪)
       for (let i = 0; i < this.ambientSparks.length; i++) {
         const sp = this.ambientSparks[i];
-        const curAngle = sp.angle + elapsedSec * sp.orbitSpeed;
-        const r = w * sp.radiusRatio;
-        const verticalCycle = ((elapsedSec * sp.speedY + i * 17) % 250) - 125;
+        const curAngle = sp.angle + elapsedSec * sp.orbitSpeed * 0.75;
+        const r = w * sp.radiusRatio * 1.12;
+        const verticalCycle = ((elapsedSec * (sp.speedY * 0.7) + i * 16) % 220) - 110;
         const px = cx + Math.cos(curAngle) * r;
-        const py = centerFocusY - verticalCycle + Math.sin(curAngle) * (r * 0.35);
+        const py = centerFocusY - verticalCycle + Math.sin(curAngle) * (r * 0.30);
 
-        ctx.globalAlpha = (0.45 + 0.55 * Math.sin(elapsedSec * 4.8 + sp.phase)) * auraFadeIn;
-        ctx.fillStyle = i % 2 === 0 ? '#fbbf24' : '#f59e0b';
+        ctx.globalAlpha = (0.42 + 0.58 * Math.sin(elapsedSec * 4.5 + sp.phase)) * fadeIn;
+        ctx.fillStyle = i % 4 === 0 ? '#ffffff' : (i % 4 === 1 ? '#fef08a' : (i % 4 === 2 ? '#c084fc' : '#38bdf8'));
         ctx.beginPath();
-        ctx.arc(px, py, sp.size * 1.3, 0, Math.PI * 2);
+        ctx.arc(px, py, sp.size * 1.22, 0, Math.PI * 2);
         ctx.fill();
       }
+
       ctx.restore();
     }
 
-    // 第五幕 [1.32s ~ 2.18s 超新星全屏流金音爆大爆发]
+    // 第五幕 [1.32s ~ 2.18s 紫薇曜金超新星全屏音爆大爆发]
     if (elapsedSec >= 1.32 && elapsedSec < 2.18) {
       const burstElapsed = elapsedSec - 1.32;
       const burstP = Math.min(1, burstElapsed / 0.78);
@@ -3034,32 +3107,36 @@ export class PackFlightVfxRenderer {
       ctx.globalCompositeOperation = 'lighter';
 
       // 闪光耀斑核
-      const coreR = 64 + burstP * (w * 0.58);
+      const coreR = 68 + burstP * (w * 0.60);
       const coreGrad = ctx.createRadialGradient(cx, centerFocusY, 4, cx, centerFocusY, coreR);
       coreGrad.addColorStop(0, `rgba(255, 255, 255, ${burstAlpha * 0.98})`);
-      coreGrad.addColorStop(0.28, `rgba(253, 224, 71, ${burstAlpha * 0.85})`);
-      coreGrad.addColorStop(0.62, `rgba(245, 158, 11, ${burstAlpha * 0.55})`);
+      coreGrad.addColorStop(0.28, `rgba(253, 224, 71, ${burstAlpha * 0.88})`);
+      coreGrad.addColorStop(0.62, `rgba(192, 132, 252, ${burstAlpha * 0.65})`);
+      coreGrad.addColorStop(0.85, `rgba(56, 189, 248, ${burstAlpha * 0.35})`);
       coreGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = coreGrad;
       ctx.beginPath();
       ctx.arc(cx, centerFocusY, coreR, 0, Math.PI * 2);
       ctx.fill();
 
-      // 三层金色冲击波环
+      // 三层帝星冲击波环 (金、紫、青)
       for (let ringIdx = 0; ringIdx < 3; ringIdx++) {
-        const rp = Math.max(0, Math.min(1, (burstElapsed - ringIdx * 0.06) / 0.58));
+        const rp = Math.max(0, Math.min(1, (burstElapsed - ringIdx * 0.07) / 0.58));
         if (rp <= 0) continue;
-        const ringR = 44 + rp * (w * 0.52);
-        ctx.strokeStyle = ringIdx === 0
+        const ringR = 42 + rp * (w * 0.52);
+        const col = ringIdx === 0
           ? `rgba(253, 224, 71, ${(1 - rp) * 0.95})`
-          : (ringIdx === 1 ? `rgba(245, 158, 11, ${(1 - rp) * 0.88})` : `rgba(56, 189, 248, ${(1 - rp) * 0.80})`);
-        ctx.lineWidth = 3.4 * (1 - rp * 0.6);
+          : (ringIdx === 1
+            ? `rgba(192, 132, 252, ${(1 - rp) * 0.90})`
+            : `rgba(56, 189, 248, ${(1 - rp) * 0.80})`);
+        ctx.strokeStyle = col;
+        ctx.lineWidth = 3.2 * (1 - rp * 0.6);
         ctx.beginPath();
         ctx.arc(cx, centerFocusY, ringR, 0, Math.PI * 2);
         ctx.stroke();
       }
 
-      // 360° 放射状金色剑芒粒子
+      // 360° 放射状金色与紫薇剑芒粒子
       const easeOut = 1 - Math.pow(1 - burstP, 2.5);
       for (let i = 0; i < this.burstParticles.length; i++) {
         const bp = this.burstParticles[i];
@@ -3072,15 +3149,15 @@ export class PackFlightVfxRenderer {
           const tailDist = Math.max(14, dist - bp.rayLen * (1 - burstP * 0.35));
           const tx = cx + Math.cos(bp.angle) * tailDist;
           const ty = centerFocusY + Math.sin(bp.angle) * tailDist;
-          ctx.strokeStyle = bp.color;
-          ctx.lineWidth = bp.size * 1.0;
+          ctx.strokeStyle = i % 2 === 0 ? '#fde047' : '#c084fc';
+          ctx.lineWidth = bp.size * 1.1;
           ctx.lineCap = 'round';
           ctx.beginPath();
           ctx.moveTo(tx, ty);
           ctx.lineTo(px, py);
           ctx.stroke();
         } else {
-          ctx.fillStyle = bp.color;
+          ctx.fillStyle = i % 2 === 0 ? '#fde047' : '#c084fc';
           ctx.beginPath();
           ctx.arc(px, py, bp.size, 0, Math.PI * 2);
           ctx.fill();
