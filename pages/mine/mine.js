@@ -23,6 +23,14 @@ import {
 import { measureSafeAreaSync } from '../../utils/safeArea.js';
 import { navigateBackWithSound } from '../../utils/navigation.js';
 
+/* ==========================================================================
+ * [DEV_ADMIN_TEST] 调试元数据引入 (可随时安全删除)
+ * ========================================================================== */
+import { CIGARETTE_CATALOG } from '../../configs/catalog.js';
+import { SMOKE_EFFECTS } from '../../configs/smokeEffects.js';
+import { ACHIEVEMENTS } from '../../configs/achievements.js';
+/* ==================== [DEV_ADMIN_TEST] 结束 ==================== */
+
 const QUICK_PRICE_PRESETS = [
   { val: 15, label: '¥15 白沙' },
   { val: 18, label: '¥18 炫赫' },
@@ -164,7 +172,13 @@ function buildInitialMineState() {
       ...staticPresets,
       projections: computeProfileProjections(payload.profile),
       vipTheme: vipService.getVipTheme(),
-      showProfileModal: false
+      showProfileModal: false,
+      /* ==================== [DEV_ADMIN_TEST] 初始状态 ==================== */
+      showAdminTestModal: false,
+      devVipActive: vipService.isVip(),
+      devVipInfo: vipService.getVipInfo(),
+      devCurrentPackCount: storageService.getPackCount(storageService.getSelectedCigaretteId(), 20)
+      /* ==================== [DEV_ADMIN_TEST] 结束 ==================== */
     };
   } catch (e) {
     console.error('buildInitialMineState error:', e);
@@ -299,10 +313,18 @@ Page({
   refreshAllData() {
     try {
       const safeArea = measureSafeAreaSync();
+      const vipInfo = vipService.getVipInfo();
+      const curCigId = storageService.getSelectedCigaretteId();
+      const curPackCount = storageService.getPackCount(curCigId, 20);
       this.setData({
         ...safeArea,
         ...computeMineStatsPayload(),
-        vipTheme: vipService.getVipTheme()
+        vipTheme: vipService.getVipTheme(),
+        /* ==================== [DEV_ADMIN_TEST] 动态状态同步 ==================== */
+        devVipActive: vipInfo.isVip,
+        devVipInfo: vipInfo,
+        devCurrentPackCount: curPackCount
+        /* ==================== [DEV_ADMIN_TEST] 结束 ==================== */
       });
     } catch (e) {
       console.error('refreshAllData error:', e);
@@ -571,5 +593,425 @@ Page({
     navigateBackWithSound();
   },
 
-  preventTouchMove() {}
+  preventTouchMove() {},
+
+  /* ==========================================================================
+   * [DEV_ADMIN_TEST] 管理员极速测试控制台业务逻辑 (可整块安全删除)
+   * ========================================================================== */
+  preventBubble() {},
+
+  onOpenAdminTest() {
+    audioManager.unlockAudio();
+    audioManager.playSwitchSound();
+    triggerHaptic('medium');
+    const vipInfo = vipService.getVipInfo();
+    const curCigId = storageService.getSelectedCigaretteId();
+    const curPackCount = storageService.getPackCount(curCigId, 20);
+    this.setData({
+      showAdminTestModal: true,
+      devVipActive: vipInfo.isVip,
+      devVipInfo: vipInfo,
+      devCurrentPackCount: curPackCount
+    });
+  },
+
+  onCloseAdminTest() {
+    audioManager.unlockAudio();
+    audioManager.playSwitchSound();
+    triggerHaptic('light');
+    this.setData({ showAdminTestModal: false });
+  },
+
+  // 1. 首页吸烟仿真与燃烧进度 (关键要求)
+  devSetSmokeProgress90() {
+    triggerHaptic('heavy');
+    wx.setStorageSync('__DEV_PENDING_ACTION__', {
+      type: 'SET_PROGRESS',
+      progress: 0.10, // 燃烧还剩10%，即吸了90%
+      ashRatio: 0.90, // 烟灰90%厚灰
+      state: 'IDLE_BURNING',
+      msg: '🔥 首页烟支已设为90%燃烧进度 (含90%厚灰待弹)'
+    });
+    toast.flame('🔥 已注入仿真：烟支已设为90%燃烧进度，返回首页查看！');
+  },
+
+  devSetSmokeProgress50() {
+    triggerHaptic('medium');
+    wx.setStorageSync('__DEV_PENDING_ACTION__', {
+      type: 'SET_PROGRESS',
+      progress: 0.50,
+      ashRatio: 0.50,
+      state: 'IDLE_BURNING',
+      msg: '🔥 首页烟支已设为50%燃烧中段'
+    });
+    toast.flame('🔥 已注入：烟支燃烧进度 50%，返回首页查看！');
+  },
+
+  devSetSmokeProgress10() {
+    triggerHaptic('light');
+    wx.setStorageSync('__DEV_PENDING_ACTION__', {
+      type: 'SET_PROGRESS',
+      progress: 0.90,
+      ashRatio: 0.10,
+      state: 'IDLE_BURNING',
+      msg: '🔥 首页烟支刚吸两口 (10%)'
+    });
+    toast.flame('🔥 已注入：烟支燃烧进度 10%，返回首页查看！');
+  },
+
+  devResetFullSmoke() {
+    triggerHaptic('medium');
+    wx.setStorageSync('__DEV_PENDING_ACTION__', {
+      type: 'SET_PROGRESS',
+      progress: 1.0,
+      ashRatio: 0.0,
+      state: 'UNLIT',
+      msg: '✨ 首页烟支已恢复100%满长未点燃'
+    });
+    toast.success('✨ 已重置：首页烟支恢复100%全新未燃！');
+  },
+
+  devIgniteNow() {
+    triggerHaptic('heavy');
+    wx.setStorageSync('__DEV_PENDING_ACTION__', {
+      type: 'SET_PROGRESS',
+      progress: 1.0,
+      ashRatio: 0.05,
+      state: 'IDLE_BURNING',
+      msg: '🔥 首页烟支已点燃！'
+    });
+    toast.flame('🔥 已点燃首页香烟，进入自燃状态！');
+  },
+
+  devExtinguishNow() {
+    triggerHaptic('medium');
+    wx.setStorageSync('__DEV_PENDING_ACTION__', {
+      type: 'SET_PROGRESS',
+      progress: 1.0,
+      ashRatio: 0.0,
+      state: 'UNLIT',
+      msg: '💨 首页烟支已掐灭'
+    });
+    toast.info('💨 已掐灭首页香烟，回归未点燃！');
+  },
+
+  devTapAshNow() {
+    triggerHaptic('light');
+    wx.setStorageSync('__DEV_PENDING_ACTION__', {
+      type: 'TAP_ASH',
+      msg: '💨 首页烟灰已弹落清空！'
+    });
+    toast.info('💨 已执行弹灰指令，返回首页可见飘散动效！');
+  },
+
+  devToggleBead() {
+    triggerHaptic('heavy');
+    const isPopped = wx.getStorageSync('__DEV_BEAD_POPPED__') || false;
+    const nextState = !isPopped;
+    wx.setStorageSync('__DEV_BEAD_POPPED__', nextState);
+    wx.setStorageSync('__DEV_PENDING_ACTION__', {
+      type: nextState ? 'POP_BEAD' : 'RESET_BEAD',
+      msg: nextState ? '🔮 爆珠已捏破！' : '🔮 爆珠已复原'
+    });
+    toast.flame(nextState ? '🔮 爆珠已捏破，返回首页查看晶体液滴！' : '🔮 爆珠已复原！');
+  },
+
+  devFinishSmokeNow() {
+    triggerHaptic('heavy');
+    // 1. 本地直接增加一条替烟记录
+    const curCigId = storageService.getSelectedCigaretteId();
+    storageService.addRecord({
+      timestamp: Date.now(),
+      cigaretteId: curCigId
+    });
+    // 2. 扣除当前烟盒库存 1 支
+    const curCount = storageService.getPackCount(curCigId, 20);
+    if (curCount > 0) {
+      storageService.setPackCount(curCigId, curCount - 1);
+    }
+    // 3. 注入首页抽完指令
+    wx.setStorageSync('__DEV_PENDING_ACTION__', {
+      type: 'FINISH_SMOKE',
+      msg: '🏁 烟支抽尽结算完成！'
+    });
+    this.refreshAllData();
+    toast.flame('⚡ 已模拟抽完吸尽：+1支替烟记录，已自动保存！');
+  },
+
+  // 2. 打卡天数与时间跨度测试 (关键要求)
+  devAddQuitDays(e) {
+    const days = Number(e.currentTarget.dataset.days) || 1;
+    triggerHaptic('medium');
+    const p = storageService.getProfile();
+    const curStart = p.quitStartDate ? new Date(p.quitStartDate).getTime() : Date.now();
+    const newStart = curStart - days * 86400000;
+    storageService.updateProfile({ quitStartDate: newStart });
+    this.refreshAllData();
+    toast.success(`📅 打卡天数已 +${days} 天！`);
+  },
+
+  devSetQuitDays(e) {
+    const days = Number(e.currentTarget.dataset.days) || 1;
+    triggerHaptic('medium');
+    const now = new Date();
+    const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const newStart = midnight - Math.max(0, days - 1) * 86400000;
+    storageService.updateProfile({ quitStartDate: newStart });
+    this.refreshAllData();
+    toast.success(`📅 打卡已设为第 ${days} 天！`);
+  },
+
+  // 3. VIP 状态与特权测试 (关键要求)
+  devActivateVipLifetime() {
+    triggerHaptic('heavy');
+    vipService.activateTier('lifetime');
+    this.refreshAllData();
+    toast.flame('👑 已激活【至尊永久卡】终身免广与黑金荣耀！');
+  },
+
+  devActivateVipMonth() {
+    triggerHaptic('heavy');
+    vipService.activateTier('month');
+    this.refreshAllData();
+    toast.flame('💎 已激活【30天尊享月卡】特权！');
+  },
+
+  devActivateVipDay() {
+    triggerHaptic('medium');
+    vipService.activateTier('day');
+    this.refreshAllData();
+    toast.flame('✨ 已激活【24小时畅玩日卡】！');
+  },
+
+  devExpireVipNow() {
+    triggerHaptic('medium');
+    const expiredData = {
+      isVip: false,
+      tierId: 'month',
+      tierName: '尊享月卡',
+      customTheme: 'month',
+      activatedAt: Date.now() - 31 * 86400000,
+      expireTime: Date.now() - 1000,
+      isLifetime: false
+    };
+    try {
+      wx.setStorageSync('JUST_ONE_SMOKE_VIP_INFO_V1', expiredData);
+    } catch (err) {}
+    this.refreshAllData();
+    toast.info('⚠️ VIP 状态已模拟设置为【刚过期1秒】！');
+  },
+
+  devClearVip() {
+    triggerHaptic('medium');
+    try {
+      wx.removeStorageSync('JUST_ONE_SMOKE_VIP_INFO_V1');
+      wx.removeStorageSync('JUST_ONE_SMOKE_PREVIEW_THEME');
+    } catch (err) {}
+    this.refreshAllData();
+    toast.info('已清除 VIP 缓存，恢复纯净普通用户！');
+  },
+
+  // 4. 替烟支数与 7 日自律数据 (关键要求)
+  devAddRecords(e) {
+    const count = Number(e.currentTarget.dataset.count) || 1;
+    triggerHaptic('medium');
+    const curCigId = storageService.getSelectedCigaretteId();
+    for (let i = 0; i < count; i++) {
+      storageService.addRecord({
+        timestamp: Date.now() - i * 60000,
+        cigaretteId: curCigId
+      });
+    }
+    this.refreshAllData();
+    toast.success(`📊 替烟记录已累加 +${count} 支！`);
+  },
+
+  devSetTotalRecords(e) {
+    const target = Number(e.currentTarget.dataset.count) || 60;
+    triggerHaptic('heavy');
+    const curCigId = storageService.getSelectedCigaretteId();
+    const records = [];
+    const now = Date.now();
+    for (let i = 0; i < target; i++) {
+      const offsetMs = Math.floor((i / target) * 7 * 86400000);
+      records.push({
+        timestamp: now - offsetMs,
+        cigaretteId: curCigId
+      });
+    }
+    try {
+      wx.setStorageSync('SMOKEFREE_RECORDS', records);
+    } catch (err) {}
+    this.refreshAllData();
+    toast.flame(`📊 累计替烟已设为 ${target} 支！`);
+  },
+
+  devFill7DaysTrends() {
+    triggerHaptic('heavy');
+    const curCigId = storageService.getSelectedCigaretteId();
+    const records = [];
+    const now = new Date();
+    for (let day = 6; day >= 0; day--) {
+      const targetDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day, 12, 0, 0);
+      const countForDay = Math.floor(Math.random() * 9) + 8;
+      for (let k = 0; k < countForDay; k++) {
+        records.push({
+          timestamp: targetDay.getTime() + k * 1800000,
+          cigaretteId: curCigId
+        });
+      }
+    }
+    try {
+      wx.setStorageSync('SMOKEFREE_RECORDS', records);
+    } catch (err) {}
+    this.refreshAllData();
+    toast.flame('✨ 已填充近 7 天完整替烟数据，折线图与柱状图已点亮！');
+  },
+
+  devClearRecords() {
+    triggerHaptic('medium');
+    try {
+      wx.setStorageSync('SMOKEFREE_RECORDS', []);
+    } catch (err) {}
+    this.refreshAllData();
+    toast.info('已清空全部替烟记录 (0支)！');
+  },
+
+  // 5. 烟盒库存与陈列
+  devSetCurrentPackCount(e) {
+    const count = Number(e.currentTarget.dataset.count) || 0;
+    triggerHaptic('medium');
+    const curCigId = storageService.getSelectedCigaretteId();
+    storageService.setPackCount(curCigId, count);
+    this.refreshAllData();
+    toast.info(`当前烟盒余量已设为 ${count} 支！`);
+  },
+
+  devRefillCurrentPack() {
+    triggerHaptic('medium');
+    const curCigId = storageService.getSelectedCigaretteId();
+    storageService.setPackCount(curCigId, 20);
+    this.refreshAllData();
+    toast.success('当前烟盒已补满 (满盒)！');
+  },
+
+  devRefillAllPacks() {
+    triggerHaptic('heavy');
+    if (Array.isArray(CIGARETTE_CATALOG)) {
+      CIGARETTE_CATALOG.forEach(c => {
+        storageService.setPackCount(c.id, c.packCapacity || 20);
+      });
+    }
+    this.refreshAllData();
+    toast.flame('📦 全部 33 款名烟展柜库存已 100% 补满！');
+  },
+
+  // 6. 展柜与特效全解锁
+  devUnlockAllCigarettes() {
+    triggerHaptic('heavy');
+    if (Array.isArray(CIGARETTE_CATALOG)) {
+      const allIds = CIGARETTE_CATALOG.map(c => c.id);
+      try {
+        wx.setStorageSync('SMOKEFREE_CUSTOM_UNLOCKED_CIGARETTES', allIds);
+      } catch (err) {}
+    }
+    this.refreshAllData();
+    toast.flame('🌟 全部 33 款名烟与雪茄已永久全量解锁！');
+  },
+
+  devLockAllCigarettes() {
+    triggerHaptic('medium');
+    try {
+      wx.setStorageSync('SMOKEFREE_CUSTOM_UNLOCKED_CIGARETTES', []);
+    } catch (err) {}
+    this.refreshAllData();
+    toast.info('已锁定全部名烟，仅保留默认款！');
+  },
+
+  devUnlockAllSmokeEffects() {
+    triggerHaptic('heavy');
+    if (Array.isArray(SMOKE_EFFECTS)) {
+      const allEffIds = SMOKE_EFFECTS.map(e => e.id);
+      try {
+        wx.setStorageSync('SMOKEFREE_SUMMONED_SMOKE_EFFECTS', allEffIds);
+      } catch (err) {}
+    }
+    this.refreshAllData();
+    toast.flame('🌌 全部 12 款 60FPS 烟雾粒子特效已全量解锁！');
+  },
+
+  devLockAllSmokeEffects() {
+    triggerHaptic('medium');
+    try {
+      wx.setStorageSync('SMOKEFREE_SUMMONED_SMOKE_EFFECTS', []);
+    } catch (err) {}
+    this.refreshAllData();
+    toast.info('已重置烟雾特效，仅保留经典空灵烟圈！');
+  },
+
+  devUnlockAllAchievements() {
+    triggerHaptic('heavy');
+    if (Array.isArray(ACHIEVEMENTS)) {
+      const allAchIds = ACHIEVEMENTS.map(a => a.id);
+      storageService.saveUnlockedAchievements(allAchIds);
+      storageService.setEquippedTitle('无烟圣尊');
+    }
+    this.refreshAllData();
+    toast.flame('👑 全部 16 阶成就已点亮！已佩戴最高称号【无烟圣尊】！');
+  },
+
+  // 7. 调试设置与系统维护
+  devShowDataSnapshot() {
+    triggerHaptic('light');
+    const p = storageService.getProfile();
+    const records = storageService.getRecords();
+    const vip = vipService.getVipInfo();
+    const curCigId = storageService.getSelectedCigaretteId();
+    const packCount = storageService.getPackCount(curCigId, 20);
+    const snap = {
+      quitDays: calculateQuitDays(p.quitStartDate),
+      totalSubstituted: records.length,
+      isVip: vip.isVip,
+      vipTier: vip.tierId,
+      currentCigaretteId: curCigId,
+      currentPackCount: packCount,
+      packPrice: p.packPrice,
+      cigsPerDay: p.cigsPerDay
+    };
+    wx.showModal({
+      title: '当前本地数据快照',
+      content: JSON.stringify(snap, null, 2),
+      showCancel: false,
+      confirmText: '已知晓'
+    });
+  },
+
+  devResetAllStorage() {
+    wx.showModal({
+      title: '⚠️ 恢复出厂设置确认',
+      content: '此操作将清空所有本地测试缓存，恢复至全新安装状态。确定继续吗？',
+      confirmColor: '#ef4444',
+      success: (res) => {
+        if (res.confirm) {
+          try {
+            wx.clearStorageSync();
+          } catch (e) {}
+          toast.info('已清空所有本地数据，正在重载...');
+          setTimeout(() => {
+            wx.reLaunch({ url: '/pages/index/index' });
+          }, 600);
+        }
+      }
+    });
+  },
+
+  devLockAdminMode() {
+    triggerHaptic('medium');
+    try {
+      wx.removeStorageSync('__DEV_ADMIN_MODE__');
+    } catch (e) {}
+    this.setData({ showAdminTestModal: false });
+    toast.info('🔒 管理员模式已锁定，下次需重新点击 10 次版权文案唤醒');
+  }
+  /* ==================== [DEV_ADMIN_TEST] 结束 ==================== */
 });

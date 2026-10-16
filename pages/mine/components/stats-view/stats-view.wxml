@@ -613,9 +613,11 @@
         <text class="disclaimer-p">2. 本应用展示之健康数据、节余估算及身体机能自愈推演指标，均依据世界卫生组织（WHO）公共医学文献及戒烟统计模型推导得出，仅供参考，不作为个性化临床依据。</text>
         <text class="disclaimer-p">3. 若您存在严重心脑血管疾病、严重呼吸系统病变或重度尼古丁戒断反应，请务必前往正规医疗机构戒烟门诊就诊并遵从执业医师指导。</text>
       </view>
-      <view class="disclaimer-copy">
+      <!-- ==================== [DEV_ADMIN_TEST] 版权区域连击入口 (可随时安全删除) ==================== -->
+      <view class="disclaimer-copy" bindtap="onTapCopyright" hover-class="disclaimer-copy-hover">
         <text>© 2026 我抽一支 · 倡导健康纯净呼吸</text>
       </view>
+      <!-- ==================== [DEV_ADMIN_TEST] 结束 ==================== -->
     </view>
 
   </view>

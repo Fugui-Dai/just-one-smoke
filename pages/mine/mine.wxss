@@ -495,4 +495,231 @@
   color: #1e1b12;
 }
 
+/* ==========================================================================
+ * [DEV_ADMIN_TEST] 管理员极速测试控制台样式 (可整块安全删除)
+ * ========================================================================== */
+.dev-admin-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: rgba(0, 0, 0, 0.72);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.dev-admin-backdrop-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dev-admin-drawer {
+  width: 100%;
+  max-height: 86vh;
+  background: #0f172a;
+  border-top: 2rpx solid #334155;
+  border-radius: 28rpx 28rpx 0 0;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  transform: translateY(100%);
+  transition: transform 0.24s ease-out;
+}
+
+.dev-admin-backdrop-active .dev-admin-drawer {
+  transform: translateY(0);
+}
+
+.dev-admin-header {
+  padding: 16rpx 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1e293b;
+  border-bottom: 1rpx solid #334155;
+}
+
+.dev-admin-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.dev-admin-title {
+  font-size: 26rpx;
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.dev-admin-sub-tag {
+  font-size: 18rpx;
+  color: #94a3b8;
+  background: #334155;
+  padding: 2rpx 10rpx;
+  border-radius: 6rpx;
+}
+
+.dev-admin-close-btn {
+  padding: 8rpx 20rpx;
+  border-radius: 10rpx;
+  background: #334155;
+  color: #e2e8f0;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+/* 状态指示条 */
+.dev-admin-hud-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 10rpx 20rpx;
+  background: #0b1120;
+  border-bottom: 1rpx solid #1e293b;
+}
+
+.dev-hud-txt {
+  font-size: 20rpx;
+  color: #64748b;
+}
+
+.dev-c-gold { color: #f59e0b; font-weight: 700; }
+.dev-c-dim { color: #94a3b8; font-weight: 700; }
+.dev-c-cyan { color: #06b6d4; font-weight: 700; }
+.dev-c-green { color: #10b981; font-weight: 700; }
+.dev-c-purple { color: #a855f7; font-weight: 700; }
+
+/* 滚动与分区 */
+.dev-admin-scroll {
+  flex: 1;
+  max-height: calc(86vh - 140rpx);
+  box-sizing: border-box;
+}
+
+.dev-admin-content-pad {
+  padding: 16rpx 20rpx 48rpx 20rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  box-sizing: border-box;
+}
+
+.dev-group {
+  background: #1e293b;
+  border: 1rpx solid #334155;
+  border-radius: 14rpx;
+  padding: 14rpx 12rpx;
+  box-sizing: border-box;
+}
+
+.dev-group-label {
+  font-size: 21rpx;
+  font-weight: 800;
+  color: #94a3b8;
+  margin-bottom: 10rpx;
+  padding-left: 4rpx;
+}
+
+/* 一行多个网格排布 */
+.dev-row-grid {
+  display: grid;
+  gap: 8rpx;
+}
+
+.cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.cols-1 {
+  grid-template-columns: 1fr;
+}
+
+.dev-btn {
+  height: 58rpx;
+  border-radius: 8rpx;
+  font-size: 21rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-sizing: border-box;
+  padding: 0 4rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dev-btn-active {
+  opacity: 0.6;
+  transform: scale(0.97);
+}
+
+/* 按钮颜色 */
+.btn-amber {
+  background: #78350f;
+  border: 1rpx solid #b45309;
+  color: #fde68a;
+}
+
+.btn-blue {
+  background: #0c4a6e;
+  border: 1rpx solid #0284c7;
+  color: #bae6fd;
+}
+
+.btn-cyan {
+  background: #164e63;
+  border: 1rpx solid #0891b2;
+  color: #a5f3fc;
+}
+
+.btn-green {
+  background: #064e3b;
+  border: 1rpx solid #059669;
+  color: #a7f3d0;
+}
+
+.btn-orange {
+  background: #7c2d12;
+  border: 1rpx solid #ea580c;
+  color: #fed7aa;
+}
+
+.btn-purple {
+  background: #581c87;
+  border: 1rpx solid #9333ea;
+  color: #e9d5ff;
+}
+
+.btn-gold {
+  background: #713f12;
+  border: 1rpx solid #ca8a04;
+  color: #fef08a;
+}
+
+.btn-gray {
+  background: #334155;
+  border: 1rpx solid #475569;
+  color: #cbd5e1;
+}
+
+.btn-red {
+  background: #7f1d1d;
+  border: 1rpx solid #dc2626;
+  color: #fecaca;
+}
+
+.disclaimer-copy-hover {
+  opacity: 0.6;
+}
+/* ==================== [DEV_ADMIN_TEST] 结束 ==================== */
+
 

@@ -904,7 +904,42 @@ Component({
 
     preventBubble() {},
 
-    preventTouchMove() {}
+    preventTouchMove() {},
+
+    /* ==========================================================================
+     * [DEV_ADMIN_TEST] 管理员测试模式快速入口 (可整块安全删除)
+     * ========================================================================== */
+    onTapCopyright() {
+      const isAlreadyUnlocked = !!wx.getStorageSync('__DEV_ADMIN_MODE__');
+      if (isAlreadyUnlocked) {
+        try {
+          if (wx.vibrateShort) wx.vibrateShort({ type: 'medium' });
+        } catch (e) {}
+        this.triggerEvent('openadmintest');
+        return;
+      }
+
+      const now = Date.now();
+      if (!this._lastAdminClickTime || now - this._lastAdminClickTime > 4000) {
+        this._adminClickCount = 0;
+      }
+      this._lastAdminClickTime = now;
+      this._adminClickCount = (this._adminClickCount || 0) + 1;
+
+      try {
+        if (wx.vibrateShort) wx.vibrateShort({ type: 'light' });
+      } catch (e) {}
+
+      if (this._adminClickCount >= 10) {
+        this._adminClickCount = 0;
+        wx.setStorageSync('__DEV_ADMIN_MODE__', true);
+        try {
+          if (wx.vibrateShort) wx.vibrateShort({ type: 'heavy' });
+        } catch (e) {}
+        this.triggerEvent('openadmintest');
+      }
+    }
+    /* ==================== [DEV_ADMIN_TEST] 结束 ==================== */
   }
 });
 

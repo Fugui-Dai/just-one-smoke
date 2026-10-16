@@ -55,6 +55,7 @@
     bindtoleaderboard="goToLeaderboard"
     bindgotoleaderboard="goToLeaderboard"
     bindtitlechange="onTitleChange"
+    bindopenadmintest="onOpenAdminTest"
   />
 
   <!-- ==================== 偏好设置弹窗 (高定一屏无滑动全览) ==================== -->
@@ -216,6 +217,139 @@
     </view>
   </view>
 
+
+  <!-- ==========================================================================
+       [DEV_ADMIN_TEST] 管理员极速测试控制台弹窗 (可整块安全删除)
+       ========================================================================== -->
+  <view class="dev-admin-backdrop {{ showAdminTestModal ? 'dev-admin-backdrop-active' : '' }}" 
+        wx:if="{{ showAdminTestModal }}" 
+        bindtap="onCloseAdminTest" 
+        catchtouchmove="preventTouchMove">
+    <view class="dev-admin-drawer" catchtap="preventBubble">
+      
+      <!-- 顶部简易标题栏 -->
+      <view class="dev-admin-header">
+        <view class="dev-admin-title-wrap">
+          <text class="dev-admin-title">🛠️ 管理员快速测试工具箱</text>
+          <text class="dev-admin-sub-tag">快速注入</text>
+        </view>
+        <view class="dev-admin-close-btn" bindtap="onCloseAdminTest" hover-class="dev-btn-active">✕ 关闭</view>
+      </view>
+
+      <!-- 实时状态条 -->
+      <view class="dev-admin-hud-bar">
+        <text class="dev-hud-txt">VIP: <text class="{{ devVipActive ? 'dev-c-gold' : 'dev-c-dim' }}">{{ devVipActive ? (devVipInfo.isLifetime ? '永久VIP' : '已开通') : '未开通' }}</text></text>
+        <text class="dev-hud-txt">戒烟: <text class="dev-c-cyan">{{ quitDays }}天</text></text>
+        <text class="dev-hud-txt">替烟: <text class="dev-c-green">{{ totalSubstituted }}支</text></text>
+        <text class="dev-hud-txt">当前盒: <text class="dev-c-purple">{{ devCurrentPackCount }}支</text></text>
+      </view>
+
+      <!-- 滚动操作面板 -->
+      <scroll-view class="dev-admin-scroll" scroll-y enable-passive>
+        <view class="dev-admin-content-pad">
+
+          <!-- 分组 1: 首页吸烟仿真 (一行4个) -->
+          <view class="dev-group">
+            <view class="dev-group-label">🔥 首页吸烟与燃烧仿真 (返回首页可见)</view>
+            <view class="dev-row-grid cols-4">
+              <view class="dev-btn btn-amber" bindtap="devSetSmokeProgress90" hover-class="dev-btn-active">吸烟90%</view>
+              <view class="dev-btn btn-amber" bindtap="devSetSmokeProgress50" hover-class="dev-btn-active">吸烟50%</view>
+              <view class="dev-btn btn-blue" bindtap="devSetSmokeProgress10" hover-class="dev-btn-active">吸烟10%</view>
+              <view class="dev-btn btn-green" bindtap="devResetFullSmoke" hover-class="dev-btn-active">满长100%</view>
+              <view class="dev-btn btn-orange" bindtap="devIgniteNow" hover-class="dev-btn-active">立即点燃</view>
+              <view class="dev-btn btn-gray" bindtap="devExtinguishNow" hover-class="dev-btn-active">立即掐灭</view>
+              <view class="dev-btn btn-cyan" bindtap="devTapAshNow" hover-class="dev-btn-active">立即弹灰</view>
+              <view class="dev-btn btn-purple" bindtap="devToggleBead" hover-class="dev-btn-active">捏/复爆珠</view>
+            </view>
+            <view class="dev-row-grid cols-1" style="margin-top: 8rpx;">
+              <view class="dev-btn btn-gold" bindtap="devFinishSmokeNow" hover-class="dev-btn-active">⚡ 快速吸尽此支 (立即+1替烟并结算)</view>
+            </view>
+          </view>
+
+          <!-- 分组 2: 打卡天数与时间 (一行4个) -->
+          <view class="dev-group">
+            <view class="dev-group-label">📅 打卡天数与时间模拟</view>
+            <view class="dev-row-grid cols-4">
+              <view class="dev-btn btn-blue" bindtap="devAddQuitDays" data-days="1" hover-class="dev-btn-active">打卡+1天</view>
+              <view class="dev-btn btn-blue" bindtap="devAddQuitDays" data-days="7" hover-class="dev-btn-active">打卡+7天</view>
+              <view class="dev-btn btn-blue" bindtap="devAddQuitDays" data-days="30" hover-class="dev-btn-active">打卡+30天</view>
+              <view class="dev-btn btn-gray" bindtap="devSetQuitDays" data-days="1" hover-class="dev-btn-active">设为第1天</view>
+              <view class="dev-btn btn-purple" bindtap="devSetQuitDays" data-days="21" hover-class="dev-btn-active">设为21天</view>
+              <view class="dev-btn btn-gold" bindtap="devSetQuitDays" data-days="100" hover-class="dev-btn-active">设为100天</view>
+              <view class="dev-btn btn-cyan" bindtap="devSetQuitDays" data-days="365" hover-class="dev-btn-active">设为1年</view>
+            </view>
+          </view>
+
+          <!-- 分组 3: VIP 会员测试 (一行4个) -->
+          <view class="dev-group">
+            <view class="dev-group-label">👑 VIP特权与到期模拟</view>
+            <view class="dev-row-grid cols-4">
+              <view class="dev-btn btn-gold" bindtap="devActivateVipLifetime" hover-class="dev-btn-active">永久VIP</view>
+              <view class="dev-btn btn-purple" bindtap="devActivateVipMonth" hover-class="dev-btn-active">30天月卡</view>
+              <view class="dev-btn btn-green" bindtap="devActivateVipDay" hover-class="dev-btn-active">24小时卡</view>
+              <view class="dev-btn btn-orange" bindtap="devExpireVipNow" hover-class="dev-btn-active">过期1秒</view>
+            </view>
+            <view class="dev-row-grid cols-1" style="margin-top: 8rpx;">
+              <view class="dev-btn btn-gray" bindtap="devClearVip" hover-class="dev-btn-active">恢复非VIP (清除全部VIP特权)</view>
+            </view>
+          </view>
+
+          <!-- 分组 4: 替烟支数与7日图表 (一行4个) -->
+          <view class="dev-group">
+            <view class="dev-group-label">📊 替烟支数与趋势数据</view>
+            <view class="dev-row-grid cols-4">
+              <view class="dev-btn btn-cyan" bindtap="devAddRecords" data-count="1" hover-class="dev-btn-active">替烟+1</view>
+              <view class="dev-btn btn-cyan" bindtap="devAddRecords" data-count="5" hover-class="dev-btn-active">替烟+5</view>
+              <view class="dev-btn btn-cyan" bindtap="devAddRecords" data-count="20" hover-class="dev-btn-active">替烟+20</view>
+              <view class="dev-btn btn-blue" bindtap="devSetTotalRecords" data-count="60" hover-class="dev-btn-active">设为60支</view>
+              <view class="dev-btn btn-blue" bindtap="devSetTotalRecords" data-count="100" hover-class="dev-btn-active">设为100支</view>
+              <view class="dev-btn btn-blue" bindtap="devSetTotalRecords" data-count="500" hover-class="dev-btn-active">设为500支</view>
+              <view class="dev-btn btn-gray" bindtap="devClearRecords" hover-class="dev-btn-active">清空记录</view>
+              <view class="dev-btn btn-green" bindtap="devFill7DaysTrends" hover-class="dev-btn-active">填满7天图</view>
+            </view>
+          </view>
+
+          <!-- 分组 5: 烟盒库存调试 (一行4个) -->
+          <view class="dev-group">
+            <view class="dev-group-label">📦 烟盒库存调试</view>
+            <view class="dev-row-grid cols-4">
+              <view class="dev-btn btn-orange" bindtap="devSetCurrentPackCount" data-count="0" hover-class="dev-btn-active">当前盒0支</view>
+              <view class="dev-btn btn-orange" bindtap="devSetCurrentPackCount" data-count="1" hover-class="dev-btn-active">当前盒1支</view>
+              <view class="dev-btn btn-green" bindtap="devRefillCurrentPack" hover-class="dev-btn-active">当前盒补满</view>
+              <view class="dev-btn btn-green" bindtap="devRefillAllPacks" hover-class="dev-btn-active">33款盒全满</view>
+            </view>
+          </view>
+
+          <!-- 分组 6: 展柜名烟、烟雾与成就解锁 (一行4个) -->
+          <view class="dev-group">
+            <view class="dev-group-label">🌟 展柜名烟、烟雾与成就解锁</view>
+            <view class="dev-row-grid cols-4">
+              <view class="dev-btn btn-gold" bindtap="devUnlockAllCigarettes" hover-class="dev-btn-active">解锁33款烟</view>
+              <view class="dev-btn btn-gray" bindtap="devLockAllCigarettes" hover-class="dev-btn-active">锁定名烟</view>
+              <view class="dev-btn btn-purple" bindtap="devUnlockAllSmokeEffects" hover-class="dev-btn-active">解锁12款雾</view>
+              <view class="dev-btn btn-gray" bindtap="devLockAllSmokeEffects" hover-class="dev-btn-active">重置烟雾</view>
+            </view>
+            <view class="dev-row-grid cols-1" style="margin-top: 8rpx;">
+              <view class="dev-btn btn-gold" bindtap="devUnlockAllAchievements" hover-class="dev-btn-active">👑 一键点亮全部 16 阶成就与佩戴【无烟圣尊】</view>
+            </view>
+          </view>
+
+          <!-- 分组 7: 系统与维护 (一行3个) -->
+          <view class="dev-group">
+            <view class="dev-group-label">⚙️ 系统维护与重置</view>
+            <view class="dev-row-grid cols-3">
+              <view class="dev-btn btn-cyan" bindtap="devShowDataSnapshot" hover-class="dev-btn-active">数据快照</view>
+              <view class="dev-btn btn-orange" bindtap="devResetAllStorage" hover-class="dev-btn-active">恢复出厂数据</view>
+              <view class="dev-btn btn-red" bindtap="devLockAdminMode" hover-class="dev-btn-active">关闭管理员模式</view>
+            </view>
+          </view>
+
+        </view>
+      </scroll-view>
+
+    </view>
+  </view>
+  <!-- ==================== [DEV_ADMIN_TEST] 结束 ==================== -->
 
   <!-- 全局腾讯级灵动微胶囊 Toast HUD -->
   <custom-toast id="customToast" />

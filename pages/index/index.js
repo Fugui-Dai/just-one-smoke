@@ -367,7 +367,66 @@ Page({
 
     // 异步静默检查并弹出运营后台赠送的专属心意礼包 (Local-First 零阻塞)
     this._checkPendingSystemRewards();
+
+    /* ==================== [DEV_ADMIN_TEST] 调试指令检测 (可随时安全删除) ==================== */
+    this._checkDevAdminPendingAction();
+    /* ==================== [DEV_ADMIN_TEST] 结束 ==================== */
   },
+
+  /* ==========================================================================
+   * [DEV_ADMIN_TEST] 调试仿真指令检测与应用 (可整块安全删除)
+   * ========================================================================== */
+  _checkDevAdminPendingAction() {
+    try {
+      const devAction = wx.getStorageSync('__DEV_PENDING_ACTION__');
+      if (!devAction) return;
+      wx.removeStorageSync('__DEV_PENDING_ACTION__');
+
+      if (devAction.type === 'SET_PROGRESS') {
+        if (this.fsm) {
+          this.fsm.state = devAction.state || 'IDLE_BURNING';
+          const p = typeof devAction.progress === 'number' ? devAction.progress : 0.10;
+          this.fsm.cigaretteProgress = p;
+          this.fsm.lastTapProgress = p;
+          this.fsm.ashRatio = typeof devAction.ashRatio === 'number' ? devAction.ashRatio : (1.0 - p);
+          const isLit = this.fsm.state !== 'UNLIT' && this.fsm.state !== 'FINISHED';
+          this.setData({
+            isLit,
+            simulatorState: this.fsm.state,
+            cigaretteProgress: this.fsm.cigaretteProgress,
+            ashRatio: this.fsm.ashRatio,
+            isBeadPopped: devAction.isBeadPopped !== undefined ? devAction.isBeadPopped : this.data.isBeadPopped
+          });
+          if (devAction.msg) {
+            toast.flame(devAction.msg);
+          }
+        }
+      } else if (devAction.type === 'POP_BEAD') {
+        this.popBead();
+      } else if (devAction.type === 'RESET_BEAD') {
+        this.setData({ isBeadPopped: false });
+        if (devAction.msg) toast.info(devAction.msg);
+      } else if (devAction.type === 'FINISH_SMOKE') {
+        if (this.fsm) {
+          this.fsm.state = 'FINISHED';
+          this.fsm.cigaretteProgress = 0.0;
+          this.fsm.ashRatio = 0.0;
+          this.handleSmokingFinished();
+        }
+      } else if (devAction.type === 'TAP_ASH') {
+        if (this.fsm) {
+          this.fsm.ashRatio = 0.0;
+          this.ashTapStartTime = Date.now();
+          triggerHaptic('light');
+          this.setData({ ashRatio: 0.0 });
+          if (devAction.msg) toast.info(devAction.msg);
+        }
+      }
+    } catch (e) {
+      console.warn('[DEV_ADMIN_TEST] check error', e);
+    }
+  },
+  /* ==================== [DEV_ADMIN_TEST] 结束 ==================== */
 
   _calcShareProgressDeg(remaining, cig) {
     const cur = (typeof remaining === 'number') ? remaining : (this.data && this.data.currentPackRemaining);
