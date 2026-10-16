@@ -3194,6 +3194,8 @@ button.dock-btn-wrap.share-dock-item::after {
   border-radius: 6rpx;
   flex-shrink: 0;
   line-height: 1.3;
+  white-space: nowrap;
+  box-sizing: border-box;
 }
 
 .ec-desc {

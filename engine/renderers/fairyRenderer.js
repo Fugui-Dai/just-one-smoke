@@ -76,19 +76,20 @@ export function drawFairyFlowerParticle(ctx, p) {
 }
 
 export class SevenFairies {
-  constructor(x, y) {
+  constructor(x, y, variant = 0) {
+    this.variant = variant;
     this.startX = x;
     this.startY = y;
-    // 初始位置偏左安全区，给右侧 DOCK 留出充裕空间
-    this.x = x - 20;
+    // 双仙阵左右错位伴飞：variant 0 偏左，variant 1 偏右
+    this.x = variant === 1 ? (x + 28) : (x - 28);
     this.y = y;
-    this.vx = -0.15;
+    this.vx = variant === 1 ? 0.20 : -0.20;
     this.vy = -1.45; // 舒缓轻灵升腾，停留时间更长更唯美
 
     this.age = 0;
     this.maxAge = 330; // 延长至约 5.5 秒，充分享受群仙凌波漫步
     this.alpha = 0;
-    this.scale = 0.90;
+    this.scale = 0.88;
 
     // 仙乐声波涟漪集合
     this.musicRipples = [];
@@ -210,8 +211,8 @@ export class SevenFairies {
     const celestialSwayX = Math.sin(this.age * 0.035) * 1.4;
     this.x += celestialSwayX + this.vx;
 
-    // 严密右边界安全区：整体保持在中心偏左安全天区
-    const safeRightLimit = (this.startX || 180) - 10;
+    // 严密边界安全区：整体保持在舒适观赏天区
+    const safeRightLimit = (this.startX || 180) + (this.variant === 1 ? 55 : -10);
     if (this.x > safeRightLimit) {
       this.x -= (this.x - safeRightLimit) * 0.08;
     }

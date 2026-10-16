@@ -545,7 +545,7 @@ export const storageService = {
   // ==========================================
   getSelectedSmokeEffectId() {
     const id = getItem('SMOKEFREE_SELECTED_SMOKE_EFFECT');
-    if (!id || id === 'cloud_dense' || id === 'silk_pure' || id === 'purple_zen' || id === 'aurora_nebula') return 'auspicious_river';
+    if (!id || id === 'cloud_dense' || id === 'silk_pure' || id === 'purple_zen' || id === 'aurora_nebula' || id === 'lotus_zen') return 'auspicious_river';
     return id;
   },
 
@@ -588,7 +588,7 @@ export const storageService = {
       } else if (Array.isArray(raw)) {
         list = raw;
       }
-      return list.filter(id => id !== 'cloud_dense' && id !== 'silk_pure');
+      return list.filter(id => id !== 'cloud_dense' && id !== 'silk_pure' && id !== 'lotus_zen');
     } catch {
       return defaultList;
     }

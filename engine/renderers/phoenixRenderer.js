@@ -82,26 +82,28 @@ export function drawBurningFeatherParticle(ctx, p) {
 }
 
 export class FirePhoenix {
-  constructor(x, y) {
+  constructor(x, y, variant = 0) {
+    this.variant = variant;
     this.startX = x;
     this.startY = y;
-    this.x = x;
+    // 双凰伴飞对飞：variant 0 偏左，variant 1 偏右
+    this.x = variant === 1 ? (x + 30) : (x - 30);
     this.y = y;
-    this.vx = (Math.random() - 0.5) * 0.45;
+    this.vx = variant === 1 ? 0.38 : -0.38;
     this.vy = -2.25; // 史诗级稳健升腾翱翔速度，给用户充分欣赏视觉细节的时长
 
     this.age = 0;
     this.maxAge = 220; // 约 3.6 秒完整生命周期
     this.alpha = 0;
-    this.scale = 0.92; // 宏大史诗比例，气吞山河
+    this.scale = 0.90; // 宏大史诗比例，气吞山河
 
     // 身后古代魔法阵旋转与呼吸脉冲
     this.magicCircleRot = Math.random() * Math.PI;
-    this.magicCircleRotSpeed = 0.007;
+    this.magicCircleRotSpeed = variant === 1 ? -0.007 : 0.007;
 
     // 扇翅与盘旋波动相位
-    this.wingPhase = Math.random() * Math.PI * 2;
-    this.driftPhase = Math.random() * Math.PI * 2;
+    this.wingPhase = variant === 1 ? Math.PI : Math.random() * Math.PI * 2;
+    this.driftPhase = variant === 1 ? Math.PI : 0;
 
     // 华丽 7 道多阶流光凤翎长尾 (中心主翎 1 道 + 内侧 2 道 + 中侧 2 道 + 外侧 2 道)
     this.tails = [

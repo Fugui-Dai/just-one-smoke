@@ -1,23 +1,22 @@
 // configs/smokeEffects.js
 import { vipService } from '../services/vipService.js';
-import { LOTUS_ICON_SVG, BUDDHA_ICON_SVG, PHOENIX_ICON_SVG, FAIRY_ICON_SVG, DRAGON_ICON_SVG } from '../utils/vectorIcons.js';
+import { BUDDHA_ICON_SVG, PHOENIX_ICON_SVG, FAIRY_ICON_SVG, DRAGON_ICON_SVG } from '../utils/vectorIcons.js';
 
 /**
  * 赛博烟雾特效工坊元数据与解锁配置 (Tencent Games 顶级品质 · 情绪价值巅峰典藏)
  * 进阶排序逻辑（从返璞纯享到炽金神品）：
  * 1. 【原真纯享 · 极简返璞（白阶入门）】：经典空灵烟圈 (唯一的极简大师白雾)
  * 2. 【浪漫至死 · 甜蜜暴击（粉阶进阶）】：一见倾心 · 丘比特星钻双心
- * 3. 【东方禅意 · 宁心静气（翡翠青莲）】：青莲化境 · 步步生莲
- * 4. 【泼天富贵 · 顶奢黑金（黑金史诗）】：曜世黑金 · 24K暴富金雨 (情绪价值巅峰)
- * 5. 【宇宙浩瀚 · 许愿流星（星芒史诗）】：星穹浩瀚 · 璀璨流星银河
- * 6. 【万福金印 · 功德护体（朱金传说）】：金玉满堂 · 迎祥纳福宝印
- * 7. 【华夏欢庆 · 终极盛典（赤炎传说）】：华夏盛世 · 万家璀璨烟火
- * 8. 【青云直上 · 乘风破浪（天阶祥瑞）】：紫霄凌云 · 步步高升天河
- * 9. 【道韵化境 · 掌控乾坤（神品玄道）】：乾坤八卦 · 紫微天穹大阵
- * 10.【梵天圣境 · 慈悲普度（神品佛瑞）】：佛光普照 · 梵天千叶金莲
- * 11.【九五之尊 · 帝王气运（至臻神品）】：真龙降世 · 曜金神龙戏珠
- * 12.【绝境逆风 · 涅槃浴火（至臻神品）】：涅槃重光 · 赤金神凤降世
- * 13.【瑶池仙境 · 天女散花（传世神品）】：七仙降世 · 霓裳羽衣散花
+ * 3. 【泼天富贵 · 顶奢黑金（黑金史诗）】：曜世黑金 · 24K暴富金雨 (情绪价值巅峰)
+ * 4. 【宇宙浩瀚 · 璀璨星河（星芒史诗）】：星穹浩瀚 · 璀璨星河
+ * 5. 【万福金印 · 功德护体（朱金传说）】：金玉满堂 · 迎祥纳福宝印
+ * 6. 【华夏欢庆 · 终极盛典（赤炎传说）】：华夏盛世 · 万家璀璨烟火
+ * 7. 【青云直上 · 乘风破浪（天阶祥瑞）】：紫霄凌云 · 步步高升天河
+ * 8. 【道韵化境 · 掌控乾坤（神品玄道）】：乾坤八卦 · 紫微天穹大阵
+ * 9. 【梵天圣境 · 慈悲普度（神品佛瑞）】：佛光普照 · 梵天千叶金莲
+ * 10.【九五之尊 · 帝王气运（至臻神品）】：真龙降世 · 曜金神龙戏珠
+ * 11.【绝境逆风 · 涅槃浴火（至臻神品）】：涅槃重光 · 赤金神凤降世
+ * 12.【瑶池仙境 · 天女散花（传世神品）】：七仙降世 · 霓裳羽衣散花
  */
 export const SMOKE_EFFECTS = [
   // ================= 1. 原真纯享 · 极简返璞（白阶入门） =================
@@ -64,30 +63,7 @@ export const SMOKE_EFFECTS = [
     renderType: 'heart_double'
   },
 
-  // ================= 3. 东方禅意 · 宁心静气（翡翠青莲） =================
-  {
-    id: 'lotus_zen',
-    name: '青莲化境 · 步步生莲',
-    shortName: '步步生莲',
-    icon: '莲',
-    iconImage: LOTUS_ICON_SVG,
-    category: '东方禅意',
-    categoryTag: '心静如水',
-    tagColor: '#34d399',
-    badgeBg: 'rgba(52, 211, 153, 0.18)',
-    badgeBorder: 'rgba(16, 185, 129, 0.45)',
-    price: 8,
-    priceDisplay: '替烟6支解锁',
-    requiredCount: 6,
-    requiredSavings: 7.5,
-    description: '凝脂青碧宝莲破晓初绽，九瓣祥和花瓣自云烟中层层舒展，晨露甘霖与温润金蕊微光流转，烦恼随烟尽散',
-    themeColor: '#34d399',
-    glowColor: 'rgba(52, 211, 153, 0.85)',
-    accentBorder: '#10b981',
-    renderType: 'lotus_zen'
-  },
-
-  // ================= 4. 泼天富贵 · 顶奢黑金（黑金史诗） =================
+  // ================= 3. 泼天富贵 · 顶奢黑金（黑金史诗） =================
   {
     id: 'gold_stardust',
     name: '曜世黑金 · 24K暴富金雨',
@@ -109,14 +85,14 @@ export const SMOKE_EFFECTS = [
     renderType: 'gold_stardust'
   },
 
-  // ================= 5. 宇宙浩瀚 · 许愿流星（星芒史诗） =================
+  // ================= 4. 宇宙浩瀚 · 璀璨星河（星芒史诗） =================
   {
     id: 'galaxy_stars',
-    name: '星穹浩瀚 · 璀璨流星银河',
-    shortName: '星穹流星',
+    name: '星穹浩瀚 · 璀璨星河',
+    shortName: '璀璨星河',
     icon: '⭐',
     category: '宇宙典藏',
-    categoryTag: '许愿成真',
+    categoryTag: '浩瀚星河',
     tagColor: '#67e8f9',
     badgeBg: 'rgba(103, 232, 249, 0.18)',
     badgeBorder: 'rgba(56, 189, 248, 0.45)',
@@ -124,14 +100,14 @@ export const SMOKE_EFFECTS = [
     priceDisplay: '替烟20支解锁',
     requiredCount: 20,
     requiredSavings: 25.0,
-    description: '白金彗星破空划出破晓尾迹，二十四颗八芒钻星凌空点亮，深邃星河伴随呼吸星尘恒久流淌',
+    description: '双旋臂极光星云旋转升腾，二十四颗八芒钻星凌空点亮，深邃星河伴随呼吸星尘恒久流淌',
     themeColor: '#38bdf8',
     glowColor: 'rgba(56, 189, 248, 0.80)',
     accentBorder: '#38bdf8',
     renderType: 'galaxy_stars'
   },
 
-  // ================= 6. 万福金印 · 功德护体（朱金传说） =================
+  // ================= 5. 万福金印 · 功德护体（朱金传说） =================
   {
     id: 'blessing_runes',
     name: '金玉满堂 · 迎祥纳福宝印',
@@ -153,7 +129,7 @@ export const SMOKE_EFFECTS = [
     renderType: 'blessing_runes'
   },
 
-  // ================= 7. 华夏欢庆 · 终极盛典（赤炎传说） =================
+  // ================= 6. 华夏欢庆 · 终极盛典（赤炎传说） =================
   {
     id: 'grand_fireworks',
     name: '华夏盛世 · 万家璀璨烟火',
@@ -175,7 +151,7 @@ export const SMOKE_EFFECTS = [
     renderType: 'grand_fireworks'
   },
 
-  // ================= 8. 青云直上 · 乘风破浪（天阶祥瑞） =================
+  // ================= 7. 青云直上 · 乘风破浪（天阶祥瑞） =================
   {
     id: 'auspicious_river',
     name: '紫霄凌云 · 步步高升天河',
@@ -197,7 +173,7 @@ export const SMOKE_EFFECTS = [
     renderType: 'auspicious_river'
   },
 
-  // ================= 9. 道韵化境 · 掌控乾坤（神品玄道） =================
+  // ================= 8. 道韵化境 · 掌控乾坤（神品玄道） =================
   {
     id: 'bagua_taichi',
     name: '乾坤八卦 · 紫微天穹大阵',
@@ -219,7 +195,7 @@ export const SMOKE_EFFECTS = [
     renderType: 'bagua_taichi'
   },
 
-  // ================= 10. 梵天圣境 · 慈悲普度（神品佛瑞） =================
+  // ================= 9. 梵天圣境 · 慈悲普度（神品佛瑞） =================
   {
     id: 'buddha_light',
     name: '佛光普照 · 梵天千叶金莲',
@@ -235,14 +211,14 @@ export const SMOKE_EFFECTS = [
     priceDisplay: '替烟100支解锁',
     requiredCount: 100,
     requiredSavings: 125.0,
-    description: '峨眉金顶五色佛光与十六道万丈日光破晓普照，三层千叶宝相金莲步步盛开，梵音真言与八宝金轮普度众生',
+    description: '莫高窟火焰水滴菩提背光与180度破晓晨曦佛光漫照，3D盛放千叶宝相金莲座、盘旋舍利天梯与六字大明咒经幢普度万灵',
     themeColor: '#fde047',
     glowColor: 'rgba(253, 224, 71, 0.92)',
     accentBorder: '#f59e0b',
     renderType: 'buddha_light'
   },
 
-  // ================= 11. 九五之尊 · 帝王气运（至臻神品） =================
+  // ================= 10. 九五之尊 · 帝王气运（至臻神品） =================
   {
     id: 'dragon_breath',
     name: '飞龙在天 · 曜金祥云真龙',
@@ -265,7 +241,7 @@ export const SMOKE_EFFECTS = [
     renderType: 'dragon_breath'
   },
 
-  // ================= 12. 绝境逆风 · 涅槃浴火（至臻神品） =================
+  // ================= 11. 绝境逆风 · 涅槃浴火（至臻神品） =================
   {
     id: 'phoenix_nirvana',
     name: '涅槃重光 · 赤金神凤降世',
@@ -288,7 +264,7 @@ export const SMOKE_EFFECTS = [
     renderType: 'phoenix_nirvana'
   },
 
-  // ================= 13. 瑶池仙境 · 天女散花（传世神品） =================
+  // ================= 12. 瑶池仙境 · 天女散花（传世神品） =================
   {
     id: 'seven_fairies',
     name: '七仙降世 · 霓裳羽衣散花',

@@ -116,7 +116,7 @@ function computeMineStatsPayload() {
       unlockedEffects: allEffects,
       unlockedEffectsCount: allEffects.length,
       hasCustomEffect: allEffects.some(id => id !== 'ring_classic' && id !== 'auspicious_river'),
-      hasSummonedMythic: allEffects.includes('dragon_breath') || allEffects.includes('phoenix_nirvana') || allEffects.includes('lotus_zen') || allEffects.includes('buddha_light') || allEffects.includes('bagua_taichi') || allEffects.includes('auspicious_river')
+      hasSummonedMythic: allEffects.includes('dragon_breath') || allEffects.includes('phoenix_nirvana') || allEffects.includes('buddha_light') || allEffects.includes('bagua_taichi') || allEffects.includes('auspicious_river')
     };
     const newlyUnlocked = checkAchievementsToUnlock(statsObj, unlockedIds);
     if (Array.isArray(newlyUnlocked) && newlyUnlocked.length > 0) {

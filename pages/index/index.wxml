@@ -420,7 +420,6 @@
         <view class="ed-header-left">
           <view class="ed-title-row">
             <text class="ed-main-title">💨 烟雾特工坊 · 尊享展厅</text>
-            <view class="ed-vip-pill">VIP EXCLUSIVE</view>
           </view>
           <text class="ed-sub-title">已替烟节省开支 ¥{{ totalSavedMoney }} · 支持替烟基金零元换购</text>
         </view>
@@ -449,7 +448,7 @@
                 <view class="ec-cat-badge" style="background: {{ item.badgeBg }}; color: {{ item.tagColor }}; border: 1rpx solid {{ item.badgeBorder }};">
                   {{ item.categoryTag }}
                 </view>
-                <view class="ec-using-badge" wx:if="{{ item.id === currentSmokeEffect.id }}">正在使用</view>
+                <view class="ec-using-badge" wx:if="{{ item.id === currentSmokeEffect.id }}">使用中</view>
               </view>
               <text class="ec-desc">{{ item.description }}</text>
               <view class="ec-price-line">

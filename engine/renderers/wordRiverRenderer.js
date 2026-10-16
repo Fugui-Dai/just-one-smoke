@@ -33,22 +33,27 @@ const AUSPICIOUS_IDIOMS = [
 ];
 
 export class AuspiciousRiver {
-  constructor(x, y) {
-    this.startX = x;
+  constructor(x, y, variant = 0) {
+    this.variant = variant;
+    // 双字河左右伴飞错位：第1条偏左，第2条偏右
+    const offsetX = variant === 1 ? 32 : -32;
+    this.startX = x + offsetX;
     this.startY = y;
     this.age = 0;
     this.maxAge = 210; // 约 3.5 秒完整飞升生命周期
     this.alpha = 0;
 
-    // 随机选取 4 个吉语组成字河
-    const pool = [...AUSPICIOUS_IDIOMS].sort(() => 0.5 - Math.random());
+    // 随机选取 4 个吉语组成字河：variant 0 选用第一组，variant 1 选用第二组，吉语各异互补
+    const pool0 = ['步步高升', '前程似锦', '大吉大利', '万事胜意', '如意吉祥', '福星高照'];
+    const pool1 = ['财源广进', '金玉满堂', '一帆风顺', '平步青云', '富贵安康', '鸿运当头'];
+    const selectedPool = (variant === 1 ? pool1 : pool0).sort(() => 0.5 - Math.random());
     this.words = [];
     const count = 4;
     for (let i = 0; i < count; i++) {
       this.words.push({
-        text: pool[i],
+        text: selectedPool[i],
         offsetAge: i * 22, // 匀称时序破雾升腾
-        phaseOffset: i * 1.35,
+        phaseOffset: (variant === 1 ? Math.PI : 0) + i * 1.35,
         speed: 2.65, // 统一恒定飞升速度，保证间距丝滑如丝绸
         sizeScale: 1.0 - i * 0.04,
         glintPhase: Math.random() * Math.PI * 2
@@ -59,12 +64,12 @@ export class AuspiciousRiver {
     this.numRibbonPoints = 24;
     this.ribbonNodes = [];
     for (let i = 0; i < this.numRibbonPoints; i++) {
-      this.ribbonNodes.push({ x: x, y: y, z: 0, alpha: 0 });
+      this.ribbonNodes.push({ x: this.startX, y: y, z: 0, alpha: 0 });
     }
-    this.ribbonBaseX = x;
+    this.ribbonBaseX = this.startX;
     this.ribbonBaseY = y;
     this.swayFreq = 0.048;
-    this.swayAmp = 34; // S 弯自然舒展摆幅
+    this.swayAmp = variant === 1 ? -32 : 32; // 镜像S型蜿蜒双螺旋！
   }
 
   update(screenH, ceilingY, emitParticleCallback) {
@@ -84,7 +89,7 @@ export class AuspiciousRiver {
     for (let i = 0; i < this.numRibbonPoints; i++) {
       const node = this.ribbonNodes[i];
       node.y = this.ribbonBaseY - (this.age * 2.8) + (i * stepDist);
-      const spiralTime = this.age * 0.075 - i * 0.22;
+      const spiralTime = this.age * 0.075 - i * 0.22 + (this.variant === 1 ? Math.PI : 0);
       node.x = this.ribbonBaseX + Math.sin(spiralTime) * this.swayAmp;
       node.z = Math.cos(spiralTime); // 3D 深度因子 (-1 到 1)
       node.alpha = Math.max(0, 1.0 - i / this.numRibbonPoints);

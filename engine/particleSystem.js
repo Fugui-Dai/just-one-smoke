@@ -4,25 +4,24 @@ import { FirePhoenix, drawBurningFeatherParticle } from './renderers/phoenixRend
 import { AuspiciousRiver } from './renderers/wordRiverRenderer.js';
 import { BaguaMatrix } from './renderers/baguaRenderer.js';
 import { BuddhaLightAscension } from './renderers/buddhaRenderer.js';
-import { JadeLotus, drawJadePetalParticle } from './renderers/lotusRenderer.js';
 import { SevenFairies, drawFairyFlowerParticle } from './renderers/fairyRenderer.js';
+import { CelebrationFireworks } from './renderers/fireworkRenderer.js';
 
 /**
  * 赛博拟真烟雾物理粒子引擎 (ParticleSystem)
- * 支持 13 种高保真高定烟雾特效体系：
+ * 支持 12 种高保真高定烟雾特效体系：
  * 1. 经典空灵烟圈 (ring_classic: Toroidal Vortex Ring)
  * 2. 丘比特星钻双心 (heart_double: Concentric Cardioid Heart Rings)
- * 3. 青莲化境·步步生莲 (lotus_zen: Jade Lotus & Ethereal Mist)
- * 4. 曜世黑金·暴富金雨 (gold_stardust: 24K Gold Stardust & Obsidian Flakes)
- * 5. 星穹浩瀚·流星银河 (galaxy_stars: Galaxy Stars & Meteor Streaks)
- * 6. 金玉满堂·迎祥纳福 (blessing_runes: Blessing Runes & Ancient Seals)
- * 7. 华夏盛世·万家烟火 (grand_fireworks: Grand Fireworks & Willow Golden Rain)
- * 8. 紫霄凌云·步步高升 (auspicious_river: Auspicious Word River)
- * 9. 乾坤八卦·紫微天穹 (bagua_taichi: Bagua Taichi Grand Matrix)
- * 10. 佛光普照·千叶金莲 (buddha_light: Buddha's Light & Thousand-Petal Lotus)
- * 11. 飞龙在天·曜金真龙 (dragon_breath: Golden Celestial Dragon)
- * 12. 涅槃重光·赤金神凤 (phoenix_nirvana: Celestial Fire Phoenix & Feathers)
- * 13. 七仙降世·霓裳羽衣 (seven_fairies: Seven Fairies & Ethereal Petals)
+ * 3. 曜世黑金·暴富金雨 (gold_stardust: 24K Gold Stardust & Obsidian Flakes)
+ * 4. 星穹浩瀚·璀璨星河 (galaxy_stars: Galaxy Stars & Nebula Arms)
+ * 5. 金玉满堂·迎祥纳福 (blessing_runes: Blessing Runes & Ancient Seals)
+ * 6. 华夏盛世·万家烟火 (grand_fireworks: Grand Fireworks & Willow Golden Rain)
+ * 7. 紫霄凌云·步步高升 (auspicious_river: Auspicious Word River)
+ * 8. 乾坤八卦·紫微天穹 (bagua_taichi: Bagua Taichi Grand Matrix)
+ * 9. 佛光普照·千叶金莲 (buddha_light: Buddha's Light & Thousand-Petal Lotus)
+ * 10. 飞龙在天·曜金真龙 (dragon_breath: Golden Celestial Dragon)
+ * 11. 涅槃重光·赤金神凤 (phoenix_nirvana: Celestial Fire Phoenix & Feathers)
+ * 12. 七仙降世·霓裳羽衣 (seven_fairies: Seven Fairies & Ethereal Petals)
  */
 function formatFillColor(color, defaultColor = '#ffffff') {
   if (!color || typeof color !== 'string') return defaultColor;
@@ -465,6 +464,8 @@ export class ParticleSystem {
     this.smokeRings = [];
     // 3D 浪漫同心爱心涡流烟圈系统 (Heart Vortex Rings)
     this.heartRings = [];
+    // 丘比特神圣爱神金箭实体系统 (Cupid Arrows - 严格支持双箭伴飞)
+    this.cupidArrows = [];
     // 东方神游九天金龙系统 (Golden Celestial Dragons)
     this.dragons = [];
     // 东方百鸟朝凤赤焰神凰系统 (Fire Phoenixes)
@@ -473,12 +474,10 @@ export class ParticleSystem {
     this.wordRivers = [];
     this.baguaMatrices = [];
     this.buddhaLights = [];
-    // 青莲化境 · 步步生莲系统 (Sacred Jade Lotuses)
-    this.lotusFlowers = [];
     // 七仙降世 · 霓裳羽衣阵系统 (Seven Celestial Fairies)
     this.fairyArrays = [];
-    // 盛世华彩烟花火箭系统 (Firework Rockets)
-    this.fireworkRockets = [];
+    // 华夏盛世 · 万家璀璨烟火系统 (Celebration Fireworks & Sky Lanterns)
+    this.celebrationFireworks = [];
     // 真实“一缕青烟”流体双缕丝带 (主青缕 + 伴生缕) - 轻柔升腾、半路自然扩散淡出，不向屏幕顶部延伸
     this.silkStreams = [
       { id: 'main', nodes: [], phase: 0, amp: 12, maxAge: 160, widthScale: 1.0 },
@@ -554,14 +553,6 @@ export class ParticleSystem {
       }
     }
 
-    if (effectId !== 'lotus_zen') {
-      this.lotusFlowers = [];
-    } else {
-      if (this.lotusFlowers.length >= 2) {
-        this.lotusFlowers = this.lotusFlowers.slice(-1);
-      }
-    }
-
     if (effectId !== 'seven_fairies') {
       this.fairyArrays = [];
     } else {
@@ -571,32 +562,42 @@ export class ParticleSystem {
     }
 
     if (effectId !== 'grand_fireworks') {
-      this.fireworkRockets = [];
-    } else if (this.fireworkRockets.length >= 2) {
-      this.fireworkRockets = [];
+      this.celebrationFireworks = [];
+    } else {
+      // 严格同屏至多显示 2 场华夏盛世璀璨烟火盛典
+      if (this.celebrationFireworks.length >= 2) {
+        this.celebrationFireworks = this.celebrationFireworks.slice(-1);
+      }
     }
 
     if (effectId !== 'heart_double') {
       this.heartRings = [];
-    } else if (this.heartRings.length >= 4) {
-      this.heartRings = this.heartRings.slice(-2);
+      this.cupidArrows = [];
+    } else {
+      // 严格同屏至多显示 2 套丘比特星钻爱心与爱神金箭 (第3个出现时淘汰第1个)
+      if (this.heartRings.length >= 4) {
+        this.heartRings = this.heartRings.slice(-2);
+      }
+      if (this.cupidArrows.length >= 2) {
+        this.cupidArrows = this.cupidArrows.slice(-1);
+      }
     }
 
     if (effectId !== 'ring_classic') {
       this.smokeRings = [];
-    } else if (this.smokeRings.length >= 4) {
-      this.smokeRings = this.smokeRings.slice(-2);
+    } else if (this.smokeRings.length >= 2) {
+      this.smokeRings = this.smokeRings.slice(-1);
     }
 
-    // 2. 存量散落粒子软削峰：保证性能充裕
-    if (this.particles.length > 50) {
-      this.particles = this.particles.slice(-35);
+    // 2. 存量散落粒子软削峰：保证性能充裕 (大幅提升容量至 320，保证两波特效金雨/星河/符印/花瓣完整同屏绽放，绝不提前截断)
+    if (this.particles.length > 320) {
+      this.particles = this.particles.slice(-220);
     }
   }
 
   // 腾讯总监设计级 · 吸气生理重置与前序烟雾自然消散 (Inhale Dissipation)
   // 用户深吸气时：净化近场烟嘴周围的滞留散烟，为下一口烟气出场让出干净视野；
-  // 但天际高空正在翱翔的神龙、神凰、祥瑞字河绝不强行抹杀，让其从容完成壮美飞升！
+  // 但天际高空正在翱翔的神龙、神凰、祥瑞字河、爱心与金箭绝不强行抹杀，让其从容完成壮美飞升！
   retireExhaleEntities(isFast = false) {
     if (isFast) {
       this.dragons = [];
@@ -604,10 +605,10 @@ export class ParticleSystem {
       this.wordRivers = [];
       this.baguaMatrices = [];
       this.buddhaLights = [];
-      this.lotusFlowers = [];
       this.fairyArrays = [];
-      this.fireworkRockets = [];
+      this.celebrationFireworks = [];
       this.heartRings = [];
+      this.cupidArrows = [];
       this.smokeRings = [];
       if (this.particles.length > 25) {
         this.particles = this.particles.slice(-25);
@@ -618,6 +619,10 @@ export class ParticleSystem {
     // 吸气时仅对靠近烟嘴/口部下方的近场散落烟雾进行柔和衰减，天际高空神兽继续傲游
     if (this.particles && this.particles.length) {
       for (const p of this.particles) {
+        // 腾讯总监设计级免死保护：对刚刚吐出不久 (life < 50 帧，约 0.8 秒) 的新生特效粒子实行绝对保护，杜绝双击吸气时上一波特效被强行淡化消失！
+        if (p.life !== undefined && p.life < 50) {
+          continue;
+        }
         // 如果粒子在烟嘴下方附近 (y > 420)，加速其消散，给下一口腾出视野
         if (p.y > 420) {
           p.alpha = (p.alpha || 0.8) * 0.45;
@@ -638,11 +643,11 @@ export class ParticleSystem {
     this.wordRivers = [];
     this.baguaMatrices = [];
     this.buddhaLights = [];
-    this.lotusFlowers = [];
     this.fairyArrays = [];
-    this.fireworkRockets = [];
+    this.celebrationFireworks = [];
     this.smokeRings = [];
     this.heartRings = [];
+    this.cupidArrows = [];
 
     // 粒子池快速净化，保留少量环境微尘
     if (this.particles && this.particles.length > 20) {
@@ -811,30 +816,33 @@ export class ParticleSystem {
     this.emitExhalePlume(x, y, count, color);
   }
 
-  // 3. 经典吐烟圈：真实的流体 3D 环形涡流烟圈 (Toroidal Vortex Ring - 前锋冲出，直径优雅扩张，羽化消散)
+  // 3. 经典吐烟圈：真实的流体 3D 环形涡流烟圈 (Toroidal Vortex Ring - 前锋冲出，直径优雅扩张，羽化消散 - 支持双圈异构优雅伴飞)
   emitSmokeRing(x, y, color = 'rgba(238, 246, 255, ', scale = 1.0, options = {}) {
+    if (this.smokeRings.length >= 2) {
+      this.smokeRings = this.smokeRings.slice(-1);
+    }
+    const isSecond = this.smokeRings.length === 1;
+    const ringOffsetX = options.offsetX !== undefined ? options.offsetX : (isSecond ? 20 : (this.smokeRings.length === 0 ? 0 : -20));
+    const ringSpeed = options.speedMul || 1.0;
     const ring = {
-      x: x + (options.offsetX || 0),
+      x: x + ringOffsetX,
       y: y + (options.offsetY || 0),
-      vx: (options.vx !== undefined) ? options.vx : ((Math.random() - 0.5) * 0.35),
-      vy: (options.vy !== undefined) ? options.vy : (-2.45 * (options.speedMul || 1.0)),
-      radius: (options.initialRadius || 11) * scale,
+      vx: (options.vx !== undefined) ? options.vx : (isSecond ? 0.18 : (this.smokeRings.length === 0 ? 0 : -0.18)),
+      vy: (options.vy !== undefined) ? options.vy : (-2.45 * ringSpeed * (isSecond ? 0.94 : 1.0)),
+      radius: (options.initialRadius || 11) * scale * (isSecond ? 0.92 : 1.0),
       targetMaxRadius: (options.maxRadius || 46) * scale,
       growRate: 0.26 * (options.growMul || 1.0),
       tubeThickness: 4.8 * scale,
       maxTubeThickness: 13.5 * scale,
       tubeGrowRate: 0.065,
       aspectRatio: 0.42, // 3D 俯仰透视压缩比
-      tilt: (options.tilt !== undefined) ? options.tilt : ((Math.random() - 0.5) * 0.16),
+      tilt: (options.tilt !== undefined) ? options.tilt : (isSecond ? 0.10 : -0.08),
       age: 0,
-      maxAge: options.maxAge || 155,
+      maxAge: options.maxAge || 165,
       color: color,
       baseAlpha: options.baseAlpha || 0.88,
       alpha: 0
     };
-    if (this.smokeRings.length >= 8) {
-      this.smokeRings.shift();
-    }
     this.smokeRings.push(ring);
 
     // 烟圈周围伴随散落的微细柔和流体烟絮 (Micro-wisp tendrils)
@@ -1031,93 +1039,43 @@ export class ParticleSystem {
     });
   }
 
-  // 3.1 青莲化境 · 步步生莲 (Lotus Zen) - 翡翠宝莲层层绽放 + 步步生水韵涟漪 + 晨露星尘 + 琉璃金蕊
-  emitLotusZen(x, y) {
-    // 严格同屏至多显示 2 朵圣莲 (双莲腾飞瑶池)
-    if (this.lotusFlowers.length >= 2) {
-      this.lotusFlowers = this.lotusFlowers.slice(-1);
-    }
-    const newLotus = new JadeLotus(x, y);
-    if (this.lotusFlowers.length === 1) {
-      // 双莲同屏时，左右交错优美游动升腾
-      newLotus.vx = (this.lotusFlowers[0].vx > 0 ? -0.32 : 0.32);
-    }
-    this.lotusFlowers.push(newLotus);
+  // 8. 曜世黑金 (Gold Stardust) - 黑曜石丝绒烟雾 + 24K 金箔漫天暴富金雨 + 3D 翻滚金币 (严格同屏至多两波，第三波出现时第一波立即隐退)
+  emitGoldStardust(x, y, spawnWave = true) {
+    let currentWave = 0;
+    if (spawnWave) {
+      if (!this._goldWaveCounter) this._goldWaveCounter = 0;
+      this._goldWaveCounter++;
+      currentWave = this._goldWaveCounter;
 
-    // 1. 周身伴生空灵青碧翡翠祥云仙气
-    const petalColors = [
-      'rgba(52, 211, 153, ', // 翡翠青碧
-      'rgba(110, 231, 183, ', // 浅玉绿
-      'rgba(103, 232, 249, ', // 冰晶湖蓝
-      'rgba(167, 243, 208, '  // 凝脂月白
-    ];
-    for (let i = 0; i < 8; i++) {
-      const angle = (i / 8) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
-      const speed = 0.9 + Math.random() * 0.7;
-      const c = petalColors[i % petalColors.length];
-      this._pushParticle({
-        x: x + Math.cos(angle) * 14,
-        y: y + Math.sin(angle) * 8,
-        vx: Math.cos(angle) * speed,
-        vy: -1.0 + Math.sin(angle) * speed * 0.5,
-        radius: 9.0 + Math.random() * 6.0,
-        alpha: 0.65,
-        baseAlpha: 0.65,
-        life: 0,
-        maxLife: 130 + Math.random() * 20,
-        color: c,
-        growRate: 0.28,
-        isZen: true
-      });
+      // 统计场上现存的所有黑金波次 (waveId)
+      const activeWaves = new Set();
+      for (const p of this.particles) {
+        if (p.goldWaveId) activeWaves.add(p.goldWaveId);
+      }
+      // 若场上已有 >= 2 波，则淘汰最早的那一波 (使最早波次透明度归零快速消散)
+      if (activeWaves.size >= 2) {
+        const sortedWaves = Array.from(activeWaves).sort((a, b) => a - b);
+        const pruneWave = sortedWaves[0];
+        for (const p of this.particles) {
+          if (p.goldWaveId === pruneWave) {
+            p.alpha = 0;
+            p.life = p.maxLife;
+          }
+        }
+      }
     }
 
-    // 2. 核心琉璃琥珀金蕊气团
-    for (let i = 0; i < 5; i++) {
-      this._pushParticle({
-        x: x + (Math.random() - 0.5) * 12,
-        y: y + (Math.random() - 0.5) * 8,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: -(1.1 + Math.random() * 0.4),
-        radius: 3.0 + Math.random() * 2.5,
-        alpha: 0.85,
-        baseAlpha: 0.85,
-        life: 0,
-        maxLife: 100,
-        color: Math.random() < 0.6 ? 'rgba(254, 240, 138, ' : 'rgba(251, 191, 36, ',
-        growRate: 0.10,
-        isLotusCore: true
-      });
-    }
+    const hasExisting = this.particles && this.particles.some(p => p.goldWaveId && p.alpha > 0.05);
+    const offsetX = hasExisting ? 32 : -32;
+    const originX = hasExisting ? (x + offsetX) : x;
 
-    // 3. 清晨甘露晨星微粒 (晶莹漂浮)
-    for (let i = 0; i < 8; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const dist = 12 + Math.random() * 20;
-      this._pushParticle({
-        x: x + Math.cos(angle) * dist,
-        y: y + Math.sin(angle) * dist,
-        vx: Math.cos(angle) * 0.5,
-        vy: -(0.8 + Math.random() * 0.5),
-        radius: 1.6 + Math.random() * 1.3,
-        alpha: 0.75,
-        baseAlpha: 0.75,
-        life: 0,
-        maxLife: 95,
-        color: 'rgba(224, 242, 254, ',
-        growRate: 0.04,
-        isDewdrop: true
-      });
-    }
-  }
-
-  // 8. 曜世黑金 (Gold Stardust) - 黑曜石丝绒烟雾 + 24K 金箔漫天暴富金雨 + 3D 翻滚金币
-  emitGoldStardust(x, y) {
-    // 基础黑曜石烟雾：大团横向分散
-    for (let i = 0; i < 14; i++) {
-      const spread = (i / 13 - 0.5) * 2;
+    // 基础黑曜石烟雾：大团横向分散 (主波 16 团，补给波 6 团)
+    const cloudCount = spawnWave ? 16 : 6;
+    for (let i = 0; i < cloudCount; i++) {
+      const spread = (i / (cloudCount - 1 || 1) - 0.5) * 2;
       const lateralPush = spread * (2.0 + Math.random() * 0.8);
       this._pushParticle({
-        x: x + spread * 28 + (Math.random() - 0.5) * 16,
+        x: originX + spread * 28 + (Math.random() - 0.5) * 16,
         y: y + (Math.random() - 0.5) * 8,
         vx: lateralPush,
         vy: -(0.80 + Math.random() * 0.35),
@@ -1128,16 +1086,19 @@ export class ParticleSystem {
         maxLife: 140,
         color: 'rgba(38, 38, 38, ',
         growRate: 0.30,
-        isObsidian: true
+        isObsidian: true,
+        goldWaveId: currentWave || undefined
       });
     }
-    // 24K 金箔闪粉：广角散射向四周飞溅散开
-    for (let i = 0; i < 22; i++) {
-      const spread = (i / 21 - 0.5) * 2;
+
+    // 24K 金箔闪粉：广角散射向四周飞溅散开 (主波 26 颗，补给波 8 颗)
+    const sparkCount = spawnWave ? 26 : 8;
+    for (let i = 0; i < sparkCount; i++) {
+      const spread = (i / (sparkCount - 1 || 1) - 0.5) * 2;
       const rad = -Math.PI / 2 + spread * 0.9 + (Math.random() - 0.5) * 0.4;
       const spd = Math.random() * 1.6 + 0.6;
       this._pushParticle({
-        x: x + spread * 32 + (Math.random() - 0.5) * 16,
+        x: originX + spread * 32 + (Math.random() - 0.5) * 16,
         y: y + (Math.random() - 0.5) * 10,
         vx: Math.cos(rad) * spd + spread * 1.4,
         vy: Math.sin(rad) * spd - 0.5,
@@ -1149,27 +1110,32 @@ export class ParticleSystem {
         color: '#fbbf24',
         isGold: true,
         shimmerPhase: Math.random() * Math.PI * 2,
-        shimmerSpeed: 0.12 + Math.random() * 0.08
+        shimmerSpeed: 0.12 + Math.random() * 0.08,
+        goldWaveId: currentWave || undefined
       });
     }
-    // 腾讯总监设计级：曜世 24K 暴富金币雨 (3D 翻转物理下落)
-    for (let i = 0; i < 5; i++) {
-      const spread = (i / 4 - 0.5) * 2;
-      this._pushParticle({
-        x: x + spread * 26 + (Math.random() - 0.5) * 12,
-        y: y + (Math.random() - 0.5) * 8,
-        vx: spread * 1.3 + (Math.random() - 0.5) * 0.4,
-        vy: -(1.6 + Math.random() * 0.8),
-        radius: 6.2 + Math.random() * 2.2,
-        alpha: 0.95,
-        baseAlpha: 0.95,
-        life: 0,
-        maxLife: 135 + Math.random() * 25,
-        rotAngle: Math.random() * Math.PI * 2,
-        rotSpeed: 0.08 + Math.random() * 0.06,
-        wobbleAngle: (Math.random() - 0.5) * 0.4,
-        isGoldCoin: true
-      });
+
+    // 腾讯总监设计级：曜世 24K 暴富金币雨 (3D 翻转物理下落，仅主波生成 6 枚翻滚古币)
+    if (spawnWave) {
+      for (let i = 0; i < 6; i++) {
+        const spread = (i / 5 - 0.5) * 2;
+        this._pushParticle({
+          x: originX + spread * 28 + (Math.random() - 0.5) * 12,
+          y: y + (Math.random() - 0.5) * 8,
+          vx: spread * 1.3 + (Math.random() - 0.5) * 0.4,
+          vy: -(1.6 + Math.random() * 0.8),
+          radius: 6.2 + Math.random() * 2.2,
+          alpha: 0.95,
+          baseAlpha: 0.95,
+          life: 0,
+          maxLife: 135 + Math.random() * 25,
+          rotAngle: Math.random() * Math.PI * 2,
+          rotSpeed: 0.08 + Math.random() * 0.06,
+          wobbleAngle: (Math.random() - 0.5) * 0.4,
+          isGoldCoin: true,
+          goldWaveId: currentWave
+        });
+      }
     }
   }
 
@@ -1203,18 +1169,28 @@ export class ParticleSystem {
     }
   }
 
-  // 10. 双爱心烟圈 (Heart Double) - 丘比特星钻双心，立体心跳律动、粉钻高光切面、漫天飘落3D玫瑰花瓣与璀璨星尘
+  // 10. 双爱心烟圈 (Heart Double) - 丘比特星钻双心，立体心跳律动、粉钻高光切面、漫天飘落3D玫瑰花瓣与璀璨星尘 (支持双套爱心同屏伴飞)
   emitHeartDouble(x, y, color = 'rgba(244, 114, 182, ') {
+    if (!this.heartRings) this.heartRings = [];
+    // 严格锁定同屏至多 2 套双心：一套由外心+内心组成(2个元素)，因此当已有 >= 4 个元素(2套)时，保留最新的 1 套(2个元素)，淘汰最早的第 1 套
+    if (this.heartRings.length >= 4) {
+      this.heartRings = this.heartRings.slice(-2);
+    }
+    const isSecond = this.heartRings.length === 2;
+    const baseOffsetX = isSecond ? 26 : -26;
+    const baseVx = isSecond ? 0.16 : -0.16;
+    const originX = isSecond ? (x + baseOffsetX) : x;
+
     const outerHeart = {
-      x: x - 4,
+      x: originX - 4,
       y: y,
-      vx: -0.12,
+      vx: baseVx - 0.08,
       vy: -2.30,
       scale: 0.45,
       targetScale: 1.62,
       growRate: 0.012,
-      tilt: -0.06,
-      tiltSpeed: 0.0025,
+      tilt: isSecond ? 0.06 : -0.06,
+      tiltSpeed: isSecond ? -0.0025 : 0.0025,
       age: 0,
       maxAge: 165,
       color: color,
@@ -1224,15 +1200,15 @@ export class ParticleSystem {
       isOuter: true
     };
     const innerHeart = {
-      x: x + 4,
+      x: originX + 4,
       y: y + 8,
-      vx: 0.10,
+      vx: baseVx + 0.08,
       vy: -2.10,
       scale: 0.28,
       targetScale: 1.10,
       growRate: 0.010,
-      tilt: 0.05,
-      tiltSpeed: -0.002,
+      tilt: isSecond ? -0.05 : 0.05,
+      tiltSpeed: isSecond ? 0.002 : -0.002,
       age: 0,
       maxAge: 155,
       color: 'rgba(253, 232, 240, ',
@@ -1242,34 +1218,35 @@ export class ParticleSystem {
       isOuter: false
     };
 
-    if (!this.heartRings) this.heartRings = [];
-    if (this.heartRings.length >= 4) {
-      this.heartRings = this.heartRings.slice(-2);
-    }
     this.heartRings.push(outerHeart, innerHeart);
 
-    // 丘比特神圣爱神金箭疾速破空贯穿双心
-    this._pushParticle({
-      x: x - 55,
-      y: y + 36,
-      vx: 4.2,
-      vy: -3.2,
+    // 丘比特神圣爱神金箭疾速破空贯穿双心 (独立实体系统 · 严格支持双箭伴飞)
+    if (!this.cupidArrows) this.cupidArrows = [];
+    if (this.cupidArrows.length >= 2) {
+      this.cupidArrows = this.cupidArrows.slice(-1);
+    }
+    const arrowVariant = this.cupidArrows.length === 1 ? 1 : 0;
+    this.cupidArrows.push({
+      x: originX - 58,
+      y: y + 38,
+      vx: 4.1 + (arrowVariant === 1 ? 0.3 : 0),
+      vy: -3.15 + (arrowVariant === 1 ? -0.2 : 0),
       length: 46,
       angle: -Math.PI * 0.21,
       alpha: 0.98,
       baseAlpha: 0.98,
       life: 0,
-      maxLife: 75,
-      isCupidArrow: true
+      maxLife: 80,
+      variant: arrowVariant
     });
 
     // 漫天飘逸舞动的 3D 玫瑰花瓣雨 (Falling Rose Petals)
     for (let i = 0; i < 9; i++) {
       const rad = Math.random() * Math.PI * 2;
       this._pushParticle({
-        x: x + Math.cos(rad) * 22,
+        x: originX + Math.cos(rad) * 22,
         y: y + Math.sin(rad) * 14,
-        vx: (Math.random() - 0.5) * 1.2,
+        vx: (Math.random() - 0.5) * 1.2 + baseVx * 0.5,
         vy: -1.2 + Math.random() * 0.8,
         radius: 4.2 + Math.random() * 2.8,
         rotation: Math.random() * Math.PI * 2,
@@ -1290,9 +1267,9 @@ export class ParticleSystem {
       const angle = Math.random() * Math.PI * 2;
       const spd = Math.random() * 2.2 + 0.6;
       this._pushParticle({
-        x: x + Math.cos(angle) * 16,
+        x: originX + Math.cos(angle) * 16,
         y: y + Math.sin(angle) * 12,
-        vx: Math.cos(angle) * spd,
+        vx: Math.cos(angle) * spd + baseVx * 0.5,
         vy: -1.8 + Math.sin(angle) * spd * 0.8,
         outerRadius: 3.8 + Math.random() * 3.5,
         innerRadius: 1.0 + Math.random() * 0.8,
@@ -1314,9 +1291,9 @@ export class ParticleSystem {
     for (let i = 0; i < 10; i++) {
       const angle = (i / 10) * Math.PI * 2;
       this._pushParticle({
-        x: x + Math.cos(angle) * 16,
+        x: originX + Math.cos(angle) * 16,
         y: y + Math.sin(angle) * 10,
-        vx: Math.cos(angle) * 0.45,
+        vx: Math.cos(angle) * 0.45 + baseVx * 0.5,
         vy: -1.55 + Math.sin(angle) * 0.35,
         radius: 4.0,
         maxRadius: 14.0,
@@ -1462,8 +1439,35 @@ export class ParticleSystem {
     }
   }
 
-  // 13. 漫天繁星 (Galaxy Stars) - 浩瀚双旋臂银河星云 + 璀璨八芒星钻脉冲 + 电影级等离子流星雨
-  emitGalaxyStars(x, y) {
+  // 4. 星穹浩瀚 · 璀璨星河 (Galaxy Stars) - 浩瀚双旋臂银河星云 + 璀璨八芒星钻脉冲与漫天星辉 (严格同屏至多两波，第三波出现时第一波立即隐退)
+  emitGalaxyStars(x, y, spawnWave = true) {
+    let currentWave = 0;
+    if (spawnWave) {
+      if (!this._galaxyWaveCounter) this._galaxyWaveCounter = 0;
+      this._galaxyWaveCounter++;
+      currentWave = this._galaxyWaveCounter;
+
+      // 统计场上现存的所有星河波次
+      const activeWaves = new Set();
+      for (const p of this.particles) {
+        if (p.galaxyWaveId) activeWaves.add(p.galaxyWaveId);
+      }
+      // 若场上已有 >= 2 波，则淘汰最早的那一波
+      if (activeWaves.size >= 2) {
+        const sortedWaves = Array.from(activeWaves).sort((a, b) => a - b);
+        const pruneWave = sortedWaves[0];
+        for (const p of this.particles) {
+          if (p.galaxyWaveId === pruneWave) {
+            p.alpha = 0;
+            p.life = p.maxLife;
+          }
+        }
+      }
+    }
+
+    const hasExisting = this.particles && this.particles.some(p => p.galaxyWaveId && p.alpha > 0.05);
+    const originX = hasExisting ? (x + 32) : (x - 24);
+    const baseArmOffset = hasExisting ? Math.PI * 0.5 : 0;
     const galaxyColors = [
       'rgba(240, 249, 255, ', // 炽亮星核白
       'rgba(56, 189, 248, ',  // 冰晶星海蓝
@@ -1474,14 +1478,14 @@ export class ParticleSystem {
 
     // 1. 双旋臂立体旋转银河星云 (Twin Logarithmic Spiral Arms)
     const armCount = 2;
-    const particlesPerArm = 12;
+    const particlesPerArm = spawnWave ? 12 : 4;
     for (let arm = 0; arm < armCount; arm++) {
-      const armOffset = arm * Math.PI; // 两臂相隔 180 度
+      const armOffset = arm * Math.PI + baseArmOffset; // 两臂相隔 180 度 + 错开相位
       for (let i = 0; i < particlesPerArm; i++) {
         const theta = 0.5 + (i / particlesPerArm) * Math.PI * 1.8;
         const dist = 6 + Math.pow(i / particlesPerArm, 0.85) * 38;
         const armAngle = theta + armOffset;
-        const px = x + Math.cos(armAngle) * dist + (Math.random() - 0.5) * 8;
+        const px = originX + Math.cos(armAngle) * dist + (Math.random() - 0.5) * 8;
         const py = y + Math.sin(armAngle) * (dist * 0.55) + (Math.random() - 0.5) * 6;
 
         // 切向公转速度 + 浮力上升
@@ -1502,154 +1506,93 @@ export class ParticleSystem {
           color: galaxyColors[i % galaxyColors.length],
           growRate: 0.28,
           isNebula: true,
-          wavePhase: armAngle
+          wavePhase: armAngle,
+          galaxyWaveId: currentWave || undefined
         });
       }
     }
 
-    // 2. 璀璨八芒星钻脉冲点亮 (Eight-Point Diamond Pulsar Stars)
-    for (let i = 0; i < 20; i++) {
-      const spread = (i / 19 - 0.5) * 2;
-      const rad = -Math.PI / 2 + spread * 0.88 + (Math.random() - 0.5) * 0.35;
-      const spd = Math.random() * 2.0 + 0.8;
-      const starColors = ['#ffffff', '#e0f2fe', '#38bdf8', '#fef08a', '#c084fc', '#fbcfe8'];
-      this._pushParticle({
-        x: x + spread * 42 + (Math.random() - 0.5) * 20,
-        y: y + (Math.random() - 0.5) * 18,
-        vx: Math.cos(rad) * spd + spread * 1.0,
-        vy: Math.sin(rad) * spd - 0.65,
-        outerRadius: 4.8 + Math.random() * 4.2,
-        innerRadius: 1.2 + Math.random() * 0.9,
-        radius: 5.5,
-        alpha: 0.98,
-        baseAlpha: 0.98,
-        life: 0,
-        maxLife: 130 + Math.random() * 35,
-        color: starColors[Math.floor(Math.random() * starColors.length)],
-        rotation: Math.random() * Math.PI * 2,
-        rotSpeed: (Math.random() - 0.5) * 0.06,
-        twinklePhase: Math.random() * Math.PI * 2,
-        isStar: true,
-        isPulsarDiamond: true
-      });
-    }
-
-    // 3. 电影级破空流星雨 (Cinematic Meteors with Plasma Trail & Stardust)
-    const meteorCount = 3;
-    for (let i = 0; i < meteorCount; i++) {
-      const angle = -Math.PI * 0.34 + (Math.random() - 0.5) * 0.18;
-      const spd = 6.2 + Math.random() * 2.5;
-      this._pushParticle({
-        x: x + (Math.random() - 0.5) * 60 - 30,
-        y: y - 18 - i * 22,
-        vx: Math.cos(angle) * spd,
-        vy: Math.sin(angle) * spd,
-        len: 44 + Math.random() * 28,
-        headR: 3.2 + Math.random() * 1.4,
-        alpha: 0.98,
-        baseAlpha: 0.98,
-        life: 0,
-        maxLife: 60 + Math.random() * 20,
-        color: '#e0f2fe',
-        isShootingStar: true
-      });
+    // 2. 璀璨八芒星钻脉冲点亮 (Eight-Point Diamond Pulsar Stars，仅主波生成 24 颗八芒星钻)
+    if (spawnWave) {
+      for (let i = 0; i < 24; i++) {
+        const spread = (i / 23 - 0.5) * 2;
+        const rad = -Math.PI / 2 + spread * 0.88 + (Math.random() - 0.5) * 0.35;
+        const spd = Math.random() * 2.0 + 0.8;
+        const starColors = ['#ffffff', '#e0f2fe', '#38bdf8', '#fef08a', '#c084fc', '#fbcfe8'];
+        this._pushParticle({
+          x: originX + spread * 42 + (Math.random() - 0.5) * 20,
+          y: y + (Math.random() - 0.5) * 18,
+          vx: Math.cos(rad) * spd + spread * 1.0,
+          vy: Math.sin(rad) * spd - 0.65,
+          outerRadius: 4.8 + Math.random() * 4.2,
+          innerRadius: 1.2 + Math.random() * 0.9,
+          radius: 5.5,
+          alpha: 0.98,
+          baseAlpha: 0.98,
+          life: 0,
+          maxLife: 130 + Math.random() * 35,
+          color: starColors[Math.floor(Math.random() * starColors.length)],
+          rotation: Math.random() * Math.PI * 2,
+          rotSpeed: (Math.random() - 0.5) * 0.06,
+          twinklePhase: Math.random() * Math.PI * 2,
+          isStar: true,
+          isPulsarDiamond: true,
+          galaxyWaveId: currentWave
+        });
+      }
     }
   }
 
-  // 14. 盛世华彩 (Grand Fireworks) - 金芒火箭腾空 + 高空绚烂锦簇连环炸裂 + 垂落漫天金雨
-  emitGrandFireworks(x, y) {
-    // 发射 2 枚腾空火箭
-    const rocketColors = ['#f43f5e', '#fbbf24', '#38bdf8'];
-    for (let i = 0; i < 2; i++) {
-      const offsetX = (i === 0 ? -12 : 12) + (Math.random() - 0.5) * 8;
-      this.fireworkRockets.push({
-        x: x + offsetX,
-        y: y,
-        vx: (offsetX / 20) * 0.8,
-        vy: -(6.2 + Math.random() * 1.5),
-        age: 0,
-        maxAge: 26 + Math.floor(Math.random() * 8),
-        color: rocketColors[i % rocketColors.length],
-        alpha: 1.0
-      });
+  // 14. 华夏盛世 · 万家璀璨烟火 (Celebration Fireworks & Sky Lanterns)
+  // 腾讯总监设计级：孔明祈愿天灯 + 螺旋金龙响尾火箭 + 高空三阶盛世牡丹与锦冠垂丝金柳 (严格同屏至多两场，第三场出现时第一场立即隐退)
+  emitGrandFireworks(x, y, spawnCelebration = true) {
+    if (spawnCelebration) {
+      if (!this.celebrationFireworks) this.celebrationFireworks = [];
+      if (this.celebrationFireworks.length >= 2) {
+        this.celebrationFireworks = this.celebrationFireworks.slice(-1);
+      }
+      const isSecond = this.celebrationFireworks.length === 1;
+      const variant = isSecond ? (this.celebrationFireworks[0].variant === 0 ? 1 : 0) : 0;
+      const celebration = new CelebrationFireworks(x, y, variant);
+      this.celebrationFireworks.push(celebration);
     }
 
-    // 地面升腾气浪
-    for (let i = 0; i < 12; i++) {
-      const spread = (i / 11 - 0.5) * 2;
+    const isSecond = this.celebrationFireworks && this.celebrationFireworks.length === 2;
+    // 伴生升腾的暖红赤金祥云破雾 (主波 14 团，补给波 6 团)
+    const cloudCount = spawnCelebration ? 14 : 6;
+    for (let i = 0; i < cloudCount; i++) {
+      const spread = (i / (cloudCount - 1 || 1) - 0.5) * 2;
       this._pushParticle({
-        x: x + spread * 20,
-        y: y,
-        vx: spread * 1.5,
-        vy: -0.8 - Math.random() * 0.5,
-        radius: 6.0 + Math.random() * 5.0,
-        alpha: 0.55,
-        baseAlpha: 0.55,
+        x: x + spread * 28 + (Math.random() - 0.5) * 14,
+        y: y + (Math.random() - 0.5) * 8,
+        vx: spread * 1.6,
+        vy: -(0.95 + Math.random() * 0.45),
+        radius: 7.5 + Math.random() * 6.0,
+        alpha: 0.58,
+        baseAlpha: 0.58,
         life: 0,
-        maxLife: 70,
-        color: 'rgba(251, 113, 133, ',
-        growRate: 0.25,
+        maxLife: 85,
+        color: isSecond ? 'rgba(192, 132, 252, ' : 'rgba(251, 113, 133, ',
+        growRate: 0.28,
         isVolumetricSmoke: true
       });
     }
   }
 
-  // 烟花高空绽放
-  triggerFireworkExplosion(x, y, themeColor) {
-    const burstColors = [
-      '#f43f5e', '#fbbf24', '#38bdf8', '#c084fc', '#34d399', '#ffffff', '#fb923c'
-    ];
-    // 1. 核心环状炸裂彩星
-    const numSparks = 28;
-    for (let i = 0; i < numSparks; i++) {
-      const angle = (i / numSparks) * Math.PI * 2 + (Math.random() - 0.5) * 0.15;
-      const spd = 2.4 + Math.random() * 2.8;
-      const c = burstColors[Math.floor(Math.random() * burstColors.length)];
-      this._pushParticle({
-        x: x,
-        y: y,
-        vx: Math.cos(angle) * spd,
-        vy: Math.sin(angle) * spd,
-        radius: 1.8 + Math.random() * 1.6,
-        alpha: 1.0,
-        baseAlpha: 1.0,
-        life: 0,
-        maxLife: 48 + Math.random() * 20,
-        color: c,
-        isFireworkBurst: true
-      });
-    }
-
-    // 2. 垂落漫天锦簇金雨 (Willow Golden Rain)
-    for (let i = 0; i < 14; i++) {
-      const angle = Math.random() * Math.PI * 2;
-      const spd = 1.0 + Math.random() * 1.8;
-      this._pushParticle({
-        x: x + Math.cos(angle) * 8,
-        y: y + Math.sin(angle) * 8,
-        vx: Math.cos(angle) * spd,
-        vy: Math.sin(angle) * spd * 0.5 - 0.2,
-        radius: 1.4 + Math.random() * 1.2,
-        alpha: 0.95,
-        baseAlpha: 0.95,
-        life: 0,
-        maxLife: 75 + Math.random() * 25,
-        color: '#fbbf24',
-        isWillowRain: true,
-        shimmerPhase: Math.random() * Math.PI * 2
-      });
-    }
-  }
-
-  // 15.5 乾坤八卦 · 紫微天穹大阵 (Bagua Taichi Grand Matrix)
+  // 15.5 乾坤八卦 · 紫微天穹大阵 (Bagua Taichi Grand Matrix) - 支持双阵同屏护法
   emitBaguaTaichi(x, y, spawnMatrix = true) {
     if (spawnMatrix) {
       if (this.baguaMatrices.length >= 2) {
         this.baguaMatrices = this.baguaMatrices.slice(-1);
       }
-      const newMatrix = new BaguaMatrix(x, y);
-      if (this.baguaMatrices.length === 1) {
-        newMatrix.vx = (this.baguaMatrices[0].vx > 0 ? -0.35 : 0.35);
+      const isSecond = this.baguaMatrices.length === 1;
+      const spawnX = isSecond ? (x + 44) : (this.baguaMatrices.length === 0 ? x : (x - 44));
+      const newMatrix = new BaguaMatrix(spawnX, y, {
+        variant: isSecond ? 1 : 0,
+        vx: isSecond ? 0.36 : 0
+      });
+      if (isSecond && this.baguaMatrices.length === 1) {
+        this.baguaMatrices[0].vx = -0.36;
       }
       this.baguaMatrices.push(newMatrix);
     }
@@ -1705,15 +1648,20 @@ export class ParticleSystem {
     }
   }
 
-  // 15.8 佛光普照 · 梵天千叶金莲 (Buddha's Light & Celestial Thousand-Petal Golden Lotus)
+  // 15.8 佛光普照 · 梵天千叶金莲 (Buddha's Light & Celestial Thousand-Petal Golden Lotus) - 支持双佛同辉
   emitBuddhaLight(x, y, spawnBuddha = true) {
     if (spawnBuddha) {
       if (this.buddhaLights.length >= 2) {
         this.buddhaLights = this.buddhaLights.slice(-1);
       }
-      const newBuddha = new BuddhaLightAscension(x, y);
-      if (this.buddhaLights.length === 1) {
-        newBuddha.vx = (this.buddhaLights[0].vx > 0 ? -0.32 : 0.32);
+      const isSecond = this.buddhaLights.length === 1;
+      const spawnX = isSecond ? (x + 44) : (this.buddhaLights.length === 0 ? x : (x - 44));
+      const newBuddha = new BuddhaLightAscension(spawnX, y, {
+        variant: isSecond ? 1 : 0,
+        vx: isSecond ? 0.34 : 0
+      });
+      if (isSecond && this.buddhaLights.length === 1) {
+        this.buddhaLights[0].vx = -0.34;
       }
       this.buddhaLights.push(newBuddha);
     }
@@ -1791,14 +1739,15 @@ export class ParticleSystem {
     }
   }
 
-  // 15. 步步高升 · 祥瑞字河 (Auspicious Word River) - 纯正金红四字吉语星河螺旋腾飞 + 双轨回旋缎带 + 破晓神光 (绝无福印遮挡)
+  // 15. 步步高升 · 祥瑞字河 (Auspicious Word River) - 纯正金红四字吉语星河螺旋腾飞 + 双轨回旋缎带 (支持双天河错层并进)
   emitAuspiciousRiver(x, y, spawnRiver = true) {
     if (spawnRiver) {
-      // 腾讯总监设计级：空间错层接力，最多保留 2 条字河错层升腾，杜绝旧吉语被强行截断
       if (this.wordRivers.length >= 2) {
         this.wordRivers = this.wordRivers.slice(-1);
       }
-      this.wordRivers.push(new AuspiciousRiver(x, y));
+      const isSecond = this.wordRivers.length === 1;
+      const variant = isSecond ? (this.wordRivers[0].variant === 0 ? 1 : 0) : 0;
+      this.wordRivers.push(new AuspiciousRiver(x, y, variant));
     }
 
     // 伴生底层清透暖金祥云微雾 (主波 8 颗，次级微波 4 颗轻柔补给，杜绝粒子堆叠)
@@ -1850,21 +1799,50 @@ export class ParticleSystem {
     }
   }
 
-  // 15.5 福愿金墨 · 古雅印章 (Blessing Runes) - 沉香金雾 + 凝结升腾古雅篆金福印【福/安/顺/吉/自在】+ 祈愿流光
-  emitBlessingRunes(x, y) {
-    // 沉香暖金烟雾
+  // 15.5 福愿金墨 · 古雅印章 (Blessing Runes) - 支持双批篆金吉印同屏腾空 (严格同屏至多两波，第三波出现时第一波立即隐退)
+  emitBlessingRunes(x, y, spawnWave = true) {
+    let currentWave = 0;
+    if (spawnWave) {
+      if (!this._blessingWaveCounter) this._blessingWaveCounter = 0;
+      this._blessingWaveCounter++;
+      currentWave = this._blessingWaveCounter;
+
+      // 统计场上现存的所有福印波次
+      const activeWaves = new Set();
+      for (const p of this.particles) {
+        if (p.blessingWaveId) activeWaves.add(p.blessingWaveId);
+      }
+      // 若场上已有 >= 2 波，则淘汰最早的那一波
+      if (activeWaves.size >= 2) {
+        const sortedWaves = Array.from(activeWaves).sort((a, b) => a - b);
+        const pruneWave = sortedWaves[0];
+        for (const p of this.particles) {
+          if (p.blessingWaveId === pruneWave) {
+            p.alpha = 0;
+            p.life = p.maxLife;
+          }
+        }
+      }
+    }
+
+    const hasExisting = this.particles && this.particles.some(p => p.blessingWaveId && p.alpha > 0.05);
+    const spawnOffsetX = hasExisting ? 32 : -32;
+    const originX = hasExisting ? (x + spawnOffsetX) : x;
+
+    // 沉香暖金烟雾 (主波 14 团，补给波 6 团)
+    const cloudCount = spawnWave ? 14 : 6;
     const sandalwoodColors = [
       'rgba(245, 158, 11, ',
       'rgba(254, 240, 138, ',
       'rgba(217, 119, 6, ',
       'rgba(251, 191, 36, '
     ];
-    for (let i = 0; i < 14; i++) {
-      const spread = (i / 13 - 0.5) * 2;
+    for (let i = 0; i < cloudCount; i++) {
+      const spread = (i / (cloudCount - 1 || 1) - 0.5) * 2;
       const c = sandalwoodColors[i % sandalwoodColors.length];
       const lateralPush = spread * (2.0 + Math.random() * 0.8);
       this._pushParticle({
-        x: x + spread * 28 + (Math.random() - 0.5) * 16,
+        x: originX + spread * 28 + (Math.random() - 0.5) * 16,
         y: y + (Math.random() - 0.5) * 10,
         vx: lateralPush,
         vy: -(0.9 + Math.random() * 0.4),
@@ -1875,34 +1853,40 @@ export class ParticleSystem {
         maxLife: 135 + Math.random() * 25,
         color: c,
         growRate: 0.32,
-        isVolumetricSmoke: true
+        isVolumetricSmoke: true,
+        blessingWaveId: currentWave || undefined
       });
     }
 
-    // 凌空凝结的古雅篆金福印 (如 福、财、暴富、顺、康、喜、大吉、发财、自在)
-    const blessingWords = ['福', '财', '暴富', '顺', '康', '喜', '大吉', '发财', '自在'];
-    const shuffled = [...blessingWords].sort(() => 0.5 - Math.random());
-    const count = 4;
-    for (let i = 0; i < count; i++) {
-      const spread = (i / (count - 1) - 0.5) * 2;
-      const word = shuffled[i];
-      this._pushParticle({
-        x: x + spread * 38 + (Math.random() - 0.5) * 12,
-        y: y + (Math.random() - 0.5) * 14 - i * 8,
-        vx: spread * 0.6 + (Math.random() - 0.5) * 0.3,
-        vy: -(1.4 + Math.random() * 0.4),
-        text: word,
-        width: 32,
-        height: 32,
-        radius: 16,
-        alpha: 0,
-        baseAlpha: 0.95,
-        life: 0,
-        maxLife: 145 + Math.random() * 25,
-        rotation: (Math.random() - 0.5) * 0.12,
-        swayPhase: Math.random() * Math.PI * 2,
-        isBlessingToken: true
-      });
+    // 凌空凝结的古雅篆金福印 (仅在主波 spawnWave 才生成 4 枚福印，双批互补吉语)
+    if (spawnWave) {
+      const blessingWords = hasExisting
+        ? ['暴富', '发财', '大吉', '自在', '富贵', '万利']
+        : ['福', '财', '康', '顺', '喜', '平安'];
+      const shuffled = [...blessingWords].sort(() => 0.5 - Math.random());
+      const count = 4;
+      for (let i = 0; i < count; i++) {
+        const spread = (i / (count - 1) - 0.5) * 2;
+        const word = shuffled[i];
+        this._pushParticle({
+          x: originX + spread * 38 + (Math.random() - 0.5) * 12,
+          y: y + (Math.random() - 0.5) * 14 - i * 8,
+          vx: spread * 0.6 + (Math.random() - 0.5) * 0.3,
+          vy: -(1.4 + Math.random() * 0.4),
+          text: word,
+          width: 32,
+          height: 32,
+          radius: 16,
+          alpha: 0,
+          baseAlpha: 0.95,
+          life: 0,
+          maxLife: 145 + Math.random() * 25,
+          rotation: (Math.random() - 0.5) * 0.12,
+          swayPhase: Math.random() * Math.PI * 2,
+          isBlessingToken: true,
+          blessingWaveId: currentWave
+        });
+      }
     }
 
     // 伴随漫天环绕的 24K 金印流光星屑
@@ -1910,7 +1894,7 @@ export class ParticleSystem {
       const rad = Math.random() * Math.PI * 2;
       const spd = Math.random() * 2.2 + 0.8;
       this._pushParticle({
-        x: x + (Math.random() - 0.5) * 32,
+        x: originX + (Math.random() - 0.5) * 32,
         y: y + (Math.random() - 0.5) * 14,
         vx: Math.cos(rad) * spd,
         vy: Math.sin(rad) * spd - 0.7,
@@ -1922,21 +1906,24 @@ export class ParticleSystem {
         color: Math.random() < 0.6 ? '#fbbf24' : '#fef08a',
         isGold: true,
         shimmerPhase: Math.random() * Math.PI * 2,
-        shimmerSpeed: 0.16
+        shimmerSpeed: 0.16,
+        blessingWaveId: currentWave
       });
     }
   }
 
-  // 16. 赤焰神凰 (Phoenix Nirvana) - 赤金烈焰长鸣展翅，九天神凰翱翔，流光凤尾与炽羽
+  // 16. 赤焰神凰 (Phoenix Nirvana) - 赤金烈焰长鸣展翅，九天神凰翱翔 (支持双凰齐飞)
   emitPhoenixNirvana(x, y, spawnPhoenix = true) {
-    // 实例化东方赤焰神凰 (用户明确指定：严格最多显示 2 只双凰展翅)
+    // 实例化东方赤焰神凰 (严格同屏最多显示 2 只双凰展翅)
     if (spawnPhoenix) {
       if (this.phoenixes.length >= 2) {
         this.phoenixes = this.phoenixes.slice(-1);
       }
-      const newPhoenix = new FirePhoenix(x, y);
-      if (this.phoenixes.length === 1) {
-        newPhoenix.vx = (this.phoenixes[0].vx > 0 ? -0.45 : 0.45);
+      const isSecond = this.phoenixes.length === 1;
+      const variant = isSecond ? (this.phoenixes[0].variant === 0 ? 1 : 0) : 0;
+      const newPhoenix = new FirePhoenix(x, y, variant);
+      if (isSecond && this.phoenixes.length === 1) {
+        this.phoenixes[0].vx = -0.38;
       }
       this.phoenixes.push(newPhoenix);
     }
@@ -2011,15 +1998,17 @@ export class ParticleSystem {
     }
   }
 
-  // 17. 七仙降世 · 霓裳羽衣阵 (Seven Fairies) - 七仙环舞，七彩通天神光柱，仙阵琼花落雨
+  // 17. 七仙降世 · 霓裳羽衣阵 (Seven Fairies) - 支持双阵飞天散花
   emitSevenFairies(x, y, spawnArray = true) {
     if (spawnArray) {
       if (this.fairyArrays.length >= 2) {
         this.fairyArrays = this.fairyArrays.slice(-1);
       }
-      const newArray = new SevenFairies(x, y);
-      if (this.fairyArrays.length === 1) {
-        newArray.vx = -0.22;
+      const isSecond = this.fairyArrays.length === 1;
+      const variant = isSecond ? (this.fairyArrays[0].variant === 0 ? 1 : 0) : 0;
+      const newArray = new SevenFairies(x, y, variant);
+      if (isSecond && this.fairyArrays.length === 1) {
+        this.fairyArrays[0].vx = -0.20;
       }
       this.fairyArrays.push(newArray);
     }
@@ -2079,9 +2068,6 @@ export class ParticleSystem {
     switch (effectId) {
       case 'ring_classic':
         this.emitSmokeRing(x, y, baseColor || 'rgba(235, 240, 252, ');
-        break;
-      case 'lotus_zen':
-        this.emitLotusZen(x, y);
         break;
       case 'gold_stardust':
         this.emitGoldStardust(x, y);
@@ -2318,6 +2304,57 @@ export class ParticleSystem {
       }
     }
 
+    // 3.1 更新丘比特神圣爱神金箭 (Cupid Arrows - 严格支持双箭伴飞)
+    if (this.cupidArrows && this.cupidArrows.length) {
+      for (let i = this.cupidArrows.length - 1; i >= 0; i--) {
+        const arrow = this.cupidArrows[i];
+        arrow.life++;
+        arrow.x += arrow.vx;
+        arrow.y += arrow.vy;
+        arrow.vx *= 0.988;
+        arrow.vy *= 0.988;
+
+        const prog = arrow.life / arrow.maxLife;
+        let lifeFade = 1.0;
+        if (prog > 0.45) {
+          lifeFade = Math.max(0, 1 - (prog - 0.45) / 0.55);
+        }
+
+        let ceilingFade = 1.0;
+        if (arrow.y < ceilingY + 80) {
+          ceilingFade = Math.max(0, (arrow.y - ceilingY) / 80);
+        }
+
+        arrow.alpha = (arrow.baseAlpha || 0.98) * lifeFade * ceilingFade;
+
+        // 箭身沿途脱落黄金粉钻星屑微粒
+        if (Math.random() < 0.45 && this.particles.length < 220) {
+          this.particles.push({
+            x: arrow.x - arrow.vx * 0.6 + (Math.random() - 0.5) * 4,
+            y: arrow.y - arrow.vy * 0.6 + (Math.random() - 0.5) * 4,
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: (Math.random() - 0.5) * 0.4 - 0.2,
+            outerRadius: 2.5,
+            innerRadius: 0.8,
+            radius: 2.0,
+            color: Math.random() > 0.5 ? '#fef08a' : '#fbcfe8',
+            alpha: arrow.alpha * 0.80,
+            baseAlpha: arrow.alpha * 0.80,
+            life: 0,
+            maxLife: 28,
+            isStar: true,
+            isPulsarDiamond: false,
+            rotation: Math.random() * Math.PI,
+            rotSpeed: 0.05
+          });
+        }
+
+        if (arrow.life >= arrow.maxLife || arrow.y <= ceilingY || arrow.alpha <= 0.005) {
+          this.cupidArrows.splice(i, 1);
+        }
+      }
+    }
+
     // 3.5 更新神游九天金龙 (Golden Celestial Dragons)
     if (this.dragons && this.dragons.length) {
       for (let i = this.dragons.length - 1; i >= 0; i--) {
@@ -2373,16 +2410,6 @@ export class ParticleSystem {
       }
     }
 
-    // 3.695 更新青莲化境 · 步步生莲 (Sacred Jade Lotuses)
-    if (this.lotusFlowers && this.lotusFlowers.length) {
-      for (let i = this.lotusFlowers.length - 1; i >= 0; i--) {
-        const lotus = this.lotusFlowers[i];
-        const isAlive = lotus.update(ch, ceilingY, this._boundPushParticle);
-        if (!isAlive) {
-          this.lotusFlowers.splice(i, 1);
-        }
-      }
-    }
 
     // 3.696 更新七仙降世 · 霓裳羽衣阵 (Seven Celestial Fairies)
     if (this.fairyArrays && this.fairyArrays.length) {
@@ -2395,34 +2422,13 @@ export class ParticleSystem {
       }
     }
 
-    // 3.7 更新盛世华彩烟花火箭 (Firework Rockets)
-    if (this.fireworkRockets && this.fireworkRockets.length) {
-      for (let i = this.fireworkRockets.length - 1; i >= 0; i--) {
-        const rk = this.fireworkRockets[i];
-        rk.age++;
-        rk.x += rk.vx;
-        rk.y += rk.vy;
-        rk.vy *= 0.95;
-
-        if (rk.age % 2 === 0) {
-          this._pushParticle({
-            x: rk.x + (Math.random() - 0.5) * 3,
-            y: rk.y + 4,
-            vx: (Math.random() - 0.5) * 0.8,
-            vy: 0.8 + Math.random() * 0.8,
-            radius: 1.4,
-            alpha: 0.85,
-            baseAlpha: 0.85,
-            life: 0,
-            maxLife: 16,
-            color: '#fef08a',
-            isSpark: true
-          });
-        }
-
-        if (rk.age >= rk.maxAge || rk.vy > -1.2 || rk.y <= ceilingY + 80) {
-          this.triggerFireworkExplosion(rk.x, rk.y, rk.color);
-          this.fireworkRockets.splice(i, 1);
+    // 3.7 更新华夏盛世 · 万家璀璨烟火 (Celebration Fireworks & Sky Lanterns)
+    if (this.celebrationFireworks && this.celebrationFireworks.length) {
+      for (let i = this.celebrationFireworks.length - 1; i >= 0; i--) {
+        const fw = this.celebrationFireworks[i];
+        const isAlive = fw.update(ch, ceilingY, this._boundPushParticle);
+        if (!isAlive) {
+          this.celebrationFireworks.splice(i, 1);
         }
       }
     }
@@ -2658,34 +2664,6 @@ export class ParticleSystem {
         p.rotAngle = (p.rotAngle || 0) + (p.rotSpeed || 0.08);
         p.wobbleAngle = (p.wobbleAngle || 0) + 0.04;
         p.alpha = (p.baseAlpha || 0.95) * fadeMultiplier;
-      } else if (p.isCupidArrow) {
-        // 丘比特爱神金箭疾速破空贯穿
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vx *= 0.988;
-        p.vy *= 0.988;
-        p.alpha = (p.baseAlpha || 0.98) * fadeMultiplier;
-        // 箭身沿途掉落黄金粉钻星屑
-        if (Math.random() < 0.48 && this.particles.length < MAX_PARTICLES) {
-          this.particles.push({
-            x: p.x - p.vx * 0.6 + (Math.random() - 0.5) * 4,
-            y: p.y - p.vy * 0.6 + (Math.random() - 0.5) * 4,
-            vx: (Math.random() - 0.5) * 0.4,
-            vy: (Math.random() - 0.5) * 0.4 - 0.2,
-            outerRadius: 2.5,
-            innerRadius: 0.8,
-            radius: 2.0,
-            color: Math.random() > 0.5 ? '#fef08a' : '#fbcfe8',
-            alpha: p.alpha * 0.80,
-            baseAlpha: p.alpha * 0.80,
-            life: 0,
-            maxLife: 28,
-            isStar: true,
-            isPulsarDiamond: false,
-            rotation: Math.random() * Math.PI,
-            rotSpeed: 0.05
-          });
-        }
       } else if (p.isAshClump) {
         // 成型断裂碳灰块：自旋翻滚 + 重力加速下坠
         p.x += p.vx;
@@ -2969,6 +2947,15 @@ export class ParticleSystem {
     // 3. 渲染 3D 浪漫同心爱心涡流烟圈 (Heart Vortex Rings - 优雅浮游心形双环)
     this.renderHeartRings(ctx);
 
+    // 3.1 渲染丘比特神圣爱神金箭 (Cupid Arrows - 严格支持双箭同屏伴飞)
+    if (this.cupidArrows && this.cupidArrows.length) {
+      for (const arrow of this.cupidArrows) {
+        if (arrow.alpha > 0.005) {
+          drawCupidArrow(ctx, arrow);
+        }
+      }
+    }
+
     // 3.5 渲染东方神游九天金龙 (Golden Celestial Dragons)
     if (this.dragons && this.dragons.length) {
       for (const d of this.dragons) {
@@ -3004,12 +2991,6 @@ export class ParticleSystem {
       }
     }
 
-    // 3.695 渲染青莲化境 · 步步生莲 (Sacred Jade Lotuses)
-    if (this.lotusFlowers && this.lotusFlowers.length) {
-      for (const lotus of this.lotusFlowers) {
-        lotus.render(ctx);
-      }
-    }
 
     // 3.696 渲染七仙降世 · 霓裳羽衣阵 (Seven Celestial Fairies)
     if (this.fairyArrays && this.fairyArrays.length) {
@@ -3018,21 +2999,10 @@ export class ParticleSystem {
       }
     }
 
-    // 3.7 渲染盛世华彩腾空火箭 (双层轻量光栅化高光)
-    if (this.fireworkRockets && this.fireworkRockets.length) {
-      for (const rk of this.fireworkRockets) {
-        ctx.save();
-        // 外层耀金光晕
-        ctx.beginPath();
-        ctx.arc(rk.x, rk.y, 4.6, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(251, 191, 36, 0.35)';
-        ctx.fill();
-        // 核心亮点
-        ctx.beginPath();
-        ctx.arc(rk.x, rk.y, 2.2, 0, Math.PI * 2);
-        ctx.fillStyle = rk.color || '#fbbf24';
-        ctx.fill();
-        ctx.restore();
+    // 3.7 渲染华夏盛世 · 万家璀璨烟火 (Celebration Fireworks & Sky Lanterns)
+    if (this.celebrationFireworks && this.celebrationFireworks.length) {
+      for (const fw of this.celebrationFireworks) {
+        fw.render(ctx);
       }
     }
 
@@ -3179,39 +3149,7 @@ export class ParticleSystem {
         ctx.fill();
         ctx.restore();
         continue;
-      } else if (p.isLotusPetal) {
-        // 青莲碧玉凝脂花瓣 (单例缓存模板 · 0 内存分配)
-        const colBase = p.color || 'rgba(52, 211, 153, ';
-        const grad = getCachedUnitRadialGradient(ctx, 'lotusPetal_' + colBase, [
-          [0.0, formatColorWithAlpha(colBase, 0.85, '52, 211, 153')],
-          [0.55, formatColorWithAlpha(colBase, 0.38, '52, 211, 153')],
-          [1.0, formatColorWithAlpha(colBase, 0.0, '52, 211, 153')]
-        ]);
-        ctx.translate(p.x, p.y);
-        ctx.scale(p.radius, p.radius);
-        ctx.fillStyle = grad || formatColorWithAlpha(p.color, 0.50, '52, 211, 153');
-        ctx.globalAlpha = (p.alpha || 0.8) * 0.88;
-        ctx.beginPath();
-        ctx.arc(0, 0, 1, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-        continue;
-      } else if (p.isLotusCore) {
-        // 莲心琥珀琉璃金蕊 (单例缓存模板 · 0 内存分配)
-        const grad = getCachedUnitRadialGradient(ctx, 'lotusCore', [
-          [0.0, 'rgba(254, 240, 138, 0.95)'],
-          [0.6, 'rgba(245, 158, 11, 0.55)'],
-          [1.0, 'rgba(217, 119, 6, 0.0)']
-        ]);
-        ctx.translate(p.x, p.y);
-        ctx.scale(p.radius, p.radius);
-        ctx.fillStyle = grad || 'rgba(251, 191, 36, 0.7)';
-        ctx.globalAlpha = (p.alpha || 0.85);
-        ctx.beginPath();
-        ctx.arc(0, 0, 1, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-        continue;
+
       } else if (p.isDewdrop) {
         // 晶莹甘露晨星微粒
         ctx.fillStyle = `rgba(224, 242, 254, ${p.alpha || 0.75})`;
@@ -3264,11 +3202,6 @@ export class ParticleSystem {
         drawLotusPetalParticle(ctx, p);
         ctx.restore();
         continue;
-      } else if (p.isJadePetal) {
-        // 飘舞的 3D 翡翠玉莲花瓣
-        drawJadePetalParticle(ctx, p);
-        ctx.restore();
-        continue;
       } else if (p.isBurningFeather) {
         // 空中飘落的 3D 燃烧赤金羽毛
         drawBurningFeatherParticle(ctx, p);
@@ -3289,19 +3222,6 @@ export class ParticleSystem {
         drawGoldCoinParticle(ctx, p);
         ctx.restore();
         continue;
-      } else if (p.isCupidArrow) {
-        // 丘比特爱神金箭
-        drawCupidArrow(ctx, p);
-        ctx.restore();
-        continue;
-      } else if (p.isFireworkBurst) {
-        // 烟花高空绽放彩星
-        ctx.fillStyle = p.color || '#fbbf24';
-        ctx.globalAlpha = p.alpha || 1.0;
-      } else if (p.isWillowRain) {
-        // 垂落金雨
-        ctx.fillStyle = p.color || '#fbbf24';
-        ctx.globalAlpha = p.alpha || 0.9;
       } else if (p.isShellShard) {
         // 拟真爆珠四分五裂胶壳残片 (Shattered Gelatin Shard)
         ctx.save();
@@ -3356,14 +3276,14 @@ export class ParticleSystem {
     this.wispTrail = [];
     this.smokeRings = [];
     this.heartRings = [];
+    this.cupidArrows = [];
     this.dragons = [];
     this.phoenixes = [];
     this.wordRivers = [];
     this.baguaMatrices = [];
     this.buddhaLights = [];
-    this.lotusFlowers = [];
     this.fairyArrays = [];
-    this.fireworkRockets = [];
+    this.celebrationFireworks = [];
     if (this.silkStreams) {
       this.silkStreams.forEach(s => { s.nodes = []; });
     }

@@ -1,4 +1,3 @@
-import { navigateBackWithSound } from '../../utils/navigation.js';
 // pages/index/index.js
 import { SmokeStateMachine } from '../../engine/smokeStateMachine.js';
 import { ParticleSystem } from '../../engine/particleSystem.js';
@@ -770,32 +769,25 @@ Page({
     this.particles.ensureExclusiveEffect(effectId);
 
     if (effectId === 'ring_classic') {
-      // 1. 经典空灵烟圈：第一圈领航冲出，第二圈追逐相伴，3D 俯仰透视环形涡流向前优雅滑行扩张并柔和羽化消散 (随吸力动态调节初速度与尺寸)
+      // 1. 经典空灵烟圈：单次呼气喷射 1 枚 3D 俯仰透视环形涡流大烟圈；双击时喷射第 2 枚异构伴飞烟圈；第 3 枚喷射时第 1 枚隐退，始终同屏至多 2 个烟圈优雅翱翔
       this.particles.emitSmokeRing(mx, my - 20, smokeColor, 1.0 * effIntensity, { speedMul: Math.min(1.35, 0.82 + effIntensity * 0.28) });
       const timer = setTimeout(() => {
         if (!this.particles) return;
-        this.particles.emitSmokeRing(mx, my - 24, smokeColor, 0.75 * effIntensity, { speedMul: 0.85 * effIntensity, offsetX: 6 });
+        // 延时只补给微量轻盈气羽微烟，绝不生成第二个主烟圈
+        this.particles.emitVolumetricCombustionSmoke(mx, my - 24, smokeColor);
       }, 190);
       this.exhaleEffectTimers.push(timer);
     } else if (effectId === 'gold_stardust') {
-      // 4. 黑金流沙：黑曜石深色烟雾基底与24K金箔大范围闪烁飞溅
-      this.particles.emitGoldStardust(mx, my - 16);
+      // 4. 黑金流沙：主呼气喷射 24K 金币雨与黑曜石流沙 (spawnWave = true)；双击时触发第 2 场暴富金雨；第 3 场喷射时第 1 场隐退，同屏至多 2 场
+      this.particles.emitGoldStardust(mx, my - 16, true);
       const timer = setTimeout(() => {
         if (!this.particles) return;
-        this.particles.emitGoldStardust(mx, my - 18);
+        this.particles.emitGoldStardust(mx, my - 18, false);
       }, 160);
       this.exhaleEffectTimers.push(timer);
     } else if (effectId === 'heart_double') {
       // 2. 双爱心烟：浪漫同心双心形涡流环，平滑浮游舒展并柔美羽化（单次自然喷发，杜绝二次重写闪动）
       this.particles.emitHeartDouble(mx, my - 20);
-    } else if (effectId === 'lotus_zen') {
-      // 3. 青莲化境 · 步步生莲：凝脂青碧宝莲破晓初绽，九瓣祥和花瓣自云烟中层层舒展，晨露甘霖与温润金蕊微光流转
-      this.particles.emitLotusZen(mx, my - 20);
-      const timer = setTimeout(() => {
-        if (!this.particles) return;
-        this.particles.emitLotusZen(mx, my - 26);
-      }, 180);
-      this.exhaleEffectTimers.push(timer);
     } else if (effectId === 'dragon_breath') {
       // 7. 金龙吐息：浓金祥云破雾而出，神龙腾云驾雾盘旋九天
       this.particles.emitDragonBreath(mx, my - 20, true);
@@ -805,19 +797,19 @@ Page({
       }, 180);
       this.exhaleEffectTimers.push(timer);
     } else if (effectId === 'galaxy_stars') {
-      // 8. 漫天繁星：璀璨四芒星钻流转跳跃，伴随流星划破星穹
-      this.particles.emitGalaxyStars(mx, my - 16);
+      // 4. 星穹浩瀚 · 璀璨星河：主呼气喷射双旋臂极光星云与二十四颗八芒星钻 (spawnWave = true)；双击时触发第 2 组星河；第 3 组喷射时第 1 组隐退，同屏至多 2 组
+      this.particles.emitGalaxyStars(mx, my - 16, true);
       const timer = setTimeout(() => {
         if (!this.particles) return;
-        this.particles.emitGalaxyStars(mx, my - 20);
+        this.particles.emitGalaxyStars(mx, my - 20, false);
       }, 160);
       this.exhaleEffectTimers.push(timer);
     } else if (effectId === 'grand_fireworks') {
-      // 9. 盛世华彩：金芒火箭破空腾飞，高空炸裂盛世锦簇烟花与垂落金雨
-      this.particles.emitGrandFireworks(mx, my - 20);
+      // 9. 华夏盛世 · 万家璀璨烟火：主呼气发射孔明祈愿天灯与金龙响尾火箭盛典 (spawnCelebration = true)；双击时触发第 2 场盛典；第 3 场触发时第 1 场隐退，同屏至多 2 场
+      this.particles.emitGrandFireworks(mx, my - 20, true);
       const timer = setTimeout(() => {
         if (!this.particles) return;
-        this.particles.emitGrandFireworks(mx, my - 24);
+        this.particles.emitGrandFireworks(mx, my - 24, false);
       }, 180);
       this.exhaleEffectTimers.push(timer);
     } else if (effectId === 'auspicious_river') {
@@ -829,11 +821,11 @@ Page({
       }, 170);
       this.exhaleEffectTimers.push(timer);
     } else if (effectId === 'blessing_runes') {
-      // 10.5 福愿金墨：沉香暖金烟雾袅袅升腾，凝结升腾古雅篆金福印【福/安/顺/吉/自在】与祈愿流光
-      this.particles.emitBlessingRunes(mx, my - 16);
+      // 10.5 福愿金墨：主呼气凝结升腾古雅篆金福印 (spawnWave = true)；双击时触发第 2 批福印；第 3 批触发时第 1 批隐退，同屏至多 2 批
+      this.particles.emitBlessingRunes(mx, my - 16, true);
       const timer = setTimeout(() => {
         if (!this.particles) return;
-        this.particles.emitBlessingRunes(mx, my - 20);
+        this.particles.emitBlessingRunes(mx, my - 20, false);
       }, 170);
       this.exhaleEffectTimers.push(timer);
     } else if (effectId === 'phoenix_nirvana') {
@@ -1279,7 +1271,7 @@ Page({
       unlockedEffects: allEffects,
       unlockedEffectsCount: allEffects.length,
       hasCustomEffect: allEffects.some(id => id !== 'ring_classic' && id !== 'auspicious_river') || (this.data.smokeEffectType !== 'ring_classic' && this.data.smokeEffectType !== 'auspicious_river'),
-      hasSummonedMythic: allEffects.includes('dragon_breath') || allEffects.includes('phoenix_nirvana') || allEffects.includes('lotus_zen') || allEffects.includes('buddha_light') || allEffects.includes('bagua_taichi') || allEffects.includes('auspicious_river') || allEffects.includes('seven_fairies')
+      hasSummonedMythic: allEffects.includes('dragon_breath') || allEffects.includes('phoenix_nirvana') || allEffects.includes('buddha_light') || allEffects.includes('bagua_taichi') || allEffects.includes('auspicious_river') || allEffects.includes('seven_fairies')
     }, storageService.getUnlockedAchievements());
 
     if (newly && newly.length) {

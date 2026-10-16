@@ -14,6 +14,7 @@
 
 export class BaguaMatrix {
   constructor(x, y, options = {}) {
+    this.variant = options.variant || 0;
     this.startX = x;
     this.startY = y;
     this.x = x;
@@ -25,7 +26,7 @@ export class BaguaMatrix {
     this.alpha = 0;
 
     // 三重天道逆向视差旋转角
-    this.rot = 0;            // 中央太极两仪顺时针流转
+    this.rot = this.variant === 1 ? Math.PI : 0;            // 中央太极两仪顺时针流转
     this.innerArrayRot = 0;  // 中层八角璇玑与八卦爻象顺转
     this.diskRot = 0;        // 外层二十八星宿与六十四卦天盘逆转
 
@@ -77,9 +78,10 @@ export class BaguaMatrix {
     this.y -= this.vy;
     this.vy = Math.max(1.15, this.vy * 0.996); // 升至高空微幅放缓，呈现悬停天穹之威仪
 
-    this.rot += 0.022;           // 太极两仪顺时针运转
-    this.innerArrayRot -= 0.012; // 璇玑内阵逆时针运转
-    this.diskRot += 0.008;       // 周天星宿外盘慢速顺转
+    const rotDir = this.variant === 1 ? -1 : 1;
+    this.rot += 0.022 * rotDir;           // 太极两仪运转
+    this.innerArrayRot -= 0.012 * rotDir; // 璇玑内阵运转
+    this.diskRot += 0.008 * rotDir;       // 周天星宿外盘慢速运转
 
     // 3. 原地更新双轨游龙气旋骨骼点 (连接呼气源与升腾大阵的广域流光绶带)
     const curR = this._getCurrentRadius();
@@ -209,26 +211,103 @@ export class BaguaMatrix {
     ctx.restore();
   }
 
-  // 0.1 紫微天顶神光束 (Top Celestial God-Rays)
+  // 0.1 紫微天顶通天神光锥与紫微帝星 (Zenith Celestial Conical Light Pillar & Polaris Star)
   _renderCelestialSunbeams(ctx, curR, a) {
-    if (a < 0.2) return;
+    if (a < 0.15) return;
     ctx.save();
-    const beamA = Math.min(0.24, a * 0.24);
+    const beamA = Math.min(0.32, a * 0.32);
     try {
-      const topY = Math.max(0, this.y - curR * 1.65);
-      const grad = ctx.createLinearGradient(this.x, topY, this.x, this.y + curR * 0.8);
-      grad.addColorStop(0, `rgba(103, 232, 249, ${beamA * 1.3})`);
-      grad.addColorStop(0.45, `rgba(251, 191, 36, ${beamA * 0.85})`);
-      grad.addColorStop(1, 'rgba(15, 23, 42, 0)');
-      ctx.fillStyle = grad;
+      // 1. 向上延升的圆锥顶点坐标 (Apex)
+      const apexX = this.x;
+      const apexY = Math.max(-20, this.y - curR * 2.35);
+      const baseY = this.y + curR * 0.75;
+      const baseHalfW = curR * 1.38;
 
+      // 2. 宏大圆锥通天神光渐变 (Conical God-Ray Pyramid)
+      const coneGrad = ctx.createLinearGradient(apexX, apexY, apexX, baseY);
+      coneGrad.addColorStop(0, `rgba(165, 243, 252, ${beamA * 1.5})`);
+      coneGrad.addColorStop(0.25, `rgba(103, 232, 249, ${beamA * 1.1})`);
+      coneGrad.addColorStop(0.65, `rgba(251, 191, 36, ${beamA * 0.75})`);
+      coneGrad.addColorStop(1, 'rgba(15, 23, 42, 0)');
+
+      // 外层广域神光锥体 (彻底消除平角，向上延展汇聚为纯正圆锥体)
       ctx.beginPath();
-      ctx.moveTo(this.x - curR * 0.45, topY);
-      ctx.lineTo(this.x + curR * 0.45, topY);
-      ctx.lineTo(this.x + curR * 1.35, this.y + curR * 0.8);
-      ctx.lineTo(this.x - curR * 1.35, this.y + curR * 0.8);
+      ctx.moveTo(apexX, apexY);
+      ctx.lineTo(apexX + baseHalfW, baseY);
+      ctx.lineTo(apexX - baseHalfW, baseY);
       ctx.closePath();
+      ctx.fillStyle = coneGrad;
       ctx.fill();
+
+      // 内层致密白金核心锥束
+      const coreGrad = ctx.createLinearGradient(apexX, apexY, apexX, baseY);
+      coreGrad.addColorStop(0, `rgba(255, 255, 255, ${beamA * 1.8})`);
+      coreGrad.addColorStop(0.3, `rgba(254, 240, 138, ${beamA * 1.2})`);
+      coreGrad.addColorStop(0.85, 'rgba(245, 158, 11, 0)');
+      ctx.beginPath();
+      ctx.moveTo(apexX, apexY);
+      ctx.lineTo(apexX + baseHalfW * 0.52, baseY);
+      ctx.lineTo(apexX - baseHalfW * 0.52, baseY);
+      ctx.closePath();
+      ctx.fillStyle = coreGrad;
+      ctx.fill();
+
+      // 3. 散发自顶点的 5 道扇形穿云透镜神光束 (Volumetric Fan Rays)
+      const rayAngles = [-0.28, -0.14, 0, 0.14, 0.28];
+      const rayLen = baseY - apexY;
+      ctx.lineWidth = 2.4;
+      for (let i = 0; i < rayAngles.length; i++) {
+        const ang = rayAngles[i];
+        const rayEndX = apexX + Math.sin(ang) * rayLen * 1.1;
+        const rayEndY = apexY + Math.cos(ang) * rayLen;
+        const rGrad = ctx.createLinearGradient(apexX, apexY, rayEndX, rayEndY);
+        rGrad.addColorStop(0, `rgba(255, 255, 255, ${beamA * 1.6})`);
+        rGrad.addColorStop(0.5, `rgba(103, 232, 249, ${beamA * 0.8})`);
+        rGrad.addColorStop(1, 'rgba(56, 189, 248, 0)');
+        ctx.beginPath();
+        ctx.moveTo(apexX, apexY);
+        ctx.lineTo(rayEndX, rayEndY);
+        ctx.strokeStyle = rGrad;
+        ctx.stroke();
+      }
+
+      // 4. 天顶神圣装饰：紫微帝星 · 八芒天道星核与旋转金环 (Zenith Polaris Diamond Crest)
+      const starPulse = 1.0 + Math.sin(this.age * 0.08) * 0.18;
+      const starR = 9.0 * starPulse;
+
+      // 4.1 帝星柔光外晕
+      ctx.beginPath();
+      ctx.arc(apexX, apexY, starR * 2.8, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(103, 232, 249, ${beamA * 0.9})`;
+      ctx.fill();
+
+      // 4.2 天元神圣金环
+      ctx.beginPath();
+      ctx.arc(apexX, apexY, starR * 1.5, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(251, 191, 36, ${beamA * 1.4})`;
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+
+      // 4.3 横向贯穿透镜耀斑光刃 (Horizontal Lens Flare)
+      const flareLen = starR * 4.2;
+      const flareGrad = ctx.createLinearGradient(apexX - flareLen, apexY, apexX + flareLen, apexY);
+      flareGrad.addColorStop(0, 'rgba(255, 255, 255, 0)');
+      flareGrad.addColorStop(0.5, `rgba(255, 255, 255, ${beamA * 2.0})`);
+      flareGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      ctx.beginPath();
+      ctx.moveTo(apexX - flareLen, apexY);
+      ctx.lineTo(apexX + flareLen, apexY);
+      ctx.strokeStyle = flareGrad;
+      ctx.lineWidth = 2.0;
+      ctx.stroke();
+
+      // 4.4 八芒紫微帝星晶核
+      this._renderStarDiamond(ctx, apexX, apexY, starR * 1.6, beamA * 2.0, '#fef08a');
+      ctx.save();
+      ctx.translate(apexX, apexY);
+      ctx.rotate(Math.PI / 4);
+      this._renderStarDiamond(ctx, 0, 0, starR * 1.1, beamA * 1.8, '#38bdf8');
+      ctx.restore();
     } catch (e) {}
     ctx.restore();
   }
