@@ -18,7 +18,6 @@
     "useCompilerPlugins": false
   },
   "compileType": "miniprogram",
-  "cloudfunctionRoot": "cloudfunctions/",
   "libVersion": "3.3.4",
   "appid": "wx8a928ab2389345f3",
   "packOptions": {
@@ -62,10 +61,6 @@
       {
         "type": "folder",
         "value": ".superpowers"
-      },
-      {
-        "type": "folder",
-        "value": "cloudfunctions"
       },
       {
         "type": "suffix",

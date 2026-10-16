@@ -7,7 +7,6 @@ import { ATMOSPHERE_SCENES, SCENE_CATEGORIES, getSceneById } from '../../engine/
 import { audioManager } from '../../services/audioManager.js';
 import { triggerHaptic } from '../../services/haptics.js';
 import { storageService } from '../../services/storageService.js';
-import { cloudSyncService } from '../../services/cloudSyncService.js';
 import { toast } from '../../services/toastService.js';
 import { IGNITION_TOOLS, getActiveIgnitionTool } from '../../services/ignitionService.js';
 import { vipService } from '../../services/vipService.js';
@@ -207,7 +206,6 @@ Page({
         curCig = giftCig;
         isReceivedGift = true;
         giftSender = options.senderName ? decodeURIComponent(options.senderName) : '老哥';
-        this._activeGiftId = options.giftId || '';
         storageService.setSelectedCigaretteId(giftCig.id);
         triggerHaptic('medium');
       }
@@ -364,9 +362,6 @@ Page({
         isIgniteGuideFading: false
       });
     }
-
-    // 异步静默检查并弹出运营后台赠送的专属心意礼包 (Local-First 零阻塞)
-    this._checkPendingSystemRewards();
 
     /* ==================== [DEV_ADMIN_TEST] 调试指令检测 (可随时安全删除) ==================== */
     this._checkDevAdminPendingAction();
@@ -1375,28 +1370,6 @@ Page({
       durationSeconds: duration,
       inhaleCount: inhales
     });
-
-    // 异步上报替烟明细流水至微信云数据库 (Local-First 零阻塞，以 recordId 作为幂等防重键)
-    try {
-      cloudSyncService.recordSmokeAction({
-        id: recordId,
-        cigaretteId: curCig.id,
-        cigaretteName: curCig.name,
-        category: curCig.widthType === 'slender' ? 'slender' : (curCig.isCigar ? 'cigar' : 'national'),
-        durationSeconds: duration,
-        inhaleCount: inhales,
-        ashTapCount: 0,
-        beadPopped: !!this.data.isBeadPopped,
-        savedMoney: saved,
-        tarAvoided: tar,
-        lifeRegained: life,
-        usedToolId: (this.data.currentIgnitionTool && this.data.currentIgnitionTool.id) || 'flint_lighter',
-        usedEffectId: (this.data.currentSmokeEffect && this.data.currentSmokeEffect.id) || 'ring_classic',
-        usedSceneId: this.data.currentScene || 'convenience_store'
-      });
-    } catch (eCloudLog) {
-      console.warn('[Index] 云端流水上报跳过 (尚未建表或离线):', eCloudLog);
-    }
 
     // 若当前抽完的是 1 支尝鲜试抽名烟，抽完即销毁试抽凭证并切回原装配名烟
     const trialInfo = storageService.getTrialCigaretteInfo();
@@ -2423,17 +2396,6 @@ Page({
     const profile = this.data.profile || {};
     const senderName = profile.nickname || profile.nickName || '老哥';
 
-    // 异步生成云端递烟礼单 (不阻塞微信原生分享唤起)
-    cloudSyncService.sendGiftCigarette({
-      senderNickName: senderName,
-      senderAvatarUrl: profile.avatarUrl || '',
-      cigaretteId: curCig.id,
-      cigaretteName: curCig.name,
-      message: '老哥，来一根电子赛博烟！少抽实体烟，健康每一天！'
-    }).catch(err => {
-      console.warn('[Index] 云端礼单生成跳过 (尚未建表或离线):', err);
-    });
-
     let title = `🤝 递你一支【${curCig.name}】！赛博替烟，少抽真烟多活好多年！`;
     if (curCig.brand === '中华' || curCig.id.includes('chunghwa')) {
       title = `🤝 老哥，递你一支软中华！赛博替烟，有面更有健康！`;
@@ -2468,63 +2430,11 @@ Page({
 
   acceptGiftAndIgnite() {
     audioManager.unlockAudio();
-    // 异步核销云端受赠礼单，给递烟人增加社交功德
-    if (this._activeGiftId) {
-      cloudSyncService.acceptGiftCigarette(this._activeGiftId, this.data.profile || {});
-      this._activeGiftId = null;
-    }
     this.closeGiftModal();
     if (this.data.simulatorState !== 'UNLIT') {
       this.restartCigarette();
     }
     this.triggerIgnite();
-  },
-
-  // ================= 运营后台专属赠礼与系统奖励弹窗控制 =================
-  onCloseSystemRewardModal() {
-    audioManager.playSwitchSound();
-    triggerHaptic('light');
-    this.setData({ showSystemRewardModal: false });
-  },
-
-  async onClaimSystemReward() {
-    const reward = this.data.pendingSystemReward;
-    if (!reward) {
-      this.setData({ showSystemRewardModal: false });
-      return;
-    }
-    triggerHaptic('heavy');
-    audioManager.playSuccessSound();
-
-    await cloudSyncService.claimSystemReward(reward);
-
-    this.setData({
-      showSystemRewardModal: false,
-      pendingSystemReward: null
-    });
-    this.refreshAllData();
-
-    toast.show({
-      title: '🎁 奖励已入账！',
-      icon: 'success'
-    });
-  },
-
-  async _checkPendingSystemRewards() {
-    try {
-      if (cloudSyncService && cloudSyncService.isAvailable()) {
-        const rewards = await cloudSyncService.fetchPendingSystemRewards();
-        if (Array.isArray(rewards) && rewards.length > 0) {
-          const latestReward = rewards[0];
-          this.setData({
-            showSystemRewardModal: true,
-            pendingSystemReward: latestReward
-          });
-        }
-      }
-    } catch (e) {
-      console.warn('[Index] _checkPendingSystemRewards err:', e);
-    }
   },
 
   // 选烟与拟真开盒页面跳转 (3D 翻盖烟盒与抽烟仪式感)

@@ -3,7 +3,6 @@ import { audioManager } from '../../services/audioManager.js';
 import { triggerHaptic } from '../../services/haptics.js';
 import { toast } from '../../services/toastService.js';
 import { storageService } from '../../services/storageService.js';
-import { cloudSyncService } from '../../services/cloudSyncService.js';
 import { leaderboardService } from '../../services/leaderboardService.js';
 import { vipService } from '../../services/vipService.js';
 import {
@@ -331,7 +330,7 @@ Page({
     }
   },
 
-  // 微信头像选择与持久化同步 (本地即刻预览 + 微信云存储永久 fileID 异步换绑)
+  // 微信头像选择与持久化同步
   onUpdateAvatar(e) {
     try {
       const avatarUrl = e.detail && e.detail.avatarUrl ? e.detail.avatarUrl : '';
@@ -339,24 +338,13 @@ Page({
         const updated = storageService.updateProfile({ avatarUrl: '' });
         this.setData({ profile: updated });
         this.refreshAllData();
-        cloudSyncService.syncUserProfile({ avatarUrl: '' });
         return;
       }
-      // 1. 本地即时保存与秒级渲染 (0ms 无白屏)
+      // 本地即时保存与秒级渲染 (0ms 无白屏)
       const savedPath = persistAvatarFile(avatarUrl);
       const updated = storageService.updateProfile({ avatarUrl: savedPath });
       this.setData({ profile: updated });
       this.refreshAllData();
-
-      // 2. 异步上传至微信云存储获取永久 fileID (彻底根治临时文件失效黑圈与破图)
-      cloudSyncService.uploadUserAvatar(avatarUrl).then(fileID => {
-        if (fileID && fileID.startsWith('cloud://')) {
-          storageService.updateProfile({ avatarUrl: fileID });
-          cloudSyncService.syncUserProfile({ avatarUrl: fileID });
-        }
-      }).catch(err => {
-        console.warn('[Mine] 云端头像同步跳过 (离线或尚未建表):', err);
-      });
     } catch (err) {
       console.error('onUpdateAvatar error:', err);
     }
@@ -370,9 +358,6 @@ Page({
       const updated = storageService.updateProfile({ nickName });
       this.setData({ profile: updated });
       this.refreshAllData();
-
-      // 异步防抖提交至云端
-      cloudSyncService.syncUserProfile({ nickName });
     } catch (err) {
       console.error('onUpdateNickname error:', err);
     }
@@ -574,14 +559,6 @@ Page({
       smokeYears
     };
     storageService.saveProfile(updated);
-    // 异步同步到云端
-    cloudSyncService.syncUserProfile({
-      smokeProfile: {
-        packPrice,
-        cigsPerDay,
-        smokeYears
-      }
-    });
     this.setData({ showProfileModal: false });
     audioManager.playSwitchSound();
     triggerHaptic('medium');
