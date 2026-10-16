@@ -1,3 +1,4 @@
+import { navigateBackWithSound } from '../../utils/navigation.js';
 // pages/shop/shop.js
 import { storageService } from '../../services/storageService.js';
 import { audioManager } from '../../services/audioManager.js';
@@ -9,6 +10,8 @@ import {
   DEFAULT_CIGARETTE,
   isCigaretteUnlocked
 } from '../../configs/catalog.js';
+import { getThemeById } from '../../configs/vipThemes.js';
+import { measureSafeAreaSync, detectIsIOS } from '../../utils/safeArea.js';
 
 function resolveCigaretteCategory(item) {
   // 1. 细支爆珠 (所有带爆珠或细支的名烟：炫赫门、贵烟跨越、利群江南韵、万宝路冰蓝、七星蓝莓双爆、宽窄五粮浓香、芙蓉王硬细支、中华双中支等)
@@ -72,34 +75,7 @@ function buildInitialCatalogList() {
   }
 }
 
-function measureSafeAreaSync() {
-  try {
-    const sysInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
-    const menuInfo = wx.getMenuButtonBoundingClientRect ? wx.getMenuButtonBoundingClientRect() : null;
-    const statusBarHeight = sysInfo.statusBarHeight || 44;
-    let navBarHeight = 44;
-    let capsuleRightSpace = 96;
 
-    if (menuInfo && menuInfo.top) {
-      navBarHeight = (menuInfo.top - statusBarHeight) * 2 + menuInfo.height;
-      capsuleRightSpace = (sysInfo.windowWidth - menuInfo.left) + 12;
-    }
-    return { statusBarHeight, navBarHeight, capsuleRightSpace };
-  } catch (e) {
-    return { statusBarHeight: 44, navBarHeight: 44, capsuleRightSpace: 100 };
-  }
-}
-
-function detectIsIOS() {
-  try {
-    const sysInfo = wx.getSystemInfoSync ? wx.getSystemInfoSync() : {};
-    const platform = (sysInfo.platform || '').toLowerCase();
-    const system = (sysInfo.system || '').toLowerCase();
-    return platform === 'ios' || system.includes('ios') || system.includes('iphone') || system.includes('ipad');
-  } catch (e) {
-    return false;
-  }
-}
 
 const INITIAL_SAFE_AREA = measureSafeAreaSync();
 const INITIAL_CATALOG = buildInitialCatalogList();
@@ -120,6 +96,8 @@ Page({
     // VIP 状态与主题 (Frame 0 同步读取，杜绝已开通 VIP 用户进页面闪现横幅)
     isVipUser: vipService.isVip(),
     vipTheme: vipService.getVipTheme(),
+    themeOpt: getThemeById(vipService.getVipTheme()),
+    vipThemeName: (getThemeById(vipService.getVipTheme()) || {}).name || '',
 
     // 解锁决策弹窗
     showUnlockDialog: false,
@@ -139,11 +117,16 @@ Page({
 
   onLoad() {
     this._skipFirstShowRefresh = true;
+    const isVipUser = vipService.isVip();
+    const vipTheme = vipService.getVipTheme();
+    const themeOpt = getThemeById(vipTheme);
 
     this.setData({
       viewMode: 'shelf',
-      isVipUser: vipService.isVip(),
-      vipTheme: vipService.getVipTheme(),
+      isVipUser,
+      vipTheme,
+      themeOpt,
+      vipThemeName: themeOpt ? themeOpt.name : '',
       enableSheen: false
     });
 
@@ -163,18 +146,26 @@ Page({
     this._lastCigaretteTapTime = 0;
     this._isNavigatingToVip = false;
 
+    const isVipUser = vipService.isVip();
+    const vipTheme = vipService.getVipTheme();
+    const themeOpt = getThemeById(vipTheme);
+
     if (this._skipFirstShowRefresh) {
       this._skipFirstShowRefresh = false;
       this.setData({
-        isVipUser: vipService.isVip(),
-        vipTheme: vipService.getVipTheme()
+        isVipUser,
+        vipTheme,
+        themeOpt,
+        vipThemeName: themeOpt ? themeOpt.name : ''
       });
       return;
     }
 
     this.setData({
-      isVipUser: vipService.isVip(),
-      vipTheme: vipService.getVipTheme(),
+      isVipUser,
+      vipTheme,
+      themeOpt,
+      vipThemeName: themeOpt ? themeOpt.name : '',
       enableSheen: false
     });
     this.refreshCatalogList();

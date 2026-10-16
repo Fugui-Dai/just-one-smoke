@@ -45,24 +45,24 @@
   animation: packVipOrbBreath 5.5s infinite alternate ease-in-out;
 }
 
-/* 默认模式：天顶柔和明丽香槟流金漫射 (通透舒朗，层次丰润，绝不压抑) */
+/* 默认模式：天顶柔和明丽漫射 (通透舒朗，层次丰润，随车色主题自适应) */
 .vip-aurora-orb.orb-primary {
   width: 600rpx;
   height: 360rpx;
   top: -40rpx;
   left: 50%;
   margin-left: -300rpx;
-  background: radial-gradient(circle, rgba(251, 191, 36, 0.32) 0%, rgba(56, 189, 248, 0.22) 45%, transparent 75%);
+  background: radial-gradient(circle, var(--vip-theme-orb1, rgba(251, 191, 36, 0.32)) 0%, transparent 75%);
 }
 
-/* 默认模式：3D 烟盒后仰背部悬浮温润琥珀金辉光晕 */
+/* 默认模式：3D 烟盒后仰背部悬浮温润辉光 */
 .vip-aurora-orb.orb-center-halo {
   width: 560rpx;
   height: 560rpx;
   top: 34%;
   left: 50%;
   margin-left: -280rpx;
-  background: radial-gradient(circle, rgba(245, 158, 11, 0.26) 0%, rgba(56, 189, 248, 0.15) 45%, transparent 72%);
+  background: radial-gradient(circle, var(--vip-theme-orb2, rgba(245, 158, 11, 0.26)) 0%, transparent 72%);
   animation-delay: -2.6s;
 }
 
@@ -73,51 +73,9 @@
   bottom: -40rpx;
   left: 50%;
   margin-left: -340rpx;
-  background: radial-gradient(ellipse at 50% 80%, rgba(56, 189, 248, 0.25) 0%, rgba(251, 191, 36, 0.22) 45%, transparent 80%);
+  background: radial-gradient(ellipse at 50% 80%, var(--vip-theme-orb1, rgba(56, 189, 248, 0.25)) 0%, transparent 80%);
   filter: blur(52rpx);
   animation: packFloorGlowBreathe 6.5s infinite alternate ease-in-out;
-}
-
-/* VIP 翡翠色系 */
-.theme-day .vip-aurora-orb.orb-primary,
-.theme-emerald .vip-aurora-orb.orb-primary {
-  background: radial-gradient(circle, rgba(52, 211, 153, 0.35) 0%, transparent 72%);
-}
-.theme-day .vip-aurora-orb.orb-center-halo,
-.theme-emerald .vip-aurora-orb.orb-center-halo {
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, transparent 70%);
-}
-.theme-day .vip-aurora-orb.orb-bottom-glow,
-.theme-emerald .vip-aurora-orb.orb-bottom-glow {
-  background: radial-gradient(ellipse at 50% 80%, rgba(52, 211, 153, 0.30) 0%, rgba(16, 185, 129, 0.12) 45%, transparent 80%);
-}
-
-/* VIP 紫晶色系 */
-.theme-month .vip-aurora-orb.orb-primary,
-.theme-purple .vip-aurora-orb.orb-primary {
-  background: radial-gradient(circle, rgba(192, 132, 252, 0.35) 0%, transparent 72%);
-}
-.theme-month .vip-aurora-orb.orb-center-halo,
-.theme-purple .vip-aurora-orb.orb-center-halo {
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.25) 0%, transparent 70%);
-}
-.theme-month .vip-aurora-orb.orb-bottom-glow,
-.theme-purple .vip-aurora-orb.orb-bottom-glow {
-  background: radial-gradient(ellipse at 50% 80%, rgba(192, 132, 252, 0.30) 0%, rgba(168, 85, 247, 0.12) 45%, transparent 80%);
-}
-
-/* VIP 鎏金冰川色系 */
-.theme-lifetime .vip-aurora-orb.orb-primary,
-.theme-glacier .vip-aurora-orb.orb-primary {
-  background: radial-gradient(circle, rgba(251, 191, 36, 0.40) 0%, transparent 72%);
-}
-.theme-lifetime .vip-aurora-orb.orb-center-halo,
-.theme-glacier .vip-aurora-orb.orb-center-halo {
-  background: radial-gradient(circle, rgba(245, 158, 11, 0.28) 0%, transparent 70%);
-}
-.theme-lifetime .vip-aurora-orb.orb-bottom-glow,
-.theme-glacier .vip-aurora-orb.orb-bottom-glow {
-  background: radial-gradient(ellipse at 50% 80%, rgba(251, 191, 36, 0.32) 0%, rgba(245, 158, 11, 0.12) 45%, transparent 80%);
 }
 
 @keyframes packVipOrbBreath {
@@ -136,17 +94,11 @@
   width: 8rpx;
   height: 8rpx;
   border-radius: 50%;
-  background: #fef08a;
-  box-shadow: 0 0 14rpx rgba(251, 191, 36, 0.85);
+  background: var(--vip-theme-spark, #fef08a);
+  box-shadow: 0 0 14rpx var(--vip-theme-spark-glow, rgba(251, 191, 36, 0.85));
   opacity: 0.68;
   animation: packVipSparkFloat 4.8s infinite ease-in-out;
 }
-.theme-day .vip-spark,
-.theme-emerald .vip-spark { background: #a7f3d0; box-shadow: 0 0 14rpx #34d399; }
-.theme-month .vip-spark,
-.theme-purple .vip-spark { background: #f5d0fe; box-shadow: 0 0 14rpx #c084fc; }
-.theme-lifetime .vip-spark,
-.theme-glacier .vip-spark { background: #fef08a; box-shadow: 0 0 16rpx #fbbf24; }
 
 .vip-spark.s1 { top: 22%; left: 14%; animation-delay: 0s; }
 .vip-spark.s2 { top: 30%; right: 14%; width: 6rpx; height: 6rpx; animation-delay: -1.3s; }
@@ -453,50 +405,103 @@
   letter-spacing: 1.2rpx;
 }
 
-/* 特效选择胶囊微切换器 (特效1 / 特效2 · 高光香槟银金金属胶囊) */
-.pack-vfx-selector-pill {
-  display: inline-flex;
-  align-items: center;
-  background: rgba(26, 38, 60, 0.78);
-  border: 1.5rpx solid rgba(251, 191, 36, 0.45);
-  border-radius: 999rpx;
-  padding: 3rpx;
-  box-shadow: 0 4rpx 14rpx rgba(10, 16, 28, 0.45);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  margin-left: 6rpx;
-}
-
-.vfx-pill-btn {
-  padding: 5rpx 18rpx;
-  border-radius: 999rpx;
-  transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+/* ==================== 3.5 品鉴出鞘特效四阶切换栏 (高定无界悬浮胶囊) ==================== */
+.pack-vfx-selector-row {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-top: 10rpx;
+  padding: 0 16rpx;
 }
 
-.vfx-pill-btn:active {
-  transform: scale(0.92);
+.vfx-tier-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  background: rgba(10, 15, 26, 0.72);
+  border: 1.5rpx solid rgba(255, 255, 255, 0.12);
+  padding: 6rpx 10rpx;
+  border-radius: 999rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.45), inset 0 1rpx 2rpx rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
-.vfx-pill-btn.vfx-pill-active {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 55%, #b45309 100%);
-  box-shadow: 0 2rpx 12rpx rgba(245, 158, 11, 0.6);
-}
-
-.vfx-pill-text {
+.vfx-tier-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 6rpx 18rpx;
+  border-radius: 999rpx;
   font-size: 20rpx;
-  font-weight: 700;
-  color: #cbd5e1;
-  letter-spacing: 1rpx;
+  font-weight: 600;
+  color: rgba(226, 232, 240, 0.65);
+  border: 1rpx solid transparent;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
 }
 
-.vfx-pill-btn.vfx-pill-active .vfx-pill-text {
+.vfx-tier-chip:active {
+  transform: scale(0.95);
+}
+
+.vfx-tier-chip .vt-icon {
+  font-size: 18rpx;
+  line-height: 1;
+}
+
+.vfx-tier-chip .vt-name {
+  letter-spacing: 0.5rpx;
+  line-height: 1;
+}
+
+/* 普通档位激活态 (白银冷月) */
+.vfx-tier-chip.tier-standard.active-tier {
+  background: linear-gradient(135deg, rgba(241, 245, 249, 0.28) 0%, rgba(148, 163, 184, 0.20) 100%);
+  border-color: rgba(248, 250, 252, 0.85);
   color: #ffffff;
-  font-weight: 900;
+  font-weight: 800;
+  box-shadow: 0 2rpx 10rpx rgba(255, 255, 255, 0.22);
 }
 
+/* 日卡档位激活态 (翡翠破晓) */
+.vfx-tier-chip.tier-day.active-tier {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.35) 0%, rgba(5, 150, 105, 0.25) 100%);
+  border-color: #34d399;
+  color: #d1fae5;
+  font-weight: 800;
+  box-shadow: 0 2rpx 12rpx rgba(16, 185, 129, 0.40);
+}
+
+/* 月卡档位激活态 (极光紫晶) */
+.vfx-tier-chip.tier-month.active-tier {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.35) 0%, rgba(126, 34, 206, 0.25) 100%);
+  border-color: #c084fc;
+  color: #f5d0fe;
+  font-weight: 800;
+  box-shadow: 0 2rpx 12rpx rgba(168, 85, 247, 0.45);
+}
+
+/* 至尊档位激活态 (曜世真龙) */
+.vfx-tier-chip.tier-lifetime.active-tier {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.38) 0%, rgba(217, 119, 6, 0.26) 100%);
+  border-color: #fde047;
+  color: #fef08a;
+  font-weight: 800;
+  box-shadow: 0 2rpx 14rpx rgba(251, 191, 36, 0.55);
+}
+
+.vt-indicator {
+  position: absolute;
+  bottom: -2rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14rpx;
+  height: 3rpx;
+  border-radius: 2rpx;
+  background: currentColor;
+  box-shadow: 0 0 6rpx currentColor;
+}
 
 /* ==================== 4. 3D 拟真烟盒舞台 (3D Pack Stage) ==================== */
 .pack-3d-stage {
@@ -1795,15 +1800,15 @@
   width: 100%;
   max-width: 440rpx;
   padding: 16rpx 36rpx 18rpx;
-  /* 告别暗黑死板：采用通透温润的香槟金-琥珀蜜糖琉璃质感，明快晶莹、高奢且亲和 */
+  /* 告别暗黑死板与生硬白边：采用纯净无界通透的香槟金-琥珀蜜糖琉璃质感，明快晶莹、高奢且亲和 */
   background: linear-gradient(180deg, #fef3c7 0%, #fde68a 22%, #f59e0b 68%, #d97706 100%);
-  border: 1.5rpx solid rgba(255, 255, 255, 0.85);
+  border: none;
   border-radius: 999rpx;
   box-shadow:
     0 12rpx 36rpx rgba(217, 119, 6, 0.42),
     0 4rpx 12rpx rgba(245, 158, 11, 0.35),
     0 0 28rpx rgba(253, 230, 138, 0.45),
-    inset 0 2.5rpx 3rpx rgba(255, 255, 255, 0.95),
+    inset 0 2rpx 3rpx rgba(254, 240, 138, 0.65),
     inset 0 -3rpx 6rpx rgba(180, 83, 9, 0.45);
   overflow: visible;
   /* 仅对底部按钮自身向上平移抬高 80rpx，完全脱离文档流推挤，100% 保证上方的诗笺、展台、烟盒零位移零影响 */
@@ -1828,16 +1833,16 @@
   position: absolute;
   inset: -6rpx;
   border-radius: 999rpx;
-  border: 1.5rpx solid rgba(254, 240, 138, 0.65);
+  border: 1.5rpx solid rgba(254, 240, 138, 0.45);
   box-shadow:
-    0 0 16rpx rgba(251, 191, 36, 0.35),
-    inset 0 0 10rpx rgba(254, 243, 199, 0.40);
+    0 0 16rpx rgba(251, 191, 36, 0.30),
+    inset 0 0 10rpx rgba(254, 243, 199, 0.35);
   pointer-events: none;
   z-index: 1;
   animation: pullBtnRingPulse 3.2s ease-in-out infinite alternate;
 }
 
-/* 顶部纳米微晶弧光丝 (纯净钻石级白金高光层) */
+/* 顶部微弧温润金光丝 */
 .pull-btn-top-crest,
 .pull-btn-top-gloss {
   position: absolute;
@@ -1846,7 +1851,7 @@
   right: 28rpx;
   height: 14rpx;
   border-radius: 999rpx 999rpx 0 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0) 100%);
+  background: linear-gradient(180deg, rgba(254, 240, 138, 0.45) 0%, rgba(254, 240, 138, 0) 100%);
   pointer-events: none;
   z-index: 2;
 }
@@ -2877,13 +2882,12 @@
   inset: 0;
   z-index: 302;
   background: radial-gradient(
-    circle at 50% 44%,
-    rgba(30, 58, 138, 0.28) 0%,
-    rgba(15, 23, 42, 0.72) 52%,
-    rgba(4, 7, 17, 0.88) 100%
+    circle at 50% 42%,
+    rgba(30, 58, 138, 0.45) 0%,
+    rgba(67, 24, 114, 0.35) 32%,
+    rgba(15, 23, 42, 0.85) 60%,
+    rgba(4, 7, 17, 0.96) 100%
   );
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
   opacity: 0;
   pointer-events: none;
 }
@@ -2970,37 +2974,37 @@
 
 /* 上回环星云弧 (对应 04 破空盘旋上拐点) */
 .scurve-ribbon-arc.arc-upper {
-  width: 440rpx;
-  height: 220rpx;
-  top: 22%;
-  left: 24%;
-  border-top: 8rpx solid #38bdf8;
-  border-left: 12rpx solid #fde047;
-  filter: drop-shadow(0 0 18rpx #38bdf8) drop-shadow(0 0 28rpx #a855f7);
+  width: 460rpx;
+  height: 230rpx;
+  top: 21%;
+  left: 23%;
+  border-top: 10rpx solid #38bdf8;
+  border-left: 14rpx solid #fde047;
+  box-shadow: 0 0 28rpx #38bdf8, 0 0 48rpx rgba(168, 85, 247, 0.65), inset 0 0 16rpx #fde047;
   transform: rotate(-16deg) scale(0.8);
 }
 
 /* 中段横贯大S金紫星河绶带 (对应 04 破空盘旋主轨迹) */
 .scurve-ribbon-arc.arc-middle {
-  width: 580rpx;
-  height: 290rpx;
-  top: 33%;
-  right: 8%;
-  border-right: 16rpx solid #fde047;
-  border-bottom: 12rpx solid #38bdf8;
-  filter: drop-shadow(0 0 24rpx #fde047) drop-shadow(0 0 38rpx #8b5cf6);
+  width: 600rpx;
+  height: 300rpx;
+  top: 32%;
+  right: 6%;
+  border-right: 18rpx solid #fde047;
+  border-bottom: 14rpx solid #38bdf8;
+  box-shadow: 0 0 32rpx #fde047, 0 0 54rpx rgba(139, 92, 246, 0.65), inset 0 0 18rpx #38bdf8;
   transform: rotate(14deg) scale(0.85);
 }
 
 /* 下回环螺旋放大星河弧 (对应 05 弧线放大) */
 .scurve-ribbon-arc.arc-lower {
-  width: 620rpx;
-  height: 310rpx;
-  bottom: 24%;
-  left: 6%;
-  border-bottom: 16rpx solid #fde047;
-  border-left: 12rpx solid #c084fc;
-  filter: drop-shadow(0 0 24rpx #38bdf8) drop-shadow(0 0 36rpx #fde047);
+  width: 640rpx;
+  height: 320rpx;
+  bottom: 23%;
+  left: 5%;
+  border-bottom: 18rpx solid #fde047;
+  border-left: 14rpx solid #c084fc;
+  box-shadow: 0 0 32rpx #38bdf8, 0 0 52rpx rgba(253, 224, 71, 0.65), inset 0 0 18rpx #c084fc;
   transform: rotate(-12deg) scale(0.85);
 }
 
@@ -3140,22 +3144,22 @@
 
 .ssr-god-rays {
   position: absolute;
-  inset: -60rpx;
+  inset: -80rpx;
   border-radius: 50%;
   background: repeating-conic-gradient(
     from 0deg,
-    rgba(253, 224, 71, 0.32) 0deg 8deg,
-    rgba(56, 189, 248, 0.24) 8deg 16deg,
-    transparent 16deg 30deg
+    rgba(253, 224, 71, 0.45) 0deg 9deg,
+    rgba(56, 189, 248, 0.35) 9deg 18deg,
+    transparent 18deg 30deg
   );
-  -webkit-mask-image: radial-gradient(circle, #000 0%, rgba(0, 0, 0, 0.72) 48%, transparent 74%);
-  mask-image: radial-gradient(circle, #000 0%, rgba(0, 0, 0, 0.72) 48%, transparent 74%);
+  -webkit-mask-image: radial-gradient(circle, #000 0%, rgba(0, 0, 0, 0.82) 48%, transparent 76%);
+  mask-image: radial-gradient(circle, #000 0%, rgba(0, 0, 0, 0.82) 48%, transparent 76%);
   animation: ssrWheelSpinCw 12s linear infinite;
 }
 
 .ssr-radial-starburst {
   position: absolute;
-  inset: -40rpx;
+  inset: -50rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3163,10 +3167,10 @@
 
 .starburst-ray {
   position: absolute;
-  width: 620rpx;
-  height: 4rpx;
-  background: linear-gradient(90deg, transparent 0%, #38bdf8 22%, #fde047 45%, #ffffff 50%, #fde047 55%, #38bdf8 78%, transparent 100%);
-  box-shadow: 0 0 18rpx #fde047;
+  width: 660rpx;
+  height: 5rpx;
+  background: linear-gradient(90deg, transparent 0%, #38bdf8 20%, #fde047 45%, #ffffff 50%, #fde047 55%, #38bdf8 80%, transparent 100%);
+  box-shadow: 0 0 24rpx #fde047, 0 0 36rpx #38bdf8;
 }
 .starburst-ray.sr-1 { transform: rotate(0deg); }
 .starburst-ray.sr-2 { transform: rotate(30deg); }
@@ -3177,11 +3181,11 @@
 
 .ssr-sacred-halo {
   position: absolute;
-  width: 420rpx;
-  height: 420rpx;
+  width: 440rpx;
+  height: 440rpx;
   border-radius: 50%;
-  border: 2rpx solid rgba(56, 189, 248, 0.55);
-  box-shadow: 0 0 38rpx rgba(56, 189, 248, 0.38), inset 0 0 28rpx rgba(251, 191, 36, 0.32);
+  border: 2.5rpx solid rgba(56, 189, 248, 0.75);
+  box-shadow: 0 0 46rpx rgba(56, 189, 248, 0.55), inset 0 0 34rpx rgba(251, 191, 36, 0.45);
   animation: ssrWheelSpinCcw 16s linear infinite;
 }
 
@@ -3312,21 +3316,13 @@
   will-change: transform, opacity;
 }
 
-/* 特效 1: 经典宝刀出鞘 360° 单周掠空大回环 (1.42s) */
-.ssr-awaken-overlay.ssr-active.vfx-mode-1 .ssr-hero-cigarette-stage,
-.ssr-awaken-overlay.ssr-active .ssr-hero-cigarette-stage.vfx-mode-1 {
-  animation: ssrHeroArcFlightVfx1 1.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+/* 经典宝刀出鞘 360° 单周掠空大回环 (1.42s) */
+.ssr-awaken-overlay.ssr-active .ssr-hero-cigarette-stage {
+  animation: ssrHeroArcFlight 1.42s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* 特效 2: 九天游龙 720° 全屏莫比乌斯大回环 (1.62s) - 默认 */
-.ssr-awaken-overlay.ssr-active .ssr-hero-cigarette-stage,
-.ssr-awaken-overlay.ssr-active.vfx-mode-2 .ssr-hero-cigarette-stage,
-.ssr-awaken-overlay.ssr-active .ssr-hero-cigarette-stage.vfx-mode-2 {
-  animation: ssrHeroArcFlightVfx2 1.62s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-/* 特效 1 关键帧：经典宝刀出鞘 · 游龙惊鸿 360° 挽剑花大回环 (382deg = 360° + 22°，精准落入粉黄蓝旋转中心) */
-@keyframes ssrHeroArcFlightVfx1 {
+/* 经典宝刀出鞘 · 游龙惊鸿 360° 挽剑花大回环 (382deg = 360° + 22°，精准落入粉黄蓝旋转中心) */
+@keyframes ssrHeroArcFlight {
   0% {
     opacity: 0.95;
     transform: translate3d(var(--slot-offset-x, 0rpx), 160rpx, 0) scale(0.46) rotate(0deg);
@@ -3357,48 +3353,6 @@
   }
 }
 
-/* 特效 2 关键帧：九天游龙 · 御剑惊鸿 720° 无尽星河莫比乌斯大回环 (742deg = 720° + 22°，精准落入粉黄蓝旋转中心) */
-@keyframes ssrHeroArcFlightVfx2 {
-  0% {
-    opacity: 0.96;
-    transform: translate3d(var(--slot-offset-x, 0rpx), 168rpx, 0) scale(0.44) rotate(0deg);
-  }
-  14% {
-    opacity: 1;
-    transform: translate3d(-110rpx, -195rpx, 0) scale(0.68) rotate(-42deg);
-  }
-  30% {
-    opacity: 1;
-    transform: translate3d(235rpx, -100rpx, 0) scale(0.88) rotate(165deg);
-  }
-  54% {
-    opacity: 1;
-    transform: translate3d(-225rpx, 155rpx, 0) scale(1.48) rotate(395deg);
-  }
-  74% {
-    opacity: 1;
-    transform: translate3d(165rpx, 82rpx, 0) scale(1.28) rotate(585deg);
-  }
-  88% {
-    opacity: 1;
-    transform: translate3d(-10rpx, -10rpx, 0) scale(1.22) rotate(750deg);
-  }
-  95% {
-    opacity: 1;
-    transform: translate3d(4rpx, 3rpx, 0) scale(1.13) rotate(739deg);
-  }
-  100% {
-    opacity: 1;
-    transform: translate3d(0rpx, 0rpx, 0) scale(1.15) rotate(742deg);
-  }
-}
-
-/* 兼容别名 */
-@keyframes ssrHeroArcFlight {
-  0% { opacity: 0.96; transform: translate3d(var(--slot-offset-x, 0rpx), 168rpx, 0) scale(0.44) rotate(0deg); }
-  100% { opacity: 1; transform: translate3d(0rpx, 0rpx, 0) scale(1.15) rotate(742deg); }
-}
-
 /* 破鞘与飞行阶段：尾部剑气推进尾焰 */
 .ssr-tail-thruster-plume {
   position: absolute;
@@ -3414,13 +3368,8 @@
   opacity: 0;
 }
 
-.ssr-awaken-overlay.ssr-active.vfx-mode-1 .ssr-tail-thruster-plume {
+.ssr-awaken-overlay.ssr-active .ssr-tail-thruster-plume {
   animation: ssrTailThrusterBurn 1.12s ease-out forwards;
-}
-
-.ssr-awaken-overlay.ssr-active .ssr-tail-thruster-plume,
-.ssr-awaken-overlay.ssr-active.vfx-mode-2 .ssr-tail-thruster-plume {
-  animation: ssrTailThrusterBurn 1.28s ease-out forwards;
 }
 
 @keyframes ssrTailThrusterBurn {
@@ -3513,10 +3462,10 @@
   position: absolute;
   top: 28%;
   left: 50%;
-  width: 460rpx;
-  height: 460rpx;
-  margin-left: -230rpx;
-  margin-top: -230rpx;
+  width: 480rpx;
+  height: 480rpx;
+  margin-left: -240rpx;
+  margin-top: -240rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3531,27 +3480,27 @@
 
 .slash-beam {
   position: absolute;
-  width: 420rpx;
-  height: 6rpx;
+  width: 460rpx;
+  height: 8rpx;
   border-radius: 999rpx;
-  background: linear-gradient(90deg, transparent 0%, #38bdf8 20%, #fde047 40%, #ffffff 50%, #fde047 60%, #38bdf8 80%, transparent 100%);
-  box-shadow: 0 0 24rpx #38bdf8, 0 0 42rpx #fde047;
+  background: linear-gradient(90deg, transparent 0%, #38bdf8 15%, #fde047 35%, #ffffff 50%, #fde047 65%, #38bdf8 85%, transparent 100%);
+  box-shadow: 0 0 32rpx #38bdf8, 0 0 56rpx #fde047, 0 0 80rpx #ffffff;
 }
 
 .slash-beam.beam-a { transform: rotate(34deg); }
 .slash-beam.beam-b { transform: rotate(-34deg); }
 
 .slash-core-star {
-  font-size: 58rpx;
+  font-size: 68rpx;
   color: #ffffff;
-  text-shadow: 0 0 24rpx #fde047, 0 0 48rpx #38bdf8;
+  text-shadow: 0 0 28rpx #fde047, 0 0 54rpx #38bdf8, 0 0 72rpx #ffffff;
   line-height: 1;
 }
 
 @keyframes ssrCrossSlashFlash {
-  0% { opacity: 0; transform: scale(0.4); }
-  30% { opacity: 1; transform: scale(1.12); }
-  100% { opacity: 0; transform: scale(1.3); }
+  0% { opacity: 0; transform: scale(0.3); }
+  25% { opacity: 1; transform: scale(1.18); }
+  100% { opacity: 0; transform: scale(1.4); }
 }
 
 /* 名烟 3D 圆柱实体 (100% 纯正完整烟支还原，首尾干净纯粹，零杂色色块) */
@@ -3564,7 +3513,11 @@
   flex-direction: column;
   border-radius: 6rpx;
   overflow: hidden;
-  box-shadow: 0 24rpx 56rpx rgba(0, 0, 0, 0.88), 0 0 36rpx rgba(251, 191, 36, 0.65), 0 0 22rpx rgba(56, 189, 248, 0.45);
+  box-shadow: 
+    0 24rpx 60rpx rgba(0, 0, 0, 0.92),
+    0 0 44rpx rgba(251, 191, 36, 0.85),
+    0 0 28rpx rgba(56, 189, 248, 0.65),
+    inset 0 0 12rpx rgba(255, 255, 255, 0.45);
 }
 
 .ssr-hero-cigarette-body.is-hanyan-body {

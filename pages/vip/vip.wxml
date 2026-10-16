@@ -13,7 +13,7 @@
       <!-- 导航中心标题 -->
       <view class="nav-center-title-box">
         <text class="nav-crown-icon">👑</text>
-        <text class="nav-center-title-text">VIP会员特权中心</text>
+        <text class="nav-center-title-text">VIP特权中心</text>
       </view>
 
       <!-- 占位平衡 -->
@@ -69,38 +69,60 @@
         <view class="current-status-strip {{ vipInfo.isVip ? 'status-active' : 'status-inactive' }}">
           <view class="status-left">
             <text class="status-dot"></text>
-            <text class="status-title">{{ vipInfo.isVip ? (vipInfo.isLifetime ? '至尊终身特权生效中' : '尊享特权生效中') : '当前暂未开通 VIP 特权' }}</text>
+            <text class="status-title">{{ vipInfo.isVip ? (vipInfo.isLifetime ? '至尊终身特权生效中' : '尊享特权生效中') : (isIOS ? '当前暂未开启自律特权' : '当前暂未开通 VIP 特权') }}</text>
           </view>
           <text class="status-right" wx:if="{{ vipInfo.isVip }}">{{ vipInfo.isLifetime ? '终身有效' : (vipInfo.formattedExpire + ' 到期') }}</text>
-          <text class="status-right hint" wx:else>开通立享 6 大特权</text>
+          <text class="status-right hint" wx:else>{{ isIOS ? '开启立享 6 大特权' : '开通立享 6 大特权' }}</text>
         </view>
 
       </view>
 
-      <!-- 🎨 VIP 专属流光主题衣橱 (与下方三档卡片 100% 同宽对齐) -->
-      <view class="vip-theme-wardrobe-card" wx:if="{{ vipInfo.isVip }}">
+      <!-- 🎨 VIP 专属流光主题衣橱 (速7 · 驭7 先锋名车全系高定色彩) -->
+      <view class="vip-theme-wardrobe-card">
         <view class="vtw-header">
-          <text class="vtw-title">🎨 专属全站背景装扮</text>
-          <text class="vtw-current">当前装扮：{{ activeVipThemeName }}</text>
+          <view class="vtw-header-left">
+            <text class="vtw-title">🎨 专属全站背景装扮</text>
+          </view>
+          <text class="vtw-current">{{ vipInfo.isVip ? ('当前装扮：' + activeVipThemeName) : (isIOS ? '点亮全系主题车色' : '开通点亮全系车色') }}</text>
         </view>
-        <view class="vtw-pills-row">
-          <block wx:for="{{ themeOptions }}" wx:key="id">
+
+        <!-- 🏎️ 分类过滤标签栏 (全部 / 速7电跑 / 驭7奢享 / 经典尊享) -->
+        <view class="vtw-category-tabs">
+          <block wx:for="{{ themeCategories }}" wx:key="id">
             <view 
-              class="vtw-pill vtw-pill-{{ item.id }} {{ activeVipThemeId === item.id ? 'vtw-pill-active' : '' }} {{ item.isLocked ? 'vtw-pill-locked' : '' }}"
-              bindtap="onSelectVipTheme"
-              data-id="{{ item.id }}"
+              class="vtw-cat-tab {{ currentThemeCategory === item.id ? 'active' : '' }}"
+              bindtap="onSelectThemeCategory"
+              data-category="{{ item.id }}"
             >
-              <view class="vtw-pill-icon-box">
-                <text class="vtw-pill-icon">{{ item.icon }}</text>
-                <text class="vtw-lock-badge" wx:if="{{ item.isLocked }}">🔒</text>
-              </view>
-              <view class="vtw-pill-texts">
-                <text class="vtw-pill-name">{{ item.name }}</text>
-                <text class="vtw-pill-tag {{ item.isLocked ? 'tag-locked' : '' }}">{{ item.isLocked ? item.requiredTierText : item.tag }}</text>
-              </view>
+              <text class="vtw-cat-name">{{ item.name }}</text>
+              <text class="vtw-cat-count">{{ item.count }}</text>
             </view>
           </block>
         </view>
+
+        <!-- 药丸/色块矩阵 (4列自适应微距网格) -->
+        <scroll-view class="vtw-pills-scroll" scroll-y enhanced show-scrollbar="{{ false }}">
+          <view class="vtw-pills-row">
+            <block wx:for="{{ filteredThemeOptions }}" wx:key="id">
+              <view 
+                class="vtw-pill {{ activeVipThemeId === item.id ? 'vtw-pill-active' : '' }} {{ item.isLocked ? 'vtw-pill-locked' : '' }}"
+                bindtap="onSelectVipTheme"
+                data-id="{{ item.id }}"
+                style="{{ activeVipThemeId === item.id ? ('border-color: ' + item.dotColor + '; box-shadow: 0 0 20rpx ' + item.dotColor + '66, inset 0 2rpx 8rpx rgba(255,255,255,0.25); background: ' + item.dotColor + '20;') : '' }}"
+              >
+                <view class="vtw-pill-icon-box">
+                  <view class="vtw-car-dot" style="background: radial-gradient(circle at 35% 30%, #ffffff 0%, {{ item.dotColor }} 45%, #050508 100%); box-shadow: 0 0 12rpx {{ item.dotColor }}, inset 0 2rpx 3rpx rgba(255,255,255,0.8);">
+                    <view class="car-dot-specular"></view>
+                  </view>
+                  <text class="vtw-lock-badge" wx:if="{{ item.isLocked }}">🔒</text>
+                </view>
+                <view class="vtw-pill-texts">
+                  <text class="vtw-pill-name" style="{{ activeVipThemeId === item.id ? ('color: ' + item.dotColor + ';') : '' }}">{{ item.name }}</text>
+                </view>
+              </view>
+            </block>
+          </view>
+        </scroll-view>
       </view>
 
 
@@ -108,8 +130,7 @@
       <view class="pricing-section">
         <view class="section-badge-bar">
           <text class="sb-dot"></text>
-          <text class="sb-title">{{ vipInfo.isLifetime ? '我的终身特权方案' : '精选会员方案' }}</text>
-          <text class="sb-note">{{ vipInfo.isVip ? '点击下方卡片也可直接切换对应主题色' : (isIOS ? '自律同行 · 免费自选特权档位' : '随时开通 · 立即生效') }}</text>
+          <text class="sb-title">{{ vipInfo.isLifetime ? '我的终身特权方案' : (isIOS ? '自律成长权益' : '精选会员方案') }}</text>
         </view>
 
         <view class="pricing-cards-row">
@@ -196,7 +217,6 @@
         <view class="section-badge-bar">
           <text class="sb-dot gold"></text>
           <text class="sb-title">VIP 专属 6 大特权</text>
-          <text class="sb-note">尊崇体验 · 一应俱全</text>
         </view>
 
         <view class="privileges-matrix-grid">
@@ -220,7 +240,6 @@
         <view class="section-badge-bar">
           <text class="sb-dot purple"></text>
           <text class="sb-title">特权深度对比</text>
-          <text class="sb-note">价值一目了然</text>
         </view>
 
         <view class="compare-card">
@@ -248,9 +267,16 @@
           <text class="gh-title">服务体验官方承诺</text>
         </view>
         <view class="guarantee-tips-list">
-          <text class="gt-item">· 开通后特权立即生效并绑定当前微信设备。</text>
-          <text class="gt-item">· 无任何强制扣费，到期自动停权不扣款。</text>
-          <text class="gt-item">· 纯净绿色体验，健康减压生活陪伴。</text>
+          <block wx:if="{{ isIOS }}">
+            <text class="gt-item">· 开启后特权立即生效并绑定当前微信设备。</text>
+            <text class="gt-item">· 绿色免广告陪伴，尊享无烟自律全图鉴。</text>
+            <text class="gt-item">· 纯净绿色体验，健康减压生活陪伴。</text>
+          </block>
+          <block wx:else>
+            <text class="gt-item">· 开通后特权立即生效并绑定当前微信设备。</text>
+            <text class="gt-item">· 无任何强制扣费，到期自动停权不扣款。</text>
+            <text class="gt-item">· 纯净绿色体验，健康减压生活陪伴。</text>
+          </block>
         </view>
       </view>
 
@@ -303,9 +329,9 @@
         </block>
         <block wx:elif="{{ isIOS }}">
           <view class="cpl-amount-row">
-            <text class="cpl-ios-badge">👑 iOS 尊享专区</text>
+            <text class="cpl-ios-badge">👑 自律成长专区</text>
           </view>
-          <text class="cpl-tip">倡导健康自律 · 免费体验 {{ selectedTier.name }}</text>
+          <text class="cpl-tip">倡导健康自律 · 体验 {{ selectedTier.name }} 特权</text>
         </block>
         <block wx:else>
           <view class="cpl-amount-row">
@@ -374,11 +400,62 @@
   <view class="glass-modal-backdrop" wx:if="{{ showProtocolModal }}" catchtouchmove="preventTouchMove">
     <view class="protocol-dialog-card">
       <view class="protocol-top-bar">
-        <text class="proto-title">VIP 会员服务与隐私协议</text>
+        <text class="proto-title">{{ isIOS ? '用户自律特权与隐私协议' : 'VIP 会员服务与隐私协议' }}</text>
         <view class="proto-close-btn" bindtap="closeProtocolModal">✕</view>
       </view>
       <scroll-view class="proto-scroll" scroll-y enhanced show-scrollbar="{{ true }}">
-        <view class="proto-content">
+        <!-- iOS 纯净健康合规协议展示 -->
+        <view class="proto-content" wx:if="{{ isIOS }}">
+          <text class="proto-date">更新日期：2026 年 10 月 13 日</text>
+
+          <text class="proto-lead">欢迎您使用本小程序的自律特权与健康辅助服务。本协议是您与本小程序运营方就自律特权服务及隐私保护相关事项所订立的协议。<text class="proto-bold">请您在开启特权服务前，仔细阅读并充分理解本协议的全部内容，特别是以加粗标注的免责声明、权利限制及未成年人保护条款。</text>一旦您进入并使用本功能，即视为您已阅读、理解并同意接受本协议的全部约定。</text>
+
+          <text class="proto-h2">一、服务范围</text>
+          <text class="proto-p">1.1 本小程序自律特权服务为数字化虚拟健康减压辅助服务，您开启后可在特权有效期内享受以下专属权益：</text>
+          <text class="proto-li">（1）免除观看激励视频直接获得相应权益（包括整盒拆封补满、解锁名烟图鉴、切换动态场景、使用专属特效等操作）；</text>
+          <text class="proto-li">（2）免门槛解锁并使用小程序内全部已上线的 33 款替烟艺术外观图鉴；</text>
+          <text class="proto-li">（3）解锁并使用小程序内全部已上线的沉浸环境主题与定制火机焰色；</text>
+          <text class="proto-li">（4）解锁并使用小程序内全部已上线的拟真烟雾特效与专属身份标识；</text>
+          <text class="proto-li">（5）运营方不时推出的其他自律专属权益（以届时页面实际公布内容为准）。</text>
+
+          <text class="proto-p">1.2 自律特权提供以下三种体验方案供您自主选择：</text>
+          <text class="proto-li">（1）<text class="proto-bold">体验日卡</text>：有效期为自开启成功之时起 24 小时，到期后自动失效；</text>
+          <text class="proto-li">（2）<text class="proto-bold">自律月卡</text>：有效期为自开启成功之日起 30 个自然日，到期后自动失效；</text>
+          <text class="proto-li">（3）<text class="proto-bold">永久自律卡</text>：自开启成功之日起在本小程序存续期内长期有效。</text>
+
+          <text class="proto-p"><text class="proto-bold">1.3 本服务范围仅限于小程序内的虚拟数字减压与控烟辅助功能体验，绝不包含任何烟草制品实物商品、线下服务或其他实体附加权益，亦不构成任何形式的烟草销售或变相交易。</text></text>
+
+          <text class="proto-h2">二、特权开启与规则</text>
+          <text class="proto-p">2.1 您可在自律成长专区选择相应方案并开启。开启成功后，特权权益即时生效。</text>
+          <text class="proto-p">2.2 <text class="proto-bold">本功能为用户自主开启体验，无任何强制扣费或隐性收费。</text>特权有效期自开启成功时刻起算，到期后自动终止并恢复为普通模式。</text>
+          <text class="proto-p">2.3 若您同时或先后开启不同档位方案，日卡与月卡有效期按剩余时长顺延叠加；若开启永久卡，则直接升级为终身有效特权。</text>
+
+          <text class="proto-h2">三、使用限制</text>
+          <text class="proto-p">3.1 自律特权服务仅限您本人在当前微信账号及设备下使用，不得转让、转借、出租、出售或以其他方式允许他人使用。</text>
+          <text class="proto-p">3.2 您不得利用本服务从事任何违法违规、违背公序良俗或损害他人合法权益的行为。</text>
+          <text class="proto-p">3.3 如发现您存在违规使用行为（包括但不限于恶意刷取、反编译、破解、外挂篡改数据等），运营方有权立即终止相关服务。</text>
+
+          <text class="proto-h2">四、免责声明与健康合规提示</text>
+          <text class="proto-p"><text class="proto-bold">4.1 本小程序为辅助控烟、健康数据记录与日常减压的数字模拟工具，仅供成年人减压与替烟记录使用，不构成任何形式的医疗诊断、临床戒烟处方或诊疗指导。小程序内的视觉动画、声效等内容仅为数字虚拟模拟，不代表真实吸烟行为。</text></text>
+          <text class="proto-p"><text class="proto-bold">4.2 吸烟有害健康，本小程序倡导无烟健康生活，严禁鼓励、诱导任何真实吸烟行为。未满 18 周岁的未成年人严禁使用本小程序。</text></text>
+          <text class="proto-p">4.3 因不可抗力（包括但不限于系统维护、服务器故障、网络中断、微信平台政策或监管规则调整等）导致服务暂时中断或变更的，运营方将在合理范围内协助恢复或顺延有效期，在法律允许范围内不承担额外赔偿责任。</text>
+          <text class="proto-p">4.4 因您个人原因（如更换微信账号、主动清除本地缓存数据、设备丢失或故障等）导致无法正常使用特权服务的，运营方不承担相关责任。</text>
+          <text class="proto-p">4.5 运营方有权根据合规要求或业务发展需要，调整、优化或下线部分虚拟外观与特效功能。</text>
+
+          <text class="proto-h2">五、隐私与个人信息保护条款</text>
+          <text class="proto-p">5.1 <text class="proto-bold">数据本地化存储原则</text>：您的替烟打卡记录、健康演算参数、烟价偏好设置及特权激活状态均优先加密存储于您手机本地（微信本地缓存 Storage），本小程序不会在未经您授权的情况下收集、上传或向任何第三方出售您的个人隐私数据。</text>
+          <text class="proto-p">5.2 <text class="proto-bold">设备权限最小化调用说明</text>：</text>
+          <text class="proto-li">（1）<text class="proto-bold">麦克风权限（可选）</text>：仅在您开启“吹气助燃”交互功能时用于实时检测气流音量强度，音频流仅在设备内存实时计算分贝值，绝不进行录音、存储或上传；</text>
+          <text class="proto-li">（2）<text class="proto-bold">头像与昵称（可选）</text>：仅在您于“我的”页面主动点击设置个人头像和昵称时用于本地名片展示，您可随时修改或清除。</text>
+
+          <text class="proto-h2">六、服务变更、终止与其他</text>
+          <text class="proto-p">6.1 运营方有权根据国家法律法规、微信平台规范或业务运营需要，对本协议或服务内容进行修订与调整，并通过小程序内页面更新予以公示。</text>
+          <text class="proto-p">6.2 本协议的订立、履行、解释及争议解决均适用中华人民共和国法律。</text>
+          <text class="proto-p">6.3 如您对本协议有任何疑问或建议，可通过小程序设置页或官方客服反馈渠道与运营方联系。</text>
+        </view>
+
+        <!-- 安卓 / 默认标准商业服务协议展示 -->
+        <view class="proto-content" wx:else>
           <text class="proto-date">更新日期：2026 年 10 月 13 日</text>
 
           <text class="proto-lead">欢迎您使用本小程序的 VIP 会员服务。本协议是您与本小程序运营方就 VIP 会员服务及隐私保护相关事项所订立的协议。<text class="proto-bold">请您在开通 VIP 会员服务前，仔细阅读并充分理解本协议的全部内容，特别是以加粗标注的免责声明、权利限制及未成年人保护条款。</text>一旦您勾选同意本协议并完成开通，即视为您已阅读、理解并同意接受本协议的全部约定。</text>

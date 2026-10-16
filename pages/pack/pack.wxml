@@ -59,21 +59,21 @@
         <view class="pack-unwrap-mini-btn" wx:if="{{ isCurrentUnlocked && !isTrialMode && packCount < packCapacity }}" bindtap="onUnwrapNewPack">
           <text class="unwrap-mini-text">↻ 换新盒</text>
         </view>
-        <!-- 特效选择胶囊 (特效1 经典出鞘 360° | 特效2 九天游龙 720°) -->
-        <view class="pack-vfx-selector-pill">
-          <view 
-            class="vfx-pill-btn {{ pullVfxType === 'vfx1' ? 'vfx-pill-active' : '' }}" 
-            catchtap="onSwitchPullVfx" 
-            data-vfx="vfx1"
+      </view>
+
+      <!-- 🏆 腾讯设计总监级：品鉴出鞘特效四阶切换器 (普通 · 日卡 · 月卡 · 至尊) -->
+      <view class="pack-vfx-selector-row">
+        <view class="vfx-tier-tabs">
+          <view
+            wx:for="{{ vfxTierOptions }}"
+            wx:key="id"
+            class="vfx-tier-chip tier-{{ item.id }} {{ currentVfxTier === item.id ? 'active-tier' : '' }}"
+            catchtap="onSelectVfxTier"
+            data-tier="{{ item.id }}"
           >
-            <text class="vfx-pill-text">特效1</text>
-          </view>
-          <view 
-            class="vfx-pill-btn {{ pullVfxType === 'vfx2' ? 'vfx-pill-active' : '' }}" 
-            catchtap="onSwitchPullVfx" 
-            data-vfx="vfx2"
-          >
-            <text class="vfx-pill-text">特效2</text>
+            <text class="vt-icon">{{ item.icon }}</text>
+            <text class="vt-name">{{ item.name }}</text>
+            <view class="vt-indicator" wx:if="{{ currentVfxTier === item.id }}"></view>
           </view>
         </view>
       </view>
@@ -341,7 +341,7 @@
 
     <!-- ==================== 腾讯游戏 CG / UE5 级：6阶名烟拔升与S型星河轨迹全屏舞台 (z-index: 310) ==================== -->
     <view 
-      class="ssr-awaken-overlay {{ isFlightActive ? 'ssr-active' : '' }} {{ pullVfxType === 'vfx1' ? 'vfx-mode-1' : 'vfx-mode-2' }}" 
+      class="ssr-awaken-overlay {{ isFlightActive ? 'ssr-active' : '' }}" 
       wx:if="{{ isFlightVisible }}"
       bindtap="onTapAwakenOverlay"
       catchtouchmove="preventTouchMove"

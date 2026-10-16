@@ -55,6 +55,25 @@ function formatColorWithAlpha(color, alpha, fallbackRgb = '240, 246, 255') {
   return `rgba(${fallbackRgb}, ${alpha})`;
 }
 
+// 高性能 Canvas 2D 径向渐变模板单例缓存池 (0 内存分配 · 彻底消除 60FPS 渲染循环中的 GC 断崖与微卡顿)
+const _radialGradCache = new Map();
+
+function getCachedUnitRadialGradient(ctx, cacheKey, colorStops) {
+  let grad = _radialGradCache.get(cacheKey);
+  if (!grad) {
+    try {
+      grad = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+      for (let i = 0; i < colorStops.length; i++) {
+        grad.addColorStop(colorStops[i][0], colorStops[i][1]);
+      }
+      _radialGradCache.set(cacheKey, grad);
+    } catch (e) {
+      return null;
+    }
+  }
+  return grad;
+}
+
 // 腾讯总监美学：飘舞的 3D 宝相金莲花瓣粒子
 function drawLotusPetalParticle(ctx, p) {
   const len = p.radius || 7.0;
@@ -3024,31 +3043,41 @@ export class ParticleSystem {
       ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
 
       if (p.isVolumetricSmoke) {
-        // 真实起火处涌现的高斯柔和羽化烟雾团 (无生硬边缘，层叠半透流体光影)
-        try {
-          const puffGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
-          puffGrad.addColorStop(0, `${p.color || 'rgba(240, 246, 255, '}0.8)`);
-          puffGrad.addColorStop(0.4, `${p.color || 'rgba(240, 246, 255, '}0.4)`);
-          puffGrad.addColorStop(0.8, `${p.color || 'rgba(240, 246, 255, '}0.1)`);
-          puffGrad.addColorStop(1.0, `${p.color || 'rgba(240, 246, 255, '}0.0)`);
-          ctx.fillStyle = puffGrad;
-        } catch (e) {
-          ctx.fillStyle = formatColorWithAlpha(p.color, 0.3, '240, 246, 255');
-        }
+        // 真实起火处涌现的高斯柔和羽化烟雾团 (单例缓存模板 · 0 内存分配 · 满帧流畅)
+        const colBase = p.color || 'rgba(240, 246, 255, ';
+        const grad = getCachedUnitRadialGradient(ctx, 'volumetric_' + colBase, [
+          [0, `${colBase}0.8)`],
+          [0.4, `${colBase}0.4)`],
+          [0.8, `${colBase}0.1)`],
+          [1.0, `${colBase}0.0)`]
+        ]);
+        ctx.translate(p.x, p.y);
+        ctx.scale(p.radius, p.radius);
+        ctx.fillStyle = grad || formatColorWithAlpha(p.color, 0.3, '240, 246, 255');
         ctx.globalAlpha = Math.min(0.65, p.alpha || 0.38);
+        ctx.beginPath();
+        ctx.arc(0, 0, 1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        continue;
       } else if (p.isExhaleCloud) {
-        // 口中吐出的真实烟雾团：4 阶高斯径向渐变，内部温润凝实，外部彻底无痕羽化消散
-        try {
-          const puffGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
-          puffGrad.addColorStop(0.0, formatColorWithAlpha(p.color, 0.85, '240, 246, 255'));
-          puffGrad.addColorStop(0.30, formatColorWithAlpha(p.color, 0.55, '240, 246, 255'));
-          puffGrad.addColorStop(0.68, formatColorWithAlpha(p.color, 0.16, '240, 246, 255'));
-          puffGrad.addColorStop(1.0, formatColorWithAlpha(p.color, 0.0, '240, 246, 255'));
-          ctx.fillStyle = puffGrad;
-        } catch (e) {
-          ctx.fillStyle = formatColorWithAlpha(p.color, 0.35, '240, 246, 255');
-        }
+        // 口中吐出的真实烟雾团 (单例缓存模板 · 4 阶高斯径向渐变 · 0 内存分配 · 满帧流畅)
+        const colBase = p.color || 'rgba(240, 246, 255, ';
+        const grad = getCachedUnitRadialGradient(ctx, 'exhale_' + colBase, [
+          [0.0, formatColorWithAlpha(colBase, 0.85, '240, 246, 255')],
+          [0.30, formatColorWithAlpha(colBase, 0.55, '240, 246, 255')],
+          [0.68, formatColorWithAlpha(colBase, 0.16, '240, 246, 255')],
+          [1.0, formatColorWithAlpha(colBase, 0.0, '240, 246, 255')]
+        ]);
+        ctx.translate(p.x, p.y);
+        ctx.scale(p.radius, p.radius);
+        ctx.fillStyle = grad || formatColorWithAlpha(p.color, 0.35, '240, 246, 255');
         ctx.globalAlpha = Math.min(0.68, p.alpha || 0.52);
+        ctx.beginPath();
+        ctx.arc(0, 0, 1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        continue;
       } else if (p.isSpark) {
         ctx.fillStyle = p.color || '#ff7700';
         ctx.globalAlpha = p.alpha || 1.0;
@@ -3117,69 +3146,92 @@ export class ParticleSystem {
         
         ctx.globalAlpha = (p.alpha || 0.8) * 0.9;
       } else if (p.isNebula) {
-        // 极光星云荧光 (柔和羽化渐变)
-        try {
-          const nebGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
-          nebGrad.addColorStop(0.0, formatColorWithAlpha(p.color, 0.80, '56, 189, 248'));
-          nebGrad.addColorStop(0.55, formatColorWithAlpha(p.color, 0.35, '56, 189, 248'));
-          nebGrad.addColorStop(1.0, formatColorWithAlpha(p.color, 0.0, '56, 189, 248'));
-          ctx.fillStyle = nebGrad;
-        } catch (e) {
-          ctx.fillStyle = formatColorWithAlpha(p.color, 0.50, '56, 189, 248');
-        }
+        // 极光星云荧光 (单例缓存模板 · 0 内存分配)
+        const colBase = p.color || 'rgba(56, 189, 248, ';
+        const grad = getCachedUnitRadialGradient(ctx, 'nebula_' + colBase, [
+          [0.0, formatColorWithAlpha(colBase, 0.80, '56, 189, 248')],
+          [0.55, formatColorWithAlpha(colBase, 0.35, '56, 189, 248')],
+          [1.0, formatColorWithAlpha(colBase, 0.0, '56, 189, 248')]
+        ]);
+        ctx.translate(p.x, p.y);
+        ctx.scale(p.radius, p.radius);
+        ctx.fillStyle = grad || formatColorWithAlpha(p.color, 0.50, '56, 189, 248');
         ctx.globalAlpha = (p.alpha || 0.8) * 0.90;
+        ctx.beginPath();
+        ctx.arc(0, 0, 1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        continue;
       } else if (p.isZen) {
-        // 紫气祥云仙气 (柔和羽化渐变)
-        try {
-          const zenGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
-          zenGrad.addColorStop(0.0, formatColorWithAlpha(p.color, 0.80, '192, 132, 252'));
-          zenGrad.addColorStop(0.55, formatColorWithAlpha(p.color, 0.35, '192, 132, 252'));
-          zenGrad.addColorStop(1.0, formatColorWithAlpha(p.color, 0.0, '192, 132, 252'));
-          ctx.fillStyle = zenGrad;
-        } catch (e) {
-          ctx.fillStyle = formatColorWithAlpha(p.color, 0.50, '192, 132, 252');
-        }
+        // 紫气祥云仙气 (单例缓存模板 · 0 内存分配)
+        const colBase = p.color || 'rgba(192, 132, 252, ';
+        const grad = getCachedUnitRadialGradient(ctx, 'zen_' + colBase, [
+          [0.0, formatColorWithAlpha(colBase, 0.80, '192, 132, 252')],
+          [0.55, formatColorWithAlpha(colBase, 0.35, '192, 132, 252')],
+          [1.0, formatColorWithAlpha(colBase, 0.0, '192, 132, 252')]
+        ]);
+        ctx.translate(p.x, p.y);
+        ctx.scale(p.radius, p.radius);
+        ctx.fillStyle = grad || formatColorWithAlpha(p.color, 0.50, '192, 132, 252');
         ctx.globalAlpha = (p.alpha || 0.8) * 0.85;
+        ctx.beginPath();
+        ctx.arc(0, 0, 1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        continue;
       } else if (p.isLotusPetal) {
-        // 青莲碧玉凝脂花瓣 (高雅翡翠羽化)
-        try {
-          const lotusGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
-          lotusGrad.addColorStop(0.0, formatColorWithAlpha(p.color, 0.85, '52, 211, 153'));
-          lotusGrad.addColorStop(0.55, formatColorWithAlpha(p.color, 0.38, '52, 211, 153'));
-          lotusGrad.addColorStop(1.0, formatColorWithAlpha(p.color, 0.0, '52, 211, 153'));
-          ctx.fillStyle = lotusGrad;
-        } catch (e) {
-          ctx.fillStyle = formatColorWithAlpha(p.color, 0.50, '52, 211, 153');
-        }
+        // 青莲碧玉凝脂花瓣 (单例缓存模板 · 0 内存分配)
+        const colBase = p.color || 'rgba(52, 211, 153, ';
+        const grad = getCachedUnitRadialGradient(ctx, 'lotusPetal_' + colBase, [
+          [0.0, formatColorWithAlpha(colBase, 0.85, '52, 211, 153')],
+          [0.55, formatColorWithAlpha(colBase, 0.38, '52, 211, 153')],
+          [1.0, formatColorWithAlpha(colBase, 0.0, '52, 211, 153')]
+        ]);
+        ctx.translate(p.x, p.y);
+        ctx.scale(p.radius, p.radius);
+        ctx.fillStyle = grad || formatColorWithAlpha(p.color, 0.50, '52, 211, 153');
         ctx.globalAlpha = (p.alpha || 0.8) * 0.88;
+        ctx.beginPath();
+        ctx.arc(0, 0, 1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        continue;
       } else if (p.isLotusCore) {
-        // 莲心琥珀琉璃金蕊
-        try {
-          const coreGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
-          coreGrad.addColorStop(0.0, 'rgba(254, 240, 138, 0.95)');
-          coreGrad.addColorStop(0.6, 'rgba(245, 158, 11, 0.55)');
-          coreGrad.addColorStop(1.0, 'rgba(217, 119, 6, 0.0)');
-          ctx.fillStyle = coreGrad;
-        } catch (e) {
-          ctx.fillStyle = 'rgba(251, 191, 36, 0.7)';
-        }
+        // 莲心琥珀琉璃金蕊 (单例缓存模板 · 0 内存分配)
+        const grad = getCachedUnitRadialGradient(ctx, 'lotusCore', [
+          [0.0, 'rgba(254, 240, 138, 0.95)'],
+          [0.6, 'rgba(245, 158, 11, 0.55)'],
+          [1.0, 'rgba(217, 119, 6, 0.0)']
+        ]);
+        ctx.translate(p.x, p.y);
+        ctx.scale(p.radius, p.radius);
+        ctx.fillStyle = grad || 'rgba(251, 191, 36, 0.7)';
         ctx.globalAlpha = (p.alpha || 0.85);
+        ctx.beginPath();
+        ctx.arc(0, 0, 1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        continue;
       } else if (p.isDewdrop) {
         // 晶莹甘露晨星微粒
         ctx.fillStyle = `rgba(224, 242, 254, ${p.alpha || 0.75})`;
         ctx.globalAlpha = p.alpha || 0.75;
       } else if (p.isObsidian) {
-        // 黑曜石深色烟雾 (柔和羽化渐变)
-        try {
-          const obsGrad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.radius);
-          obsGrad.addColorStop(0, 'rgba(38, 38, 38, 0.7)');
-          obsGrad.addColorStop(0.6, 'rgba(38, 38, 38, 0.3)');
-          obsGrad.addColorStop(1.0, 'rgba(38, 38, 38, 0.0)');
-          ctx.fillStyle = obsGrad;
-        } catch (e) {
-          ctx.fillStyle = 'rgba(38, 38, 38, 0.4)';
-        }
+        // 黑曜石深色烟雾 (单例缓存模板 · 0 内存分配)
+        const grad = getCachedUnitRadialGradient(ctx, 'obsidian', [
+          [0, 'rgba(38, 38, 38, 0.7)'],
+          [0.6, 'rgba(38, 38, 38, 0.3)'],
+          [1.0, 'rgba(38, 38, 38, 0.0)']
+        ]);
+        ctx.translate(p.x, p.y);
+        ctx.scale(p.radius, p.radius);
+        ctx.fillStyle = grad || 'rgba(38, 38, 38, 0.4)';
         ctx.globalAlpha = (p.alpha || 0.7) * 0.85;
+        ctx.beginPath();
+        ctx.arc(0, 0, 1, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        continue;
       } else if (p.isStar) {
         if (p.isPulsarDiamond) {
           // 八芒璀璨钻石脉冲星钻

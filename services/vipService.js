@@ -130,12 +130,8 @@ function formatVipExpireDate(timestamp) {
   return `${year}.${month}.${day}`;
 }
 
-export const VIP_THEME_OPTIONS = [
-  { id: 'classic', name: '原色深曜', tag: '纯净黑', icon: '🌑', dotColor: '#64748b' },
-  { id: 'day', name: '翡翠晨曦', tag: '日卡色', icon: '🌿', dotColor: '#10b981' },
-  { id: 'month', name: '极光紫晶', tag: '月卡色', icon: '🔮', dotColor: '#a855f7' },
-  { id: 'lifetime', name: '曜世黑金', tag: '永久色', icon: '👑', dotColor: '#fbbf24' }
-];
+import { VIP_THEME_OPTIONS, VIP_THEME_CATEGORIES, getThemeById } from '../configs/vipThemes.js';
+export { VIP_THEME_OPTIONS, VIP_THEME_CATEGORIES, getThemeById };
 
 export const vipService = {
   getVipInfo() {
@@ -170,22 +166,26 @@ export const vipService = {
 
   isThemeAllowed(themeId, currentTierId, isLifetime) {
     if (!themeId || themeId === 'classic') return true;
-    if (isLifetime || currentTierId === 'lifetime') {
-      return true; // 开通永久卡：所有的颜色都能选择
-    }
-    if (currentTierId === 'month') {
-      return themeId === 'day' || themeId === 'month'; // 开通月卡：可选择紫色与翡翠色
-    }
-    if (currentTierId === 'day') {
-      return themeId === 'day'; // 开通日卡：只能选择翡翠颜色（及原色）
-    }
-    return false;
+    const theme = getThemeById(themeId);
+    if (!theme) return false;
+    const TIER_LEVELS = { '': 0, 'day': 1, 'month': 2, 'lifetime': 3 };
+    const userLevel = isLifetime || currentTierId === 'lifetime' ? 3 : (TIER_LEVELS[currentTierId] || 0);
+    const requiredLevel = TIER_LEVELS[theme.minTier || 'month'] || 2;
+    return userLevel >= requiredLevel;
   },
 
   getVipTheme() {
     const info = this.getVipInfo();
     if (!info || !info.isVip) {
-      return ''; // 会员未开通或已到期，返回空字符串，全应用立即恢复默认背景
+      // 腾讯总监设计级：若尚未正式支付或激活VIP，但用户在专属背景装扮中点击了心仪车色，
+      // 读取预览装扮缓存，让用户在首页与全站均能真实感受沉浸情绪价值
+      try {
+        const previewTheme = wx.getStorageSync('JUST_ONE_SMOKE_PREVIEW_THEME');
+        if (previewTheme && previewTheme !== 'classic') {
+          return previewTheme;
+        }
+      } catch (e) {}
+      return ''; // 会员未开通且无预览，返回空字符串，全应用保持默认纯黑背景
     }
     if (info.customTheme === 'classic') {
       return ''; // VIP用户主动选择原色深曜纯黑背景，保留全部VIP特权但使用经典暗黑底色
@@ -200,12 +200,17 @@ export const vipService = {
   setVipTheme(themeId) {
     try {
       const info = this.getVipInfo();
-      if (!info || !info.isVip) return false;
+      if (!info || !info.isVip) {
+        // 未激活VIP时，将心仪车色保存至预览装扮缓存，实现无缝全站漫游
+        try {
+          wx.setStorageSync('JUST_ONE_SMOKE_PREVIEW_THEME', themeId);
+        } catch (e) {}
+        return true;
+      }
       if (!this.isThemeAllowed(themeId, info.tierId, info.isLifetime)) {
         return false;
       }
-      const data = wx.getStorageSync(STORAGE_KEY_VIP);
-      if (!data) return false;
+      const data = wx.getStorageSync(STORAGE_KEY_VIP) || {};
       data.customTheme = themeId;
       wx.setStorageSync(STORAGE_KEY_VIP, data);
       return true;

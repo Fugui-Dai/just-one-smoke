@@ -4,7 +4,7 @@
  * 纯原生 SVG Data URI 编码，全平台免字体依赖、超高清矢量渲染
  */
 
-function svgToUri(svgString) {
+export function svgToUri(svgString) {
   return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString.trim());
 }
 
@@ -1042,9 +1042,138 @@ export const DRAW_CIG_ICON_SVG = svgToUri(`
 </svg>
 `);
 
+// ==============================================================================
+// 🔥 点火器具工坊 5 款专属纯高清矢量 SVG 图标 (100% 免字体/跨端零缺失渲染)
+// ==============================================================================
 
+// 1. 经典砂轮机 (滚花砂轮 + 防风罩 + 跃动火苗)
+export const TOOL_FLINT_LIGHTER_SVG = svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
+  <!-- 火苗外焰 -->
+  <path d="M 32 6 Q 38 16 35 24 Q 40 20 38 14 Q 42 22 36 28 C 30 34 26 28 26 22 Q 26 12 32 6 Z" fill="#ff7700"/>
+  <!-- 火苗内焰 (金黄) -->
+  <path d="M 32 14 Q 35 20 33 26 C 29 28 28 24 29 20 Q 30 15 32 14 Z" fill="#ffea00"/>
+  <!-- 砂轮与防风金属罩 -->
+  <rect x="22" y="27" width="20" height="9" rx="3" fill="#94a3b8" stroke="#cbd5e1" stroke-width="1.5"/>
+  <line x1="28" y1="29" x2="28" y2="34" stroke="#475569" stroke-width="1.5"/>
+  <line x1="32" y1="29" x2="32" y2="34" stroke="#475569" stroke-width="1.5"/>
+  <line x1="36" y1="29" x2="36" y2="34" stroke="#475569" stroke-width="1.5"/>
+  <!-- 滚花砂轮圆轮 -->
+  <circle cx="40" cy="31" r="5" fill="#64748b" stroke="#e2e8f0" stroke-width="1.5"/>
+  <!-- 机身 (黄铜质感) -->
+  <rect x="22" y="36" width="20" height="23" rx="4" fill="#d97706" stroke="#fbbf24" stroke-width="2"/>
+  <line x1="26" y1="39" x2="26" y2="56" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+`);
 
+// 2. 红头木质火柴 (白烟 + 红磷火柴头 + 纹理木杆)
+export const TOOL_VINTAGE_MATCH_SVG = svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
+  <!-- 燃烧火苗与微烟 -->
+  <path d="M 44 8 C 50 14 47 22 41 24 C 37 25 36 21 39 18 C 36 18 35 14 38 11 Q 41 7 44 8 Z" fill="#ef4444"/>
+  <path d="M 42 12 Q 45 16 41 20 C 39 20 38 18 40 15 Z" fill="#fbbf24"/>
+  <!-- 红磷火柴头 (椭圆) -->
+  <ellipse cx="37" cy="27" rx="5.5" ry="7.5" transform="rotate(-35 37 27)" fill="#b91c1c" stroke="#dc2626" stroke-width="1.5"/>
+  <!-- 木质火柴棒斜插 -->
+  <line x1="34" y1="31" x2="16" y2="55" stroke="#d97706" stroke-width="5" stroke-linecap="round"/>
+  <line x1="32" y1="33" x2="18" y2="52" stroke="#fef3c7" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+`);
 
+// 3. 雪茄蓝焰喷枪 (三束等离子蓝焰火锥 + 战术喷口)
+export const TOOL_BLUE_TORCH_SVG = svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
+  <!-- 核心强劲蓝焰 (等离子青蓝) -->
+  <path d="M 32 5 Q 35 15 34 23 Q 32 24 30 23 Q 29 15 32 5 Z" fill="#38bdf8"/>
+  <path d="M 26 10 Q 28 17 29 23 Q 27 24 25 22 Q 24 16 26 10 Z" fill="#06b6d4" opacity="0.9"/>
+  <path d="M 38 10 Q 40 16 39 22 Q 37 24 35 23 Q 36 17 38 10 Z" fill="#06b6d4" opacity="0.9"/>
+  <path d="M 32 9 Q 34 16 33 21 Q 32 22 31 21 Q 30 16 32 9 Z" fill="#ffffff"/>
+  <!-- 喷嘴基座 -->
+  <rect x="23" y="24" width="18" height="7" rx="2" fill="#334155" stroke="#06b6d4" stroke-width="1.5"/>
+  <circle cx="27" cy="27" r="1.5" fill="#06b6d4"/>
+  <circle cx="32" cy="27" r="1.5" fill="#06b6d4"/>
+  <circle cx="37" cy="27" r="1.5" fill="#06b6d4"/>
+  <!-- 喷枪握把机体 -->
+  <rect x="24" y="31" width="16" height="27" rx="4" fill="#0f172a" stroke="#0284c7" stroke-width="2"/>
+  <rect x="27" y="35" width="10" height="18" rx="2" fill="#1e293b"/>
+  <!-- 点火按压板 -->
+  <rect x="18" y="34" width="6" height="12" rx="2" fill="#0284c7"/>
+</svg>
+`);
 
+// 4. 车载电热点烟器 (通红螺旋电阻发热丝 + 金属套筒插拔握钮)
+export const TOOL_CAR_LIGHTER_SVG = svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
+  <!-- 外发光辐射圈 -->
+  <circle cx="32" cy="26" r="17" fill="none" stroke="#ea580c" stroke-width="1" opacity="0.4"/>
+  <!-- 炽热通红螺旋盘香电阻丝 -->
+  <circle cx="32" cy="26" r="14" fill="#7c2d12" stroke="#ea580c" stroke-width="2.5"/>
+  <path d="M 32 15 A 11 11 0 1 1 23 33 A 8 8 0 1 1 32 20 A 5 5 0 1 1 32 26" fill="none" stroke="#ffedd5" stroke-width="2.2" stroke-linecap="round"/>
+  <circle cx="32" cy="26" r="2.5" fill="#fed7aa"/>
+  <!-- 插入式圆柱底座套筒与手柄 -->
+  <path d="M 24 38 L 40 38 L 38 52 L 26 52 Z" fill="#1e293b" stroke="#f97316" stroke-width="1.5"/>
+  <rect x="28" y="52" width="8" height="6" rx="2" fill="#475569" stroke="#94a3b8" stroke-width="1"/>
+</svg>
+`);
 
+// 5. Zippo 纯铜打火机 (标志性掀盖 45度角 + 防风烟囱气孔 + 金黄油焰)
+export const TOOL_ZIPPO_VINTAGE_SVG = svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
+  <!-- 金黄火苗 -->
+  <path d="M 32 6 Q 37 14 34 22 C 30 25 27 22 28 17 Q 29 11 32 6 Z" fill="#fbbf24"/>
+  <path d="M 32 12 Q 34 16 33 21 C 31 22 29 20 30 17 Z" fill="#ffffff"/>
+  <!-- 防风孔金属烟囱 (带圆孔) -->
+  <rect x="26" y="21" width="12" height="11" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1.5"/>
+  <circle cx="29" cy="25" r="1" fill="#475569"/>
+  <circle cx="35" cy="25" r="1" fill="#475569"/>
+  <circle cx="32" cy="28" r="1" fill="#475569"/>
+  <!-- 掀开的上盖 (45度倾斜) -->
+  <path d="M 23 32 L 13 18 L 22 12 L 29 27 Z" fill="#b45309" stroke="#fde047" stroke-width="1.8"/>
+  <circle cx="23" cy="32" r="1.8" fill="#fde047"/>
+  <!-- 纯铜长方体下机身 -->
+  <rect x="23" y="32" width="22" height="26" rx="3" fill="#d97706" stroke="#fde047" stroke-width="2"/>
+  <!-- 机身经典铜丝拉丝纹 -->
+  <line x1="27" y1="36" x2="27" y2="54" stroke="#b45309" stroke-width="1.5"/>
+  <line x1="41" y1="36" x2="41" y2="54" stroke="#fef08a" stroke-width="1.5"/>
+</svg>
+`);
 
+// 6. 胜利结算荣誉勋章 (腾讯游戏级 24K 曜金勋章 + 八芒光芒 + 浮雕微光五角星)
+export const VICTORY_MEDAL_SVG = svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <defs>
+    <radialGradient id="vMedalGold" cx="35%" cy="28%" r="65%">
+      <stop offset="0%" stop-color="#fff7c0"/>
+      <stop offset="35%" stop-color="#fbbf24"/>
+      <stop offset="75%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#78350f"/>
+    </radialGradient>
+    <radialGradient id="vMedalCore" cx="45%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="60%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </radialGradient>
+  </defs>
+  <!-- 耀世八角星芒光环 -->
+  <g fill="#fbbf24" opacity="0.85" transform="translate(50,50)">
+    <rect x="-3" y="-48" width="6" height="16" rx="3"/>
+    <rect x="-3" y="-48" width="6" height="16" rx="3" transform="rotate(45)"/>
+    <rect x="-3" y="-48" width="6" height="16" rx="3" transform="rotate(90)"/>
+    <rect x="-3" y="-48" width="6" height="16" rx="3" transform="rotate(135)"/>
+    <rect x="-3" y="-48" width="6" height="16" rx="3" transform="rotate(180)"/>
+    <rect x="-3" y="-48" width="6" height="16" rx="3" transform="rotate(225)"/>
+    <rect x="-3" y="-48" width="6" height="16" rx="3" transform="rotate(270)"/>
+    <rect x="-3" y="-48" width="6" height="16" rx="3" transform="rotate(315)"/>
+  </g>
+  <!-- 外曜金圆徽外盘 -->
+  <circle cx="50" cy="50" r="37" fill="url(#vMedalGold)" stroke="#fef08a" stroke-width="2"/>
+  <circle cx="50" cy="50" r="33" fill="none" stroke="#78350f" stroke-width="1" opacity="0.45"/>
+  <!-- 内嵌核心宝玉圆盘 -->
+  <circle cx="50" cy="50" r="28" fill="url(#vMedalCore)" stroke="#fef08a" stroke-width="1.5"/>
+  <!-- 立体浮雕金星 -->
+  <polygon points="50,26 55.5,39 69,40 58.5,49 62.5,63 50,54 37.5,63 41.5,49 31,40 44.5,39" fill="#451a03" opacity="0.8"/>
+  <polygon points="50,28 54.5,39 66,40 57,48 60.5,60 50,52 39.5,60 43,48 34,40 45.5,39" fill="#fef08a"/>
+  <!-- 高光弧线光影 -->
+  <ellipse cx="44" cy="38" rx="12" ry="7" fill="#ffffff" opacity="0.32" transform="rotate(-25,44,38)"/>
+</svg>
+`);

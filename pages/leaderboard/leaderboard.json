@@ -9,6 +9,6 @@
   "backgroundTextStyle": "dark",
   "disableScroll": true,
   "usingComponents": {
-    "leaderboard-view": "/components/leaderboard-view/leaderboard-view"
+    "leaderboard-view": "./components/leaderboard-view/leaderboard-view"
   }
 }

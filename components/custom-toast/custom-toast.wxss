@@ -1,43 +1,50 @@
 /* components/custom-toast/custom-toast.wxss */
 
+/* -------------------------------------------------------------------------
+   极光琉璃微晶舱 (Liquid Vitreous Capsule) - Tencent Design Benchmark
+   ------------------------------------------------------------------------- */
+
 .toast-hud-wrapper {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: calc(112rpx + env(safe-area-inset-bottom, 0px));
+  bottom: calc(116rpx + env(safe-area-inset-bottom, 0px));
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 999999;
   pointer-events: none;
-  padding: 0 32rpx;
+  padding: 0 36rpx;
   box-sizing: border-box;
 }
 
+/* 核心琉璃晶舱主体 */
 .toast-capsule-card {
   position: relative;
   display: inline-flex;
   align-items: center;
-  max-width: 86vw;
-  min-height: 76rpx;
-  padding: 16rpx 36rpx;
-  border-radius: 44rpx;
+  max-width: 88vw;
+  min-height: 84rpx;
+  padding: 16rpx 36rpx 16rpx 24rpx;
+  border-radius: 999rpx;
   box-sizing: border-box;
-  background: linear-gradient(135deg, rgba(32, 25, 19, 0.95) 0%, rgba(18, 14, 11, 0.98) 100%);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  border: 1.5rpx solid rgba(194, 155, 111, 0.32);
+  background: rgba(11, 16, 26, 0.86);
+  backdrop-filter: blur(36px) saturate(190%);
+  -webkit-backdrop-filter: blur(36px) saturate(190%);
+  border: 1.5rpx solid rgba(255, 255, 255, 0.2);
   box-shadow: 
-    0 16rpx 48rpx rgba(0, 0, 0, 0.65),
-    0 2rpx 8rpx rgba(0, 0, 0, 0.4),
-    inset 0 1rpx 2rpx rgba(255, 255, 255, 0.16);
+    0 24rpx 56rpx rgba(0, 0, 0, 0.6),
+    0 4rpx 16rpx rgba(0, 0, 0, 0.35),
+    inset 0 1.5rpx 1.5rpx rgba(255, 255, 255, 0.38),
+    inset 0 -1.5rpx 2rpx rgba(0, 0, 0, 0.45);
   transform-origin: center bottom;
   overflow: hidden;
+  will-change: transform, opacity;
 }
 
-/* 动效：T-Motion 弹簧物理升腾入场与淡出 */
+/* 动效：T-Motion 弹簧物理升腾与微阻尼震颤 */
 .toast-visible .toast-capsule-card {
-  animation: toastSpringIn 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: toastSpringIn 0.42s cubic-bezier(0.175, 0.885, 0.32, 1.25) forwards;
 }
 
 .toast-exiting .toast-capsule-card {
@@ -46,8 +53,12 @@
 
 @keyframes toastSpringIn {
   0% {
-    transform: translateY(44rpx) scale(0.9);
+    transform: translateY(52rpx) scale(0.86);
     opacity: 0;
+  }
+  68% {
+    transform: translateY(-4rpx) scale(1.02);
+    opacity: 1;
   }
   100% {
     transform: translateY(0) scale(1);
@@ -61,12 +72,32 @@
     opacity: 1;
   }
   100% {
-    transform: translateY(24rpx) scale(0.96);
+    transform: translateY(20rpx) scale(0.95);
     opacity: 0;
   }
 }
 
-/* 专属背景环境微光 */
+/* 1. 顶边极光微晶反光切面线 (Specular Highlight Rim) */
+.toast-specular-rim {
+  position: absolute;
+  top: 0;
+  left: 32rpx;
+  right: 32rpx;
+  height: 2rpx;
+  background: linear-gradient(
+    90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.4) 25%, 
+    rgba(255, 255, 255, 0.95) 50%, 
+    rgba(255, 255, 255, 0.4) 75%, 
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+  border-radius: 999rpx;
+}
+
+/* 2. 专属背景环境微光柔晕 */
 .toast-ambient-glow {
   position: absolute;
   left: 0;
@@ -75,85 +106,154 @@
   bottom: 0;
   pointer-events: none;
   border-radius: inherit;
-  opacity: 0.6;
+  z-index: 1;
+  opacity: 0.9;
 }
 
-/* 1. 燃情模式 (Flame - 琥珀金红) */
+/* -------------------------------------------------------------------------
+   四大情绪美学色彩调式 (Pure Emotional Chroma)
+   ------------------------------------------------------------------------- */
+
+/* 模式 1：24K 琉光炽焰 (Flame - 琥珀流金与暖火活力) */
 .toast-capsule-card.type-flame {
-  border-color: rgba(245, 158, 11, 0.52);
-  background: linear-gradient(135deg, rgba(48, 28, 14, 0.96) 0%, rgba(24, 15, 8, 0.98) 100%);
+  border-color: rgba(251, 191, 36, 0.52);
+  background: linear-gradient(135deg, rgba(38, 22, 12, 0.92) 0%, rgba(18, 11, 7, 0.96) 100%);
   box-shadow: 
-    0 16rpx 48rpx rgba(0, 0, 0, 0.65),
-    0 0 24rpx rgba(245, 158, 11, 0.28),
-    inset 0 1rpx 2rpx rgba(255, 255, 255, 0.2);
+    0 24rpx 56rpx rgba(0, 0, 0, 0.65),
+    0 0 36rpx rgba(245, 158, 11, 0.35),
+    inset 0 1.5rpx 1.5rpx rgba(254, 240, 138, 0.45),
+    inset 0 -1.5rpx 2rpx rgba(0, 0, 0, 0.5);
 }
 .toast-capsule-card.type-flame .toast-ambient-glow {
-  background: radial-gradient(circle at 18% 50%, rgba(245, 158, 11, 0.3) 0%, transparent 65%);
+  background: radial-gradient(circle at 18% 50%, rgba(245, 158, 11, 0.45) 0%, rgba(234, 88, 12, 0.16) 55%, transparent 80%);
+}
+.toast-capsule-card.type-flame .toast-icon-box {
+  background: radial-gradient(circle at 35% 35%, rgba(251, 191, 36, 0.32) 0%, rgba(217, 119, 6, 0.18) 100%);
+  border-color: rgba(251, 191, 36, 0.6);
+  box-shadow: 0 0 16rpx rgba(245, 158, 11, 0.45), inset 0 1rpx 2rpx rgba(255, 255, 255, 0.5);
+}
+.toast-capsule-card.type-flame .toast-title-text {
+  color: #fffbeb;
 }
 
-/* 2. 成就与成功模式 (Success - 香槟金/翠微光) */
+/* 模式 2：翡翠新生 · 自愈之境 (Success - 青翠翡翠与生命治愈) */
 .toast-capsule-card.type-success {
-  border-color: rgba(52, 211, 153, 0.48);
-  background: linear-gradient(135deg, rgba(18, 38, 28, 0.96) 0%, rgba(10, 22, 17, 0.98) 100%);
+  border-color: rgba(52, 211, 153, 0.52);
+  background: linear-gradient(135deg, rgba(12, 34, 24, 0.92) 0%, rgba(6, 18, 13, 0.96) 100%);
   box-shadow: 
-    0 16rpx 48rpx rgba(0, 0, 0, 0.65),
-    0 0 24rpx rgba(16, 185, 129, 0.25),
-    inset 0 1rpx 2rpx rgba(255, 255, 255, 0.2);
+    0 24rpx 56rpx rgba(0, 0, 0, 0.65),
+    0 0 36rpx rgba(16, 185, 129, 0.35),
+    inset 0 1.5rpx 1.5rpx rgba(167, 243, 208, 0.45),
+    inset 0 -1.5rpx 2rpx rgba(0, 0, 0, 0.5);
 }
 .toast-capsule-card.type-success .toast-ambient-glow {
-  background: radial-gradient(circle at 18% 50%, rgba(16, 185, 129, 0.28) 0%, transparent 65%);
+  background: radial-gradient(circle at 18% 50%, rgba(16, 185, 129, 0.45) 0%, rgba(5, 150, 105, 0.16) 55%, transparent 80%);
+}
+.toast-capsule-card.type-success .toast-icon-box {
+  background: radial-gradient(circle at 35% 35%, rgba(52, 211, 153, 0.32) 0%, rgba(16, 185, 129, 0.18) 100%);
+  border-color: rgba(52, 211, 153, 0.6);
+  box-shadow: 0 0 16rpx rgba(16, 185, 129, 0.45), inset 0 1rpx 2rpx rgba(255, 255, 255, 0.5);
+}
+.toast-capsule-card.type-success .toast-title-text {
+  color: #ecfdf5;
 }
 
-/* 3. 灵动爆珠与信息模式 (Bead / Info - 极境冰蓝) */
+/* 模式 3：深空霓虹 · 极境冰晶 (Bead / Info - 赛博幻蓝与清冽科技) */
 .toast-capsule-card.type-bead,
 .toast-capsule-card.type-info {
-  border-color: rgba(56, 189, 248, 0.48);
-  background: linear-gradient(135deg, rgba(16, 34, 48, 0.96) 0%, rgba(9, 20, 30, 0.98) 100%);
+  border-color: rgba(56, 189, 248, 0.52);
+  background: linear-gradient(135deg, rgba(10, 28, 46, 0.92) 0%, rgba(5, 16, 28, 0.96) 100%);
   box-shadow: 
-    0 16rpx 48rpx rgba(0, 0, 0, 0.65),
-    0 0 24rpx rgba(56, 189, 248, 0.25),
-    inset 0 1rpx 2rpx rgba(255, 255, 255, 0.2);
+    0 24rpx 56rpx rgba(0, 0, 0, 0.65),
+    0 0 36rpx rgba(56, 189, 248, 0.35),
+    inset 0 1.5rpx 1.5rpx rgba(186, 230, 253, 0.45),
+    inset 0 -1.5rpx 2rpx rgba(0, 0, 0, 0.5);
 }
 .toast-capsule-card.type-bead .toast-ambient-glow,
 .toast-capsule-card.type-info .toast-ambient-glow {
-  background: radial-gradient(circle at 18% 50%, rgba(56, 189, 248, 0.28) 0%, transparent 65%);
+  background: radial-gradient(circle at 18% 50%, rgba(56, 189, 248, 0.45) 0%, rgba(14, 165, 233, 0.16) 55%, transparent 80%);
+}
+.toast-capsule-card.type-bead .toast-icon-box,
+.toast-capsule-card.type-info .toast-icon-box {
+  background: radial-gradient(circle at 35% 35%, rgba(56, 189, 248, 0.32) 0%, rgba(14, 165, 233, 0.18) 100%);
+  border-color: rgba(56, 189, 248, 0.6);
+  box-shadow: 0 0 16rpx rgba(56, 189, 248, 0.45), inset 0 1rpx 2rpx rgba(255, 255, 255, 0.5);
+}
+.toast-capsule-card.type-bead .toast-title-text,
+.toast-capsule-card.type-info .toast-title-text {
+  color: #f0f9ff;
 }
 
-/* 4. 轻量警示模式 (Warn - 暖珊瑚红) */
+/* 模式 4：暮色落樱 · 柔情温语 (Warn - 珊瑚粉晶与克制呵护) */
 .toast-capsule-card.type-warn {
-  border-color: rgba(248, 113, 113, 0.48);
-  background: linear-gradient(135deg, rgba(48, 20, 22, 0.96) 0%, rgba(26, 11, 13, 0.98) 100%);
+  border-color: rgba(251, 113, 133, 0.52);
+  background: linear-gradient(135deg, rgba(38, 16, 22, 0.92) 0%, rgba(20, 9, 13, 0.96) 100%);
   box-shadow: 
-    0 16rpx 48rpx rgba(0, 0, 0, 0.65),
-    0 0 24rpx rgba(239, 68, 68, 0.25),
-    inset 0 1rpx 2rpx rgba(255, 255, 255, 0.2);
+    0 24rpx 56rpx rgba(0, 0, 0, 0.65),
+    0 0 36rpx rgba(244, 63, 94, 0.35),
+    inset 0 1.5rpx 1.5rpx rgba(254, 205, 211, 0.45),
+    inset 0 -1.5rpx 2rpx rgba(0, 0, 0, 0.5);
 }
 .toast-capsule-card.type-warn .toast-ambient-glow {
-  background: radial-gradient(circle at 18% 50%, rgba(239, 68, 68, 0.28) 0%, transparent 65%);
+  background: radial-gradient(circle at 18% 50%, rgba(244, 63, 94, 0.45) 0%, rgba(225, 29, 72, 0.16) 55%, transparent 80%);
+}
+.toast-capsule-card.type-warn .toast-icon-box {
+  background: radial-gradient(circle at 35% 35%, rgba(251, 113, 133, 0.32) 0%, rgba(244, 63, 94, 0.18) 100%);
+  border-color: rgba(251, 113, 133, 0.6);
+  box-shadow: 0 0 16rpx rgba(244, 63, 94, 0.45), inset 0 1rpx 2rpx rgba(255, 255, 255, 0.5);
+}
+.toast-capsule-card.type-warn .toast-title-text {
+  color: #fff1f2;
 }
 
-/* 图标微区域 */
+/* -------------------------------------------------------------------------
+   微晶悬浮宝石底托 (Gemstone Pod)
+   ------------------------------------------------------------------------- */
 .toast-icon-box {
-  font-size: 32rpx;
-  margin-right: 14rpx;
+  width: 52rpx;
+  height: 52rpx;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  line-height: 1;
+  margin-right: 18rpx;
+  position: relative;
+  z-index: 3;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1.5rpx solid rgba(255, 255, 255, 0.25);
+  box-shadow: inset 0 1rpx 2rpx rgba(255, 255, 255, 0.35), 0 4rpx 12rpx rgba(0, 0, 0, 0.25);
+  animation: iconPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both 0.06s;
+}
+
+@keyframes iconPop {
+  0% {
+    transform: scale(0.65);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .toast-icon-char {
+  font-size: 28rpx;
   line-height: 1;
   display: inline-block;
+  filter: drop-shadow(0 2rpx 6rpx rgba(0, 0, 0, 0.35));
 }
 
-/* 文本微区域 */
+/* -------------------------------------------------------------------------
+   文本微排版 (Typography & Visual Hierarchy)
+   ------------------------------------------------------------------------- */
 .toast-text-box {
   display: flex;
   flex-direction: column;
   justify-content: center;
   min-width: 0;
+  position: relative;
+  z-index: 3;
 }
 
 .toast-title-text {
@@ -161,13 +261,18 @@
   font-weight: 600;
   color: #ffffff;
   line-height: 1.35;
-  letter-spacing: 0.5rpx;
+  letter-spacing: 0.6rpx;
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.4);
   white-space: pre-wrap;
+  word-break: break-all;
 }
 
 .toast-desc-text {
   font-size: 21rpx;
-  color: rgba(255, 255, 255, 0.68);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.72);
   line-height: 1.25;
-  margin-top: 4rpx;
+  margin-top: 5rpx;
+  letter-spacing: 0.4rpx;
+  text-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.3);
 }

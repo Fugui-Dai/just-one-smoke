@@ -9,6 +9,6 @@
   "backgroundTextStyle": "dark",
   "disableScroll": true,
   "usingComponents": {
-    "stats-view": "/components/stats-view/stats-view"
+    "stats-view": "./components/stats-view/stats-view"
   }
 }

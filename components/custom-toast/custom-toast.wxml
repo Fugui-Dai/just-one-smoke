@@ -6,15 +6,18 @@
   wx:if="{{ rendered }}"
 >
   <view class="toast-capsule-card {{ typeClass }}">
-    <!-- 专属环境流光层 -->
+    <!-- 极光高光切面边缘 (琉璃微晶顶边反光线) -->
+    <view class="toast-specular-rim"></view>
+
+    <!-- 专属环境氛围柔晕层 -->
     <view class="toast-ambient-glow"></view>
 
-    <!-- 图标徽章 -->
+    <!-- 悬浮微晶宝石图标底托 -->
     <view class="toast-icon-box" wx:if="{{ iconText }}">
       <text class="toast-icon-char">{{ iconText }}</text>
     </view>
 
-    <!-- 文本内容 -->
+    <!-- 文本微排版 -->
     <view class="toast-text-box">
       <text class="toast-title-text">{{ title }}</text>
       <text class="toast-desc-text" wx:if="{{ desc }}">{{ desc }}</text>

@@ -48,7 +48,7 @@
               </view>
               <view class="profile-vip-nameplate {{ (isVip || vipInfo.isVip) ? 'is-vip' : 'is-vip-inactive' }}" catchtap="onGoToVip">
                 <text class="pvn-crown">👑</text>
-                <text class="pvn-text">{{ (isVip || vipInfo.isVip) ? 'VIP' : '开通VIP' }}</text>
+                <text class="pvn-text">{{ (isVip || vipInfo.isVip) ? 'VIP' : (isIOS ? 'VIP专区' : '开通VIP') }}</text>
               </view>
             </view>
             <view class="user-meta-subrow" bindtap="onOpenProfileModal">
@@ -68,7 +68,7 @@
             <text class="punch-card-num {{ isTodayPunched ? 'num-punched' : 'num-pending' }}">{{ calendarStats.streakDays }}</text>
             <text class="punch-card-unit {{ isTodayPunched ? 'unit-punched' : 'unit-pending' }}">天</text>
           </view>
-          <text class="punch-card-action-hint" wx:if="{{ !isTodayPunched }}">点击盖印</text>
+          <text class="punch-card-action-hint {{ isTodayPunched ? 'hint-punched' : 'hint-pending' }}">{{ isTodayPunched ? '已盖印 ✓' : '点击盖印' }}</text>
         </view>
       </view>
     </view>
@@ -172,9 +172,9 @@
           <view class="hud-card-header">
             <view class="hud-title-badge-row">
               <view class="hud-organ-dot dot-lungs"></view>
-              <text class="hud-card-title title-lungs">双肺自愈</text>
+              <text class="hud-card-title title-lungs">双肺与咽喉</text>
             </view>
-            <text class="hud-card-en en-lungs">PULMONARY CILIA</text>
+            <text class="hud-card-en en-lungs">PULMONARY & ORAL</text>
           </view>
           <view class="hud-card-body">
             <view class="hud-metric-row">
@@ -182,7 +182,7 @@
               <text class="hud-metric-val cyan">{{ lungPercent }}%</text>
             </view>
             <view class="hud-progress-track track-lungs">
-              <view class="hud-progress-bar cyan-bar" style="width: {{ lungPercent }}%;"></view>
+              <view class="hud-progress-bar cyan-bar" style="width: {{ lungPercent + '%' }};"></view>
             </view>
           </view>
         </view>
@@ -202,17 +202,17 @@
               <text class="hud-metric-val orange">{{ heartPercent }}%</text>
             </view>
             <view class="hud-progress-track track-heart">
-              <view class="hud-progress-bar orange-bar" style="width: {{ heartPercent }}%;"></view>
+              <view class="hud-progress-bar orange-bar" style="width: {{ heartPercent + '%' }};"></view>
             </view>
           </view>
         </view>
 
-        <!-- 左下方 HUD 引出数据框：自律神经系统 (精准指向腹部植物神经中枢与肠脑交感轴) -->
+        <!-- 左下方 HUD 引出数据框：脑-肠自主神经系统 (精准贯通中枢脑受体与迷走神经交感轴) -->
         <view class="hud-card hud-card-bl hud-card-brain {{ activeOrgan === 'brain' ? 'is-active' : '' }}" bindtap="onSelectOrgan" data-organ="brain">
           <view class="hud-card-header">
             <view class="hud-title-badge-row">
               <view class="hud-organ-dot dot-brain"></view>
-              <text class="hud-card-title title-brain">自律神经</text>
+              <text class="hud-card-title title-brain">自主神经轴</text>
             </view>
             <text class="hud-card-en en-brain">AUTONOMIC AXIS</text>
           </view>
@@ -222,7 +222,7 @@
               <text class="hud-metric-val purple">{{ brainPercent }}%</text>
             </view>
             <view class="hud-progress-track track-brain">
-              <view class="hud-progress-bar purple-bar" style="width: {{ brainPercent }}%;"></view>
+              <view class="hud-progress-bar purple-bar" style="width: {{ brainPercent + '%' }};"></view>
             </view>
           </view>
         </view>
@@ -242,7 +242,7 @@
               <text class="hud-metric-val green">{{ bloodPercent }}%</text>
             </view>
             <view class="hud-progress-track track-blood">
-              <view class="hud-progress-bar green-bar" style="width: {{ bloodPercent }}%;"></view>
+              <view class="hud-progress-bar green-bar" style="width: {{ bloodPercent + '%' }};"></view>
             </view>
           </view>
         </view>
@@ -365,7 +365,7 @@
 
       <!-- 顶部全域发光进度条 -->
       <view class="honor-progress-track">
-        <view class="honor-progress-fill" style="width: {{ achievementsCompletionRate }}%;"></view>
+        <view class="honor-progress-fill" style="width: {{ achievementsCompletionRate + '%' }};"></view>
       </view>
 
       <!-- 4 列流式曜石称号橱窗网格 (严格从低到高 Lv.1 ~ Lv.16 排列) -->
@@ -678,7 +678,7 @@
         <text class="cp-val" style="color: {{ selectedAchievement.tagColor }};">{{ selectedAchievement.progress.progressText }}</text>
       </view>
       <view class="cp-track">
-        <view class="cp-bar" style="width: {{ selectedAchievement.progress.percent }}%; background: {{ selectedAchievement.tagColor }}; box-shadow: 0 0 12rpx {{ selectedAchievement.glowColor }};"></view>
+        <view class="cp-bar" style="width: {{ selectedAchievement.progress.percent + '%' }}; background: {{ selectedAchievement.tagColor }}; box-shadow: 0 0 12rpx {{ selectedAchievement.glowColor }};"></view>
       </view>
     </view>
   </view>

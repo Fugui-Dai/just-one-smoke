@@ -102,6 +102,7 @@
   justify-content: space-between;
   width: 100%;
   min-width: 0;
+  min-height: 114rpx;
 }
 
 /* 左侧头像与昵称组合：头像严格靠左，名字紧随其后 */
@@ -420,8 +421,11 @@ button.user-avatar-btn::after,
 .user-punch-card {
   flex-shrink: 0;
   margin-left: 16rpx;
-  min-width: 120rpx;
-  padding: 10rpx 14rpx;
+  min-width: 128rpx;
+  height: 114rpx;
+  min-height: 114rpx;
+  box-sizing: border-box;
+  padding: 8rpx 12rpx;
   border-radius: 20rpx;
   display: flex;
   flex-direction: column;
@@ -568,6 +572,13 @@ button.user-avatar-btn::after,
   margin-top: 4rpx;
   line-height: 1.2;
   letter-spacing: 0.5rpx;
+  transition: all 0.25s ease;
+}
+
+.punch-card-action-hint.hint-punched {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.16);
+  border-color: rgba(16, 185, 129, 0.35);
 }
 
 /* ==================== VIP 尊享特权入口横幅 (腾讯黑金曜石奢雅标准) ==================== */
@@ -1842,7 +1853,7 @@ button.user-avatar-btn::after,
   animation: leadAnchorPulse 1.8s infinite ease-in-out;
 }
 
-/* 左下指向迷走神经/太阳神经丛中枢 (无缝贴合自律神经卡片右边缘中轴) */
+/* 左下指向脑-肠自主神经轴 (双锚点贯通中枢受体与迷走神经丛) */
 .hud-lead-line.to-visceral {
   bottom: 140rpx;
   left: 198rpx;
@@ -1850,6 +1861,16 @@ button.user-avatar-btn::after,
   height: 165rpx;
   border-bottom: 2rpx solid rgba(192, 132, 252, 0.55);
   border-right: 2rpx solid rgba(192, 132, 252, 0.55);
+}
+.hud-lead-line.to-visceral::before {
+  content: '';
+  position: absolute;
+  right: -1rpx;
+  top: -180rpx;
+  width: 2rpx;
+  height: 180rpx;
+  border-right: 2rpx dashed rgba(192, 132, 252, 0.45);
+  transition: all 0.3s ease;
 }
 .hud-lead-line.to-visceral::after {
   content: '';
@@ -1867,6 +1888,11 @@ button.user-avatar-btn::after,
   border-bottom-color: #c084fc;
   border-right-color: #c084fc;
   filter: drop-shadow(0 0 6rpx rgba(192, 132, 252, 0.8));
+}
+.hud-lead-line.to-visceral.lead-active::before {
+  border-right-color: #c084fc;
+  border-right-style: solid;
+  filter: drop-shadow(0 0 6rpx rgba(192, 132, 252, 0.85));
 }
 .hud-lead-line.to-visceral.lead-active::after {
   box-shadow: 0 0 14rpx #c084fc, 0 0 24rpx #c084fc;
@@ -2476,6 +2502,7 @@ button.user-avatar-btn::after,
 .disclaimer-copy {
   text-align: center;
   padding-top: 14rpx;
+  margin-top: 10rpx;
   border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
@@ -2483,6 +2510,7 @@ button.user-avatar-btn::after,
   font-size: 22rpx;
   color: #475569;
 }
+
 
 /* ==================== 🏆 荣耀勋章殿堂 · 赛博成就展柜 (Tencent Games 曜石展柜标准) ==================== */
 .honor-wall-card {
@@ -2724,6 +2752,25 @@ button.user-avatar-btn::after,
 }
 
 
+
+/* ==================== 基础玻璃拟态弹窗蒙层 (Glass Modal Backdrop) ==================== */
+.glass-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(3, 6, 14, 0.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  z-index: 999998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
 
 /* ==================== 荣耀称号殿堂 · 殿堂典藏证书详情弹窗 (高定沉浸卡牌·情绪价值) ==================== */
 .achievement-modal-backdrop {
@@ -3067,13 +3114,13 @@ button.user-avatar-btn::after,
   width: 620rpx;
   max-width: 90vw;
   background: linear-gradient(165deg, rgba(20, 28, 44, 0.96) 0%, rgba(10, 15, 26, 0.98) 100%);
-  border: 1.5rpx solid rgba(251, 191, 36, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 32rpx;
   padding: 36rpx 32rpx 32rpx;
   box-sizing: border-box;
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.85), 0 0 32rpx rgba(245, 158, 11, 0.15);
+  box-shadow: 0 28rpx 72rpx rgba(0, 0, 0, 0.88), inset 0 1px 0 rgba(255, 255, 255, 0.14);
   animation: dayModalPop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
   display: flex;
   flex-direction: column;
@@ -3288,6 +3335,5 @@ button.user-avatar-btn::after,
   transform: scale(0.97);
   background: rgba(255, 255, 255, 0.16);
 }
-
 
 

@@ -1,17 +1,46 @@
 <!-- pages/index/index.wxml -->
 <view class="app-container {{ vipTheme ? 'theme-' + vipTheme : '' }}">
 
+  <!-- 🎨 全局 VIP 尊享极光天幕与浮光星尘 (全站背景装扮) -->
+  <view wx:if="{{ vipTheme }}" class="vip-ambient-stage">
+    <view class="vip-aurora-orb orb-primary"></view>
+    <view class="vip-aurora-orb orb-secondary"></view>
+    <view class="vip-spark s1"></view>
+    <view class="vip-spark s2"></view>
+    <view class="vip-spark s3"></view>
+  </view>
+
   <!-- ==================== 沉浸式模拟器主页 ==================== -->
   <view class="tab-page simulator-tab active">
 
     <!-- ==================== 右侧主控 DOCK 栏 (极简无界 · 纯净通透悬浮 · 零外壳边框) ==================== -->
     <view class="right-arc-dock">
 
-      <!-- 1. 点燃 / 掐灭 / 抽新烟 (第一核心操作：未点燃显示点燃，燃烧中显示掐灭，燃尽抽完显示抽新烟) -->
-      <view class="dock-btn-wrap" bindtap="triggerIgnite">
-        <view class="dock-circle-btn ignite-btn {{ simulatorState === 'FINISHED' ? 'is-draw-new' : ((simulatorState !== 'UNLIT') ? 'is-lit' : '') }}">
+      <!-- 1. 点燃 / 掐灭 / 抽新烟 (单击点燃/掐灭，UNLIT状态长按弹出器具选择) -->
+      <view
+        class="dock-btn-wrap ignite-dock-wrap"
+        bindtap="triggerIgnite"
+        bindlongpress="onIgniteLongPress"
+      >
+        <!-- 💡 UNLIT 状态首次进入引导气泡：长按换器具 -->
+        <view
+          class="smoke-guide-tooltip ignite-guide-tooltip {{ isIgniteGuideFading ? 'guide-fade-out' : '' }}"
+          wx:if="{{ showIgniteGuide }}"
+          catchtap="onTapIgniteGuideTooltip"
+        >
+          <text class="sgt-text">💡 长按换点烟器具</text>
+          <view class="sgt-arrow"></view>
+        </view>
+
+        <view
+          class="dock-circle-btn ignite-btn {{ simulatorState === 'FINISHED' ? 'is-draw-new' : ((simulatorState !== 'UNLIT') ? 'is-lit' : 'is-unlit-tool') }} {{ isSparking ? 'is-btn-sparking' : '' }}"
+          style="{{ simulatorState === 'UNLIT' ? 'border-color: ' + currentIgnitionTool.themeColor + 'bb; box-shadow: 0 4rpx 14rpx rgba(0,0,0,0.6), 0 0 16rpx ' + currentIgnitionTool.themeColor + '66, inset 0 2rpx 3rpx rgba(255,255,255,0.4);' : '' }}"
+        >
           <image class="dock-svg-icon draw-svg-icon" src="{{ drawCigIconUri }}" mode="aspectFit" wx:if="{{ simulatorState === 'FINISHED' }}" />
           <image class="dock-svg-icon extinguish-svg-icon" src="{{ extinguishIconUri }}" mode="aspectFit" wx:elif="{{ simulatorState !== 'UNLIT' }}" />
+          <!-- 未点燃时：优先显示当前点火器具的高清矢量SVG或emoji图标 -->
+          <image class="dock-svg-icon ignite-svg-icon {{ isSparking ? 'ignite-icon-spark' : '' }}" src="{{ currentIgnitionTool.iconImage }}" mode="aspectFit" wx:elif="{{ currentIgnitionTool.iconImage }}" />
+          <text class="dock-char-icon ignite-tool-icon {{ isSparking ? 'ignite-icon-spark' : '' }}" wx:elif="{{ currentIgnitionTool.icon }}">{{ currentIgnitionTool.icon }}</text>
           <image class="dock-svg-icon ignite-svg-icon" src="{{ igniteIconUri }}" mode="aspectFit" wx:else />
         </view>
         <text class="dock-title">{{ simulatorState === 'FINISHED' ? '抽新烟' : (simulatorState === 'UNLIT' ? '点燃' : '掐灭') }}</text>
@@ -94,7 +123,7 @@
           <!-- 动态烟盒余量进度圆环 -->
           <view 
             class="share-progress-ring" 
-            style="background: conic-gradient(#34d399 0deg, #10b981 {{ (currentPackRemaining / (currentCigarette.packCapacity || (currentCigarette.isCigar ? 5 : 20))) * 360 }}deg, rgba(255, 255, 255, 0.14) {{ (currentPackRemaining / (currentCigarette.packCapacity || (currentCigarette.isCigar ? 5 : 20))) * 360 }}deg 360deg);"
+            style="background: conic-gradient(#34d399 0deg, #10b981 {{ shareProgressDeg }}deg, rgba(255, 255, 255, 0.14) {{ shareProgressDeg }}deg 360deg);"
           ></view>
           <view class="share-btn-inner">
             <image class="dock-svg-icon share-svg-icon" src="{{ giveCigIconUri }}" mode="aspectFit" />
@@ -169,13 +198,26 @@
       <view class="dialog-crest-wrap">
         <view class="crest-halo-glow"></view>
         <view class="crest-badge-circle">
-          <text class="dialog-badge-glow">🏅</text>
+          <image class="dialog-medal-img" src="{{ victoryMedalSvgUri }}" mode="aspectFit" />
         </view>
         <view class="crest-tag-pill">✦ VICTORY · 替瘾战报 ✦</view>
       </view>
 
       <text class="dialog-title">战胜心魔！成功替瘾 1 支</text>
       <text class="dialog-subtitle">阻断焦油与尼古丁侵袭 · 身体自愈力 UP!</text>
+
+      <!-- 每日自律打卡自动盖印闭环提示条 (腾讯大厂仪式感激励 · 消除断层) -->
+      <view class="reward-punch-stamp-strip">
+        <view class="rpss-left">
+          <text class="rpss-dot"></text>
+          <text class="rpss-title">今日自律打卡已自动盖印 ✓</text>
+        </view>
+        <view class="rpss-right">
+          <text class="rpss-streak-label">连续自律</text>
+          <text class="rpss-streak-num">{{ lastReward.streakDays || 1 }}</text>
+          <text class="rpss-streak-unit">天</text>
+        </view>
+      </view>
 
       <!-- 尊享自律金券入账条 (深度联动钱包自律储备金券概念) -->
       <view class="reward-bill-deposit-box">
@@ -502,6 +544,120 @@
           <text class="btn-sub-text">🤝 回敬老哥 · 再递一支</text>
         </button>
       </view>
+    </view>
+  </view>
+
+  <!-- ==================== 💎 创新点火工坊 · 掌心 EDC 机巧把玩所 (Tactile Fidget Lab) ==================== -->
+  <view class="glass-modal-backdrop matrix-vault-backdrop" wx:if="{{ showIgnitionToolDrawer }}" catchtouchmove="preventTouchMove" bindtap="closeIgnitionToolDrawer">
+    <view class="matrix-vault-container" catchtap="stopBubble">
+
+      <!-- 顶栏：赛博解压工坊标题 + 情绪解压计数勋章 + 优雅关闭按钮 -->
+      <view class="matrix-top-bar">
+        <view class="mtb-title-group">
+          <text class="mtb-en-tag">EDC FIDGET ARSENAL // 掌心解压</text>
+          <text class="mtb-main-title">🔥 掌心机巧把玩所</text>
+        </view>
+        <view class="mtb-right-actions">
+          <view class="fidget-counter-pill {{ fidgetCounterBumping ? 'fcp-bump' : '' }}" wx:if="{{ fidgetCount > 0 }}">
+            <text class="fcp-spark">✨</text>
+            <text class="fcp-label">已解压 <text class="fcp-count">{{ fidgetCount }}</text> 次</text>
+          </view>
+          <view class="matrix-close-circle" bindtap="closeIgnitionToolDrawer">✕</view>
+        </view>
+      </view>
+
+      <!-- 核心 1：中央全息悬浮机体光轮展台 (纯净通透，支持高频点击与手势物理把玩) -->
+      <view
+        class="matrix-halo-stage fidget-tactile-stage"
+        bindtouchstart="onStageTouchStart"
+        bindtouchmove="onStageTouchMove"
+        bindtouchend="onStageTouchEnd"
+        catchtap="onTapHeroStage"
+      >
+        <!-- 动态色温流光环与能量粒子线 -->
+        <view class="matrix-radial-aurora" style="background: radial-gradient(circle, {{ previewIgnitionTool.themeColor }}40 0%, {{ previewIgnitionTool.themeColor }}12 55%, transparent 75%);"></view>
+        <view class="matrix-reticle-ring" style="border-color: {{ previewIgnitionTool.themeColor }}55; box-shadow: 0 0 36rpx {{ previewIgnitionTool.themeColor }}25;"></view>
+        
+        <!-- 悬浮机体主像与点触微爆 (双态交替，连续点击每次必重新震荡爆破) -->
+        <view class="matrix-hero-pod {{ isFidgetActive ? 'pod-fidget-active' : '' }} {{ fidgetBlastIndex === 1 ? 'pod-blast-a' : (fidgetBlastIndex === 2 ? 'pod-blast-b' : (isPreviewTesting ? 'pod-ignite-blast' : '')) }}">
+          <image class="matrix-hero-svg" src="{{ previewIgnitionTool.iconImage }}" mode="aspectFit" wx:if="{{ previewIgnitionTool.iconImage }}" />
+          <text class="matrix-hero-emoji" wx:else>{{ previewIgnitionTool.icon }}</text>
+          <!-- 物理火星冲击波光环 (双波交替重绘) -->
+          <view class="matrix-shockwave shockwave-a" wx:if="{{ shockwaveToggle === 1 }}" style="border-color: {{ previewIgnitionTool.themeColor }};"></view>
+          <view class="matrix-shockwave shockwave-b" wx:if="{{ shockwaveToggle === 2 }}" style="border-color: {{ previewIgnitionTool.themeColor }};"></view>
+          <!-- 飞溅星火微粒 -->
+          <view class="fidget-spark-dots" wx:if="{{ fidgetSparksVisible }}">
+            <view class="fs-dot fs-d1" style="background: {{ previewIgnitionTool.themeColor }}; box-shadow: 0 0 8rpx {{ previewIgnitionTool.themeColor }};"></view>
+            <view class="fs-dot fs-d2" style="background: {{ previewIgnitionTool.themeColor }}; box-shadow: 0 0 8rpx {{ previewIgnitionTool.themeColor }};"></view>
+            <view class="fs-dot fs-d3" style="background: {{ previewIgnitionTool.themeColor }}; box-shadow: 0 0 8rpx {{ previewIgnitionTool.themeColor }};"></view>
+            <view class="fs-dot fs-d4" style="background: {{ previewIgnitionTool.themeColor }}; box-shadow: 0 0 8rpx {{ previewIgnitionTool.themeColor }};"></view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 试火与手势指引胶囊（向下独立外置，不再遮挡机身与光轮） -->
+      <view class="matrix-action-indicator-dock" catchtap="onTapHeroStage">
+        <view class="matrix-action-indicator" style="border-color: {{ previewIgnitionTool.themeColor }}55;">
+          <text class="mai-text" style="{{ isPreviewTesting ? 'color:' + previewIgnitionTool.themeColor + '; font-weight:800;' : '' }}">{{ isPreviewTesting ? '🔥 机巧引燃 · 物理共振' : (previewIgnitionTool.id === 'zippo_vintage' && isZippoLidOpen ? '🪙 已掀开纯铜顶盖 · 轻触搓动打火' : (previewIgnitionTool.fidgetHint ? '👆 ' + previewIgnitionTool.fidgetHint : '👆 轻触机体 释放专属物理点火')) }}</text>
+        </view>
+      </view>
+
+      <!-- 核心 2：悬浮解构机巧铭牌与情绪心境金句 (严格恒高，杜绝切换大小跳变) -->
+      <view class="matrix-spec-card">
+        <view class="msc-header">
+          <view class="msc-title-left">
+            <text class="msc-name">{{ previewIgnitionTool.name }}</text>
+            <view class="fidget-mood-chip" style="color: {{ previewIgnitionTool.themeColor }}; border-color: {{ previewIgnitionTool.themeColor }}55; background: {{ previewIgnitionTool.themeColor }}15;">
+              {{ previewIgnitionTool.moodTag || previewIgnitionTool.badge }}
+            </view>
+          </view>
+          <view class="msc-title-right">
+            <text class="fidget-material-tag">{{ previewIgnitionTool.craftMaterial || previewIgnitionTool.subTitle }}</text>
+            <view class="msc-equipped-chip" wx:if="{{ previewIgnitionTool.id === currentIgnitionTool.id }}">
+              <text class="chip-dot"></text>
+              <text class="chip-label">专属伴侣</text>
+            </view>
+          </view>
+        </view>
+        
+        <!-- 情绪抚慰灵魂语录 (固定单行省略，恒定高度) -->
+        <view class="fidget-quote-box">
+          <text class="fqb-quote">“{{ previewIgnitionTool.moodQuote || previewIgnitionTool.description }}”</text>
+        </view>
+      </view>
+
+      <!-- 核心 3：5 位平视机械舱卡（即点即换即试装） -->
+      <view class="matrix-selector-strip">
+        <view
+          class="matrix-slot-unit {{ item.id === previewIgnitionTool.id ? 'slot-current-focus' : '' }} {{ item.id === currentIgnitionTool.id ? 'slot-is-equipped' : '' }}"
+          wx:for="{{ ignitionToolsList }}"
+          wx:key="id"
+          bindtap="onSelectShowcaseTool"
+          data-id="{{ item.id }}"
+        >
+          <!-- 选中高亮光框 -->
+          <view class="msu-glow-border" wx:if="{{ item.id === previewIgnitionTool.id }}" style="border-color: {{ item.themeColor }}; box-shadow: 0 0 16rpx {{ item.themeColor }}66;"></view>
+          
+          <view class="msu-icon-wrap" style="background: {{ item.id === previewIgnitionTool.id ? item.themeColor + '20' : 'rgba(255,255,255,0.04)' }};">
+            <image class="msu-svg" wx:if="{{ item.iconImage }}" src="{{ item.iconImage }}" mode="aspectFit" />
+            <text class="msu-emoji" wx:else>{{ item.icon }}</text>
+            <view class="msu-active-pip" wx:if="{{ item.id === currentIgnitionTool.id }}"></view>
+          </view>
+          <text class="msu-label" style="{{ item.id === previewIgnitionTool.id ? 'color:' + item.themeColor + '; font-weight:800;' : '' }}">{{ item.name }}</text>
+        </view>
+      </view>
+
+      <!-- 核心 4：悬浮胶囊装配主操作键 (单行无换行，严格绝对几何双居中) -->
+      <view class="matrix-action-dock">
+        <view
+          class="matrix-equip-btn {{ previewIgnitionTool.id === currentIgnitionTool.id ? 'meb-equipped' : '' }} {{ justEquippedAnim ? 'meb-just-equipped' : '' }}"
+          catchtap="onConfirmEquipTool"
+          style="background: {{ previewIgnitionTool.id === currentIgnitionTool.id ? 'rgba(255,255,255,0.08)' : (previewIgnitionTool.buttonGradient || 'linear-gradient(135deg, ' + previewIgnitionTool.themeColor + ' 0%, #d97706 100%)') }}; border-color: {{ previewIgnitionTool.id === currentIgnitionTool.id ? 'rgba(52,211,153,0.35)' : previewIgnitionTool.themeColor }};"
+        >
+          <text class="meb-text {{ previewIgnitionTool.id === currentIgnitionTool.id ? 'text-is-equipped' : 'text-need-equip' }}">{{ justEquippedAnim ? '✨ 契约已缔结 · 专属点火伴侣' : (previewIgnitionTool.id === currentIgnitionTool.id ? '✓ 当前已装配为专属点火器具' : '立即装配为专属点火器具') }}</text>
+        </view>
+      </view>
+
     </view>
   </view>
 

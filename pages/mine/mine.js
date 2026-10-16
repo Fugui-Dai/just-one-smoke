@@ -19,6 +19,8 @@ import {
   YEARS_CLOCK_ICON_SVG,
   PROJECTION_SPARK_SVG
 } from '../../utils/vectorIcons.js';
+import { measureSafeAreaSync } from '../../utils/safeArea.js';
+import { navigateBackWithSound } from '../../utils/navigation.js';
 
 const QUICK_PRICE_PRESETS = [
   { val: 15, label: '¥15 白沙' },
@@ -65,23 +67,6 @@ function computeProfileProjections(profile = {}) {
   };
 }
 
-function measureSafeAreaSync() {
-  try {
-    const sysInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
-    const menuInfo = wx.getMenuButtonBoundingClientRect ? wx.getMenuButtonBoundingClientRect() : null;
-    const statusBarHeight = sysInfo.statusBarHeight || 44;
-    let navBarHeight = 44;
-    let capsuleRightSpace = 96;
-
-    if (menuInfo && menuInfo.top) {
-      navBarHeight = (menuInfo.top - statusBarHeight) * 2 + menuInfo.height;
-      capsuleRightSpace = (sysInfo.windowWidth - menuInfo.left) + 12;
-    }
-    return { statusBarHeight, navBarHeight, capsuleRightSpace };
-  } catch (e) {
-    return { statusBarHeight: 44, navBarHeight: 44, capsuleRightSpace: 100 };
-  }
-}
 
 function computeMineStatsPayload() {
   const profile = storageService.getProfile();
@@ -339,7 +324,6 @@ Page({
       const updated = storageService.updateProfile({ avatarUrl: savedPath });
       this.setData({ profile: updated });
       this.refreshAllData();
-      toast.success('头像已同步');
     } catch (err) {
       console.error('onUpdateAvatar error:', err);
     }
@@ -353,7 +337,6 @@ Page({
       const updated = storageService.updateProfile({ nickName });
       this.setData({ profile: updated });
       this.refreshAllData();
-      toast.success('昵称已同步');
     } catch (err) {
       console.error('onUpdateNickname error:', err);
     }
@@ -563,10 +546,7 @@ Page({
   },
 
   onNavigateBack() {
-    audioManager.unlockAudio();
-    audioManager.playSwitchSound();
-    triggerHaptic('light');
-    wx.navigateBack({ delta: 1 });
+    navigateBackWithSound();
   },
 
   preventTouchMove() {}

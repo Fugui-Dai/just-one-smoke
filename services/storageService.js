@@ -38,7 +38,7 @@ function removeItem(key) {
   } catch {}
 }
 
-export function getDailyStats(records, days = 7, refDate = new Date()) {
+function getDailyStats(records, days = 7, refDate = new Date()) {
   const result = [];
   const map = {};
 
@@ -476,19 +476,6 @@ export const storageService = {
 
   setSelectedIgnitionTool(toolId) {
     setItem('SMOKEFREE_IGNITION_TOOL', toolId);
-  },
-
-  // ==========================================
-  // 名烟品鉴抽取动效偏好 (Pull VFX: 'vfx2' 九天游龙 720° 大回环 | 'vfx1' 经典出鞘 360°)
-  // ==========================================
-  getPullVfxType() {
-    return getItem('SMOKEFREE_PULL_VFX_TYPE') || 'vfx2';
-  },
-
-  setPullVfxType(vfxType) {
-    const type = (vfxType === 'vfx1') ? 'vfx1' : 'vfx2';
-    setItem('SMOKEFREE_PULL_VFX_TYPE', type);
-    return type;
   },
 
   // ==========================================

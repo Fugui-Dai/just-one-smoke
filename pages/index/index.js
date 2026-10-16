@@ -1,3 +1,4 @@
+import { navigateBackWithSound } from '../../utils/navigation.js';
 // pages/index/index.js
 import { SmokeStateMachine } from '../../engine/smokeStateMachine.js';
 import { ParticleSystem } from '../../engine/particleSystem.js';
@@ -51,13 +52,16 @@ import {
   DOCK_AURORA_STREAM_SVG,
   DOCK_AURORA_TOP_SVG,
   DOCK_AURORA_BOTTOM_SVG,
-  CYBER_GOLD_VOUCHER_SVG
+  CYBER_GOLD_VOUCHER_SVG,
+  VICTORY_MEDAL_SVG
 } from '../../utils/vectorIcons.js';
+import { measureSafeAreaSync } from '../../utils/safeArea.js';
 
 Page({
   data: {
     isVipUser: false,
     vipTheme: '',
+    victoryMedalSvgUri: VICTORY_MEDAL_SVG,
     goldVoucherSvgUri: CYBER_GOLD_VOUCHER_SVG,
     dockFluidShellUri: DOCK_FLUID_SHELL_SVG,
     dockAuroraStreamUri: DOCK_AURORA_STREAM_SVG,
@@ -108,6 +112,7 @@ Page({
 
     // 创新互动与状态参数
     currentPackRemaining: 20, // 烟盒余量
+    shareProgressDeg: 360, // 递烟进度环角度 (预计算防除零/越界)
     smokeEffectType: DEFAULT_SMOKE_EFFECT.id,
     smokeEffectsList: SMOKE_EFFECTS,
     currentSmokeEffect: DEFAULT_SMOKE_EFFECT,
@@ -123,6 +128,17 @@ Page({
 
     // 点火器具工坊
     currentIgnitionTool: IGNITION_TOOLS[0],
+    previewIgnitionTool: IGNITION_TOOLS[0],   // 抽屉内预览器具（点小 chip 切换，未必是已装配的）
+    activeToolIndex: 0,                       // 3D 画廊 Swiper 当前索引
+    isPreviewTesting: false,                  // 正在试火交互动画中
+    isZippoLidOpen: false,                    // Zippo 翻盖开合态
+    isFidgetActive: false,                    // 持续性手势点火中（如喷枪长按）
+    justEquippedAnim: false,                  // 装配成功瞬间微光波纹
+    fidgetCount: 0,                           // 掌心累计解压把玩次数（情绪价值勋章）
+    ignitionToolsList: IGNITION_TOOLS,        // 器具列表（用于抽屉渲染）
+    showIgnitionToolDrawer: false,            // 器具选择抽屉
+    showIgniteGuide: false,                   // 💡 长按点燃引导气泡
+    isIgniteGuideFading: false,               // 引导气泡渐隐动画标记
 
     // 统计看板核心数据
     profile: {},
@@ -174,6 +190,7 @@ Page({
     this._sparkResetTimer = null;
     this._guideTimer = null;
     this._isCarLighterHeating = false;
+    this._suppressNextTapUntil = 0;
 
     // 动态精确测算胶囊按钮与安全状态栏
     this.measureSafeArea();
@@ -249,6 +266,7 @@ Page({
       this.setData({
         currentCigarette: curCig,
         currentPackRemaining: packRemaining,
+        shareProgressDeg: this._calcShareProgressDeg(packRemaining, curCig),
         isBeadPopped: false
       });
       // 换烟或抽出新烟：旧烟舍弃，重置为全新未点燃的烟
@@ -257,7 +275,10 @@ Page({
       }
     } else {
       if (this.data.currentPackRemaining !== packRemaining) {
-        this.setData({ currentPackRemaining: packRemaining });
+        this.setData({
+          currentPackRemaining: packRemaining,
+          shareProgressDeg: this._calcShareProgressDeg(packRemaining, curCig)
+        });
       }
       // 腾讯总监设计级：时空流转与环境空气净空 (Atmospheric Air Cleansed & Living Ember)
       // 用户离开页面去商店（离开超过 400ms）后返回：
@@ -306,52 +327,56 @@ Page({
       this.startRenderLoop();
     }
     const app = typeof getApp === 'function' ? getApp() : null;
-    const isShown = (app && app.globalData && app.globalData.hasShownGuideInSession) || this._hasShownGuideInSession;
-    if (!isShown) {
+    const isShownInSession = (app && app.globalData && app.globalData.hasShownGuideInSession) || this._hasShownGuideInSession;
+    
+    // 【气泡提示频率控制】生命周期最多总共提示2次，2次之后永久不再显示
+    let guideShownCount = 0;
+    try {
+      guideShownCount = Number(wx.getStorageSync('SMOKEFREE_GUIDE_SHOWN_COUNT') || 0);
+    } catch (e) {}
+
+    const canShowGuide = !isShownInSession && guideShownCount < 2;
+
+    if (canShowGuide) {
       if (app && app.globalData) {
         app.globalData.hasShownGuideInSession = true;
       }
       this._hasShownGuideInSession = true;
+
+      // 累计提示次数写入本地持久化存储
+      try {
+        wx.setStorageSync('SMOKEFREE_GUIDE_SHOWN_COUNT', guideShownCount + 1);
+      } catch (e) {}
+
       this.checkSmokeGuide();
       this.checkSceneGuide();
+      this.checkIgniteGuide();  // 💡 点燃引导（长按换器具）
     } else {
-      // 本次进入程序已显示过一次：无论进入商店、排行榜再如何返回，坚决不再提示长按，并强制关闭气泡
+      // 已经达到2次上限，或本次启动会话已提示过：坚决不再提示长按，并强制清理隐藏气泡
       this._clearGuideTimers();
       this.setData({
         showSmokeEffectGuide: false,
         showSceneGuide: false,
+        showIgniteGuide: false,      // 点燃引导同步清除
         isGuideFading: false,
-        isSceneGuideFading: false
+        isSceneGuideFading: false,
+        isIgniteGuideFading: false
       });
     }
+
+  },
+
+  _calcShareProgressDeg(remaining, cig) {
+    const cur = (typeof remaining === 'number') ? remaining : (this.data && this.data.currentPackRemaining);
+    const targetCig = cig || (this.data && this.data.currentCigarette) || DEFAULT_CIGARETTE;
+    const capacity = (targetCig && (targetCig.packCapacity || (targetCig.isCigar ? 5 : 20))) || 20;
+    if (capacity <= 0) return 360;
+    const ratio = Math.max(0, Math.min(1, (Number(cur) || 0) / capacity));
+    return Math.round(ratio * 360);
   },
 
   measureSafeArea() {
-    try {
-      const sysInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
-      const menuInfo = wx.getMenuButtonBoundingClientRect ? wx.getMenuButtonBoundingClientRect() : null;
-      const statusBarHeight = sysInfo.statusBarHeight || 44;
-      let navBarHeight = 44;
-      let capsuleRightSpace = 96;
-      let capsuleTop = statusBarHeight + 6;
-
-      if (menuInfo && menuInfo.top) {
-        navBarHeight = (menuInfo.top - statusBarHeight) * 2 + menuInfo.height;
-        capsuleRightSpace = (sysInfo.windowWidth - menuInfo.left) + 12;
-        capsuleTop = menuInfo.top;
-      }
-
-      this.setData({
-        statusBarHeight,
-        navBarHeight,
-        capsuleRightSpace,
-        capsuleTop,
-        windowWidth: sysInfo.windowWidth,
-        windowHeight: sysInfo.windowHeight
-      });
-    } catch (e) {
-      console.warn('measureSafeArea error', e);
-    }
+    this.setData(measureSafeAreaSync());
   },
 
   onReady() {
@@ -979,7 +1004,6 @@ Page({
     if (!this.fsm) return;
     // 抖灰过程中严格锁定，禁止掐灭，必须等抖灰完成
     if (this.data.isAshTapping) {
-      toast.info('正在抖灰中，请稍候');
       triggerHaptic('light');
       return;
     }
@@ -1015,6 +1039,10 @@ Page({
 
   // 点火与掐灭核心动作 (未点燃时点燃，燃烧中点击掐灭，抽完直接点燃新一支无重置步骤)
   triggerIgnite() {
+    // 微信小程序双重触发防御：长按触发后抬手产生的幽灵点击严格拦截
+    if (this._suppressNextTapUntil && Date.now() < this._suppressNextTapUntil) {
+      return;
+    }
     audioManager.unlockAudio();
 
     // 校验 1 支尝鲜试抽凭证与名烟解锁状态，防止未解锁名烟无限白嫖连抽
@@ -1025,10 +1053,11 @@ Page({
       const revertId = (trialInfo && trialInfo.prevId) ? trialInfo.prevId : 'chaotianmen_gold';
       curCig = getCigaretteById(revertId) || DEFAULT_CIGARETTE;
       storageService.setSelectedCigaretteId(curCig.id);
-      const revCap = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
+      const revRem = storageService.getPackCount(curCig.id, revCap);
       this.setData({
         currentCigarette: curCig,
-        currentPackRemaining: storageService.getPackCount(curCig.id, revCap),
+        currentPackRemaining: revRem,
+        shareProgressDeg: this._calcShareProgressDeg(revRem, curCig),
         isBeadPopped: false
       });
     }
@@ -1082,6 +1111,7 @@ Page({
     }
 
     this.setData({ isSparking: true });
+    this.sparkStartTime = Date.now();
     audioManager.playIgnitionSoundByTool(tool.id);
     triggerHaptic('heavy');
 
@@ -1091,20 +1121,26 @@ Page({
 
     const { cx, cy } = this.getTipCoordinates();
     if (tool.id === 'vintage_match') {
-      // 火柴特有的柔和微粒火星
-      this.particles.emitSparks(cx, cy, 14);
-    } else if (tool.id === 'blue_torch') {
-      // 强劲蓝焰火枪密集火星
-      this.particles.emitSparks(cx, cy, 26);
-    } else {
+      // 火柴柔和微粒火星
       this.particles.emitSparks(cx, cy, 18);
+    } else if (tool.id === 'blue_torch') {
+      // 强劲蓝焰火枪密集穿透火星
+      this.particles.emitSparks(cx, cy, 32);
+    } else {
+      this.particles.emitSparks(cx, cy, 24);
+    }
+
+    // 烟丝瞬间点燃腾起第一缕生动轻烟
+    if (typeof this.particles.emitVolumetricCombustionSmoke === 'function') {
+      this.particles.emitVolumetricCombustionSmoke(cx, cy, '#ffffff');
+      this.particles.emitVolumetricCombustionSmoke(cx, cy - 8, '#fef08a');
     }
 
     if (this._sparkResetTimer) clearTimeout(this._sparkResetTimer);
     this._sparkResetTimer = setTimeout(() => {
       this._sparkResetTimer = null;
       this.setData({ isSparking: false });
-    }, 550);
+    }, 750);
 
     if (this.fsm.light()) {
       storageService.incrementIgniteCount();
@@ -1325,6 +1361,33 @@ Page({
       console.warn('Leaderboard rank evaluation fallback:', e);
     }
 
+    // 自动闭环打卡签到：完成一次替烟即刻自动盖印今日自律打卡，杜绝主页与打卡业务断层
+    storageService.recordDailyCheckIn();
+    const checkInDates = (storageService.getCheckInDates && storageService.getCheckInDates()) || [];
+    const allPunchedDateKeySet = new Set(checkInDates);
+    const formatYMD = (y, m, d) => `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    records.forEach(r => {
+      if (!r || !r.timestamp) return;
+      const ts = typeof r.timestamp === 'string' ? Number(r.timestamp) || Date.parse(r.timestamp) : r.timestamp;
+      const d = new Date(ts);
+      if (!isNaN(d.getTime())) {
+        allPunchedDateKeySet.add(formatYMD(d.getFullYear(), d.getMonth() + 1, d.getDate()));
+      }
+    });
+
+    const nowD = new Date();
+    let streakDays = 0;
+    const startCursor = new Date(nowD.getFullYear(), nowD.getMonth(), nowD.getDate());
+    for (let offset = 0; offset < 3650; offset++) {
+      const key = formatYMD(startCursor.getFullYear(), startCursor.getMonth() + 1, startCursor.getDate());
+      if (allPunchedDateKeySet.has(key)) {
+        streakDays++;
+      } else {
+        break;
+      }
+      startCursor.setDate(startCursor.getDate() - 1);
+    }
+
     const PUNCHLINES = [
       '尼古丁骂骂咧咧地退出了群聊！',
       '你的双肺正在后台给你疯狂点赞 👍',
@@ -1343,6 +1406,7 @@ Page({
         lifeRegained: life,
         inhaleCount: inhales,
         durationSeconds: duration,
+        streakDays: streakDays || 1,
         rankFeedback
       },
       myRankInfo
@@ -1406,9 +1470,11 @@ Page({
       curCig = getCigaretteById(revertId) || DEFAULT_CIGARETTE;
       storageService.setSelectedCigaretteId(curCig.id);
       const revCap = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
+      const revRem = storageService.getPackCount(curCig.id, revCap);
       this.setData({
         currentCigarette: curCig,
-        currentPackRemaining: storageService.getPackCount(curCig.id, revCap),
+        currentPackRemaining: revRem,
+        shareProgressDeg: this._calcShareProgressDeg(revRem, curCig),
         isBeadPopped: false
       });
     }
@@ -1432,7 +1498,8 @@ Page({
     audioManager.playPackOpenSound();
     triggerHaptic('medium');
     this.setData({
-      currentPackRemaining: newRem
+      currentPackRemaining: newRem,
+      shareProgressDeg: this._calcShareProgressDeg(newRem, curCig)
     });
     this.restartCigarette();
     setTimeout(() => {
@@ -1497,6 +1564,7 @@ Page({
       singleStickSavedPrice: singleStickPrice,
       quitDays,
       currentPackRemaining: packRemaining,
+      shareProgressDeg: this._calcShareProgressDeg(packRemaining, this.data.currentCigarette),
       smokeEffectsList,
       myRankInfo
     });
@@ -1562,6 +1630,15 @@ Page({
       clearTimeout(this._sceneGuideTimer);
       this._sceneGuideTimer = null;
     }
+    // 点燃引导 timer
+    if (this._igniteGuideTimer) {
+      clearTimeout(this._igniteGuideTimer);
+      this._igniteGuideTimer = null;
+    }
+    if (this.igniteGuideDismissTimer) {
+      clearTimeout(this.igniteGuideDismissTimer);
+      this.igniteGuideDismissTimer = null;
+    }
   },
 
   // ================= 抽烟环境长按引导微气泡管线 (仅单次会话进入程序展示一次，3.2s后自动渐隐) =================
@@ -1607,6 +1684,10 @@ Page({
 
   // 单击快速轮换下一个沉浸环境
   toggleScene() {
+    // 微信小程序双重触发防御：长按触发后抬手产生的幽灵点击严格拦截
+    if (this._suppressNextTapUntil && Date.now() < this._suppressNextTapUntil) {
+      return;
+    }
     audioManager.unlockAudio();
     triggerHaptic('medium');
     this.dismissSceneGuide();
@@ -1628,8 +1709,6 @@ Page({
     if (this.data.isAmbientEnabled) {
       audioManager.startAmbientSound(nextScene.id);
     }
-
-    toast.info(`已切换至【${nextScene.name}】`);
   },
 
   // ================= 烟雾特效长按引导微气泡管线 (仅单次会话进入程序展示一次，3.2s后自动渐隐) =================
@@ -1673,8 +1752,291 @@ Page({
     this.openSmokeEffectDrawer();
   },
 
+  // ================= 点燃按钮长按引导气泡管线 (仅单次会话显示一次，与环境/烟雾引导逻辑一致) =================
+  checkIgniteGuide() {
+    try {
+      if (!this.data.showIgniteGuide) {
+        if (this._igniteGuideTimer) clearTimeout(this._igniteGuideTimer);
+        // 延迟 800ms 弹出（比环境/烟雾稍晚，三个气泡错峰出现）
+        this._igniteGuideTimer = setTimeout(() => {
+          this._igniteGuideTimer = null;
+          this.setData({ showIgniteGuide: true, isIgniteGuideFading: false });
+          if (this.igniteGuideDismissTimer) clearTimeout(this.igniteGuideDismissTimer);
+          // 3.2 秒后自动渐隐消失
+          this.igniteGuideDismissTimer = setTimeout(() => {
+            this.igniteGuideDismissTimer = null;
+            this.dismissIgniteGuide();
+          }, 3200);
+        }, 800);
+      }
+    } catch (e) {}
+  },
+
+  dismissIgniteGuide() {
+    if (this.igniteGuideDismissTimer) {
+      clearTimeout(this.igniteGuideDismissTimer);
+      this.igniteGuideDismissTimer = null;
+    }
+    if (this._igniteGuideTimer) {
+      clearTimeout(this._igniteGuideTimer);
+      this._igniteGuideTimer = null;
+    }
+    this.setData({ isIgniteGuideFading: true });
+    this._igniteGuideTimer = setTimeout(() => {
+      this._igniteGuideTimer = null;
+      this.setData({ showIgniteGuide: false, isIgniteGuideFading: false });
+    }, 350);
+  },
+
+  onTapIgniteGuideTooltip() {
+    this.dismissIgniteGuide();
+    this.openIgnitionToolDrawer();
+  },
+
+  // ================= 点火器具工坊 · 底部抽屉 =================
+  /** 长按点燃按钮：仅在 UNLIT 状态打开器具选择抽屉 */
+  onIgniteLongPress() {
+    this._suppressNextTapUntil = Date.now() + 500;
+    if (this.data.simulatorState !== 'UNLIT') return;
+    this.openIgnitionToolDrawer();
+  },
+
+  openIgnitionToolDrawer() {
+    audioManager.unlockAudio();
+    triggerHaptic('medium');
+    this.dismissIgniteGuide();
+    const curTool = this.data.currentIgnitionTool || IGNITION_TOOLS[0];
+    const idx = IGNITION_TOOLS.findIndex(t => t.id === curTool.id);
+    const savedFidgetCount = wx.getStorageSync('SMOKEFREE_FIDGET_COUNT') || 0;
+    // 打开时将预览器具重置为当前已装配器具，开启掌心把玩仪式
+    this.setData({
+      showIgnitionToolDrawer: true,
+      previewIgnitionTool: curTool,
+      activeToolIndex: idx >= 0 ? idx : 0,
+      isPreviewTesting: false,
+      isZippoLidOpen: false,
+      isFidgetActive: false,
+      justEquippedAnim: false,
+      fidgetCount: savedFidgetCount
+    });
+  },
+
+  closeIgnitionToolDrawer() {
+    this.setData({
+      showIgnitionToolDrawer: false,
+      isFidgetActive: false,
+      isPreviewTesting: false
+    });
+  },
+
+  /** 3D 殿堂展台：点击下方底座切换展示器具 (切换视听音效 + 震动 + 浮空呈现) */
+  onSelectShowcaseTool(e) {
+    const toolId = e.currentTarget.dataset.id;
+    if (!toolId) return;
+    const tool = IGNITION_TOOLS.find(t => t.id === toolId);
+    if (!tool) return;
+
+    audioManager.unlockAudio();
+    audioManager.playSwitchSound();
+    triggerHaptic('light');
+
+    this.setData({
+      previewIgnitionTool: tool,
+      isPreviewTesting: false,
+      isZippoLidOpen: false,
+      isFidgetActive: false
+    });
+  },
+
+  /** 掌心 EDC：记录并持久化一次情绪解压把玩计数 */
+  _recordFidgetRelief() {
+    const nextCount = (this.data.fidgetCount || 0) + 1;
+    this.setData({
+      fidgetCount: nextCount,
+      fidgetCounterBumping: true
+    });
+    if (this._fcpTimer) clearTimeout(this._fcpTimer);
+    this._fcpTimer = setTimeout(() => {
+      this._fcpTimer = null;
+      this.setData({ fidgetCounterBumping: false });
+    }, 280);
+    try {
+      wx.setStorageSync('SMOKEFREE_FIDGET_COUNT', nextCount);
+    } catch (e) {}
+    return nextCount;
+  },
+
+  /** 掌心 EDC：触发 Zippo 掀盖清脆金属鸣响 */
+  triggerZippoFlip(isOpen) {
+    audioManager.unlockAudio();
+    audioManager.playZippoOpenSound();
+    triggerHaptic('medium');
+    this._recordFidgetRelief();
+    this.setData({ isZippoLidOpen: isOpen });
+  },
+
+  /** 掌心 EDC：触发点火机械真声与视听震感 (80ms 超低延迟连击响应 + 双态交替动画) */
+  triggerFidgetStrike(toolId) {
+    if (this._fidgetThrottle && Date.now() - this._fidgetThrottle < 80) return;
+    this._fidgetThrottle = Date.now();
+
+    audioManager.unlockAudio();
+    audioManager.playIgnitionSoundByTool(toolId);
+    triggerHaptic('medium');
+    this._recordFidgetRelief();
+
+    // 双态交替切换：通过 1 和 2 强制在每次连续点击时重置 CSS @keyframes 动画
+    const nextBlast = (this.data.fidgetBlastIndex === 1) ? 2 : 1;
+    const nextShockwave = (this.data.shockwaveToggle === 1) ? 2 : 1;
+
+    this.setData({
+      isPreviewTesting: true,
+      fidgetBlastIndex: nextBlast,
+      shockwaveToggle: nextShockwave,
+      fidgetSparksVisible: true
+    });
+
+    if (this._heroStageTimer) clearTimeout(this._heroStageTimer);
+    this._heroStageTimer = setTimeout(() => {
+      this._heroStageTimer = null;
+      if (!this.data.isFidgetActive) {
+        this.setData({
+          isPreviewTesting: false,
+          fidgetBlastIndex: 0,
+          shockwaveToggle: 0,
+          fidgetSparksVisible: false
+        });
+      }
+    }, 550);
+  },
+
+  /** 掌心 EDC：触摸手势交互识别 (滑动摩擦/上滑掀盖/下压砂轮/长按蓝焰) */
+  onStageTouchStart(e) {
+    if (!e.touches || !e.touches[0]) return;
+    this._touchStartX = e.touches[0].clientX;
+    this._touchStartY = e.touches[0].clientY;
+    this._touchStartTime = Date.now();
+    this._hasTriggeredGesture = false;
+
+    const tool = this.data.previewIgnitionTool || IGNITION_TOOLS[0];
+    // 战术蓝焰喷枪：按住即刻喷薄
+    if (tool.id === 'blue_torch') {
+      audioManager.unlockAudio();
+      audioManager.playTorchSound();
+      triggerHaptic('heavy');
+      this._recordFidgetRelief();
+      this.setData({ isFidgetActive: true, isPreviewTesting: true });
+    }
+  },
+
+  onStageTouchMove(e) {
+    if (!e.touches || !e.touches[0] || this._hasTriggeredGesture) return;
+    const curX = e.touches[0].clientX;
+    const curY = e.touches[0].clientY;
+    const dx = curX - this._touchStartX;
+    const dy = curY - this._touchStartY;
+    const tool = this.data.previewIgnitionTool || IGNITION_TOOLS[0];
+
+    // 1. 红头火柴：横向指尖划擦 (模拟红磷擦纸摩擦)
+    if (tool.id === 'vintage_match' && Math.abs(dx) > 30) {
+      this._hasTriggeredGesture = true;
+      this.triggerFidgetStrike('vintage_match');
+      return;
+    }
+
+    // 2. Zippo：指尖上滑掀盖 (听到铛的清脆声)
+    if (tool.id === 'zippo_vintage' && dy < -25 && !this.data.isZippoLidOpen) {
+      this._hasTriggeredGesture = true;
+      this.triggerZippoFlip(true);
+      return;
+    }
+
+    // 3. 经典砂轮打火机：拇指下压滑动砂轮
+    if (tool.id === 'flint_lighter' && dy > 25) {
+      this._hasTriggeredGesture = true;
+      this.triggerFidgetStrike('flint_lighter');
+      return;
+    }
+
+    // 4. 车载电热丝：按下下压
+    if (tool.id === 'car_lighter' && dy > 25) {
+      this._hasTriggeredGesture = true;
+      this.triggerFidgetStrike('car_lighter');
+      return;
+    }
+  },
+
+  onStageTouchEnd(e) {
+    const tool = this.data.previewIgnitionTool || IGNITION_TOOLS[0];
+    if (tool.id === 'blue_torch' && this.data.isFidgetActive) {
+      this.setData({ isFidgetActive: false });
+      setTimeout(() => {
+        if (!this.data.isFidgetActive) {
+          this.setData({ isPreviewTesting: false });
+        }
+      }, 350);
+      return;
+    }
+    // 注意：轻触由 catchtap="onTapHeroStage" 统一分发，杜绝与 touchend 双重触发互相吞掉点击！
+  },
+
+  /** 掌心 EDC：轻触中央浮空机体或展台触发把玩 */
+  onTapHeroStage() {
+    if (this._hasTriggeredGesture) {
+      this._hasTriggeredGesture = false;
+      return;
+    }
+    const tool = this.data.previewIgnitionTool || this.data.currentIgnitionTool || IGNITION_TOOLS[0];
+    if (tool.id === 'zippo_vintage') {
+      if (!this.data.isZippoLidOpen) {
+        // 第一击掀开盖子
+        this.triggerZippoFlip(true);
+      } else {
+        // 盖子已开，击发打火
+        this.triggerFidgetStrike('zippo_vintage');
+      }
+      return;
+    }
+    this.triggerFidgetStrike(tool.id);
+  },
+
+  /** 掌心 EDC：装配为专属伴侣 (无缝契约仪式感) */
+  onConfirmEquipTool() {
+    const tool = this.data.previewIgnitionTool || IGNITION_TOOLS[0];
+    if (tool.id === this.data.currentIgnitionTool.id) {
+      // 已经装配过了，触发一次试火增强满足感
+      this.onTapHeroStage();
+      return;
+    }
+
+    audioManager.unlockAudio();
+    audioManager.playSwitchSound();
+    audioManager.playIgnitionSoundByTool(tool.id);
+    triggerHaptic('heavy');
+
+    storageService.setSelectedIgnitionTool
+      ? storageService.setSelectedIgnitionTool(tool.id)
+      : wx.setStorageSync('SMOKEFREE_IGNITION_TOOL', tool.id);
+
+    this.setData({
+      currentIgnitionTool: tool,
+      isPreviewTesting: true,
+      justEquippedAnim: true
+    });
+
+    if (this._equipAnimTimer) clearTimeout(this._equipAnimTimer);
+    this._equipAnimTimer = setTimeout(() => {
+      this._equipAnimTimer = null;
+      this.setData({ justEquippedAnim: false, isPreviewTesting: false });
+    }, 850);
+  },
+
   // ================= 赛博烟雾特效工坊 (实机切换图标与氪金/免费解锁特工坊) =================
   toggleSmokeEffect() {
+    // 微信小程序双重触发防御：长按触发后抬手产生的幽灵点击严格拦截
+    if (this._suppressNextTapUntil && Date.now() < this._suppressNextTapUntil) {
+      return;
+    }
     audioManager.unlockAudio();
     triggerHaptic('medium');
     this.dismissSmokeGuide();
@@ -1715,6 +2077,7 @@ Page({
   },
 
   openSmokeEffectDrawer() {
+    this._suppressNextTapUntil = Date.now() + 500;
     audioManager.unlockAudio();
     audioManager.playSwitchSound();
     triggerHaptic('light');
@@ -1894,7 +2257,6 @@ Page({
     audioManager.unlockAudio();
     // 抖灰过程中严格锁定，禁止猛吸，必须等抖灰完成
     if (this.data.isAshTapping) {
-      toast.info('正在抖灰中，请稍候');
       triggerHaptic('light');
       return;
     }
@@ -1956,7 +2318,8 @@ Page({
     const { remaining: next } = storageService.consumePackSlot(curCig.id, -1, cap);
 
     this.setData({
-      currentPackRemaining: next
+      currentPackRemaining: next,
+      shareProgressDeg: this._calcShareProgressDeg(next, curCig)
     });
 
     return next;
@@ -2047,6 +2410,7 @@ Page({
 
   // ================= 沉浸生活场景氛围切换 =================
   openSceneModal() {
+    this._suppressNextTapUntil = Date.now() + 500;
     this.dismissSceneGuide();
     audioManager.unlockAudio();
     audioManager.playSwitchSound();
@@ -2102,8 +2466,6 @@ Page({
     if (this.data.isAmbientEnabled) {
       audioManager.startAmbientSound(sceneId);
     }
-
-    toast.info(`已置身【${sceneInfo.name}】`);
   },
 
   toggleAmbientSound() {
@@ -2113,12 +2475,6 @@ Page({
     audioManager.setAmbientEnabled(nextState, this.data.currentScene);
     triggerHaptic('light');
     this.setData({ isAmbientEnabled: nextState });
-
-    if (nextState) {
-      toast.info('已开启场景白噪音');
-    } else {
-      toast.info('已静音场景白噪音');
-    }
   },
 
   stopBubble() {},

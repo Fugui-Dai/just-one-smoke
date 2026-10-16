@@ -4,7 +4,7 @@
  * 调度当前活跃页面挂载的 <custom-toast id="customToast"> 组件实例
  * 替代原生生硬的 wx.showToast，呈现灵动浮空微胶囊 HUD
  */
-export function showToast(options) {
+function showToast(options) {
   if (typeof options === 'string') {
     options = { title: options };
   }

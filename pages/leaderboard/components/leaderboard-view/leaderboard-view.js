@@ -1,5 +1,5 @@
 // components/leaderboard-view/leaderboard-view.js
-import { DEFAULT_USER_AVATAR_SVG } from '../../utils/vectorIcons.js';
+import { DEFAULT_USER_AVATAR_SVG } from '../../../../utils/vectorIcons.js';
 
 Component({
   properties: {

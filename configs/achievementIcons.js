@@ -4,9 +4,7 @@
  * 纯原生 SVG 矢量微雕 · 珠宝级多层渐变与金属光影 · 告别粗糙系统 Emoji
  */
 
-function svgToUri(svgString) {
-  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString.trim());
-}
+import { svgToUri } from '../utils/vectorIcons.js';
 
 export const ACHIEVEMENT_ICONS = {
   // 1. 破土初萌 (Lv.1 · 启蒙): 沃土初萌嫩芽与晨露微星

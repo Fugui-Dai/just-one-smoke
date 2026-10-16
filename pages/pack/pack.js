@@ -13,24 +13,8 @@ import {
   PACK_DISPLAY_MODE,
   DEFAULT_PACK_CAPACITY
 } from '../../configs/catalog.js';
-
-function measureSafeAreaSync() {
-  try {
-    const sysInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
-    const menuInfo = wx.getMenuButtonBoundingClientRect ? wx.getMenuButtonBoundingClientRect() : null;
-    const statusBarHeight = sysInfo.statusBarHeight || 44;
-    let navBarHeight = 44;
-    let capsuleRightSpace = 96;
-
-    if (menuInfo && menuInfo.top) {
-      navBarHeight = (menuInfo.top - statusBarHeight) * 2 + menuInfo.height;
-      capsuleRightSpace = (sysInfo.windowWidth - menuInfo.left) + 12;
-    }
-    return { statusBarHeight, navBarHeight, capsuleRightSpace };
-  } catch (e) {
-    return { statusBarHeight: 44, navBarHeight: 44, capsuleRightSpace: 100 };
-  }
-}
+import { measureSafeAreaSync, detectIsIOS } from '../../utils/safeArea.js';
+import { navigateBackWithSound } from '../../utils/navigation.js';
 
 function computeLidWatermark(cig, capacity) {
   if (!cig) return '★ 20 FILTER CIGARETTES ★';
@@ -43,6 +27,13 @@ function computeLidWatermark(cig, capacity) {
 
 const INITIAL_SAFE_AREA = measureSafeAreaSync();
 
+const VFX_TIER_OPTIONS = [
+  { id: 'standard', name: '普通', fullName: '晨曦冷刃', icon: '✦', tag: '基础', color: '#e2e8f0' },
+  { id: 'day', name: '日卡', fullName: '翡翠碧波', icon: '🌿', tag: '日卡', color: '#10b981' },
+  { id: 'month', name: '月卡', fullName: '极光紫晶', icon: '🔮', tag: '月卡', color: '#a855f7' },
+  { id: 'lifetime', name: '至尊', fullName: '曜世真龙', icon: '👑', tag: '至尊', color: '#fbbf24' }
+];
+
 Page({
   data: {
     // 导航与屏幕尺寸适配
@@ -51,6 +42,10 @@ Page({
     capsuleRightSpace: INITIAL_SAFE_AREA.capsuleRightSpace,
 
     vipTheme: '',
+
+    // 品鉴特效阶梯选项 (普通 · 日卡 · 月卡 · 至尊)
+    vfxTierOptions: VFX_TIER_OPTIONS,
+    currentVfxTier: 'lifetime', // 默认至尊真龙体验，支持点击即时切换
 
     // 烟盒陈列模式 ('row6': 6支宽幕轻奢单排 | 'matrix20': 经典20支双排矩阵)
     packLayoutMode: PACK_DISPLAY_MODE,
@@ -64,7 +59,6 @@ Page({
     packCount: DEFAULT_PACK_CAPACITY, // 盒内剩余烟支数量
     slotArray: [], // 槽位索引数组 [0..5] 或 [0..19] 或 [0..4]
     slotStates: [], // 每个槽位是否有烟状态数组 [true, false, ...]
-    pullVfxType: 'vfx2', // 'vfx1' (经典出鞘 360°) | 'vfx2' (九天游龙 720°)
     flightStyles: computeFlightStyles(DEFAULT_CIGARETTE),
 
     // 3D 动画交互状态
@@ -87,7 +81,6 @@ Page({
     // 读取真实剩余槽位状态与剩余数量（绝不强制重置未抽完的烟盒，保留被抽走后的空槽位置）
     const slotStates = storageService.getPackSlots(curCig.id, capacity);
     const count = slotStates.filter(Boolean).length;
-    const pullVfxType = storageService.getPullVfxType();
 
     const records = storageService.getRecords();
     const totalSubs = records.length;
@@ -110,9 +103,14 @@ Page({
       slotArray.push(i);
     }
 
+    const vipInfo = vipService.getVipInfo();
+    const defaultTier = vipInfo.isVip ? (vipInfo.tierId || 'lifetime') : 'lifetime';
+
     // 单次原子化 setData 直出目标名烟 3D 状态，包含完整 flightStyles 与独立槽位状态
     this.setData({
       vipTheme: vipService.getVipTheme(),
+      vfxTierOptions: VFX_TIER_OPTIONS,
+      currentVfxTier: defaultTier,
       packLayoutMode: PACK_DISPLAY_MODE,
       currentCigarette: curCig,
       isCurrentUnlocked: unlocked,
@@ -122,7 +120,6 @@ Page({
       packCount: count,
       slotArray,
       slotStates,
-      pullVfxType,
       flightStyles,
       isLidOpen: false,
       isPulling: false,
@@ -166,27 +163,11 @@ Page({
     } catch (e) {}
   },
 
-  // 切换抽烟特效 (特效1: 经典出鞘 360° | 特效2: 九天游龙 720°)
-  onSwitchPullVfx(e) {
-    const vfx = e.currentTarget.dataset.vfx;
-    if (!vfx || vfx === this.data.pullVfxType) return;
-    audioManager.unlockAudio();
-    audioManager.playSwitchSound();
-    triggerHaptic('medium');
-    const savedType = storageService.setPullVfxType(vfx);
-    this.setData({
-      pullVfxType: savedType
-    });
-    const label = savedType === 'vfx1' ? '特效1：经典出鞘 360°' : '特效2：九天游龙 720°';
-    toast.info(`已切换至【${label}】`);
-  },
-
   startFlightVfxLoop(slotOffsetX = 0) {
     this.stopFlightVfxLoop();
     packFlightVfxRenderer.reset();
     this._flightStartTime = Date.now();
     const pxOffset = (slotOffsetX || 0) * 0.5;
-    const vfxType = this.data.pullVfxType || 'vfx2';
 
     const step = () => {
       if (!this._flightStartTime) return;
@@ -197,7 +178,7 @@ Page({
           this._flightCanvasW,
           this._flightCanvasH,
           elapsedSec,
-          { slotOffsetX: pxOffset, vfxType }
+          { slotOffsetX: pxOffset, vfxTier: this.data.currentVfxTier || 'lifetime' }
         );
       }
       if (elapsedSec >= 4.5) {
@@ -277,6 +258,7 @@ Page({
 
   clearPullTimers() {
     this._isPullingInProgress = false;
+    if (this._lidOpenDelayTimer) { clearTimeout(this._lidOpenDelayTimer); this._lidOpenDelayTimer = null; }
     if (this._pullTimer1) { clearTimeout(this._pullTimer1); this._pullTimer1 = null; }
     if (this._pullTimer2) { clearTimeout(this._pullTimer2); this._pullTimer2 = null; }
     if (this._pullTimer3) { clearTimeout(this._pullTimer3); this._pullTimer3 = null; }
@@ -309,6 +291,16 @@ Page({
     this.setData({ isLidOpen: next });
   },
 
+  // 切换品鉴特效档位 (普通 · 日卡 · 月卡 · 至尊)
+  onSelectVfxTier(e) {
+    const tier = e.currentTarget.dataset.tier;
+    if (!tier || tier === this.data.currentVfxTier) return;
+    audioManager.playSwitchSound();
+    const hapticMap = { standard: 'light', day: 'medium', month: 'medium', lifetime: 'heavy' };
+    triggerHaptic(hapticMap[tier] || 'medium');
+    this.setData({ currentVfxTier: tier });
+  },
+
   // 点击盒内某支烟直接抽取（点到谁谁就出来，然后该位置空着）
   onTapCigaretteSlot(e) {
     const index = Number(e.currentTarget.dataset.index);
@@ -319,7 +311,7 @@ Page({
     }
     if (this._fromTrial && this._trialPullUsed) {
       triggerHaptic('medium');
-      toast.warn('单支尝鲜仅限抽取 1 支，解锁或开通 VIP 可无限畅享');
+      toast.warn(detectIsIOS() ? '单支尝鲜仅限抽取 1 支，自律解锁或升级特权可畅享' : '单支尝鲜仅限抽取 1 支，解锁或开通 VIP 可无限畅享');
       return;
     }
     const curCig = this.data.currentCigarette;
@@ -337,10 +329,9 @@ Page({
       return;
     }
 
-    // 若点击的位置已经是空槽，提示该位置烟支已取出，绝不误抽其他槽位
+    // 若点击的位置已经是空槽，轻微物理顿挫反馈，绝不误抽其他槽位
     if (Array.isArray(this.data.slotStates) && !this.data.slotStates[index]) {
       triggerHaptic('light');
-      toast.info('该位置烟支已取出，请点选其他烟支');
       return;
     }
 
@@ -352,11 +343,12 @@ Page({
     if (!this.data.isCurrentUnlocked) {
       triggerHaptic('medium');
       audioManager.playSwitchSound();
+      const isIOS = detectIsIOS();
       wx.showModal({
         title: '🔒 名烟待解锁',
-        content: `【${this.data.currentCigarette.name}】尚未解锁（${this.data.currentCigarette.unlockDesc}）。是否前往替烟展柜挑选已解锁名烟或开通VIP直通畅享？`,
+        content: `【${this.data.currentCigarette.name}】尚未解锁（${this.data.currentCigarette.unlockDesc}）。是否前往替烟展柜挑选已解锁名烟或${isIOS ? '了解特权专区' : '开通VIP'}直通畅享？`,
         confirmText: '去展柜',
-        cancelText: '开通VIP',
+        cancelText: isIOS ? '特权专区' : '开通VIP',
         confirmColor: '#f59e0b',
         cancelColor: '#38bdf8',
         success: (res) => {
@@ -371,7 +363,7 @@ Page({
     }
     if (this._fromTrial && this._trialPullUsed) {
       triggerHaptic('medium');
-      toast.warn('单支尝鲜仅限抽取 1 支，解锁或开通 VIP 可无限畅享');
+      toast.warn(detectIsIOS() ? '单支尝鲜仅限抽取 1 支，自律解锁或升级特权可畅享' : '单支尝鲜仅限抽取 1 支，解锁或开通 VIP 可无限畅享');
       return;
     }
     const curCig = this.data.currentCigarette;
@@ -409,13 +401,26 @@ Page({
     this.clearPullTimers();
     this._isPullingInProgress = true;
 
+    // 若当前烟盒盖未打开，先执行丝滑开盖物理翻转与拟真声振反馈，240ms 盖子掀起后再进入抽烟出鞘动效，彻底杜绝帧冲突卡顿
     if (!this.data.isLidOpen) {
       audioManager.playPackOpenSound();
+      triggerHaptic('medium');
       this.setData({ isLidOpen: true });
+      this._lidOpenDelayTimer = setTimeout(() => {
+        this._lidOpenDelayTimer = null;
+        this._startPullSequence(slotIndex);
+      }, 240);
+      return;
     }
 
+    this._startPullSequence(slotIndex);
+  },
+
+  _startPullSequence(slotIndex) {
     audioManager.playPullCigaretteSound();
-    triggerHaptic('heavy');
+    const tier = this.data.currentVfxTier || 'lifetime';
+    const pullHapticMap = { standard: 'light', day: 'medium', month: 'medium', lifetime: 'heavy' };
+    triggerHaptic(pullHapticMap[tier] || 'heavy');
 
     const curCig = this.data.currentCigarette;
     const capacity = curCig.packCapacity || (curCig.isCigar ? 5 : DEFAULT_PACK_CAPACITY);
@@ -492,8 +497,8 @@ Page({
       triggerHaptic('medium');
     }, 1120);
 
-    // 阶段 06 [屏幕呈现]：未点燃东方流云金纹烟支 28° 悬停定格 + 等待用户点击屏幕跳转 (特效1: 1.28s定格, 特效2: 1.48s定格)
-    const settleDelay = this.data.pullVfxType === 'vfx1' ? 1280 : 1480;
+    // 阶段 06 [屏幕呈现]：未点燃东方流云金纹烟支 22° 悬停定格 + 等待用户点击屏幕跳转 (经典出鞘 1.28s 定格)
+    const settleDelay = 1280;
     this._pullTimer4 = setTimeout(() => {
       triggerHaptic('heavy');
       this.setData({
@@ -522,7 +527,7 @@ Page({
   onUnwrapNewPack() {
     if (this._fromTrial) {
       triggerHaptic('medium');
-      toast.warn('尝鲜模式仅限品吸 1 支，解锁或开通 VIP 可无限拆包');
+      toast.warn(detectIsIOS() ? '尝鲜模式仅限品吸 1 支，自律解锁或升级特权可无限拆包' : '尝鲜模式仅限品吸 1 支，解锁或开通 VIP 可无限拆包');
       return;
     }
     audioManager.unlockAudio();
@@ -547,8 +552,6 @@ Page({
       pulledSlotIndex: -1,
       isSlotEjected: false
     });
-
-    toast.success(`拆封全新一盒【${curCig.name}】`);
   },
 
   // 确认并携带这支烟返回主页品吸（烟进入首页代表盒内已消化该支烟，但首页处于未点燃待抽状态，不代表抽完）
@@ -596,14 +599,7 @@ Page({
   onNavigateBack() {
     if (this._isNavigatingBack) return;
     this._isNavigatingBack = true;
-    audioManager.unlockAudio();
-    audioManager.playSwitchSound();
-    const pages = getCurrentPages();
-    if (pages.length > 1) {
-      wx.navigateBack({ delta: 1 });
-    } else {
-      wx.redirectTo({ url: '/pages/shop/shop' });
-    }
+    navigateBackWithSound('/pages/shop/shop');
   },
 
   preventTouchMove() {}

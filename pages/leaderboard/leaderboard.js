@@ -5,24 +5,8 @@ import { storageService } from '../../services/storageService.js';
 import { leaderboardService } from '../../services/leaderboardService.js';
 import { calculateSavings, calculateQuitDays } from '../../configs/healthCalculator.js';
 import { vipService } from '../../services/vipService.js';
-
-function measureSafeAreaSync() {
-  try {
-    const sysInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
-    const menuInfo = wx.getMenuButtonBoundingClientRect ? wx.getMenuButtonBoundingClientRect() : null;
-    const statusBarHeight = sysInfo.statusBarHeight || 44;
-    let navBarHeight = 44;
-    let capsuleRightSpace = 96;
-
-    if (menuInfo && menuInfo.top) {
-      navBarHeight = (menuInfo.top - statusBarHeight) * 2 + menuInfo.height;
-      capsuleRightSpace = (sysInfo.windowWidth - menuInfo.left) + 12;
-    }
-    return { statusBarHeight, navBarHeight, capsuleRightSpace };
-  } catch (e) {
-    return { statusBarHeight: 44, navBarHeight: 44, capsuleRightSpace: 100 };
-  }
-}
+import { measureSafeAreaSync } from '../../utils/safeArea.js';
+import { navigateBackWithSound } from '../../utils/navigation.js';
 
 function buildInitialLeaderboardState(category = 'substituted') {
   const safeArea = measureSafeAreaSync();
@@ -148,9 +132,6 @@ Page({
   },
 
   onNavigateBack() {
-    audioManager.unlockAudio();
-    audioManager.playSwitchSound();
-    triggerHaptic('light');
-    wx.navigateBack({ delta: 1 });
+    navigateBackWithSound();
   }
 });

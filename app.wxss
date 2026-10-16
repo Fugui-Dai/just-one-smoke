@@ -52,3 +52,281 @@ button::after {
   border-bottom: none !important;
   box-shadow: none !important;
 }
+
+/* ==================== 全局通用：VIP 尊享动态极光天幕与浮光星尘 ==================== */
+.vip-ambient-stage {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* 🏎️ 小米汽车 8 层高透镜面清漆全局反光弧面 (Global Clear-Coat Horizon Reflection) */
+.vip-ambient-stage::after {
+  content: '';
+  position: absolute;
+  top: -20%;
+  left: -20%;
+  width: 140%;
+  height: 60%;
+  background: radial-gradient(ellipse 80% 50% at 50% 20%, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.02) 45%, transparent 70%);
+  transform: rotate(-8deg);
+  pointer-events: none;
+  opacity: 0.75;
+}
+
+.vip-aurora-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(56rpx);
+  opacity: 0.55;
+  animation: globalVipOrbBreath 6s infinite alternate ease-in-out;
+}
+
+.vip-aurora-orb.orb-primary {
+  width: 520rpx;
+  height: 300rpx;
+  top: -50rpx;
+  left: 50%;
+  margin-left: -260rpx;
+  background: radial-gradient(circle, var(--vip-theme-orb1, rgba(168, 85, 247, 0.38)) 0%, transparent 72%);
+}
+
+.vip-aurora-orb.orb-secondary {
+  width: 400rpx;
+  height: 400rpx;
+  top: 38%;
+  right: -120rpx;
+  background: radial-gradient(circle, var(--vip-theme-orb2, rgba(192, 132, 252, 0.20)) 0%, transparent 70%);
+  animation-delay: -3s;
+}
+
+@keyframes globalVipOrbBreath {
+  0% { transform: scale(0.92); opacity: 0.42; }
+  100% { transform: scale(1.12); opacity: 0.72; }
+}
+
+.vip-spark {
+  position: absolute;
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background: var(--vip-theme-spark, #f5d0fe);
+  box-shadow: 0 0 14rpx var(--vip-theme-spark-glow, #c084fc);
+  opacity: 0.6;
+  animation: globalVipSparkFloat 5s infinite ease-in-out;
+}
+
+.vip-spark.s1 { top: 16%; left: 16%; animation-delay: 0s; }
+.vip-spark.s2 { top: 32%; right: 14%; width: 6rpx; height: 6rpx; animation-delay: -1.6s; }
+.vip-spark.s3 { top: 62%; left: 18%; width: 6rpx; height: 6rpx; animation-delay: -3.2s; }
+
+@keyframes globalVipSparkFloat {
+  0%, 100% { transform: translateY(0) scale(0.8); opacity: 0.25; }
+  50% { transform: translateY(-24rpx) scale(1.2); opacity: 0.85; }
+}
+
+/* ==================== VIP 全站车身色彩天幕 (先锋纯电名车高定专属) ==================== */
+/* 经典原厂 VIP 系列 */
+.theme-classic {
+  --vip-theme-orb1: rgba(148, 163, 184, 0.25);
+  --vip-theme-orb2: rgba(100, 116, 139, 0.15);
+  --vip-theme-spark: #cbd5e1;
+  --vip-theme-spark-glow: #94a3b8;
+  background: radial-gradient(circle at 50% -10%, rgba(148, 163, 184, 0.14) 0%, #111318 45%, #07080b 100%) !important;
+}
+
+.theme-day, .theme-emerald {
+  --vip-theme-orb1: rgba(16, 185, 129, 0.42);
+  --vip-theme-orb2: rgba(52, 211, 153, 0.22);
+  --vip-theme-spark: #a7f3d0;
+  --vip-theme-spark-glow: #34d399;
+  background: radial-gradient(ellipse 90% 75% at 50% 16%, #133328 0%, #0d251d 40%, #071712 70%, #020907 100%) !important;
+}
+
+.theme-month, .theme-purple {
+  --vip-theme-orb1: rgba(168, 85, 247, 0.42);
+  --vip-theme-orb2: rgba(192, 132, 252, 0.22);
+  --vip-theme-spark: #f5d0fe;
+  --vip-theme-spark-glow: #c084fc;
+  background: radial-gradient(ellipse 90% 75% at 50% 16%, #281a38 0%, #1d1329 40%, #140d1c 70%, #0a060e 100%) !important;
+}
+
+.theme-lifetime, .theme-glacier, .theme-gold {
+  --vip-theme-orb1: rgba(251, 191, 36, 0.42);
+  --vip-theme-orb2: rgba(245, 158, 11, 0.22);
+  --vip-theme-spark: #fef08a;
+  --vip-theme-spark-glow: #fbbf24;
+  background: radial-gradient(ellipse 90% 75% at 50% 16%, #332615 0%, #251b0e 40%, #171108 70%, #0d0904 100%) !important;
+}
+
+/* 先锋极速轿跑系列 (Hyper GT Series) */
+.theme-gt_gulf_blue {
+  --vip-theme-orb1: rgba(14, 165, 233, 0.45);
+  --vip-theme-orb2: rgba(56, 189, 248, 0.22);
+  --vip-theme-spark: #7dd3fc;
+  --vip-theme-spark-glow: #38bdf8;
+  background: radial-gradient(ellipse 90% 75% at 50% 16%, #0d2f4d 0%, #081f33 40%, #051321 70%, #020910 100%) !important;
+}
+
+.theme-gt_lava_orange {
+  --vip-theme-orb1: rgba(249, 115, 22, 0.45);
+  --vip-theme-orb2: rgba(251, 146, 60, 0.22);
+  --vip-theme-spark: #fed7aa;
+  --vip-theme-spark-glow: #fb923c;
+  background: radial-gradient(ellipse 90% 75% at 50% 16%, #3d1c09 0%, #291206 40%, #180a03 70%, #0d0501 100%) !important;
+}
+
+.theme-gt_elegant_gray {
+  --vip-theme-orb1: rgba(100, 116, 139, 0.40);
+  --vip-theme-orb2: rgba(148, 163, 184, 0.20);
+  --vip-theme-spark: #e2e8f0;
+  --vip-theme-spark-glow: #94a3b8;
+  background: radial-gradient(ellipse 90% 75% at 50% 16%, #1e2430 0%, #161a24 40%, #0e1118 70%, #07080d 100%) !important;
+}
+
+.theme-gt_meteor_blue {
+  --vip-theme-orb1: rgba(59, 130, 246, 0.42);
+  --vip-theme-orb2: rgba(96, 165, 250, 0.20);
+  --vip-theme-spark: #bfdbfe;
+  --vip-theme-spark-glow: #60a5fa;
+  background: radial-gradient(ellipse 90% 75% at 50% 16%, #122144 0%, #0c1630 40%, #070e20 70%, #03060f 100%) !important;
+}
+
+.theme-gt_radiant_purple {
+  --vip-theme-orb1: rgba(192, 132, 252, 0.42);
+  --vip-theme-orb2: rgba(216, 180, 254, 0.20);
+  --vip-theme-spark: #f3e8ff;
+  --vip-theme-spark-glow: #c084fc;
+  background: radial-gradient(ellipse 90% 75% at 50% 16%, #2d183d 0%, #1f102b 40%, #14091d 70%, #0a040e 100%) !important;
+}
+
+.theme-gt_olive_green {
+  --vip-theme-orb1: rgba(101, 163, 13, 0.42);
+  --vip-theme-orb2: rgba(132, 204, 22, 0.20);
+  --vip-theme-spark: #d9f99d;
+  --vip-theme-spark-glow: #a3e635;
+  background: radial-gradient(ellipse 90% 75% at 50% 16%, #1e2e0d 0%, #152109 40%, #0d1505 70%, #060a02 100%) !important;
+}
+
+.theme-gt_basalt_gray {
+  --vip-theme-orb1: rgba(71, 85, 105, 0.42);
+  --vip-theme-orb2: rgba(100, 116, 139, 0.20);
+  --vip-theme-spark: #cbd5e1;
+  --vip-theme-spark-glow: #64748b;
+  background: radial-gradient(ellipse 90% 75% at 50% 16%, #18202c 0%, #121822 40%, #0b0f16 70%, #06080c 100%) !important;
+}
+
+.theme-gt_pearl_white {
+  --vip-theme-orb1: rgba(241, 245, 249, 0.32);
+  --vip-theme-orb2: rgba(203, 213, 225, 0.18);
+  --vip-theme-spark: #ffffff;
+  --vip-theme-spark-glow: #e2e8f0;
+  background: radial-gradient(ellipse 90% 75% at 50% 16%, #252b36 0%, #181d26 40%, #10131a 70%, #080a0e 100%) !important;
+}
+
+.theme-gt_diamond_black {
+  --vip-theme-orb1: rgba(51, 65, 85, 0.42);
+  --vip-theme-orb2: rgba(30, 41, 59, 0.25);
+  --vip-theme-spark: #94a3b8;
+  --vip-theme-spark-glow: #475569;
+  background: radial-gradient(ellipse 90% 75% at 50% 16%, #131722 0%, #0c0f16 40%, #07090e 70%, #030407 100%) !important;
+}
+
+.theme-gt_lightning_yellow {
+  --vip-theme-orb1: rgba(234, 179, 8, 0.45);
+  --vip-theme-orb2: rgba(250, 204, 21, 0.22);
+  --vip-theme-spark: #fef08a;
+  --vip-theme-spark-glow: #facc15;
+  background: radial-gradient(ellipse 90% 75% at 50% 16%, #3a2e0a 0%, #281f06 40%, #181303 70%, #0d0a01 100%) !important;
+}
+
+.theme-gt_capri_blue {
+  --vip-theme-orb1: rgba(2, 132, 199, 0.45);
+  --vip-theme-orb2: rgba(56, 189, 248, 0.22);
+  --vip-theme-spark: #7dd3fc;
+  --vip-theme-spark-glow: #38bdf8;
+  background: radial-gradient(ellipse 90% 75% at 50% 16%, #0b2b46 0%, #071c2f 40%, #04111e 70%, #020810 100%) !important;
+}
+
+.theme-gt_chixia_red {
+  --vip-theme-orb1: rgba(225, 29, 72, 0.45);
+  --vip-theme-orb2: rgba(251, 113, 133, 0.22);
+  --vip-theme-spark: #fecdd3;
+  --vip-theme-spark-glow: #f43f5e;
+  background: radial-gradient(ellipse 90% 75% at 50% 16%, #3c0c16 0%, #29080e 40%, #1a0408 70%, #0e0204 100%) !important;
+}
+
+.theme-gt_indigo_green {
+  --vip-theme-orb1: rgba(15, 118, 110, 0.45);
+  --vip-theme-orb2: rgba(45, 212, 191, 0.22);
+  --vip-theme-spark: #99f6e4;
+  --vip-theme-spark-glow: #2dd4bf;
+  background: radial-gradient(ellipse 90% 75% at 50% 16%, #0a2f2c 0%, #06201e 40%, #031413 70%, #010a09 100%) !important;
+}
+
+/* 旗舰奢享巡航 SUV 系列 (Horizon Luxury SUV) */
+.theme-suv_gem_green {
+  --vip-theme-orb1: rgba(5, 150, 105, 0.45);
+  --vip-theme-orb2: rgba(16, 185, 129, 0.22);
+  --vip-theme-spark: #a7f3d0;
+  --vip-theme-spark-glow: #34d399;
+  background: radial-gradient(ellipse 90% 75% at 50% 16%, #0a3325 0%, #062319 40%, #041610 70%, #020b08 100%) !important;
+}
+
+.theme-suv_titanium {
+  --vip-theme-orb1: rgba(161, 161, 170, 0.38);
+  --vip-theme-orb2: rgba(113, 113, 122, 0.20);
+  --vip-theme-spark: #e4e4e7;
+  --vip-theme-spark-glow: #a1a1aa;
+  background: radial-gradient(ellipse 90% 75% at 50% 16%, #24262c 0%, #191b20 40%, #111216 70%, #090a0d 100%) !important;
+}
+
+.theme-suv_shadow_celadon {
+  --vip-theme-orb1: rgba(20, 184, 166, 0.45);
+  --vip-theme-orb2: rgba(45, 212, 191, 0.22);
+  --vip-theme-spark: #99f6e4;
+  --vip-theme-spark-glow: #2dd4bf;
+  background: radial-gradient(ellipse 90% 75% at 50% 16%, #0b3433 0%, #072524 40%, #041716 70%, #020c0b 100%) !important;
+}
+
+.theme-suv_gold_pink {
+  --vip-theme-orb1: rgba(244, 114, 182, 0.42);
+  --vip-theme-orb2: rgba(249, 168, 212, 0.20);
+  --vip-theme-spark: #fbcfe8;
+  --vip-theme-spark-glow: #f472b6;
+  background: radial-gradient(ellipse 90% 75% at 50% 16%, #3a1529 0%, #280e1c 40%, #190812 70%, #0e0409 100%) !important;
+}
+
+.theme-suv_danxia_purple {
+  --vip-theme-orb1: rgba(147, 51, 234, 0.45);
+  --vip-theme-orb2: rgba(192, 132, 252, 0.22);
+  --vip-theme-spark: #e9d5ff;
+  --vip-theme-spark-glow: #c084fc;
+  background: radial-gradient(ellipse 90% 75% at 50% 16%, #31113f 0%, #220b2d 40%, #15061c 70%, #0c0310 100%) !important;
+}
+
+.theme-suv_deep_sea_blue {
+  --vip-theme-orb1: rgba(2, 132, 199, 0.42);
+  --vip-theme-orb2: rgba(56, 189, 248, 0.20);
+  --vip-theme-spark: #bae6fd;
+  --vip-theme-spark-glow: #38bdf8;
+  background: radial-gradient(ellipse 90% 75% at 50% 16%, #082238 0%, #051726 40%, #030e19 70%, #01070e 100%) !important;
+}
+
+.theme-suv_cherry_red {
+  --vip-theme-orb1: rgba(190, 18, 60, 0.45);
+  --vip-theme-orb2: rgba(244, 63, 94, 0.22);
+  --vip-theme-spark: #fecdd3;
+  --vip-theme-spark-glow: #fb7185;
+  background: radial-gradient(ellipse 90% 75% at 50% 16%, #3d0c19 0%, #2a0710 40%, #1a0409 70%, #0e0204 100%) !important;
+}
+
+.theme-suv_volcanic_ash {
+  --vip-theme-orb1: rgba(82, 82, 91, 0.40);
+  --vip-theme-orb2: rgba(113, 113, 122, 0.20);
+  --vip-theme-spark: #d4d4d8;
+  --vip-theme-spark-glow: #71717a;
+  background: radial-gradient(ellipse 90% 75% at 50% 16%, #1c1c20 0%, #141417 40%, #0d0d0f 70%, #060608 100%) !important;
+}

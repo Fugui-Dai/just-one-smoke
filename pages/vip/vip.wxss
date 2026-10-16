@@ -95,7 +95,7 @@ page {
 .vip-theme-wardrobe-card {
   width: 100%;
   margin: 0;
-  padding: 20rpx 22rpx;
+  padding: 24rpx 22rpx 20rpx;
   border-radius: 24rpx;
   background: rgba(15, 18, 28, 0.72);
   border: 1.5px solid rgba(255, 255, 255, 0.10);
@@ -107,81 +107,175 @@ page {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16rpx;
+  margin-bottom: 18rpx;
+}
+
+.vtw-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
 }
 
 .vtw-title {
-  font-size: 24rpx;
+  font-size: 28rpx;
   font-weight: 800;
   color: #f8fafc;
   letter-spacing: 1rpx;
 }
 
-.vtw-current {
+.vtw-subtitle {
   font-size: 22rpx;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.vtw-current {
+  font-size: 24rpx;
   font-weight: 600;
-  color: #cbd5e1;
+  color: #fbbf24;
+}
+
+/* 分类 Tab 切换 */
+.vtw-category-tabs {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 18rpx;
+  overflow-x: auto;
+}
+
+.vtw-cat-tab {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 10rpx 20rpx;
+  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1rpx solid rgba(255, 255, 255, 0.10);
+  font-size: 24rpx;
+  color: #94a3b8;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.vtw-cat-tab.active {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.vtw-cat-count {
+  font-size: 20rpx;
+  opacity: 0.8;
+}
+
+/* 药丸网格滚动区 */
+.vtw-pills-scroll {
+  max-height: 480rpx;
+  width: 100%;
 }
 
 .vtw-pills-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12rpx;
+  gap: 14rpx;
+  padding-bottom: 6rpx;
 }
 
 .vtw-pill {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6rpx;
-  padding: 14rpx 8rpx;
-  border-radius: 18rpx;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1.5rpx solid rgba(255, 255, 255, 0.10);
-  transition: all 0.22s ease;
+  gap: 8rpx;
+  padding: 14rpx 6rpx;
+  border-radius: 20rpx;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 40%, rgba(0, 0, 0, 0.35) 100%);
+  border: 1.5rpx solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1rpx 2rpx rgba(255, 255, 255, 0.25), 0 4rpx 14rpx rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  transition: all 0.22s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .vtw-pill:active {
   transform: scale(0.95);
 }
 
+
+
 .vtw-pill-icon-box {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 36rpx;
+  height: 36rpx;
+  z-index: 2;
 }
 
-.vtw-pill-icon {
-  font-size: 28rpx;
-  line-height: 1;
+/* 纳米珠光金属车漆圆点 (High-Gloss Pearlescent Specular Dot) */
+.vtw-car-dot {
+  position: relative;
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 50%;
+  border: 1.5rpx solid rgba(255, 255, 255, 0.7);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* 车漆迎光面微弧高光点 (Liquid Fresnel Reflection) */
+.car-dot-specular {
+  position: absolute;
+  top: 3rpx;
+  left: 4rpx;
+  width: 8rpx;
+  height: 5rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.95);
+  filter: blur(0.5px);
+  transform: rotate(-35deg);
 }
 
 .vtw-lock-badge {
   position: absolute;
   top: -8rpx;
   right: -14rpx;
-  font-size: 18rpx;
+  font-size: 20rpx;
   line-height: 1;
+  z-index: 3;
 }
 
 .vtw-pill-texts {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rpx;
+  gap: 4rpx;
+  width: 100%;
 }
 
 .vtw-pill-name {
-  font-size: 22rpx;
+  font-size: 24rpx;
   font-weight: 700;
-  color: #e2e8f0;
+  color: #f1f5f9;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.6);
 }
 
 .vtw-pill-tag {
   font-size: 20rpx;
   color: #94a3b8;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .vtw-pill-tag.tag-locked {
@@ -189,38 +283,10 @@ page {
 }
 
 .vtw-pill.vtw-pill-locked {
-  opacity: 0.62;
-  background: rgba(255, 255, 255, 0.03);
-  border-color: rgba(255, 255, 255, 0.06);
+  opacity: 0.58;
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.05);
 }
-
-.vtw-pill.vtw-pill-active.vtw-pill-month {
-  background: linear-gradient(145deg, rgba(168, 85, 247, 0.32), rgba(88, 28, 135, 0.28));
-  border-color: #c084fc;
-  box-shadow: 0 0 18rpx rgba(168, 85, 247, 0.38);
-}
-.vtw-pill.vtw-pill-active.vtw-pill-month .vtw-pill-name { color: #f5d0fe; }
-
-.vtw-pill.vtw-pill-active.vtw-pill-lifetime {
-  background: linear-gradient(145deg, rgba(251, 191, 36, 0.32), rgba(146, 64, 14, 0.28));
-  border-color: #fbbf24;
-  box-shadow: 0 0 18rpx rgba(251, 191, 36, 0.38);
-}
-.vtw-pill.vtw-pill-active.vtw-pill-lifetime .vtw-pill-name { color: #fef08a; }
-
-.vtw-pill.vtw-pill-active.vtw-pill-day {
-  background: linear-gradient(145deg, rgba(16, 185, 129, 0.32), rgba(6, 95, 70, 0.28));
-  border-color: #34d399;
-  box-shadow: 0 0 18rpx rgba(16, 185, 129, 0.38);
-}
-.vtw-pill.vtw-pill-active.vtw-pill-day .vtw-pill-name { color: #a7f3d0; }
-
-.vtw-pill.vtw-pill-active.vtw-pill-classic {
-  background: linear-gradient(145deg, rgba(148, 163, 184, 0.26), rgba(30, 41, 59, 0.45));
-  border-color: #cbd5e1;
-  box-shadow: 0 0 16rpx rgba(203, 213, 225, 0.24);
-}
-.vtw-pill.vtw-pill-active.vtw-pill-classic .vtw-pill-name { color: #ffffff; }
 
 /* ==================== 顶部极光沉浸导航栏 ==================== */
 .custom-navbar {
@@ -368,28 +434,28 @@ page {
   transition: all 0.5s ease;
 }
 
-.theme-day .hero-aurora-glow {
-  background: radial-gradient(circle, rgba(52, 211, 153, 0.48) 0%, rgba(16, 185, 129, 0.22) 55%, transparent 80%);
+.hero-aurora-glow {
+  position: absolute;
+  top: -60rpx;
+  width: 520rpx;
+  height: 260rpx;
+  background: radial-gradient(circle, var(--vip-theme-orb1, rgba(168, 85, 247, 0.45)) 0%, transparent 80%);
+  filter: blur(48px);
+  z-index: 0;
+  pointer-events: none;
+  transition: all 0.5s ease;
 }
 
-.theme-day .hero-aurora-glow-secondary {
-  background: radial-gradient(circle, rgba(110, 231, 183, 0.28) 0%, transparent 75%);
-}
-
-.theme-month .hero-aurora-glow {
-  background: radial-gradient(circle, rgba(192, 132, 252, 0.5) 0%, rgba(168, 85, 247, 0.25) 55%, transparent 80%);
-}
-
-.theme-month .hero-aurora-glow-secondary {
-  background: radial-gradient(circle, rgba(147, 51, 234, 0.3) 0%, transparent 75%);
-}
-
-.theme-lifetime .hero-aurora-glow {
-  background: radial-gradient(circle, rgba(254, 240, 138, 0.55) 0%, rgba(245, 158, 11, 0.28) 55%, transparent 80%);
-}
-
-.theme-lifetime .hero-aurora-glow-secondary {
-  background: radial-gradient(circle, rgba(217, 119, 6, 0.35) 0%, transparent 75%);
+.hero-aurora-glow-secondary {
+  position: absolute;
+  top: 40rpx;
+  width: 380rpx;
+  height: 200rpx;
+  background: radial-gradient(circle, var(--vip-theme-orb2, rgba(192, 132, 252, 0.25)) 0%, transparent 75%);
+  filter: blur(36px);
+  z-index: 0;
+  pointer-events: none;
+  transition: all 0.5s ease;
 }
 
 /* 腾讯游戏级漂浮星光粒子 */
@@ -409,6 +475,7 @@ page {
   border-radius: 50%;
   filter: blur(14px);
   opacity: 0.55;
+  background: var(--vip-theme-orb1, rgba(192, 132, 252, 0.42));
   animation: orbFloat 6s infinite ease-in-out alternate;
   transition: background 0.5s ease;
 }
@@ -521,7 +588,6 @@ page {
   border-radius: 20rpx;
   box-sizing: border-box;
   font-size: 22rpx;
-  backdrop-filter: blur(12px);
 }
 
 .status-inactive {
@@ -814,16 +880,14 @@ page {
 }
 
 .privilege-glass-card {
-  background: rgba(22, 28, 40, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(22, 28, 40, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 20rpx;
   padding: 20rpx 16rpx;
   display: flex;
   align-items: center;
   gap: 16rpx;
-  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.25);
+  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.35);
 }
 
 .priv-icon-circle {
@@ -868,13 +932,11 @@ page {
 }
 
 .compare-card {
-  background: rgba(22, 28, 40, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(22, 28, 40, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 22rpx;
   overflow: hidden;
-  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.35);
 }
 
 .compare-thead {
@@ -1120,28 +1182,36 @@ page {
   max-width: 100%;
 }
 
-/* 经典尊贵曜金恒定开通大按键 (绝对定宽定高居右，切换价格绝不形变、绝不移位) */
+/* 经典尊贵曜金恒定收银台大按键 (与名烟品鉴“我抽一支”统一顶级大厂香槟金琉璃美学，无生硬白边) */
 .checkout-cta-btn {
-  width: 270rpx;
-  min-width: 270rpx;
-  max-width: 270rpx;
+  width: 276rpx;
+  min-width: 276rpx;
+  max-width: 276rpx;
   height: 84rpx;
   flex-shrink: 0;
-  border-radius: 42rpx;
-  background: linear-gradient(135deg, #fef08a 0%, #f59e0b 50%, #b45309 100%);
+  border-radius: 999rpx;
+  background: linear-gradient(180deg, #fef3c7 0%, #fde68a 22%, #f59e0b 68%, #d97706 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8rpx 28rpx rgba(245, 158, 11, 0.42);
   border: none;
+  box-shadow:
+    0 10rpx 28rpx rgba(217, 119, 6, 0.42),
+    0 2rpx 8rpx rgba(245, 158, 11, 0.35),
+    0 0 20rpx rgba(253, 230, 138, 0.40),
+    inset 0 2rpx 3rpx rgba(254, 240, 138, 0.65),
+    inset 0 -2.5rpx 5rpx rgba(180, 83, 9, 0.40);
   padding: 0;
-  transition: transform 0.15s ease, opacity 0.2s ease;
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease, box-shadow 0.2s ease;
 }
 
 .checkout-cta-btn:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
+  box-shadow:
+    0 4rpx 14rpx rgba(217, 119, 6, 0.38),
+    inset 0 2rpx 3rpx rgba(254, 240, 138, 0.7);
 }
 
 .checkout-cta-btn::after {
@@ -1149,8 +1219,9 @@ page {
 }
 
 .checkout-cta-btn.btn-disabled {
-  opacity: 0.55;
-  filter: grayscale(0.5);
+  opacity: 0.48;
+  filter: grayscale(0.65);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.3) !important;
 }
 
 .checkout-cta-btn.btn-disabled .btn-shine-sweep {
@@ -1158,8 +1229,14 @@ page {
 }
 
 .checkout-cta-btn.btn-ios-free {
-  background: linear-gradient(135deg, #fef08a 0%, #f59e0b 50%, #b45309 100%);
-  box-shadow: 0 8rpx 28rpx rgba(245, 158, 11, 0.42);
+  background: linear-gradient(180deg, #fef3c7 0%, #fde68a 22%, #f59e0b 68%, #d97706 100%);
+  border: none;
+  box-shadow:
+    0 10rpx 28rpx rgba(217, 119, 6, 0.42),
+    0 2rpx 8rpx rgba(245, 158, 11, 0.35),
+    0 0 20rpx rgba(253, 230, 138, 0.40),
+    inset 0 2rpx 3rpx rgba(254, 240, 138, 0.65),
+    inset 0 -2.5rpx 5rpx rgba(180, 83, 9, 0.40);
 }
 
 /* 腾讯游戏级收银台 CTA 尊贵耀目光刃扫光 (Luminous Sweeping Light Blade) */
@@ -1204,11 +1281,15 @@ page {
 .btn-cta-text {
   position: relative;
   z-index: 2;
-  font-size: 32rpx;
+  font-size: 30rpx;
   font-weight: 900;
-  color: #1e1305;
-  letter-spacing: 2rpx;
+  background: linear-gradient(180deg, #451a03 0%, #78350f 55%, #451a03 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #451a03;
+  letter-spacing: 2.5rpx;
   white-space: nowrap;
+  filter: drop-shadow(0 1rpx 1rpx rgba(255, 255, 255, 0.65));
 }
 
 /* ==================== 终身至尊会员专属荣耀展台与交互样式 (全彩微晶·绝无灰色) ==================== */
@@ -1356,14 +1437,44 @@ page {
 }
 
 .btn-lifetime-active {
-  background: linear-gradient(135deg, #fef08a 0%, #f59e0b 50%, #b45309 100%);
-  box-shadow: 0 8rpx 32rpx rgba(245, 158, 11, 0.55);
-  animation: lifetimePulse 2.5s infinite ease-in-out;
+  background: linear-gradient(180deg, #fef3c7 0%, #fde68a 22%, #f59e0b 68%, #d97706 100%);
+  border: none;
+  box-shadow:
+    0 10rpx 32rpx rgba(217, 119, 6, 0.48),
+    0 2rpx 8rpx rgba(245, 158, 11, 0.38),
+    0 0 24rpx rgba(253, 230, 138, 0.45),
+    inset 0 2rpx 3rpx rgba(254, 240, 138, 0.65),
+    inset 0 -2.5rpx 5rpx rgba(180, 83, 9, 0.40);
+  animation: lifetimePulse 2.8s infinite ease-in-out;
+}
+
+.btn-lifetime-active .btn-cta-text {
+  background: linear-gradient(180deg, #451a03 0%, #78350f 55%, #451a03 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #451a03;
+  font-weight: 900;
+  letter-spacing: 2.5rpx;
+  filter: drop-shadow(0 1rpx 1rpx rgba(255, 255, 255, 0.65));
 }
 
 @keyframes lifetimePulse {
-  0%, 100% { box-shadow: 0 8rpx 28rpx rgba(245, 158, 11, 0.45); }
-  50% { box-shadow: 0 10rpx 40rpx rgba(251, 191, 36, 0.75); }
+  0%, 100% {
+    box-shadow:
+      0 10rpx 32rpx rgba(217, 119, 6, 0.42),
+      0 2rpx 8rpx rgba(245, 158, 11, 0.35),
+      0 0 20rpx rgba(253, 230, 138, 0.40),
+      inset 0 2rpx 3rpx rgba(254, 240, 138, 0.65),
+      inset 0 -2.5rpx 5rpx rgba(180, 83, 9, 0.40);
+  }
+  50% {
+    box-shadow:
+      0 14rpx 40rpx rgba(217, 119, 6, 0.58),
+      0 4rpx 14rpx rgba(245, 158, 11, 0.45),
+      0 0 32rpx rgba(253, 230, 138, 0.60),
+      inset 0 2.5rpx 4rpx rgba(254, 240, 138, 0.8),
+      inset 0 -3rpx 6rpx rgba(180, 83, 9, 0.45);
+  }
 }
 
 /* ==================== 模态弹窗公共基础 ==================== */
@@ -1371,9 +1482,7 @@ page {
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.92) 0%, rgba(4, 7, 13, 0.98) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1384,15 +1493,17 @@ page {
 .success-dialog-card {
   width: 100%;
   max-width: 600rpx;
-  background: linear-gradient(160deg, #1e2538 0%, #0d121f 100%);
-  border: 1.5px solid rgba(251, 191, 36, 0.4);
-  border-radius: 32rpx;
-  padding: 40rpx 32rpx;
+  background: linear-gradient(165deg, rgba(30, 37, 56, 0.96) 0%, rgba(13, 18, 31, 0.98) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 36rpx;
+  padding: 44rpx 32rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.6);
+  box-shadow: 0 28rpx 72rpx rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 }
 
 .dialog-confetti-badge {
@@ -1419,6 +1530,7 @@ page {
   flex-direction: column;
   gap: 14rpx;
   background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 18rpx;
   padding: 20rpx;
   box-sizing: border-box;
@@ -1441,30 +1553,52 @@ page {
 
 .dialog-primary-btn {
   width: 100%;
-  height: 80rpx;
-  background: linear-gradient(135deg, #f59e0b, #fbbf24);
-  border-radius: 40rpx;
+  height: 86rpx;
+  background: linear-gradient(180deg, #fef3c7 0%, #fde68a 22%, #f59e0b 68%, #d97706 100%);
+  border-radius: 999rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28rpx;
-  font-weight: 700;
-  color: #1e1305;
+  font-size: 30rpx;
+  font-weight: 900;
+  color: #451a03;
+  letter-spacing: 2.5rpx;
   border: none;
+  box-shadow:
+    0 10rpx 28rpx rgba(217, 119, 6, 0.42),
+    0 2rpx 8rpx rgba(245, 158, 11, 0.35),
+    0 0 20rpx rgba(253, 230, 138, 0.40),
+    inset 0 2rpx 3rpx rgba(254, 240, 138, 0.65),
+    inset 0 -2.5rpx 5rpx rgba(180, 83, 9, 0.40);
+  text-shadow: 0 1rpx 1rpx rgba(255, 255, 255, 0.65);
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+
+.dialog-primary-btn:active {
+  transform: scale(0.97);
+  box-shadow:
+    0 4rpx 14rpx rgba(217, 119, 6, 0.38),
+    inset 0 2rpx 3rpx rgba(254, 240, 138, 0.7);
+}
+
+.dialog-primary-btn::after {
+  display: none;
 }
 
 .protocol-dialog-card {
   width: 100%;
   max-width: 650rpx;
-  background: linear-gradient(165deg, #161f33 0%, #0d121f 100%);
-  border: 1px solid rgba(251, 191, 36, 0.28);
-  border-radius: 30rpx;
-  padding: 32rpx 30rpx;
+  background: linear-gradient(165deg, rgba(22, 31, 51, 0.96) 0%, rgba(13, 18, 31, 0.98) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 36rpx;
+  padding: 34rpx 30rpx;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 20rpx;
-  box-shadow: 0 24rpx 64rpx rgba(0, 0, 0, 0.72);
+  box-shadow: 0 28rpx 72rpx rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
 }
 
 .protocol-top-bar {
@@ -1556,7 +1690,6 @@ page {
   letter-spacing: 1rpx;
   margin-bottom: 10rpx;
   transition: all 0.4s ease;
-  backdrop-filter: blur(12px);
 }
 
 .mood-spark {

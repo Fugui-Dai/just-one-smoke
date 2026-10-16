@@ -2,7 +2,7 @@
 import { getActiveUserTitle, getTitleMetaByName } from '../configs/achievements.js';
 import { storageService } from './storageService.js';
 
-export const DEFAULT_LEADERBOARD_DATA = [
+const DEFAULT_LEADERBOARD_DATA = [
   {
     id: 'hero_1',
     rank: 1,

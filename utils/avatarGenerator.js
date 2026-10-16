@@ -10,9 +10,7 @@
  * 4. 超过 34,500+ 种高颜值绝不重样的独创组合！
  */
 
-function svgToUri(svgString) {
-  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString.trim());
-}
+import { svgToUri } from './vectorIcons.js';
 
 // 12 大高饱和鲜艳游戏级色系 (Tencent Games Vibrant Palette)
 const COLOR_THEMES = [
@@ -313,7 +311,7 @@ const STAR_BUILDERS = [
  * @param {number|string} [seed] 可选随机种子
  * @returns {string} SVG Data URI
  */
-export function generateRandomAvatarSvg(seed) {
+function generateRandomAvatarSvg(seed) {
   let rand;
   if (seed !== undefined && seed !== null) {
     let num = 0;

@@ -51,31 +51,41 @@ class AudioManager {
     return this._sharedNoiseBuffer;
   }
 
-  // 播放本地高品质真实音效文件 (微信原生 InnerAudioContext 硬件加速播放 · 单例池复用保障 60FPS 零泄露)
+  _createAudioInstance(filePath, fallbackFn) {
+    const audio = wx.createInnerAudioContext();
+    audio.src = filePath;
+    audio.onError((err) => {
+      console.warn('InnerAudioContext failed:', filePath, err);
+      try { audio.destroy(); } catch (e) {}
+      if (fallbackFn) fallbackFn.call(this);
+    });
+    return audio;
+  }
+
+  // 播放本地高品质真实音效文件 (微信原生 InnerAudioContext 硬件加速播放 · 3路复用池轮转保障高速连击零卡顿零丢音)
   playLocalAudio(filePath, fallbackFn) {
     if (this.muted) return;
     this.initWeChatAudioOption();
     try {
       if (typeof wx !== 'undefined' && wx.createInnerAudioContext) {
         if (!this._localAudioPool) this._localAudioPool = {};
-        let audio = this._localAudioPool[filePath];
-        if (!audio) {
-          audio = wx.createInnerAudioContext();
-          audio.src = filePath;
-          audio.onError((err) => {
-            console.warn('InnerAudioContext failed:', filePath, err);
-            try { audio.destroy(); } catch (e) {}
-            delete this._localAudioPool[filePath];
-            if (fallbackFn) fallbackFn.call(this);
-          });
-          this._localAudioPool[filePath] = audio;
+        let pool = this._localAudioPool[filePath];
+        if (!pool) {
+          pool = {
+            index: 0,
+            instances: [
+              this._createAudioInstance(filePath, fallbackFn),
+              this._createAudioInstance(filePath, fallbackFn),
+              this._createAudioInstance(filePath, fallbackFn)
+            ]
+          };
+          this._localAudioPool[filePath] = pool;
         }
+        const audio = pool.instances[pool.index];
+        pool.index = (pool.index + 1) % pool.instances.length;
         audio.volume = this.volume;
         try {
           audio.stop();
-          if (typeof audio.seek === 'function') {
-            audio.seek(0);
-          }
         } catch (e) {}
         audio.play();
         return;
@@ -156,7 +166,7 @@ class AudioManager {
   // 1. 打火机全套音效（砂轮摩擦嚓声 + 簧片金属嗒声 + 丁烷燃气膨胀呼声 + 烟丝初燃微弱滋滋声）
   playLighterSound() {
     if (this.muted) return;
-    this.playLocalAudio('/audio/lighter.wav', () => {
+    this.playLocalAudio('/audio/lighter.mp3', () => {
       this.playLighterSynth();
     });
   }
@@ -236,7 +246,7 @@ class AudioManager {
   // 1.2 红头木质火柴划燃音效 (红磷砂纸摩擦哧啦声 + 硫磺爆燃噗嗤声 + 干燥松木轻微哔剥)
   playMatchStrikeSound() {
     if (this.muted) return;
-    this.playLocalAudio('/audio/match.wav', () => {
+    this.playLocalAudio('/audio/match.mp3', () => {
       this.playMatchSynth();
     });
   }
@@ -342,7 +352,7 @@ class AudioManager {
   // 1.4 Zippo 砂轮打火 (粗犷火石摩擦 + 饱满棉芯燃油蓬勃火苗)
   playZippoStrikeSound() {
     if (this.muted) return;
-    this.playLocalAudio('/audio/zippo.wav', () => {
+    this.playLocalAudio('/audio/zippo.mp3', () => {
       this.playZippoOpenSound();
       setTimeout(() => {
         this.playLighterSynth();
@@ -353,7 +363,7 @@ class AudioManager {
   // 1.5 雪茄专配三喷高温防风蓝焰喷枪 (压电电击哒声 + 强劲暴风呼啸高压蓝锥气流)
   playTorchSound() {
     if (this.muted) return;
-    this.playLocalAudio('/audio/torch.wav', () => {
+    this.playLocalAudio('/audio/torch.mp3', () => {
       this.playTorchSynth();
     });
   }
@@ -784,10 +794,35 @@ class AudioManager {
     this.playSwitchSound();
   }
 
+  // 星链卫星测控连线与应答脉冲音 (高频纯净太空遥测双音: 1046Hz -> 1318Hz 晶振微鸣)
+  playSatellitePingSound() {
+    if (this.muted) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1046, t);
+      osc.frequency.setValueAtTime(1318, t + 0.04);
+      osc.frequency.exponentialRampToValueAtTime(1568, t + 0.09);
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.001, t);
+      gain.gain.linearRampToValueAtTime(0.18, t + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+
+      osc.connect(gain);
+      this.connectToMaster(gain);
+      osc.start(t);
+      osc.stop(t + 0.16);
+    } catch {}
+  }
+
   // 8. 捏爆珠真实物理破壳声 (5阶物理声学建模：滤嘴捏压摩擦 -> 明胶脆壳咔啪双裂瞬态 -> 内部高压香精爆浆 -> 残壳微碎 -> 海绵毛细吸纳微滋声)
   playPopBeadSound() {
     if (this.muted) return;
-    this.playLocalAudio('/audio/bead_pop.wav', () => {
+    this.playLocalAudio('/audio/bead_pop.mp3', () => {
       this.playPopBeadSynth();
     });
   }
@@ -1201,8 +1236,8 @@ class AudioManager {
       } else if (sceneType === 'underground_garage' || sceneType === 'stairwell' || sceneType === 'convenience_store') {
         cutoffFreq = 220;
         targetGain = 0.046;
-      } else if (sceneType === 'solar_system' || sceneType === 'deep_cosmos' || sceneType === 'lunar_planet' || sceneType === 'starship_bridge') {
-        cutoffFreq = sceneType === 'starship_bridge' ? 190 : 240;
+      } else if (sceneType === 'solar_system' || sceneType === 'deep_cosmos' || sceneType === 'lunar_planet' || sceneType === 'starship_bridge' || sceneType === 'starlink_orbit') {
+        cutoffFreq = sceneType === 'starlink_orbit' ? 260 : (sceneType === 'starship_bridge' ? 190 : 240);
         targetGain = 0.048;
       } else if (sceneType === 'sakura_night') {
         cutoffFreq = 280;
@@ -1297,14 +1332,16 @@ class AudioManager {
             const roomDrone = 0.84 + 0.16 * Math.sin((i / bufferLength) * Math.PI * 2 * 0.5);
             raw[i] = b1 * 0.48 * roomDrone;
           }
-        } else if (sceneType === 'solar_system' || sceneType === 'deep_cosmos' || sceneType === 'lunar_planet') {
-          // 浩瀚太阳系 / 深空宇宙 / 荒原星球：深空引力波空灵双耳谐波冥想音
+        } else if (sceneType === 'solar_system' || sceneType === 'deep_cosmos' || sceneType === 'lunar_planet' || sceneType === 'starlink_orbit') {
+          // 浩瀚太阳系 / 深空宇宙 / 荒原星球 / 星链天网：深空引力波空灵双耳谐波冥想音 + 星链近地轨道微弱脉冲
           let b0 = 0, b1 = 0;
           for (let i = 0; i < totalGen; i++) {
             const white = Math.random() * 2 - 1;
             b0 = 0.9968 * b0 + white * 0.019;
             b1 = 0.9905 * b1 + b0 * 0.15;
-            const cosmosSine = 0.12 * Math.sin((i / sampleRate) * 2 * Math.PI * 108); // 108Hz 空灵柔低音
+            const cosmosSine = sceneType === 'starlink_orbit'
+              ? (0.10 * Math.sin((i / sampleRate) * 2 * Math.PI * 114) + 0.02 * Math.sin((i / sampleRate) * 2 * Math.PI * 880) * (Math.sin((i / sampleRate) * Math.PI * 2 * 0.5) > 0.88 ? 1 : 0))
+              : (0.12 * Math.sin((i / sampleRate) * 2 * Math.PI * 108));
             const deepWave = 0.75 + 0.25 * Math.sin((i / bufferLength) * Math.PI * 2);
             raw[i] = (b1 * 0.42 + cosmosSine) * deepWave;
           }

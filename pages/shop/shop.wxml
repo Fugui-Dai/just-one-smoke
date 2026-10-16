@@ -1,5 +1,5 @@
 <!-- pages/shop/shop.wxml -->
-<view class="pack-page-container {{ vipTheme ? 'theme-' + vipTheme : '' }}">
+<view class="pack-page-container {{ vipTheme ? 'theme-' + vipTheme : '' }}" style="{{ themeOpt ? ('--vip-theme-dot: ' + themeOpt.dotColor + '; --vip-theme-orb1: ' + themeOpt.orb1 + '; --vip-theme-orb2: ' + themeOpt.orb2 + '; --vip-theme-spark: ' + themeOpt.spark + '; --vip-theme-spark-glow: ' + themeOpt.sparkGlow + '; background: ' + themeOpt.bgGradient + ' !important;') : '' }}">
 
   <!-- VIP 尊享动态极光天幕与浮光星尘层 (开通 VIP 后激活情绪价值背景特效) -->
   <view wx:if="{{ vipTheme }}" class="vip-ambient-stage">
@@ -60,7 +60,7 @@
         </view>
       </view>
 
-      <!-- 1B. 已开通 VIP：尊享流光礼遇横幅（强化已付费 VIP 尊贵感与情绪价值） -->
+      <!-- 1B. 已开通 VIP：尊享流光礼遇横幅（根据当前 VIP / SU7 车身定制色彩动态映射） -->
       <view wx:else class="shelf-vip-banner vip-active-banner" bindtap="onTapVipBanner">
         <view class="vip-banner-shimmer"></view>
         <view class="shelf-vip-banner-left">
@@ -69,7 +69,7 @@
           </view>
           <view class="vip-banner-texts">
             <view class="vip-banner-headline">
-              <text class="vip-headline-tag active-vip-tag">{{ vipTheme === 'lifetime' ? '至尊永久VIP' : (vipTheme === 'day' ? '翡翠日卡VIP' : '极光月卡VIP') }}</text>
+              <text class="vip-headline-tag active-vip-tag">{{ vipThemeName ? (vipThemeName + ' · VIP') : (vipTheme === 'lifetime' ? '至尊永久VIP' : (vipTheme === 'day' ? '翡翠日卡VIP' : '极光月卡VIP')) }}</text>
               <text class="vip-headline-title">全馆 33 款典藏名烟已为您敞开</text>
             </view>
             <text class="vip-banner-sub">尊享 0 门槛无限拆封 · 专属流光天幕已点亮</text>
@@ -274,7 +274,7 @@
           </view>
           
           <view class="track-progress-bar-wrap">
-            <view class="track-progress-fill" style="width: {{ dialogProgressPercent }}%;"></view>
+            <view class="track-progress-fill" style="width: {{ dialogProgressPercent + '%' }};"></view>
           </view>
 
           <view class="track-progress-desc">

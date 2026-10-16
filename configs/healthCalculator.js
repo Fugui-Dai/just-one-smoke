@@ -17,7 +17,7 @@ export function calculateLifeRegained(substituteCount) {
   return count * 11; // minutes
 }
 
-export const WHO_STAGES_CONFIG = [
+const WHO_STAGES_CONFIG = [
   { id: '20m', icon: '❤️', title: '20 分钟', description: '心率和血压回落至健康平稳区间', requiredMinutes: 20 },
   { id: '8h', icon: '🩸', title: '8 小时', description: '血液中一氧化碳水平减半，血氧恢复正常饱和', requiredMinutes: 8 * 60 },
   { id: '24h', icon: '💓', title: '24 小时', description: '心肌梗死突发概率开始显著下降，心血管减负', requiredMinutes: 24 * 60 },

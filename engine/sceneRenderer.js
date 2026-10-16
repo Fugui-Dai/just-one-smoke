@@ -25,8 +25,11 @@
  *   15. deep_cosmos: 深空宇宙 (猎户紫粉与礁湖青蓝双星云、旋涡星系与周期性浪漫流星)
  *   16. lunar_planet: 荒原星球 (环形山月表剪影、地平线壮丽巨型气态母星升起与蓝色大气弧)
  *   17. starship_bridge: 星舰舰桥 (环带巨型气态行星、钛合金装甲立柱、吸烟跃迁星流与全息战术星图)
- *   18. obsidian: 极简黑曜 (专注一呼一吸 · 侘寂纯黑微距摄影棚背景)
+ *   18. starlink_orbit: 星链天网 (全息 3D 星轨 · 环球赛博天网、星链列车与激光星间链路)
+ *   19. obsidian: 极简黑曜 (专注一呼一吸 · 侘寂纯黑微距摄影棚背景)
  */
+
+import { getThemeById } from '../configs/vipThemes.js';
 
 export const SCENE_CATEGORIES = [
   { id: 'all', name: '全部', icon: '✨' },
@@ -227,6 +230,17 @@ export const ATMOSPHERE_SCENES = [
     soundType: 'starship',
     ambientDesc: '猛禽低频轰鸣与筷子臂精准回收',
     badge: '马斯克星舰'
+  },
+  {
+    id: 'starlink_orbit',
+    name: '星链天网',
+    subtitle: '全息3D星轨 · 环球赛博卫星阵',
+    icon: '🛰️',
+    category: 'cosmos',
+    accentColor: '#38bdf8',
+    soundType: 'cosmos',
+    ambientDesc: '星轨交织与深空遥测脉冲',
+    badge: '赛博星轨'
   },
   {
     id: 'obsidian',
@@ -514,6 +528,77 @@ export class SceneRenderer {
       });
     }
 
+    // 14. 星链天网 (Starlink Constellation) 3D 地球、16 轨道面与卫星群
+    this.starlinkSatellites = [];
+    const NUM_PLANES = 16;
+    const SATS_PER_PLANE = 14;
+    for (let p = 0; p < NUM_PLANES; p++) {
+      const inclination = (p % 2 === 0 ? 53 : 70) * (Math.PI / 180);
+      const raan = p * (Math.PI / (NUM_PLANES / 2));
+      const baseSpeed = 0.36 + (p % 4) * 0.02;
+      for (let s = 0; s < SATS_PER_PLANE; s++) {
+        this.starlinkSatellites.push({
+          plane: p,
+          inclination,
+          raan,
+          phase: (s / SATS_PER_PLANE) * Math.PI * 2 + (p * 0.18),
+          speed: baseSpeed,
+          size: 1.2 + (Math.random() < 0.25 ? 1.0 : 0.3),
+          color: Math.random() < 0.8 ? '#ffffff' : '#7dd3fc',
+          flarePhase: Math.random() * Math.PI * 2
+        });
+      }
+    }
+
+    // 星链列车 (Starlink Train) - 20 颗紧密发射成一列的高亮卫星
+    this.starlinkTrain = [];
+    for (let i = 0; i < 20; i++) {
+      this.starlinkTrain.push({
+        offset: i * 0.025,
+        size: 2.2,
+        speed: 0.44
+      });
+    }
+
+    // 3D 地球全息大陆板块点阵与夜景城市群 (涵盖欧亚大陆、北美、南美、非洲、大洋洲)
+    this.starlinkContinents = [
+      { lat: 35, lon: 110, isCity: true },
+      { lat: 31, lon: 121, isCity: true },
+      { lat: 39, lon: 116, isCity: true },
+      { lat: 23, lon: 113, isCity: true },
+      { lat: 36, lon: 139, isCity: true },
+      { lat: 51, lon: 0, isCity: true },
+      { lat: 48, lon: 2, isCity: true },
+      { lat: 52, lon: 13, isCity: true },
+      { lat: 28, lon: 77, isCity: true },
+      { lat: 13, lon: 100, isCity: true },
+      { lat: 55, lon: 37, isCity: true },
+      { lat: 60, lon: 105, isCity: false },
+      { lat: 45, lon: 90, isCity: false },
+      { lat: 25, lon: 85, isCity: false },
+      { lat: 10, lon: 105, isCity: false },
+      { lat: 40, lon: -74, isCity: true },
+      { lat: 34, lon: -118, isCity: true },
+      { lat: 41, lon: -87, isCity: true },
+      { lat: 37, lon: -122, isCity: true },
+      { lat: 29, lon: -95, isCity: true },
+      { lat: 45, lon: -100, isCity: false },
+      { lat: 55, lon: -115, isCity: false },
+      { lat: 20, lon: -100, isCity: true },
+      { lat: -23, lon: -46, isCity: true },
+      { lat: -34, lon: -58, isCity: true },
+      { lat: -12, lon: -77, isCity: false },
+      { lat: -5, lon: -60, isCity: false },
+      { lat: 30, lon: 31, isCity: true },
+      { lat: -26, lon: 28, isCity: true },
+      { lat: 6, lon: 3, isCity: true },
+      { lat: 0, lon: 25, isCity: false },
+      { lat: 15, lon: 20, isCity: false },
+      { lat: -33, lon: 151, isCity: true },
+      { lat: -37, lon: 144, isCity: true },
+      { lat: -25, lon: 135, isCity: false }
+    ];
+
     this.initialized = true;
     this.lastW = w;
     this.lastH = h;
@@ -580,6 +665,9 @@ export class SceneRenderer {
       case 'starship_launch':
       case 'starship_bridge':
         this.renderStarshipLaunch(ctx, w, h, dt, totalTime, emberIntensity);
+        break;
+      case 'starlink_orbit':
+        this.renderStarlinkOrbit(ctx, w, h, dt, totalTime, emberIntensity);
         break;
       case 'obsidian':
       default:
@@ -2033,6 +2121,13 @@ export class SceneRenderer {
       ctx.beginPath();
       ctx.moveTo(0, h * 0.88); ctx.lineTo(w, h * 0.88);
       ctx.stroke();
+    } else if (sceneType === 'starlink_orbit') {
+      // 照亮地球南极边缘与近地轨道卫星太阳翼反光
+      ctx.strokeStyle = `rgba(249, 115, 22, ${alpha * 0.85})`;
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.arc(w * 0.5, h * 0.31, Math.min(w * 0.34, 136), Math.PI * 0.25, Math.PI * 0.75);
+      ctx.stroke();
     }
 
     ctx.restore();
@@ -2042,8 +2137,8 @@ export class SceneRenderer {
   // 15. 极简黑曜：极致写实纯黑微距摄影背景 (Solid Pitch-Black Studio Background)
   // ==========================================
   renderObsidian(ctx, w, h) {
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(0, 0, w, h);
+    // 腾讯总监设计级：透明纯黑通透画布 (清空像素，让底层 .app-container 的高奢深曜/速7/驭7尊享车色天幕无界自然透出)
+    ctx.clearRect(0, 0, w, h);
   }
 
   // ==========================================
@@ -2411,7 +2506,23 @@ export class SceneRenderer {
     let centerColor0 = 'rgba(192, 132, 252, 0.11)';
     let sparkRgb = '233, 213, 255';
 
-    if (vipTheme === 'day' || vipTheme === 'emerald') {
+    const themeOpt = getThemeById(vipTheme);
+    if (themeOpt) {
+      if (themeOpt.orb1) topColor0 = themeOpt.orb1;
+      if (themeOpt.orb2) {
+        topColor1 = themeOpt.orb2;
+        centerColor0 = themeOpt.orb2;
+      }
+      if (themeOpt.spark) {
+        const hex = themeOpt.spark.replace('#', '');
+        if (hex.length === 6) {
+          const r = parseInt(hex.substring(0, 2), 16);
+          const g = parseInt(hex.substring(2, 4), 16);
+          const b = parseInt(hex.substring(4, 6), 16);
+          sparkRgb = `${r}, ${g}, ${b}`;
+        }
+      }
+    } else if (vipTheme === 'day' || vipTheme === 'emerald') {
       topColor0 = 'rgba(16, 185, 129, 0.22)';
       topColor1 = 'rgba(5, 150, 105, 0.08)';
       centerColor0 = 'rgba(52, 211, 153, 0.10)';
@@ -3213,6 +3324,357 @@ export class SceneRenderer {
       ctx.fillText(missionPhaseName, pillX + 20, hudY);
       ctx.restore();
     }
+  }
+
+  // ==========================================
+  // 19. 星链天网：全息 3D 星轨 · 环球赛博卫星阵 (Starlink Constellation)
+  // ==========================================
+  renderStarlinkOrbit(ctx, w, h, dt, t, emberIntensity = 0) {
+    const cx = w * 0.5;
+    const cy = h * 0.31;
+    const globeR = Math.min(w * 0.34, 136);
+    const orbitR = globeR * 1.18;
+    const earthTilt = 0.36; // 轴倾角约 21 度
+    const earthRot = t * 0.08; // 自转角速度
+
+    // 吸烟超频状态联动：长按深吸时卫星加速与激光网密度提升
+    const isOverdrive = emberIntensity > 0.05;
+    const speedMult = 1.0 + (isOverdrive ? 1.4 : 0);
+
+    // 19.1 深空星际微光渐变
+    const spaceGrad = ctx.createRadialGradient(cx, cy, globeR * 0.5, cx, cy, w * 1.1);
+    spaceGrad.addColorStop(0, '#040b1e');
+    spaceGrad.addColorStop(0.45, '#02050e');
+    spaceGrad.addColorStop(1, '#000104');
+    ctx.fillStyle = spaceGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    // 19.2 深空繁星
+    this.renderStarfield(ctx, t, 0.45);
+
+    // 19.3 地球高空大气层瑞利散射辉光 (Rayleigh Atmosphere Halo)
+    const atmoGrad = ctx.createRadialGradient(cx, cy, globeR * 0.90, cx, cy, globeR * 1.30);
+    atmoGrad.addColorStop(0, 'rgba(56, 189, 248, 0.42)');
+    atmoGrad.addColorStop(0.35, 'rgba(14, 165, 233, 0.18)');
+    atmoGrad.addColorStop(0.70, 'rgba(3, 105, 161, 0.05)');
+    atmoGrad.addColorStop(1.0, 'rgba(2, 132, 199, 0)');
+    ctx.fillStyle = atmoGrad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, globeR * 1.30, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 19.4 3D 地球球体与向阳面/背阳面日照渐变
+    // 太阳光位于左上方 (angle -45°)
+    const oceanGrad = ctx.createRadialGradient(
+      cx - globeR * 0.38, cy - globeR * 0.38, globeR * 0.06,
+      cx, cy, globeR
+    );
+    oceanGrad.addColorStop(0, '#1d4ed8');      // 蔚蓝向阳深海
+    oceanGrad.addColorStop(0.25, '#1e3a8a');
+    oceanGrad.addColorStop(0.55, '#0f172a');   // 晨昏明暗交界线
+    oceanGrad.addColorStop(0.85, '#050914');   // 深黑夜半球
+    oceanGrad.addColorStop(1.0, '#020308');
+    ctx.fillStyle = oceanGrad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, globeR, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 19.5 3D 投影转换函数
+    const project3D = (latDeg, lonDeg, altRadius = globeR) => {
+      const phi = latDeg * (Math.PI / 180);
+      const lam = (lonDeg + (earthRot * 180 / Math.PI)) * (Math.PI / 180);
+      const x0 = Math.cos(phi) * Math.sin(lam);
+      const y0 = -Math.sin(phi);
+      const z0 = Math.cos(phi) * Math.cos(lam);
+      // 轴倾斜变换
+      const x1 = x0;
+      const y1 = y0 * Math.cos(earthTilt) - z0 * Math.sin(earthTilt);
+      const z1 = y0 * Math.sin(earthTilt) + z0 * Math.cos(earthTilt);
+      // 太阳朝向点积 [-0.55, -0.55, 0.62]
+      const sunDot = x1 * (-0.55) + y1 * (-0.55) + z1 * 0.62;
+      return {
+        sx: cx + x1 * altRadius,
+        sy: cy + y1 * altRadius,
+        z: z1,
+        isFront: z1 > 0,
+        isDay: sunDot > 0
+      };
+    };
+
+    // 19.6 3D 全息经纬度网络 (Lat/Lon Grid)
+    ctx.save();
+    ctx.lineWidth = 0.6;
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.12)';
+    // 纬线圈 (赤道与南北纬30°/60°)
+    const lats = [-60, -30, 0, 30, 60];
+    for (let l = 0; l < lats.length; l++) {
+      ctx.beginPath();
+      let started = false;
+      for (let lon = 0; lon <= 360; lon += 15) {
+        const pt = project3D(lats[l], lon, globeR);
+        if (pt.isFront) {
+          if (!started) {
+            ctx.moveTo(pt.sx, pt.sy);
+            started = true;
+          } else {
+            ctx.lineTo(pt.sx, pt.sy);
+          }
+        } else {
+          started = false;
+        }
+      }
+      ctx.stroke();
+    }
+    // 经线圈 (每隔 45 度)
+    for (let lon = 0; lon < 360; lon += 45) {
+      ctx.beginPath();
+      let started = false;
+      for (let lat = -80; lat <= 80; lat += 10) {
+        const pt = project3D(lat, lon, globeR);
+        if (pt.isFront) {
+          if (!started) {
+            ctx.moveTo(pt.sx, pt.sy);
+            started = true;
+          } else {
+            ctx.lineTo(pt.sx, pt.sy);
+          }
+        } else {
+          started = false;
+        }
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // 19.7 大陆板块节点与夜半球璀璨万家灯火 (Satellitemap / NASA Earth at Night)
+    for (let i = 0; i < this.starlinkContinents.length; i++) {
+      const node = this.starlinkContinents[i];
+      const p = project3D(node.lat, node.lon, globeR);
+      if (p.isFront) {
+        if (p.isDay) {
+          // 向阳面：赛博全息翠青雷达大陆点
+          ctx.fillStyle = 'rgba(34, 211, 238, 0.42)';
+          ctx.beginPath();
+          ctx.arc(p.sx, p.sy, node.isCity ? 2.2 : 1.4, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          // 背阳面：真实暖金城市灯火微光 (密集夜景)
+          const cityAlpha = 0.55 + 0.35 * Math.sin(t * 2.5 + i);
+          ctx.fillStyle = `rgba(253, 224, 71, ${cityAlpha})`;
+          ctx.beginPath();
+          ctx.arc(p.sx, p.sy, node.isCity ? 2.0 : 1.2, 0, Math.PI * 2);
+          ctx.fill();
+
+          // 核心都市暖晕
+          if (node.isCity) {
+            ctx.fillStyle = `rgba(245, 158, 11, ${cityAlpha * 0.35})`;
+            ctx.beginPath();
+            ctx.arc(p.sx, p.sy, 3.8, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+    }
+
+    // 19.8 星链 16 大轨道平面倾角虚线圈 (Orbital Shells: 53° & 70°)
+    ctx.save();
+    ctx.lineWidth = 0.65;
+    ctx.setLineDash([2, 5]);
+    const NUM_PLANES = 16;
+    for (let pl = 0; pl < NUM_PLANES; pl++) {
+      const inclination = (pl % 2 === 0 ? 53 : 70) * (Math.PI / 180);
+      const raan = pl * (Math.PI / (NUM_PLANES / 2));
+      ctx.strokeStyle = pl % 2 === 0 ? 'rgba(56, 189, 248, 0.11)' : 'rgba(125, 211, 252, 0.08)';
+      ctx.beginPath();
+      let started = false;
+      for (let u = 0; u <= Math.PI * 2; u += 0.14) {
+        const xo = orbitR * Math.cos(u);
+        const yo = orbitR * Math.sin(u);
+        const x1 = xo;
+        const y1 = yo * Math.cos(inclination);
+        const z1 = yo * Math.sin(inclination);
+        const x2 = x1 * Math.cos(raan) + z1 * Math.sin(raan);
+        const y2 = y1;
+        const z2 = -x1 * Math.sin(raan) + z1 * Math.cos(raan);
+        const sx = cx + x2;
+        const sy = cy + (y2 * Math.cos(earthTilt) - z2 * Math.sin(earthTilt));
+        const z3d = y2 * Math.sin(earthTilt) + z2 * Math.cos(earthTilt);
+        const d2d = Math.hypot(sx - cx, sy - cy);
+        if (!(z3d < 0 && d2d < globeR)) {
+          if (!started) {
+            ctx.moveTo(sx, sy);
+            started = true;
+          } else {
+            ctx.lineTo(sx, sy);
+          }
+        } else {
+          started = false;
+        }
+      }
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    // 19.9 220+ 活跃星链卫星群实时运行 (60FPS 运动与太阳翼闪光)
+    const visibleSats = [];
+
+    for (let i = 0; i < this.starlinkSatellites.length; i++) {
+      const sat = this.starlinkSatellites[i];
+      const u = sat.phase + sat.speed * speedMult * t;
+      const xo = orbitR * Math.cos(u);
+      const yo = orbitR * Math.sin(u);
+      const x1 = xo;
+      const y1 = yo * Math.cos(sat.inclination);
+      const z1 = yo * Math.sin(sat.inclination);
+      const x2 = x1 * Math.cos(sat.raan) + z1 * Math.sin(sat.raan);
+      const y2 = y1;
+      const z2 = -x1 * Math.sin(sat.raan) + z1 * Math.cos(sat.raan);
+      const sx = cx + x2;
+      const sy = cy + (y2 * Math.cos(earthTilt) - z2 * Math.sin(earthTilt));
+      const z3d = y2 * Math.sin(earthTilt) + z2 * Math.cos(earthTilt);
+      const d2d = Math.hypot(sx - cx, sy - cy);
+
+      // 遮挡剔除 (Occlusion culling)
+      if (z3d < 0 && d2d < globeR) {
+        continue;
+      }
+
+      const alpha = z3d >= 0 ? 0.95 : 0.35;
+      ctx.fillStyle = sat.color === '#ffffff' ? `rgba(255, 255, 255, ${alpha})` : `rgba(125, 211, 252, ${alpha})`;
+      ctx.fillRect(sx - sat.size * 0.5, sy - sat.size * 0.5, sat.size, sat.size);
+
+      // 记录前视卫星用于激光链路
+      if (z3d > globeR * 0.15 && visibleSats.length < 36) {
+        visibleSats.push({ sx, sy });
+      }
+
+      // 太阳翼反光爆发 (Solar Flare Glint)
+      const flare = Math.sin(t * 3.2 + sat.flarePhase);
+      if (flare > 0.96 && z3d > 0) {
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(sx - 3, sy); ctx.lineTo(sx + 3, sy);
+        ctx.moveTo(sx, sy - 3); ctx.lineTo(sx, sy + 3);
+        ctx.stroke();
+      }
+    }
+
+    // 19.10 激光星间链路微网 (ISL Laser Mesh)
+    if (visibleSats.length >= 6) {
+      ctx.save();
+      ctx.lineWidth = isOverdrive ? 1.0 : 0.6;
+      const laserCount = isOverdrive ? Math.min(14, visibleSats.length - 1) : Math.min(8, Math.floor(visibleSats.length / 2));
+      for (let k = 0; k < laserCount; k++) {
+        const s1 = visibleSats[k];
+        const s2 = visibleSats[(k + 3) % visibleSats.length];
+        const dist = Math.hypot(s1.sx - s2.sx, s1.sy - s2.sy);
+        if (dist > 18 && dist < (isOverdrive ? 95 : 65)) {
+          const lAlpha = isOverdrive 
+            ? (0.55 + 0.40 * Math.sin(t * 7.5 + k)) 
+            : (0.35 + 0.30 * Math.sin(t * 4.5 + k));
+          ctx.strokeStyle = k % 2 === 0 ? `rgba(52, 211, 153, ${lAlpha})` : `rgba(56, 189, 248, ${lAlpha})`;
+          ctx.beginPath();
+          ctx.moveTo(s1.sx, s1.sy);
+          ctx.lineTo(s2.sx, s2.sy);
+          ctx.stroke();
+        }
+      }
+      ctx.restore();
+    }
+
+    // 19.11 标志性“星链列车” (The Starlink Train - 20颗列阵飞越地平线)
+    ctx.save();
+    const trainSpeed = 0.44 * speedMult;
+    const trainU0 = (t * trainSpeed) % (Math.PI * 2);
+    const trainInc = 53 * (Math.PI / 180);
+    const trainRaan = 0.85;
+    ctx.lineWidth = 1.0;
+    ctx.strokeStyle = 'rgba(56, 189, 248, 0.45)';
+    let lastTrainX = null;
+    let lastTrainY = null;
+
+    for (let ti = 0; ti < this.starlinkTrain.length; ti++) {
+      const item = this.starlinkTrain[ti];
+      const tu = trainU0 - item.offset;
+      const xo = orbitR * Math.cos(tu);
+      const yo = orbitR * Math.sin(tu);
+      const x1 = xo;
+      const y1 = yo * Math.cos(trainInc);
+      const z1 = yo * Math.sin(trainInc);
+      const x2 = x1 * Math.cos(trainRaan) + z1 * Math.sin(trainRaan);
+      const y2 = y1;
+      const z2 = -x1 * Math.sin(trainRaan) + z1 * Math.cos(trainRaan);
+      const sx = cx + x2;
+      const sy = cy + (y2 * Math.cos(earthTilt) - z2 * Math.sin(earthTilt));
+      const z3d = y2 * Math.sin(earthTilt) + z2 * Math.cos(earthTilt);
+      const d2d = Math.hypot(sx - cx, sy - cy);
+
+      if (z3d < 0 && d2d < globeR) continue;
+
+      // 卫星列车激光光缆虚线连接
+      if (lastTrainX !== null) {
+        ctx.beginPath();
+        ctx.moveTo(lastTrainX, lastTrainY);
+        ctx.lineTo(sx, sy);
+        ctx.stroke();
+      }
+      lastTrainX = sx;
+      lastTrainY = sy;
+
+      // 星体高亮
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(sx, sy, item.size, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 星链列车光芒微晕
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.45)';
+      ctx.beginPath();
+      ctx.arc(sx, sy, item.size + 1.8, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // 19.12 SpaceX / Starlink 航天遥测 HUD 微胶囊
+    ctx.save();
+    const hudY = h * 0.12;
+    const hudText = isOverdrive 
+      ? '⚡ STARLINK // ULTRA-BURST BANDWIDTH MODE [OVERDRIVE]' 
+      : '🛰️ STARLINK MESH · 550KM LEO ｜ ACTIVE: 6,280 [ISL LIVE]';
+    ctx.font = '10px -apple-system, monospace';
+    const textMetrics = ctx.measureText(hudText);
+    const textW = textMetrics.width || 240;
+    const pillW = textW + 28;
+    const pillH = 22;
+    const pillX = w * 0.5 - pillW * 0.5;
+
+    // 半透明磨砂胶囊底板
+    ctx.fillStyle = 'rgba(8, 14, 28, 0.65)';
+    ctx.beginPath();
+    ctx.arc(pillX + pillH * 0.5, hudY, pillH * 0.5, Math.PI * 0.5, Math.PI * 1.5);
+    ctx.arc(pillX + pillW - pillH * 0.5, hudY, pillH * 0.5, -Math.PI * 0.5, Math.PI * 0.5);
+    ctx.closePath();
+    ctx.fill();
+
+    // 边框微光
+    ctx.strokeStyle = isOverdrive ? 'rgba(52, 211, 153, 0.55)' : 'rgba(56, 189, 248, 0.35)';
+    ctx.lineWidth = 1.0;
+    ctx.stroke();
+
+    // 遥测指示灯脉冲
+    const pulseAlpha = 0.5 + 0.5 * Math.sin(t * (isOverdrive ? 8.0 : 4.0));
+    ctx.fillStyle = isOverdrive ? `rgba(52, 211, 153, ${pulseAlpha})` : `rgba(56, 189, 248, ${pulseAlpha})`;
+    ctx.beginPath();
+    ctx.arc(pillX + 12, hudY, 3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 遥测文字
+    ctx.fillStyle = isOverdrive ? '#a7f3d0' : '#bae6fd';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(hudText, pillX + 20, hudY);
+    ctx.restore();
   }
 }
 

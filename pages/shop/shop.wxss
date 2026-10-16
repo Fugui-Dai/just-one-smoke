@@ -12,20 +12,9 @@
   box-sizing: border-box;
   transition: background 0.35s ease;
 }
-
-.pack-page-container.theme-emerald,
-.pack-page-container.theme-day {
-  background: radial-gradient(circle at 50% 8%, rgba(16, 185, 129, 0.28) 0%, #091c17 46%, #050c0a 100%);
-}
-
-.pack-page-container.theme-purple,
-.pack-page-container.theme-month {
-  background: radial-gradient(circle at 50% 8%, rgba(168, 85, 247, 0.30) 0%, #150c24 46%, #08050e 100%);
-}
-
-.pack-page-container.theme-glacier,
-.pack-page-container.theme-lifetime {
-  background: radial-gradient(circle at 50% 8%, rgba(251, 191, 36, 0.30) 0%, rgba(180, 83, 9, 0.14) 36%, #141008 65%, #070604 100%);
+/* 基础暗黑舞台背景；已选高定 VIP 车色时由 app.wxss .theme-* 或行内样式生效全站流光 */
+.pack-page-container.theme-classic {
+  background: radial-gradient(circle at 50% -10%, rgba(148, 163, 184, 0.14) 0%, #111318 45%, #07080b 100%);
 }
 
 /* VIP 动态极光天幕与浮光星尘舞台 */
@@ -51,7 +40,7 @@
   top: -60rpx;
   left: 50%;
   margin-left: -260rpx;
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.42) 0%, transparent 72%);
+  background: radial-gradient(circle, var(--vip-theme-orb1, rgba(168, 85, 247, 0.42)) 0%, transparent 72%);
 }
 
 .vip-aurora-orb.orb-secondary {
@@ -59,26 +48,8 @@
   height: 420rpx;
   bottom: 12%;
   right: -120rpx;
-  background: radial-gradient(circle, rgba(192, 132, 252, 0.22) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--vip-theme-orb2, rgba(192, 132, 252, 0.22)) 0%, transparent 70%);
   animation-delay: -3s;
-}
-
-.theme-day .vip-aurora-orb.orb-primary,
-.theme-emerald .vip-aurora-orb.orb-primary {
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.42) 0%, transparent 72%);
-}
-.theme-day .vip-aurora-orb.orb-secondary,
-.theme-emerald .vip-aurora-orb.orb-secondary {
-  background: radial-gradient(circle, rgba(52, 211, 153, 0.22) 0%, transparent 70%);
-}
-
-.theme-lifetime .vip-aurora-orb.orb-primary,
-.theme-glacier .vip-aurora-orb.orb-primary {
-  background: radial-gradient(circle, rgba(251, 191, 36, 0.45) 0%, transparent 72%);
-}
-.theme-lifetime .vip-aurora-orb.orb-secondary,
-.theme-glacier .vip-aurora-orb.orb-secondary {
-  background: radial-gradient(circle, rgba(245, 158, 11, 0.25) 0%, transparent 70%);
 }
 
 @keyframes vipOrbBreath {
@@ -91,13 +62,11 @@
   width: 8rpx;
   height: 8rpx;
   border-radius: 50%;
-  background: #f5d0fe;
-  box-shadow: 0 0 14rpx #c084fc;
+  background: var(--vip-theme-spark, #f5d0fe);
+  box-shadow: 0 0 14rpx var(--vip-theme-spark-glow, #c084fc);
   opacity: 0.6;
   animation: vipSparkFloat 5s infinite ease-in-out;
 }
-.theme-day .vip-spark { background: #a7f3d0; box-shadow: 0 0 14rpx #34d399; }
-.theme-lifetime .vip-spark { background: #fef08a; box-shadow: 0 0 16rpx #fbbf24; }
 
 .vip-spark.s1 { top: 18%; left: 14%; animation-delay: 0s; }
 .vip-spark.s2 { top: 28%; right: 16%; width: 6rpx; height: 6rpx; animation-delay: -1.4s; }
@@ -269,18 +238,26 @@
 
 .shelf-vip-banner.vip-active-banner {
   background:
-    radial-gradient(circle at 12% 50%, rgba(168, 85, 247, 0.36) 0%, transparent 65%),
-    linear-gradient(90deg, rgba(46, 22, 75, 0.92) 0%, rgba(24, 14, 42, 0.92) 50%, rgba(15, 12, 24, 0.95) 100%);
-  border-color: rgba(192, 132, 252, 0.58);
-  box-shadow: 0 8rpx 28rpx rgba(168, 85, 247, 0.24), inset 0 1rpx 2rpx rgba(245, 208, 254, 0.28);
+    radial-gradient(circle at 12% 50%, var(--vip-theme-orb1, rgba(168, 85, 247, 0.40)) 0%, transparent 68%),
+    linear-gradient(90deg, rgba(22, 25, 34, 0.94) 0%, rgba(16, 18, 26, 0.96) 50%, rgba(10, 12, 18, 0.98) 100%);
+  border-color: var(--vip-theme-dot, rgba(192, 132, 252, 0.58));
+  box-shadow: 0 8rpx 28rpx rgba(0, 0, 0, 0.55), 0 0 20rpx var(--vip-theme-orb2, rgba(168, 85, 247, 0.22)), inset 0 1rpx 2rpx rgba(255, 255, 255, 0.18);
 }
 
 .theme-day .shelf-vip-banner.vip-active-banner {
   background:
-    radial-gradient(circle at 12% 50%, rgba(16, 185, 129, 0.36) 0%, transparent 65%),
+    radial-gradient(circle at 12% 50%, rgba(16, 185, 129, 0.38) 0%, transparent 65%),
     linear-gradient(90deg, rgba(12, 52, 40, 0.92) 0%, rgba(8, 30, 24, 0.92) 50%, rgba(6, 18, 15, 0.95) 100%);
   border-color: rgba(52, 211, 153, 0.58);
   box-shadow: 0 8rpx 28rpx rgba(16, 185, 129, 0.24), inset 0 1rpx 2rpx rgba(167, 243, 208, 0.28);
+}
+
+.theme-month .shelf-vip-banner.vip-active-banner {
+  background:
+    radial-gradient(circle at 12% 50%, rgba(168, 85, 247, 0.36) 0%, transparent 65%),
+    linear-gradient(90deg, rgba(46, 22, 75, 0.92) 0%, rgba(24, 14, 42, 0.92) 50%, rgba(15, 12, 24, 0.95) 100%);
+  border-color: rgba(192, 132, 252, 0.58);
+  box-shadow: 0 8rpx 28rpx rgba(168, 85, 247, 0.24), inset 0 1rpx 2rpx rgba(245, 208, 254, 0.28);
 }
 
 .theme-lifetime .shelf-vip-banner.vip-active-banner {
@@ -342,9 +319,11 @@
   flex-shrink: 0;
 }
 
-.vip-crown-icon-wrap.active-crown {
-  background: linear-gradient(145deg, #d7b264 0%, #9b742d 100%);
-  border-color: rgba(255, 240, 195, 0.75);
+.vip-crown-icon-wrap.active-crown,
+.vip-crown-icon-wrap.active-crown-wrap {
+  background: radial-gradient(circle at 30% 30%, var(--vip-theme-spark, #fef08a) 0%, var(--vip-theme-dot, #d7b264) 75%, rgba(0, 0, 0, 0.4) 100%);
+  border-color: var(--vip-theme-spark, rgba(255, 240, 195, 0.85));
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.55), 0 0 14rpx var(--vip-theme-orb2, rgba(212, 175, 55, 0.35));
 }
 
 .vip-crown-icon {
@@ -378,10 +357,12 @@
   white-space: nowrap;
 }
 
-.vip-headline-tag.active-tag {
-  background: rgba(196, 152, 62, 0.42);
-  border-color: rgba(247, 223, 160, 0.82);
-  color: #fffbeb;
+.vip-headline-tag.active-tag,
+.vip-headline-tag.active-vip-tag {
+  background: var(--vip-theme-orb1, rgba(196, 152, 62, 0.42));
+  border-color: var(--vip-theme-dot, rgba(247, 223, 160, 0.82));
+  color: #ffffff;
+  text-shadow: 0 1rpx 3rpx rgba(0, 0, 0, 0.8);
 }
 
 .vip-headline-title {
@@ -397,7 +378,7 @@
 .vip-banner-sub {
   font-size: 22rpx;
   font-weight: 600;
-  color: #f3e5ab;
+  color: #e2e8f0;
   text-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.65);
   white-space: nowrap;
   overflow: hidden;
@@ -418,10 +399,12 @@
   margin-left: 10rpx;
 }
 
-.shelf-vip-banner-btn.active-btn {
-  background: linear-gradient(180deg, rgba(234, 195, 92, 0.36) 0%, rgba(180, 138, 52, 0.28) 100%);
-  border: 1px solid rgba(247, 223, 160, 0.85);
-  color: #fffbeb;
+.shelf-vip-banner-btn.active-btn,
+.shelf-vip-banner-btn.active-vip-btn {
+  background: var(--vip-theme-orb1, rgba(234, 195, 92, 0.36));
+  border: 1px solid var(--vip-theme-dot, rgba(247, 223, 160, 0.85));
+  color: #ffffff;
+  box-shadow: 0 2rpx 10rpx var(--vip-theme-orb2, rgba(0, 0, 0, 0.4)), inset 0 1rpx 2rpx rgba(255, 255, 255, 0.3);
 }
 
 .vip-btn-text {
@@ -949,9 +932,7 @@
   position: fixed;
   inset: 0;
   z-index: 160;
-  background: rgba(0, 0, 0, 0.82);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.92) 0%, rgba(4, 7, 13, 0.98) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -968,11 +949,13 @@
 .unlock-choice-dialog {
   width: 100%;
   max-width: 630rpx;
-  background: linear-gradient(160deg, #171c2a 0%, #0c0f18 100%);
-  border: 1px solid rgba(251, 191, 36, 0.35);
+  background: linear-gradient(165deg, rgba(26, 33, 49, 0.96) 0%, rgba(12, 16, 26, 0.98) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 36rpx;
   padding: 38rpx 30rpx 32rpx 30rpx;
-  box-shadow: 0 24rpx 64rpx rgba(0, 0, 0, 0.9), 0 0 36rpx rgba(251, 191, 36, 0.12);
+  box-shadow: 0 28rpx 72rpx rgba(0, 0, 0, 0.88), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   display: flex;
   flex-direction: column;
   position: relative;

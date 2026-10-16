@@ -87,13 +87,11 @@
   display: inline-flex;
   align-items: center;
   gap: 10rpx;
-  background: rgba(18, 14, 10, 0.75);
+  background: rgba(18, 14, 10, 0.88);
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 36rpx;
   height: 64rpx;
   padding: 0 24rpx;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.45);
   transition: all 0.2s ease;
   pointer-events: auto;
@@ -107,13 +105,11 @@
 .top-capsule-row {
   display: inline-flex;
   align-items: center;
-  background: rgba(18, 14, 10, 0.75);
+  background: rgba(18, 14, 10, 0.88);
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 36rpx;
   height: 64rpx;
   padding: 0 4rpx;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.45);
 }
 
@@ -161,12 +157,10 @@
   display: inline-flex;
   align-items: center;
   gap: 6rpx;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   padding: 6rpx 20rpx;
   border-radius: 30rpx;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
 }
 
 .navbar-back-btn:active {
@@ -522,9 +516,7 @@
   width: 72rpx;
   height: 72rpx;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(14, 18, 28, 0.95) 0%, rgba(20, 25, 38, 0.92) 100%);
-  backdrop-filter: blur(32px);
-  -webkit-backdrop-filter: blur(32px);
+  background: linear-gradient(135deg, rgba(14, 18, 28, 0.96) 0%, rgba(20, 25, 38, 0.94) 100%);
   border: 2rpx solid rgba(255, 255, 255, 0.2);
   box-shadow:
     0 8rpx 32rpx rgba(0, 0, 0, 0.6),
@@ -558,6 +550,7 @@
   top: 50%;
   transform: translateY(-50%);
   width: 104rpx;
+  max-height: calc(100vh - 120rpx);
   box-sizing: border-box;
   background: transparent;
   border: none;
@@ -566,9 +559,29 @@
   flex-direction: column;
   align-items: center;
   padding: 24rpx 0;
-  gap: 24rpx;
+  gap: 20rpx;
   z-index: 45;
-  overflow: visible;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.right-arc-dock::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-height: 720px) {
+  .right-arc-dock {
+    gap: 12rpx;
+    padding: 10rpx 0;
+  }
+}
+
+@media (max-height: 668px) {
+  .right-arc-dock {
+    gap: 8rpx;
+    padding: 6rpx 0;
+  }
 }
 
 /* 一体化数学相切流体外壳底衬 (零边框极简模式下隐藏) */
@@ -625,8 +638,6 @@ button.dock-btn-wrap.share-dock-item::after {
   align-items: center;
   justify-content: center;
   position: relative;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.55), inset 0 1rpx 1rpx rgba(255, 255, 255, 0.20);
   transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -1379,9 +1390,10 @@ button.dock-btn-wrap.share-dock-item::after {
   position: fixed;
   inset: 0;
   z-index: 150;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  /* 安卓低端机与兼容降级 fallback: 高不透明纯黑底，杜绝白屏/透明透底 */
+  background: rgba(4, 7, 14, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1391,9 +1403,7 @@ button.dock-btn-wrap.share-dock-item::after {
 
 /* ==================== 8. 抽完结算达成弹窗 (Reward Modal - 腾讯高品质游戏化胜利战报) ==================== */
 .reward-modal-backdrop {
-  background: rgba(4, 7, 13, 0.85);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.94) 0%, rgba(4, 7, 13, 0.98) 100%);
   padding: 32rpx;
 }
 
@@ -1402,10 +1412,12 @@ button.dock-btn-wrap.share-dock-item::after {
   width: 100%;
   max-width: 650rpx;
   background: linear-gradient(165deg, rgba(26, 35, 52, 0.98) 0%, rgba(12, 17, 28, 0.99) 100%);
-  border: 1.5rpx solid rgba(251, 191, 36, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 40rpx;
   padding: 44rpx 32rpx 36rpx;
-  box-shadow: 0 24rpx 70rpx rgba(0, 0, 0, 0.88), 0 0 36rpx rgba(245, 158, 11, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  box-shadow: 0 28rpx 72rpx rgba(0, 0, 0, 0.88), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1489,12 +1501,26 @@ button.dock-btn-wrap.share-dock-item::after {
   filter: drop-shadow(0 0 12rpx rgba(245, 158, 11, 0.6));
 }
 
+.dialog-medal-img {
+  width: 68rpx;
+  height: 68rpx;
+  display: block;
+  filter: drop-shadow(0 0 14rpx rgba(245, 158, 11, 0.75));
+  animation: medalSpin 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes medalSpin {
+  0% { transform: scale(0.3) rotate(-180deg); opacity: 0; }
+  60% { transform: scale(1.15) rotate(8deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
 .crest-tag-pill {
   font-size: 19rpx;
   font-weight: 800;
   color: #fde047;
-  background: rgba(245, 158, 11, 0.15);
-  border: 1px solid rgba(245, 158, 11, 0.45);
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.35);
   border-radius: 20rpx;
   padding: 4rpx 18rpx;
   letter-spacing: 1.5rpx;
@@ -1513,7 +1539,67 @@ button.dock-btn-wrap.share-dock-item::after {
 .dialog-subtitle {
   font-size: 22rpx;
   color: #94a3b8;
-  margin-bottom: 24rpx;
+  margin-bottom: 20rpx;
+}
+
+/* 每日自律打卡自动盖印闭环提示条 */
+.reward-punch-stamp-strip {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.16) 0%, rgba(6, 78, 59, 0.22) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.42);
+  border-radius: 20rpx;
+  padding: 12rpx 20rpx;
+  margin-bottom: 18rpx;
+  box-sizing: border-box;
+  box-shadow: 0 4rpx 16rpx rgba(16, 185, 129, 0.12), inset 0 0 12rpx rgba(16, 185, 129, 0.08);
+}
+
+.rpss-left {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.rpss-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 10rpx #10b981;
+}
+
+.rpss-title {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #34d399;
+  letter-spacing: 0.5rpx;
+}
+
+.rpss-right {
+  display: flex;
+  align-items: baseline;
+  gap: 4rpx;
+}
+
+.rpss-streak-label {
+  font-size: 20rpx;
+  color: #a7f3d0;
+}
+
+.rpss-streak-num {
+  font-size: 28rpx;
+  font-weight: 900;
+  color: #fbbf24;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 10rpx rgba(251, 191, 36, 0.4);
+}
+
+.rpss-streak-unit {
+  font-size: 20rpx;
+  color: #fde047;
 }
 
 /* 尊享 24K 黑金自律储备金券入账条 (深度联动钱包自律金库概念) */
@@ -1522,13 +1608,13 @@ button.dock-btn-wrap.share-dock-item::after {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(135deg, rgba(35, 24, 10, 0.92) 0%, rgba(18, 13, 6, 0.96) 100%);
-  border: 1.5rpx solid rgba(245, 158, 11, 0.55);
+  background: linear-gradient(135deg, rgba(30, 24, 16, 0.85) 0%, rgba(14, 16, 22, 0.95) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 24rpx;
   padding: 16rpx 20rpx;
   margin-bottom: 22rpx;
   box-sizing: border-box;
-  box-shadow: inset 0 0 18rpx rgba(245, 158, 11, 0.18), 0 6rpx 20rpx rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 0 18rpx rgba(251, 191, 36, 0.08), 0 6rpx 20rpx rgba(0, 0, 0, 0.5);
 }
 
 .rb-mini-bill-wrap {
@@ -1537,8 +1623,8 @@ button.dock-btn-wrap.share-dock-item::after {
   flex-shrink: 0;
   border-radius: 8rpx;
   overflow: hidden;
-  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.6), 0 0 10rpx rgba(245, 158, 11, 0.35);
-  border: 1.5rpx solid rgba(245, 158, 11, 0.7);
+  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.6), 0 0 10rpx rgba(251, 191, 36, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   background: #0b101b;
 }
 
@@ -2080,10 +2166,8 @@ button.dock-btn-wrap.share-dock-item::after {
   width: 600rpx;
   max-width: 82vw;
   height: 100vh;
-  background: rgba(13, 17, 27, 0.96);
+  background: rgba(13, 17, 27, 0.98);
   border-left: 1px solid rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
   padding: calc(50rpx + env(safe-area-inset-top, 0px)) 26rpx calc(40rpx + env(safe-area-inset-bottom, 0px)) 26rpx;
   box-shadow: -20rpx 0 60rpx rgba(0, 0, 0, 0.85);
   box-sizing: border-box;
@@ -2262,8 +2346,8 @@ button.dock-btn-wrap.share-dock-item::after {
   display: flex;
   align-items: center;
   gap: 16rpx;
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.18) 0%, rgba(180, 83, 9, 0.28) 100%);
-  border: 1px solid rgba(245, 158, 11, 0.45);
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.12) 0%, rgba(180, 83, 9, 0.18) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 20rpx;
   padding: 18rpx 20rpx;
   box-sizing: border-box;
@@ -2474,9 +2558,9 @@ button.dock-btn-wrap.share-dock-item::after {
 }
 
 .scene-cat-pill.active-cat-pill {
-  background: rgba(245, 158, 11, 0.2);
-  border-color: #f59e0b;
-  box-shadow: 0 0 16rpx rgba(245, 158, 11, 0.35);
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.16) 0%, rgba(217, 119, 6, 0.08) 100%);
+  border: 1px solid rgba(251, 191, 36, 0.55);
+  box-shadow: 0 0 14rpx rgba(251, 191, 36, 0.2);
 }
 
 .scp-icon {
@@ -2493,7 +2577,7 @@ button.dock-btn-wrap.share-dock-item::after {
 }
 
 .scene-cat-pill.active-cat-pill .scp-text {
-  color: #fbbf24;
+  color: #fde047;
 }
 
 .skill-card-top-row {
@@ -2529,9 +2613,9 @@ button.dock-btn-wrap.share-dock-item::after {
 }
 
 .scene-item-badge.active-badge {
-  color: #fbbf24;
-  background: rgba(245, 158, 11, 0.22);
-  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fde047;
+  background: rgba(251, 191, 36, 0.14);
+  border: 1px solid rgba(251, 191, 36, 0.35);
 }
 
 .scene-card-sound-row {
@@ -2630,8 +2714,9 @@ button.dock-btn-wrap.share-dock-item::after {
 }
 
 .skill-item-card.is-active-skill {
-  background: rgba(245, 158, 11, 0.14);
-  border-color: #f59e0b;
+  background: linear-gradient(145deg, rgba(251, 191, 36, 0.12) 0%, rgba(255, 255, 255, 0.03) 100%);
+  border: 1px solid rgba(251, 191, 36, 0.65);
+  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.45), inset 0 0 16rpx rgba(251, 191, 36, 0.12);
 }
 
 .skill-card-icon {
@@ -2666,9 +2751,9 @@ button.dock-btn-wrap.share-dock-item::after {
   align-self: flex-start;
   font-size: 18rpx;
   font-weight: 700;
-  color: #fbbf24;
-  background: rgba(245, 158, 11, 0.18);
-  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fde047;
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.35);
   padding: 4rpx 14rpx;
   border-radius: 12rpx;
   margin-top: 4rpx;
@@ -2704,20 +2789,22 @@ button.dock-btn-wrap.share-dock-item::after {
 }
 
 .skill-tool-capsule.active-tool {
-  background: rgba(245, 158, 11, 0.22);
-  border-color: #f59e0b;
-  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.15);
+  border: 1px solid rgba(251, 191, 36, 0.55);
+  color: #fde047;
   font-weight: 800;
 }
 
 /* ==================== 13. 赛博替烟原理说明弹窗 (Cyber Tip Dialog) ==================== */
 .cyber-tip-dialog {
   width: 600rpx;
-  background: #15110d;
-  border: 1px solid rgba(245, 158, 11, 0.4);
+  background: rgba(18, 20, 28, 0.96);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 28rpx;
   padding: 36rpx 28rpx;
-  box-shadow: 0 16rpx 50rpx rgba(0, 0, 0, 0.85);
+  box-shadow: 0 24rpx 60rpx rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.12);
   box-sizing: border-box;
 }
 
@@ -2944,8 +3031,10 @@ button.dock-btn-wrap.share-dock-item::after {
   height: 80vh;
   max-height: 80vh;
   min-height: 80vh;
-  background: rgba(15, 12, 10, 0.97);
-  border-top: 1px solid rgba(245, 158, 11, 0.35);
+  background: rgba(14, 16, 24, 0.96);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 36rpx 36rpx 0 0;
   padding: 24rpx 28rpx;
   padding-bottom: calc(36rpx + env(safe-area-inset-bottom, 0px));
@@ -2990,11 +3079,12 @@ button.dock-btn-wrap.share-dock-item::after {
 .ed-vip-pill {
   font-size: 19rpx;
   font-weight: 800;
-  color: #1e1204;
-  background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
-  padding: 2rpx 12rpx;
+  color: #1a160d;
+  background: linear-gradient(135deg, #fef08a 0%, #f59e0b 50%, #d97706 100%);
+  padding: 2rpx 14rpx;
   border-radius: 12rpx;
   letter-spacing: 1px;
+  box-shadow: 0 2rpx 8rpx rgba(245, 158, 11, 0.3);
 }
 
 .ed-sub-title {
@@ -3036,9 +3126,9 @@ button.dock-btn-wrap.share-dock-item::after {
 }
 
 .effect-card.active-effect-card {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.18) 0%, rgba(217, 119, 6, 0.08) 100%);
-  border: 1.5px solid #f59e0b;
-  box-shadow: 0 4rpx 18rpx rgba(0, 0, 0, 0.4), inset 0 0 14rpx rgba(245, 158, 11, 0.22);
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.12) 0%, rgba(255, 255, 255, 0.03) 100%);
+  border: 1px solid rgba(251, 191, 36, 0.65);
+  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.45), inset 0 0 16rpx rgba(251, 191, 36, 0.12);
   /* 彻底移除导致横向溢出屏幕的 transform: scale(1.01) */
 }
 
@@ -3184,9 +3274,9 @@ button.dock-btn-wrap.share-dock-item::after {
 }
 
 .ec-trial-btn {
-  background: rgba(236, 72, 153, 0.16);
+  background: rgba(236, 72, 153, 0.14);
   color: #f472b6;
-  border: 1px solid rgba(236, 72, 153, 0.4);
+  border: 1px solid rgba(236, 72, 153, 0.35);
 }
 
 .ec-unlock-btn {
@@ -3196,11 +3286,11 @@ button.dock-btn-wrap.share-dock-item::after {
 }
 
 .ec-unlock-btn.can-buy-btn {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  color: #1e1204;
+  background: linear-gradient(135deg, #fef08a 0%, #f59e0b 55%, #d97706 100%);
+  color: #1a160d;
   font-weight: 800;
   border: none;
-  box-shadow: 0 4rpx 12rpx rgba(245, 158, 11, 0.4);
+  box-shadow: 0 4rpx 14rpx rgba(245, 158, 11, 0.35);
 }
 
 .effects-drawer-footer {
@@ -3211,7 +3301,7 @@ button.dock-btn-wrap.share-dock-item::after {
 
 .edf-tip {
   font-size: 19rpx;
-  color: #fbbf24;
+  color: #fde68a;
   line-height: 1.4;
   text-align: center;
   display: block;
@@ -3427,3 +3517,707 @@ button.dock-btn-wrap.share-dock-item::after {
 }
 
 
+
+
+/* ==================== 点火器具工坊 · 引导气泡 & 抽屉 ==================== */
+
+/* 引导气泡：复用 smoke-guide-tooltip，橙色主题区分 */
+.ignite-guide-tooltip {
+  border-color: rgba(251, 146, 60, 0.85) !important;
+  box-shadow: 0 8rpx 28rpx rgba(0, 0, 0, 0.8), 0 0 16rpx rgba(251, 146, 60, 0.4) !important;
+  /* 气泡位置：在点燃按钮左侧弹出，与其他引导对齐 */
+  top: 50% !important;
+}
+
+.ignite-guide-tooltip .sgt-text {
+  color: #fb923c !important;
+}
+
+.ignite-guide-tooltip .sgt-arrow {
+  border-left-color: rgba(251, 146, 60, 0.85) !important;
+}
+
+/* 未点燃时按钮内显示器具 emoji */
+.ignite-tool-icon {
+  font-size: 38rpx;
+  line-height: 1;
+}
+
+/* 点火器具抽屉 */
+/* ==================== 💎 创新点火工坊 · 掌心 EDC 机巧把玩所 (Tactile Fidget Lab) ==================== */
+
+.matrix-vault-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.85) !important;
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 30rpx !important;
+  box-sizing: border-box !important;
+}
+
+.matrix-vault-container {
+  width: 100%;
+  max-width: 680rpx;
+  height: auto !important;
+  min-height: unset !important;
+  max-height: 88vh !important;
+  background: radial-gradient(circle at 50% 0%, #1a1e28 0%, #0d0f14 60%, #080a0f 100%);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 36rpx;
+  padding: 22rpx 24rpx;
+  box-shadow: 0 24rpx 80rpx rgba(0, 0, 0, 0.95), 0 0 40rpx rgba(255, 255, 255, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  box-sizing: border-box;
+  animation: vaultScaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+/* 顶栏：赛博全息标题 + 解压计数勋章与关闭按钮 */
+.matrix-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10rpx;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.mtb-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2rpx;
+}
+
+.mtb-en-tag {
+  font-size: 16rpx;
+  font-weight: 800;
+  color: #fbbf24;
+  letter-spacing: 2rpx;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.mtb-main-title {
+  font-size: 30rpx;
+  font-weight: 900;
+  color: #f8fafc;
+  letter-spacing: 1rpx;
+}
+
+.mtb-right-actions {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.fidget-counter-pill {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 4rpx 14rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.3);
+}
+
+.fcp-spark {
+  font-size: 18rpx;
+}
+
+.fcp-label {
+  font-size: 18rpx;
+  color: #fde68a;
+  font-weight: 700;
+}
+
+.fcp-count {
+  color: #f59e0b;
+  font-weight: 900;
+}
+
+.matrix-close-circle {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22rpx;
+  color: #94a3b8;
+  transition: all 0.2s;
+}
+
+.matrix-close-circle:active {
+  transform: scale(0.9);
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* ==================== 1. 中央掌心把玩解压展台 (纯净通透，触觉手势感应) ==================== */
+.matrix-halo-stage {
+  position: relative;
+  height: 216rpx;
+  min-height: 216rpx;
+  max-height: 216rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  border-radius: 24rpx;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0.3) 100%);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  touch-action: none;
+  flex-shrink: 0;
+}
+
+.matrix-radial-aurora {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: background 0.4s ease;
+}
+
+.matrix-reticle-ring {
+  position: absolute;
+  width: 180rpx;
+  height: 180rpx;
+  border-radius: 50%;
+  border: 1.5px dashed;
+  pointer-events: none;
+  animation: matrixSpin 25s linear infinite;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.matrix-hero-pod {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 120rpx;
+  height: 120rpx;
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.pod-ignite-blast {
+  animation: heroBlastShake 0.45s ease-out;
+}
+
+.pod-fidget-active {
+  transform: scale(1.18) !important;
+  filter: drop-shadow(0 0 28rpx #06b6d4) brightness(1.25) !important;
+  animation: torchHum 0.15s infinite alternate;
+}
+
+.matrix-hero-svg {
+  width: 104rpx;
+  height: 104rpx;
+  filter: drop-shadow(0 8rpx 20rpx rgba(0, 0, 0, 0.6));
+}
+
+.matrix-hero-emoji {
+  font-size: 86rpx;
+  line-height: 1;
+  filter: drop-shadow(0 8rpx 20rpx rgba(0, 0, 0, 0.6));
+}
+
+.matrix-shockwave {
+  position: absolute;
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  border: 2px solid;
+  animation: shockwaveExpand 0.6s ease-out forwards;
+  pointer-events: none;
+}
+
+.shockwave-a {
+  animation: shockwaveExpandA 0.45s ease-out forwards !important;
+}
+
+.shockwave-b {
+  animation: shockwaveExpandB 0.45s ease-out forwards !important;
+}
+
+/* 连续点击交替震击动画 (左右微倾交替，打击感十足) */
+.pod-blast-a {
+  animation: heroBlastShakeA 0.32s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+}
+
+.pod-blast-b {
+  animation: heroBlastShakeB 0.32s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+}
+
+/* 飞溅星火微粒 */
+.fidget-spark-dots {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.fs-dot {
+  position: absolute;
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  left: 50%;
+  top: 50%;
+  margin: -5rpx 0 0 -5rpx;
+}
+
+.fs-d1 { animation: sparkFly1 0.36s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.fs-d2 { animation: sparkFly2 0.36s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.fs-d3 { animation: sparkFly3 0.36s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.fs-d4 { animation: sparkFly4 0.36s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+.fcp-bump {
+  animation: counterBump 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* 试火手势提示底座（向下紧凑贴合，形成舞台专属状态条） */
+.matrix-action-indicator-dock {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44rpx;
+  min-height: 44rpx;
+  max-height: 44rpx;
+  margin: -4rpx 0 0 0;
+  flex-shrink: 0;
+}
+
+.matrix-action-indicator {
+  position: static !important;
+  height: 42rpx;
+  line-height: 42rpx;
+  padding: 0 20rpx;
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 21rpx;
+  backdrop-filter: blur(8px);
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+.mai-text {
+  font-size: 20rpx;
+  color: #cbd5e1;
+  font-weight: 600;
+  letter-spacing: 0.5rpx;
+  height: 42rpx !important;
+  line-height: 40rpx !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* ==================== 2. 悬浮解构机巧铭牌与情绪心境金句 (严格恒高118rpx，绝不跳变) ==================== */
+.matrix-spec-card {
+  height: 118rpx;
+  min-height: 118rpx;
+  max-height: 118rpx;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  padding: 10rpx 16rpx;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 18rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  margin: 0;
+}
+
+.msc-header {
+  height: 42rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  width: 100%;
+}
+
+.msc-title-left {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  flex-shrink: 0;
+}
+
+.msc-name {
+  font-size: 28rpx;
+  font-weight: 800;
+  color: #f8fafc;
+  white-space: nowrap;
+}
+
+.fidget-mood-chip {
+  font-size: 18rpx;
+  font-weight: 800;
+  padding: 2rpx 12rpx;
+  border-radius: 10rpx;
+  border: 1px solid;
+  letter-spacing: 1rpx;
+  white-space: nowrap;
+}
+
+.msc-title-right {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  flex-shrink: 1;
+  overflow: hidden;
+  justify-content: flex-end;
+}
+
+.fidget-material-tag {
+  font-size: 19rpx;
+  color: #94a3b8;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 240rpx;
+}
+
+.msc-equipped-chip {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  padding: 2rpx 12rpx;
+  border-radius: 12rpx;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.chip-dot {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 10rpx #10b981;
+}
+
+.chip-label {
+  font-size: 18rpx;
+  color: #10b981;
+  font-weight: 800;
+}
+
+.fidget-quote-box {
+  height: 44rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 14rpx;
+  background: rgba(255, 255, 255, 0.025);
+  border-left: 4rpx solid #f59e0b;
+  border-radius: 4rpx 12rpx 12rpx 4rpx;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.fqb-quote {
+  font-size: 20rpx;
+  color: #e2e8f0;
+  font-style: italic;
+  line-height: 44rpx;
+  letter-spacing: 0.5rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  width: 100%;
+}
+
+/* ==================== 3. 5 位平视机械舱卡（即点即换，紧凑工整） ==================== */
+.matrix-selector-strip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10rpx;
+  height: 128rpx;
+  min-height: 128rpx;
+  max-height: 128rpx;
+  margin: 0;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.matrix-slot-unit {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+  position: relative;
+  padding: 10rpx 2rpx;
+  border-radius: 16rpx;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.matrix-slot-unit:active {
+  transform: scale(0.95);
+}
+
+.slot-current-focus {
+  background: rgba(255, 255, 255, 0.08) !important;
+  transform: translateY(-3rpx);
+}
+
+.msu-glow-border {
+  position: absolute;
+  inset: -1px;
+  border-radius: 16rpx;
+  border: 1.5px solid;
+  pointer-events: none;
+}
+
+.msu-icon-wrap {
+  width: 62rpx;
+  height: 62rpx;
+  border-radius: 14rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: background 0.2s;
+}
+
+.msu-svg {
+  width: 40rpx;
+  height: 40rpx;
+}
+
+.msu-emoji {
+  font-size: 36rpx;
+  line-height: 1;
+}
+
+.msu-active-pip {
+  position: absolute;
+  top: -4rpx;
+  right: -4rpx;
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8rpx #10b981;
+  border: 2rpx solid #000;
+}
+
+.msu-label {
+  font-size: 19rpx;
+  color: #94a3b8;
+  font-weight: 600;
+  white-space: nowrap;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* ==================== 4. 悬浮胶囊装配主操作键 (严格双向几何居中，绝不下沉) ==================== */
+.matrix-action-dock {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.matrix-equip-btn {
+  width: 100%;
+  height: 86rpx;
+  border-radius: 43rpx;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1.5px solid;
+  box-sizing: border-box;
+  text-align: center;
+  box-shadow: 0 10rpx 28rpx rgba(0, 0, 0, 0.5);
+  transition: all 0.25s ease;
+  padding: 0 !important;
+  margin: 0 !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.matrix-equip-btn:active {
+  transform: scale(0.98);
+  opacity: 0.92;
+}
+
+.meb-text {
+  width: 100% !important;
+  height: 86rpx !important;
+  line-height: 84rpx !important;
+  text-align: center !important;
+  font-size: 28rpx;
+  font-weight: 800;
+  letter-spacing: 2rpx;
+  white-space: nowrap !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box;
+}
+
+/* 无论背景色切为什么颜色（深色/浅色/鲜艳色），白字+柔和暗影永远对比度拉满，绝对清晰可见！ */
+.text-need-equip {
+  color: #ffffff !important;
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.45);
+}
+
+/* 已装配：清新翡翠绿 */
+.text-is-equipped {
+  color: #34d399 !important;
+  text-shadow: 0 0 10rpx rgba(52, 211, 153, 0.3);
+}
+
+.meb-equipped {
+  box-shadow: none !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.meb-just-equipped {
+  animation: equipGlowPulse 0.85s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* 动效 */
+@keyframes matrixSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes heroBlastShake {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.28) rotate(-6deg); filter: drop-shadow(0 0 24rpx #f59e0b) brightness(1.3); }
+  60% { transform: scale(1.1) rotate(4deg); }
+  100% { transform: scale(1); }
+}
+
+@keyframes heroBlastShakeA {
+  0% { transform: scale(0.9); }
+  30% { transform: scale(1.22) rotate(-8deg); filter: drop-shadow(0 0 24rpx #f59e0b) brightness(1.35); }
+  65% { transform: scale(1.06) rotate(4deg); }
+  100% { transform: scale(1); }
+}
+
+@keyframes heroBlastShakeB {
+  0% { transform: scale(0.9); }
+  30% { transform: scale(1.22) rotate(8deg); filter: drop-shadow(0 0 24rpx #f59e0b) brightness(1.35); }
+  65% { transform: scale(1.06) rotate(-4deg); }
+  100% { transform: scale(1); }
+}
+
+@keyframes torchHum {
+  0% { transform: scale(1.16); }
+  100% { transform: scale(1.20) translateY(-2rpx); }
+}
+
+@keyframes shockwaveExpand {
+  0% { transform: scale(0.6); opacity: 0.9; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+@keyframes shockwaveExpandA {
+  0% { transform: scale(0.5); opacity: 0.95; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+@keyframes shockwaveExpandB {
+  0% { transform: scale(0.5); opacity: 0.95; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+@keyframes sparkFly1 {
+  0% { transform: translate(0, 0) scale(1.2); opacity: 1; }
+  100% { transform: translate(-38rpx, -44rpx) scale(0.2); opacity: 0; }
+}
+
+@keyframes sparkFly2 {
+  0% { transform: translate(0, 0) scale(1.2); opacity: 1; }
+  100% { transform: translate(42rpx, -36rpx) scale(0.2); opacity: 0; }
+}
+
+@keyframes sparkFly3 {
+  0% { transform: translate(0, 0) scale(1.2); opacity: 1; }
+  100% { transform: translate(-36rpx, 38rpx) scale(0.2); opacity: 0; }
+}
+
+@keyframes sparkFly4 {
+  0% { transform: translate(0, 0) scale(1.2); opacity: 1; }
+  100% { transform: translate(38rpx, 36rpx) scale(0.2); opacity: 0; }
+}
+
+@keyframes counterBump {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.18); box-shadow: 0 0 24rpx rgba(245, 158, 11, 0.5); }
+  100% { transform: scale(1); }
+}
+
+@keyframes vaultScaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes equipGlowPulse {
+  0% { transform: scale(0.96); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.8); }
+  50% { transform: scale(1.02); box-shadow: 0 0 40rpx 12rpx rgba(245, 158, 11, 0.4); }
+  100% { transform: scale(1); box-shadow: none; }
+}
+
+
+/* ==================== 腾讯级：点燃按钮动态器具自适应与点火微爆动效 ==================== */
+.dock-circle-btn.ignite-btn.is-unlit-tool {
+  background: radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.12) 0%, rgba(245, 158, 11, 0.25) 45%, rgba(15, 23, 42, 0.95) 100%) !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dock-circle-btn.ignite-btn.is-btn-sparking {
+  transform: scale(1.15) !important;
+  box-shadow: 0 0 36rpx #ff7700, inset 0 0 16rpx #ffffff !important;
+  border-color: #ffffff !important;
+}
+
+.ignite-icon-spark {
+  animation: igniteJolt 0.5s ease-out;
+}
+
+@keyframes igniteJolt {
+  0% { transform: scale(0.9); }
+  30% { transform: scale(1.35) rotate(-8deg); filter: drop-shadow(0 0 16rpx #ffea00) brightness(1.4); }
+  60% { transform: scale(1.1) rotate(6deg); }
+  100% { transform: scale(1); }
+}

@@ -1,19 +1,10 @@
+import { navigateBackWithSound } from '../../utils/navigation.js';
 // pages/vip/vip.js
 import { audioManager } from '../../services/audioManager.js';
 import { triggerHaptic } from '../../services/haptics.js';
 import { toast } from '../../services/toastService.js';
-import { VIP_TIERS, VIP_PRIVILEGES, VIP_COMPARE_ROWS, VIP_THEME_OPTIONS, vipService } from '../../services/vipService.js';
-
-function detectIsIOS() {
-  try {
-    const sysInfo = wx.getSystemInfoSync ? wx.getSystemInfoSync() : {};
-    const platform = (sysInfo.platform || '').toLowerCase();
-    const system = (sysInfo.system || '').toLowerCase();
-    return platform === 'ios' || system.includes('ios') || system.includes('iphone') || system.includes('ipad');
-  } catch (e) {
-    return false;
-  }
-}
+import { VIP_TIERS, VIP_PRIVILEGES, VIP_COMPARE_ROWS, VIP_THEME_OPTIONS, VIP_THEME_CATEGORIES, vipService } from '../../services/vipService.js';
+import { measureSafeAreaSync, detectIsIOS } from '../../utils/safeArea.js';
 
 Page({
   data: {
@@ -24,9 +15,12 @@ Page({
 
     tiers: VIP_TIERS,
     themeOptions: VIP_THEME_OPTIONS,
+    themeCategories: VIP_THEME_CATEGORIES,
+    currentThemeCategory: 'all',
+    filteredThemeOptions: VIP_THEME_OPTIONS,
     selectedTierId: 'month', // 腾讯游戏默认选中最高转化率推荐款（月卡）
     selectedTier: VIP_TIERS[1],
-    currentTheme: 'month', // 动态氛围主题：'day' (翡翠晨曦) | 'month' (极光紫晶) | 'lifetime' (曜世黑金) | 'classic' (原色深曜)
+    currentTheme: 'month', // 动态氛围主题
     activeVipThemeId: 'month',
     activeVipThemeName: '极光紫晶',
 
@@ -53,47 +47,37 @@ Page({
   },
 
   measureSafeArea() {
-    try {
-      const sysInfo = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
-      const menuInfo = wx.getMenuButtonBoundingClientRect ? wx.getMenuButtonBoundingClientRect() : null;
-      const statusBarHeight = sysInfo.statusBarHeight || 44;
-      let navBarHeight = 44;
-      let capsuleRightSpace = 96;
+    this.setData(measureSafeAreaSync());
+  },
 
-      if (menuInfo && menuInfo.top) {
-        navBarHeight = (menuInfo.top - statusBarHeight) * 2 + menuInfo.height;
-        capsuleRightSpace = (sysInfo.windowWidth - menuInfo.left) + 12;
-      }
+  computeFilteredThemes(themeOptions, category) {
+    if (!category || category === 'all') return themeOptions;
+    return themeOptions.filter(t => t.category === category);
+  },
 
-      this.setData({
-        statusBarHeight,
-        navBarHeight,
-        capsuleRightSpace
-      });
-    } catch (e) {
-      console.warn('measureSafeArea error', e);
-    }
+  computeThemeCategories(themeOptions) {
+    return VIP_THEME_CATEGORIES.map(cat => {
+      const count = cat.id === 'all'
+        ? themeOptions.length
+        : themeOptions.filter(t => t.category === cat.id).length;
+      return { ...cat, count };
+    });
   },
 
   buildThemeOptionsWithLock(vipInfo) {
     const isVip = !!(vipInfo && vipInfo.isVip);
     const tierId = vipInfo ? vipInfo.tierId : '';
     const isLifetime = !!(vipInfo && vipInfo.isLifetime);
+    const TIER_LEVELS = { '': 0, 'day': 1, 'month': 2, 'lifetime': 3 };
+    const userLevel = isLifetime || tierId === 'lifetime' ? 3 : (TIER_LEVELS[tierId] || (isVip ? 1 : 0));
 
     return VIP_THEME_OPTIONS.map(opt => {
-      let isLocked = false;
+      const requiredLevel = TIER_LEVELS[opt.minTier || 'month'] || 2;
+      const isLocked = !isVip || (userLevel < requiredLevel);
       let requiredTierText = '';
-
-      if (opt.id === 'day') {
-        isLocked = !isVip; // 开通日卡/月卡/永久卡均可解锁翡翠绿
-        requiredTierText = '日卡解锁';
-      } else if (opt.id === 'month') {
-        isLocked = !isVip || (!isLifetime && tierId !== 'month'); // 只有月卡与永久卡能选紫色
-        requiredTierText = '月卡解锁';
-      } else if (opt.id === 'lifetime') {
-        isLocked = !isVip || (!isLifetime && tierId !== 'lifetime'); // 只有永久卡能选曜世黑金
-        requiredTierText = '永久专属';
-      }
+      if (opt.minTier === 'day') requiredTierText = '日卡解锁';
+      else if (opt.minTier === 'month') requiredTierText = '月卡解锁';
+      else if (opt.minTier === 'lifetime') requiredTierText = '永久专属';
 
       return {
         ...opt,
@@ -106,6 +90,19 @@ Page({
   refreshVipStatus() {
     const vipInfo = vipService.getVipInfo();
     const themeOptions = this.buildThemeOptionsWithLock(vipInfo);
+    const themeCategories = this.computeThemeCategories(themeOptions);
+
+    // 腾讯总监设计级：恢复用户上次所选分类分组（持久化记忆）
+    let category = this.data.currentThemeCategory || 'all';
+    try {
+      const savedCat = wx.getStorageSync('JUST_ONE_SMOKE_VIP_THEME_CAT');
+      if (savedCat && themeCategories.some(c => c.id === savedCat)) {
+        category = savedCat;
+      }
+    } catch (e) {}
+
+    const filteredThemeOptions = this.computeFilteredThemes(themeOptions, category);
+
     if (vipInfo && vipInfo.isVip) {
       let savedThemeId = vipInfo.customTheme || vipInfo.tierId || 'month';
       if (!vipService.isThemeAllowed(savedThemeId, vipInfo.tierId, vipInfo.isLifetime)) {
@@ -113,13 +110,16 @@ Page({
         vipService.setVipTheme(savedThemeId);
       }
       const themeOpt = VIP_THEME_OPTIONS.find(o => o.id === savedThemeId) || VIP_THEME_OPTIONS[0];
-      const targetTierId = savedThemeId === 'classic' ? 'day' : savedThemeId;
+      const targetTierId = themeOpt.minTier === 'lifetime' ? 'lifetime' : (themeOpt.minTier === 'day' ? 'day' : 'month');
       const matchedTier = this.data.tiers.find(t => t.id === targetTierId)
         || this.data.tiers.find(t => t.id === vipInfo.tierId)
         || this.data.tiers[0];
       this.setData({
         vipInfo,
         themeOptions,
+        themeCategories,
+        currentThemeCategory: category,
+        filteredThemeOptions,
         selectedTierId: matchedTier.id,
         selectedTier: matchedTier,
         activeVipThemeId: savedThemeId,
@@ -127,11 +127,46 @@ Page({
         currentTheme: savedThemeId
       });
     } else {
-      this.setData({ vipInfo, themeOptions });
+      let previewTheme = 'month';
+      try {
+        const storedPreview = wx.getStorageSync('JUST_ONE_SMOKE_PREVIEW_THEME');
+        if (storedPreview) previewTheme = storedPreview;
+      } catch (e) {}
+      const previewOpt = VIP_THEME_OPTIONS.find(o => o.id === previewTheme) || VIP_THEME_OPTIONS[0];
+      this.setData({
+        vipInfo,
+        themeOptions,
+        themeCategories,
+        currentThemeCategory: category,
+        filteredThemeOptions,
+        activeVipThemeId: previewTheme,
+        activeVipThemeName: previewOpt.name,
+        currentTheme: previewTheme
+      });
     }
   },
 
-  // VIP 专属：一键自由切换全站背景氛围主题（按档位鉴权：日卡选翡翠，月卡选紫+翡翠，永久卡全选）
+  onSelectThemeCategory(e) {
+    const category = e.currentTarget.dataset.category || 'all';
+    if (category === this.data.currentThemeCategory) return;
+    triggerHaptic('light');
+    try {
+      audioManager.playClick();
+    } catch (err) {}
+
+    // 记住用户当前选择的分组
+    try {
+      wx.setStorageSync('JUST_ONE_SMOKE_VIP_THEME_CAT', category);
+    } catch (e) {}
+
+    const filteredThemeOptions = this.computeFilteredThemes(this.data.themeOptions, category);
+    this.setData({
+      currentThemeCategory: category,
+      filteredThemeOptions
+    });
+  },
+
+  // VIP 专属：一键自由切换全站背景氛围主题（按档位鉴权：日卡/月卡/永久卡梯度解锁）
   onSelectVipTheme(e) {
     const themeId = e.currentTarget.dataset.id;
     if (!themeId) return;
@@ -139,23 +174,23 @@ Page({
     triggerHaptic('light');
     try {
       audioManager.playClick();
-    } catch (e) {}
+    } catch (err) {}
 
     const vipInfo = this.data.vipInfo || {};
     const isAllowed = vipService.isThemeAllowed(themeId, vipInfo.tierId, vipInfo.isLifetime);
-
     const themeOpt = VIP_THEME_OPTIONS.find(o => o.id === themeId) || VIP_THEME_OPTIONS[0];
-    const targetTierId = themeId === 'classic' ? 'day' : themeId;
-    const matchedTier = this.data.tiers.find(t => t.id === targetTierId) || this.data.tiers[0];
 
-    // 如果未达到权限（如日卡点紫色/金色，或月卡点金色）：
-    // 自动帮用户选中下方对应套餐卡片供其升级，同时在当前页面预览该档位背景色，但不保存全站、不弹 toast
+    // 如果未达到权限（如日卡点月卡色，或月卡点永久色）：
+    // 联动下方推荐套餐卡片，并在当前页面实时预览该车身色彩，友善提示
     if (!isAllowed) {
+      const targetTierId = themeOpt.minTier === 'lifetime' ? 'lifetime' : (themeOpt.minTier === 'day' ? 'day' : 'month');
+      const matchedTier = this.data.tiers.find(t => t.id === targetTierId) || this.data.tiers[0];
       this.setData({
         selectedTierId: matchedTier.id,
         selectedTier: matchedTier,
-        currentTheme: targetTierId
+        currentTheme: themeId
       });
+      toast.info(this.data.isIOS ? `【${themeOpt.name}】需开启${matchedTier.name}解锁` : `【${themeOpt.name}】需开通${matchedTier.name}解锁`);
       return;
     }
 
@@ -166,17 +201,15 @@ Page({
         vipInfo: updatedVipInfo,
         activeVipThemeId: themeId,
         activeVipThemeName: themeOpt.name,
-        currentTheme: themeId,
-        selectedTierId: matchedTier.id,
-        selectedTier: matchedTier
+        currentTheme: themeId
       });
     } else {
+      // 腾讯总监设计级：非 VIP 用户体验点击时，同样写入预览主题，在返回首页时能够即时体验
+      vipService.setVipTheme(themeId);
       this.setData({
         activeVipThemeId: themeId,
         activeVipThemeName: themeOpt.name,
-        currentTheme: themeId,
-        selectedTierId: matchedTier.id,
-        selectedTier: matchedTier
+        currentTheme: themeId
       });
     }
   },
@@ -307,13 +340,7 @@ Page({
   },
 
   onNavigateBack() {
-    triggerHaptic('light');
-    const pages = getCurrentPages();
-    if (pages.length > 1) {
-      wx.navigateBack();
-    } else {
-      wx.redirectTo({ url: '/pages/index/index' });
-    }
+    navigateBackWithSound('/pages/index/index');
   },
 
   preventTouchMove() {}

@@ -1,9 +1,9 @@
-// components/stats-view/stats-view.js
+// pages/mine/components/stats-view/stats-view.js
 import { buildTrendLineChartSvg } from '../../utils/trendChartSvgBuilder.js';
-import { storageService } from '../../services/storageService.js';
-import { vipService } from '../../services/vipService.js';
-import { toast } from '../../services/toastService.js';
-import { audioManager } from '../../services/audioManager.js';
+import { storageService } from '../../../../services/storageService.js';
+import { vipService } from '../../../../services/vipService.js';
+import { toast } from '../../../../services/toastService.js';
+import { audioManager } from '../../../../services/audioManager.js';
 import {
   LUNG_ICON_SVG,
   HEART_ICON_SVG,
@@ -11,7 +11,7 @@ import {
   BRAIN_ICON_SVG,
   DEFAULT_USER_AVATAR_SVG,
   CYBER_GOLD_VOUCHER_SVG
-} from '../../utils/vectorIcons.js';
+} from '../../../../utils/vectorIcons.js';
 import {
   ACHIEVEMENTS,
   checkAchievementsToUnlock,
@@ -19,7 +19,8 @@ import {
   getHighestUnlockedTitle,
   getActiveUserTitle,
   normalizeUnlockedIds
-} from '../../configs/achievements.js';
+} from '../../../../configs/achievements.js';
+import { detectIsIOS } from '../../../../utils/safeArea.js';
 
 Component({
   properties: {
@@ -108,6 +109,7 @@ Component({
     },
     defaultAvatarSvg: DEFAULT_USER_AVATAR_SVG,
     goldVoucherSvgUri: CYBER_GOLD_VOUCHER_SVG,
+    isIOS: detectIsIOS(),
     isVip: false,
     vipInfo: { isVip: false, isLifetime: false, formattedExpire: '' },
 
@@ -170,7 +172,7 @@ Component({
   },
 
   observers: {
-    'quitDays, totalSubstituted, totalTarAvoided, totalSavedMoney, dailyTrends, igniteCount, totalIgnites': function() {
+    'profile, quitDays, totalSubstituted, totalTarAvoided, totalSavedMoney, dailyTrends, igniteCount, totalIgnites': function() {
       this._syncAllStats();
     },
     'whoStages': function() {
@@ -486,7 +488,7 @@ Component({
       const organDictionary = {
         lungs: {
           id: 'lungs',
-          name: '双肺呼吸系统',
+          name: '双肺呼吸与咽喉粘膜',
           icon: '🫁',
           iconUri: LUNG_ICON_SVG,
           percent: lPct,
@@ -496,14 +498,14 @@ Component({
           statusBadge: lPct >= 70 ? '深度焕新' : (lPct >= 35 ? '排毒加速中' : '初步唤醒'),
           statMetrics: [
             { label: '阻断有害焦油', val: `${tar} mg`, highlight: true },
-            { label: '纤毛摆动活力', val: `${lPct}%` },
-            { label: '通气阻力下降', val: `-${Math.max(2, Math.min(38, Math.round(lPct * 0.38)))}%` }
+            { label: '咽部充血水肿', val: lPct >= 70 ? '完全消退' : (lPct >= 35 ? '-68% 吸收' : '充血减轻') },
+            { label: '气道纤毛活力', val: `${lPct}%` }
           ],
           clinicalDesc: lPct >= 70
-            ? '双肺支气管纤毛麻痹状态已完全解除，左肺与右肺粘液清除系统同步恢复规律摆动。肺泡巨噬细胞正在深层分解并搬运沉着焦油颗粒，双肺气体交换通畅度显著跃升。'
+            ? '口腔与咽喉粘膜红肿彻底消除，声带水肿完全吸收，晨起咳痰与咽干异物感全面消失。双肺支气管纤毛麻痹状态解除并规律律动，肺泡巨噬细胞高效代谢清除沉积焦油，通气阻力下降，气体交换显著跃升。'
             : (lPct >= 35
-              ? '支气管纤毛逐步恢复规律摆动，肺泡巨噬细胞正在加速吞噬并分解沉积焦油微粒，晨起咳痰或咽部异物感逐渐减轻，气道呼吸通畅度明显提升。'
-              : '停吸初期，支气管黏膜受烟碱与焦油刺激显著减弱，麻痹的呼吸纤毛开始初步苏醒微动，气道表面粘液自洁与排毒机制重新启动。')
+              ? '咽喉黏膜充血水肿明显消退，舌苔味觉与嗅觉受体敏感度大幅复苏。支气管纤毛逐步恢复节律摆动，加速吞噬并排空焦油微粒，晨起气道清澈，呼吸轻盈舒畅。'
+              : '停吸初期，口腔与咽部粘膜脱离高温焦油直接灼伤，表层水肿开始吸收；呼吸道纤毛系统苏醒微动，自洁排毒机制重新运转。')
         },
         heart: {
           id: 'heart',
@@ -528,7 +530,7 @@ Component({
         },
         blood: {
           id: 'blood',
-          name: '血液循环网络',
+          name: '血液微循环系统',
           icon: '🩸',
           iconUri: BLOOD_ICON_SVG,
           percent: blPct,
@@ -549,24 +551,24 @@ Component({
         },
         brain: {
           id: 'brain',
-          name: '自律神经与脑中枢',
+          name: '脑神经与自主神经轴',
           icon: '🧠',
           iconUri: BRAIN_ICON_SVG,
           percent: brPct,
           color: '#8b5cf6',
           accentBg: 'rgba(139, 92, 246, 0.12)',
-          stageTitle: brPct >= 70 ? '植物神经平衡 · 情绪安宁' : (brPct >= 35 ? '交感神经脱敏 · 焦躁缓解' : '受体适应 · 戒断过渡'),
-          statusBadge: brPct >= 70 ? '神经舒缓' : (brPct >= 35 ? '脱敏修复' : '节律重建'),
+          stageTitle: brPct >= 70 ? '神经受体稳态 · 情绪安宁' : (brPct >= 35 ? '中枢受体脱敏 · 焦躁缓解' : '受体适应 · 戒断过渡'),
+          statusBadge: brPct >= 70 ? '稳态平衡' : (brPct >= 35 ? '脱敏修复' : '节律重建'),
           statMetrics: [
-            { label: '自律平衡度', val: `${brPct}%`, highlight: true },
-            { label: '深度睡眠改善', val: `+${Math.max(3, Math.min(40, Math.round(brPct * 0.4)))}%` },
-            { label: '烟瘾焦躁消除', val: `${Math.max(12, Math.min(92, Math.round(brPct * 0.9)))}%` }
+            { label: '神经受体脱敏', val: `${brPct}%`, highlight: true },
+            { label: '迷走交感平衡', val: brPct >= 70 ? '高度平稳' : (brPct >= 35 ? '平稳恢复' : '交感初降') },
+            { label: '深度睡眠改善', val: `+${Math.max(3, Math.min(40, Math.round(brPct * 0.4)))}%` }
           ],
           clinicalDesc: brPct >= 70
-            ? '交感神经与迷走神经受体逐步脱敏至健康基准线，天然副交感神经自律机制重建，肠胃神经痉挛消除，深睡眠脑电波显著增强。'
+            ? '大脑中枢多巴胺与尼古丁受体完全适应健康生理节律，迷走神经-腹部植物神经轴恢复良性负反馈，焦虑与易怒神经回路切断，深睡眠慢波脑电显著恢复。'
             : (brPct >= 35
-              ? '中枢尼古丁受体敏感度逐步回落，副交感神经（迷走神经）张力稳步恢复，焦躁易怒感明显消退，夜间入睡速度与深睡眠质量显著提升。'
-              : '赛博替烟呼吸节律正在安抚交感神经丛，缓解尼古丁撤退初期的烦躁与空虚感，中枢多巴胺与乙酰胆碱受体开始启动脱敏调节。')
+              ? '中枢胆碱受体敏感度稳步回落，迷走神经（副交感）张力恢复，胃肠神经肌肉痉挛消退，入睡速度与睡眠深度明显增强。'
+              : '中枢神经脱离尼古丁急速刺激，自律神经系统启动自我稳态调节，缓解初期的生理撤退性焦躁与空虚感。')
         }
       };
 
@@ -903,3 +905,4 @@ Component({
     preventTouchMove() {}
   }
 });
+
