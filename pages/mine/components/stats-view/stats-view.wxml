@@ -161,11 +161,19 @@
         </view>
 
 
-        <!-- HUD 数据引线 (纯 CSS 矢量引线折线与发光锚点，精准指向人体靶器官) -->
-        <view class="hud-lead-line to-lung {{ activeOrgan === 'lungs' ? 'lead-active' : '' }}"></view>
-        <view class="hud-lead-line to-visceral {{ activeOrgan === 'brain' ? 'lead-active' : '' }}"></view>
-        <view class="hud-lead-line to-heart {{ activeOrgan === 'heart' ? 'lead-active' : '' }}"></view>
-        <view class="hud-lead-line to-blood {{ activeOrgan === 'blood' ? 'lead-active' : '' }}"></view>
+        <!-- HUD 数据引线 (纯矢量全息贝塞尔流线与发光锚点，告别机械90°直角) -->
+        <view class="hud-lead-line to-lung {{ activeOrgan === 'lungs' ? 'lead-active' : '' }}">
+          <image class="hud-curve-svg" src="{{ leadCurveUris.lungs }}" mode="scaleToFill" />
+        </view>
+        <view class="hud-lead-line to-visceral {{ activeOrgan === 'brain' ? 'lead-active' : '' }}">
+          <image class="hud-curve-svg" src="{{ leadCurveUris.brain }}" mode="scaleToFill" />
+        </view>
+        <view class="hud-lead-line to-heart {{ activeOrgan === 'heart' ? 'lead-active' : '' }}">
+          <image class="hud-curve-svg" src="{{ leadCurveUris.heart }}" mode="scaleToFill" />
+        </view>
+        <view class="hud-lead-line to-blood {{ activeOrgan === 'blood' ? 'lead-active' : '' }}">
+          <image class="hud-curve-svg" src="{{ leadCurveUris.blood }}" mode="scaleToFill" />
+        </view>
 
         <!-- 左上方 HUD 引出数据框：双肺呼吸系统 (精准指向左侧胸腔肺叶) -->
         <view class="hud-card hud-card-tl hud-card-lungs {{ activeOrgan === 'lungs' ? 'is-active' : '' }}" bindtap="onSelectOrgan" data-organ="lungs">

@@ -1784,21 +1784,29 @@ button.user-avatar-btn::after,
 .hud-progress-bar.green-bar { background: linear-gradient(90deg, #059669, #34d399); }
 .hud-progress-bar.purple-bar { background: linear-gradient(90deg, #7c3aed, #c084fc); }
 
-/* HUD 矢量引线 (折线与发光锚点，精准指向解剖位置) */
+/* HUD 矢量引线 (平滑全息三次贝塞尔流线与发光锚点，杜绝生硬机械90°直角) */
 .hud-lead-line {
   position: absolute;
   pointer-events: none;
   z-index: 5;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-/* 左上指向左肺叶 (胸腔左中部) */
+
+.hud-curve-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  transition: transform 0.3s ease, filter 0.3s ease, opacity 0.3s ease;
+  filter: drop-shadow(0 0 4rpx rgba(255, 255, 255, 0.15));
+}
+
+/* 左上指向左肺叶 (胸腔左中部 · 平滑贝塞尔流线) */
 .hud-lead-line.to-lung {
   top: 104rpx;
   left: 198rpx;
   width: 66rpx;
   height: 92rpx;
-  border-top: 2rpx solid rgba(56, 189, 248, 0.55);
-  border-right: 2rpx solid rgba(56, 189, 248, 0.55);
 }
 .hud-lead-line.to-lung::after {
   content: '';
@@ -1812,24 +1820,21 @@ button.user-avatar-btn::after,
   box-shadow: 0 0 10rpx #38bdf8;
   transition: all 0.3s ease;
 }
-.hud-lead-line.to-lung.lead-active {
-  border-top-color: #38bdf8;
-  border-right-color: #38bdf8;
-  filter: drop-shadow(0 0 6rpx rgba(56, 189, 248, 0.8));
+.hud-lead-line.to-lung.lead-active .hud-curve-svg {
+  filter: drop-shadow(0 0 8rpx rgba(56, 189, 248, 0.95)) brightness(1.25);
+  transform: scale(1.02);
 }
 .hud-lead-line.to-lung.lead-active::after {
   box-shadow: 0 0 14rpx #38bdf8, 0 0 24rpx #38bdf8;
   animation: leadAnchorPulse 1.8s infinite ease-in-out;
 }
 
-/* 右上指向心脏 (正中偏左纵隔心区) */
+/* 右上指向心脏 (正中偏左纵隔心区 · 平滑贝塞尔流线) */
 .hud-lead-line.to-heart {
   top: 104rpx;
   right: 198rpx;
   width: 106rpx;
   height: 112rpx;
-  border-top: 2rpx solid rgba(245, 158, 11, 0.55);
-  border-left: 2rpx solid rgba(245, 158, 11, 0.55);
 }
 .hud-lead-line.to-heart::after {
   content: '';
@@ -1843,24 +1848,21 @@ button.user-avatar-btn::after,
   box-shadow: 0 0 10rpx #f59e0b;
   transition: all 0.3s ease;
 }
-.hud-lead-line.to-heart.lead-active {
-  border-top-color: #f59e0b;
-  border-left-color: #f59e0b;
-  filter: drop-shadow(0 0 6rpx rgba(245, 158, 11, 0.8));
+.hud-lead-line.to-heart.lead-active .hud-curve-svg {
+  filter: drop-shadow(0 0 8rpx rgba(245, 158, 11, 0.95)) brightness(1.25);
+  transform: scale(1.02);
 }
 .hud-lead-line.to-heart.lead-active::after {
   box-shadow: 0 0 14rpx #f59e0b, 0 0 24rpx #f59e0b;
   animation: leadAnchorPulse 1.8s infinite ease-in-out;
 }
 
-/* 左下指向脑-肠自主神经轴 (双锚点贯通中枢受体与迷走神经丛) */
+/* 左下指向脑-肠自主神经轴 (双锚点贯通中枢受体与迷走神经丛 · 平滑贝塞尔流线) */
 .hud-lead-line.to-visceral {
   bottom: 140rpx;
   left: 198rpx;
   width: 108rpx;
   height: 165rpx;
-  border-bottom: 2rpx solid rgba(192, 132, 252, 0.55);
-  border-right: 2rpx solid rgba(192, 132, 252, 0.55);
 }
 .hud-lead-line.to-visceral::before {
   content: '';
@@ -1884,10 +1886,9 @@ button.user-avatar-btn::after,
   box-shadow: 0 0 10rpx #c084fc;
   transition: all 0.3s ease;
 }
-.hud-lead-line.to-visceral.lead-active {
-  border-bottom-color: #c084fc;
-  border-right-color: #c084fc;
-  filter: drop-shadow(0 0 6rpx rgba(192, 132, 252, 0.8));
+.hud-lead-line.to-visceral.lead-active .hud-curve-svg {
+  filter: drop-shadow(0 0 8rpx rgba(192, 132, 252, 0.95)) brightness(1.25);
+  transform: scale(1.02);
 }
 .hud-lead-line.to-visceral.lead-active::before {
   border-right-color: #c084fc;
@@ -1899,14 +1900,12 @@ button.user-avatar-btn::after,
   animation: leadAnchorPulse 1.8s infinite ease-in-out;
 }
 
-/* 右下指向大动脉与全身微循环血管网 */
+/* 右下指向大动脉与全身微循环血管网 · 平滑贝塞尔流线 */
 .hud-lead-line.to-blood {
   bottom: 140rpx;
   right: 198rpx;
   width: 60rpx;
   height: 52rpx;
-  border-bottom: 2rpx solid rgba(52, 211, 153, 0.55);
-  border-left: 2rpx solid rgba(52, 211, 153, 0.55);
 }
 .hud-lead-line.to-blood::after {
   content: '';
@@ -1920,10 +1919,9 @@ button.user-avatar-btn::after,
   box-shadow: 0 0 10rpx #34d399;
   transition: all 0.3s ease;
 }
-.hud-lead-line.to-blood.lead-active {
-  border-bottom-color: #34d399;
-  border-left-color: #34d399;
-  filter: drop-shadow(0 0 6rpx rgba(52, 211, 153, 0.8));
+.hud-lead-line.to-blood.lead-active .hud-curve-svg {
+  filter: drop-shadow(0 0 8rpx rgba(52, 211, 153, 0.95)) brightness(1.25);
+  transform: scale(1.02);
 }
 .hud-lead-line.to-blood.lead-active::after {
   box-shadow: 0 0 14rpx #34d399, 0 0 24rpx #34d399;

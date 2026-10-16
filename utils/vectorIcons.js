@@ -1177,3 +1177,78 @@ export const VICTORY_MEDAL_SVG = svgToUri(`
   <ellipse cx="44" cy="38" rx="12" ry="7" fill="#ffffff" opacity="0.32" transform="rotate(-25,44,38)"/>
 </svg>
 `);
+
+// ============================================================================
+// 17. 👑 人体自愈数字孪生体 · 4大靶器官平滑全息三次贝塞尔流线 (Smooth Cubic Bézier Splines)
+// 告别呆板机械90°直角，仿生生物神经与血管流动弧度，腾讯大厂级全息微光矢量渲染
+// ============================================================================
+export const HUD_LEAD_CURVES = {
+  // 左上：双肺与咽喉 (宽66rpx, 高92rpx · 自左向右下自然俯冲弧线)
+  lungs: svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 92" width="100%" height="100%">
+  <defs>
+    <linearGradient id="gLung" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.35"/>
+      <stop offset="60%" stop-color="#38bdf8" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#7dd3fc" stop-opacity="1"/>
+    </linearGradient>
+  </defs>
+  <!-- 光晕底层 -->
+  <path d="M 0 2 C 36 2, 64 42, 64 90" fill="none" stroke="#38bdf8" stroke-width="5" stroke-opacity="0.22" stroke-linecap="round"/>
+  <!-- 核心高精贝塞尔流线 -->
+  <path d="M 0 2 C 36 2, 64 42, 64 90" fill="none" stroke="url(#gLung)" stroke-width="2.5" stroke-linecap="round"/>
+</svg>
+`),
+
+  // 右上：心血管系统 (宽106rpx, 高112rpx · 自右向左下向心汇流弧线)
+  heart: svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 106 112" width="100%" height="100%">
+  <defs>
+    <linearGradient id="gHeart" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.35"/>
+      <stop offset="60%" stop-color="#f59e0b" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#fde047" stop-opacity="1"/>
+    </linearGradient>
+  </defs>
+  <!-- 光晕底层 -->
+  <path d="M 106 2 C 55 2, 2 52, 2 110" fill="none" stroke="#f59e0b" stroke-width="5" stroke-opacity="0.22" stroke-linecap="round"/>
+  <!-- 核心高精贝塞尔流线 -->
+  <path d="M 106 2 C 55 2, 2 52, 2 110" fill="none" stroke="url(#gHeart)" stroke-width="2.5" stroke-linecap="round"/>
+</svg>
+`),
+
+  // 左下：脑-肠自主神经轴 (宽108rpx, 高165rpx · 自左向右上神经冲动上升弧线)
+  brain: svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 165" width="100%" height="100%">
+  <defs>
+    <linearGradient id="gBrain" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#c084fc" stop-opacity="0.35"/>
+      <stop offset="60%" stop-color="#c084fc" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#e9d5ff" stop-opacity="1"/>
+    </linearGradient>
+  </defs>
+  <!-- 光晕底层 -->
+  <path d="M 0 163 C 60 163, 106 95, 106 2" fill="none" stroke="#c084fc" stroke-width="5" stroke-opacity="0.22" stroke-linecap="round"/>
+  <!-- 核心高精贝塞尔流线 -->
+  <path d="M 0 163 C 60 163, 106 95, 106 2" fill="none" stroke="url(#gBrain)" stroke-width="2.5" stroke-linecap="round"/>
+</svg>
+`),
+
+  // 右下：血液微循环 (宽60rpx, 高52rpx · 自右向左上向心分支弧线)
+  blood: svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 52" width="100%" height="100%">
+  <defs>
+    <linearGradient id="gBlood" x1="100%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#34d399" stop-opacity="0.35"/>
+      <stop offset="60%" stop-color="#34d399" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#a7f3d0" stop-opacity="1"/>
+    </linearGradient>
+  </defs>
+  <!-- 光晕底层 -->
+  <path d="M 60 50 C 26 50, 2 28, 2 2" fill="none" stroke="#34d399" stroke-width="5" stroke-opacity="0.22" stroke-linecap="round"/>
+  <!-- 核心高精贝塞尔流线 -->
+  <path d="M 60 50 C 26 50, 2 28, 2 2" fill="none" stroke="url(#gBlood)" stroke-width="2.5" stroke-linecap="round"/>
+</svg>
+`)
+};
+

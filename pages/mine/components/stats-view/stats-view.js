@@ -10,7 +10,8 @@ import {
   BLOOD_ICON_SVG,
   BRAIN_ICON_SVG,
   DEFAULT_USER_AVATAR_SVG,
-  CYBER_GOLD_VOUCHER_SVG
+  CYBER_GOLD_VOUCHER_SVG,
+  HUD_LEAD_CURVES
 } from '../../../../utils/vectorIcons.js';
 import {
   ACHIEVEMENTS,
@@ -107,6 +108,7 @@ Component({
       blood: BLOOD_ICON_SVG,
       brain: BRAIN_ICON_SVG
     },
+    leadCurveUris: HUD_LEAD_CURVES,
     defaultAvatarSvg: DEFAULT_USER_AVATAR_SVG,
     goldVoucherSvgUri: CYBER_GOLD_VOUCHER_SVG,
     isIOS: detectIsIOS(),
