@@ -341,7 +341,7 @@
         <view class="drl-item"><text class="drl-tick">✓</text><text>已点亮 VIP 专属荣耀金冠标识</text></view>
       </view>
 
-      <button class="dialog-primary-btn" bindtap="closeSuccessModal">立即回展柜品吸体验</button>
+      <button class="dialog-primary-btn" bindtap="closeSuccessModal">确定</button>
     </view>
   </view>
 
