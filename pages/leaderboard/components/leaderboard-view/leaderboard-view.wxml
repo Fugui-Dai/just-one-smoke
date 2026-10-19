@@ -36,18 +36,18 @@
           </view>
         </view>
         <view class="my-rank-beat">
-          <text class="beat-label">战胜全国</text>
+          <text class="beat-label">自律领先</text>
           <text class="beat-pct">{{ myRankInfo.beatPercent || 50 }}%</text>
         </view>
       </view>
       <view class="my-rank-metrics">
         <view class="metric-item">
           <text class="m-val">{{ totalSubstituted }}</text>
-          <text class="m-lbl">累计替烟(支)</text>
+          <text class="m-lbl">累计少抽(支)</text>
         </view>
         <view class="metric-item">
           <text class="m-val">¥{{ totalSavedMoney }}</text>
-          <text class="m-lbl">节省烟资</text>
+          <text class="m-lbl">省下烟钱</text>
         </view>
         <view class="metric-item">
           <text class="m-val">{{ quitDays + 1 }}</text>
@@ -56,36 +56,42 @@
       </view>
     </view>
 
-    <!-- 4维荣耀分榜切换栏 (2字极简版) -->
+    <!-- 4维同行分榜切换栏 -->
     <view class="rank-category-tabs">
       <view 
         class="rank-cat-tab {{ currentCategory === 'substituted' ? 'active' : '' }}" 
         bindtap="onSwitchCategory" 
         data-category="substituted"
       >
-        <text class="rct-text">🔥 替烟</text>
+        <text class="rct-text">🌿 少抽榜</text>
       </view>
       <view 
         class="rank-cat-tab {{ currentCategory === 'saved' ? 'active' : '' }}" 
         bindtap="onSwitchCategory" 
         data-category="saved"
       >
-        <text class="rct-text">💰 省钱</text>
+        <text class="rct-text">💰 省钱榜</text>
       </view>
       <view 
         class="rank-cat-tab {{ currentCategory === 'days' ? 'active' : '' }}" 
         bindtap="onSwitchCategory" 
         data-category="days"
       >
-        <text class="rct-text">🌲 毅力</text>
+        <text class="rct-text">⏳ 坚持榜</text>
       </view>
       <view 
         class="rank-cat-tab {{ currentCategory === 'likes' ? 'active' : '' }}" 
         bindtap="onSwitchCategory" 
         data-category="likes"
       >
-        <text class="rct-text">❤️ 人气</text>
+        <text class="rct-text">❤️ 人气榜</text>
       </view>
+    </view>
+
+    <!-- 公平防刷公示徽标 (仅省钱榜展示：防止个人偏好虚高恶意刷榜) -->
+    <view class="rank-fairness-pill" wx:if="{{ currentCategory === 'saved' }}">
+      <text class="rfp-icon">⚖️</text>
+      <text class="rfp-text">同行省钱榜按标准中高档烟基准（¥2.5/支）统算 · 杜绝虚高刷榜</text>
     </view>
 
     <!-- 英雄榜单列表 -->
@@ -122,7 +128,7 @@
             <text class="hero-slogan-text">{{ item.quote }}</text>
           </view>
           <view class="hero-data-tags">
-            <text class="data-tag">替烟 {{ item.substituted }}支</text>
+            <text class="data-tag">少抽 {{ item.substituted }}支</text>
             <text class="data-tag green">省 ¥{{ item.savedMoney }}</text>
             <text class="data-tag purple">坚持 {{ item.days }}天</text>
           </view>
@@ -140,10 +146,10 @@
       </view>
     </view>
 
-    <!-- 底部已展示前50名英雄结语 -->
+    <!-- 底部已展示前50名自律同行者结语 -->
     <view class="list-end-footer" wx:if="{{ list.length >= 50 }}">
       <view class="footer-divider-line"></view>
-      <text class="footer-text">✦ 全国前 50 席英雄榜 · 每日均可点赞送心 ✦</text>
+      <text class="footer-text">✦ 全国前 50 席自律同行先锋 · 每日互相点赞送暖 ✦</text>
       <view class="footer-divider-line"></view>
     </view>
 

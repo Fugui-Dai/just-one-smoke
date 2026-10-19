@@ -4,6 +4,7 @@ import { storageService } from '../../../../services/storageService.js';
 import { vipService } from '../../../../services/vipService.js';
 import { toast } from '../../../../services/toastService.js';
 import { audioManager } from '../../../../services/audioManager.js';
+import { triggerHaptic } from '../../../../services/haptics.js';
 import {
   LUNG_ICON_SVG,
   HEART_ICON_SVG,
@@ -22,6 +23,8 @@ import {
   normalizeUnlockedIds
 } from '../../../../configs/achievements.js';
 import { detectIsIOS } from '../../../../utils/safeArea.js';
+import { VIP_THEME_CATEGORIES, VIP_THEME_OPTIONS, getThemeById } from '../../../../configs/vipThemes.js';
+import { calculateOrganMetrics } from '../../../../configs/healthCalculator.js';
 
 Component({
   properties: {
@@ -92,6 +95,13 @@ Component({
     topPadding: {
       type: Number,
       value: 100
+    },
+    vipTheme: {
+      type: String,
+      value: '',
+      observer() {
+        this.refreshVipStatus();
+      }
     }
   },
 
@@ -149,12 +159,29 @@ Component({
     achievementsCompletionRate: 0,
     equippedTitle: '无烟觉醒者',
     showAchievementModal: false,
-    selectedAchievement: null
+    selectedAchievement: null,
+
+    // 用户服务协议与隐私条款弹窗 (就地查看，不跳转VIP)
+    showProtocolModal: false,
+    protocolType: 'user', // 'user' | 'privacy'
+
+    // 全域流光心境换肤 (Mine 专属轻量装扮中心 · 页面内嵌伸缩折叠)
+    isWardrobeExpanded: true,
+    themeCategories: VIP_THEME_CATEGORIES,
+    currentThemeCategory: 'classic',
+    filteredThemeOptions: VIP_THEME_OPTIONS.filter(t => t.category === 'classic'),
+    activeVipThemeId: 'classic',
+    previewVipThemeId: '',
+    activeThemeObj: VIP_THEME_OPTIONS[0]
   },
 
   lifetimes: {
     attached() {
       const now = new Date();
+      // 只要打开页面/登录即自动签到打卡
+      try {
+        storageService.recordDailyCheckIn();
+      } catch (e) {}
       this.setData({
         calendarYear: now.getFullYear(),
         calendarMonth: now.getMonth() + 1
@@ -168,6 +195,9 @@ Component({
   pageLifetimes: {
     show() {
       this._isNavigating = false;
+      try {
+        storageService.recordDailyCheckIn();
+      } catch (e) {}
       this.refreshVipStatus();
       this._syncAllStats();
     }
@@ -187,11 +217,161 @@ Component({
       try {
         const vipInfo = vipService.getVipInfo();
         const isVip = !!(vipInfo && vipInfo.isVip);
-        this.setData({ vipInfo, isVip });
+        const userStats = {
+          quitDays: this.data.quitDays,
+          totalSubstituted: this.data.totalSubstituted
+        };
+        const curThemeId = vipService.getSelectedThemeId ? vipService.getSelectedThemeId(userStats) : (vipService.getVipTheme(userStats) || 'classic');
+        const activeThemeObj = getThemeById(curThemeId) || VIP_THEME_OPTIONS[0];
+
+        const allThemes = VIP_THEME_OPTIONS.map(opt => ({
+          ...opt,
+          isLocked: !vipService.isThemeAllowed(opt.id, vipInfo.tierId, vipInfo.isLifetime, userStats)
+        }));
+
+        const themeCategories = VIP_THEME_CATEGORIES.map(cat => ({
+          ...cat,
+          count: allThemes.filter(t => t.category === cat.id).length
+        }));
+
+        let category = this.data.currentThemeCategory || 'classic';
+        try {
+          const savedCat = wx.getStorageSync('JUST_ONE_SMOKE_VIP_THEME_CAT');
+          if (savedCat && savedCat !== 'all' && themeCategories.some(c => c.id === savedCat)) {
+            category = savedCat;
+          } else if (category === 'all' || !themeCategories.some(c => c.id === category)) {
+            category = 'classic';
+          }
+        } catch (e) {
+          if (category === 'all' || !themeCategories.some(c => c.id === category)) {
+            category = 'classic';
+          }
+        }
+
+        const filteredThemeOptions = allThemes.filter(t => t.category === category);
+
+        this.setData({ 
+          vipInfo, 
+          isVip,
+          currentThemeCategory: category,
+          activeVipThemeId: curThemeId,
+          activeThemeObj,
+          themeOptions: allThemes,
+          themeCategories,
+          filteredThemeOptions
+        });
       } catch (e) {
         console.warn('refreshVipStatus error', e);
       }
     },
+
+    // 伸缩折叠换肤卡片展开/收起
+    onToggleWardrobeExpand() {
+      try { triggerHaptic('light'); } catch (e) {}
+      try { audioManager.playClick(); } catch (e) {}
+      const next = !this.data.isWardrobeExpanded;
+      this.setData({ isWardrobeExpanded: next });
+    },
+
+    // 分类筛选切换
+    onSelectThemeCategory(e) {
+      const category = e.currentTarget.dataset.category || 'classic';
+      if (!category) return;
+      try { triggerHaptic('selection'); } catch (err) {}
+      try { audioManager.playClick(); } catch (err) {}
+
+      try {
+        wx.setStorageSync('JUST_ONE_SMOKE_VIP_THEME_CAT', category);
+      } catch (err) {}
+
+      const allThemes = this.data.themeOptions || VIP_THEME_OPTIONS;
+      const filteredThemeOptions = allThemes.filter(t => t.category === category);
+
+      this.setData({
+        currentThemeCategory: category,
+        filteredThemeOptions
+      });
+    },
+
+    // 选中流光主题：已解锁正式换肤，未开通/未解锁仅作为实时预览
+    onSelectVipTheme(e) {
+      const themeId = e.currentTarget.dataset.id;
+      if (!themeId) return;
+
+      try { triggerHaptic('light'); } catch (err) {}
+      try { audioManager.playClick(); } catch (err) {}
+
+      const vipInfo = this.data.vipInfo || {};
+      const userStats = {
+        quitDays: this.data.quitDays,
+        totalSubstituted: this.data.totalSubstituted
+      };
+      const isAllowed = vipService.isThemeAllowed(themeId, vipInfo.tierId, vipInfo.isLifetime, userStats);
+      const themeOpt = getThemeById(themeId) || VIP_THEME_OPTIONS[0];
+
+      if (!isAllowed) {
+        // 未解锁：仅实时预览当前页面光影，绝不持久化保存
+        this.setData({
+          previewVipThemeId: themeId,
+          activeThemeObj: themeOpt
+        });
+
+        // 联动当前页面背景实时预览
+        this.triggerEvent('themepreview', { themeId, isPreview: true });
+
+        const daysLeft = Math.max(0, (themeOpt.unlockDays || 0) - (userStats.quitDays || 0));
+        const subsLeft = Math.max(0, (themeOpt.unlockSubs || 0) - (userStats.totalSubstituted || 0));
+        let progressHint = '';
+        if (daysLeft > 0 && subsLeft > 0) {
+          progressHint = `还需自律 ${daysLeft} 天或替烟 ${subsLeft} 支免费解锁`;
+        } else if (daysLeft > 0) {
+          progressHint = `还需自律 ${daysLeft} 天免费解锁`;
+        } else if (subsLeft > 0) {
+          progressHint = `还需替烟 ${subsLeft} 支免费解锁`;
+        } else {
+          progressHint = themeOpt.unlockDesc || '达成自律条件即可免费解锁';
+        }
+
+        const isIOS = this.data.isIOS;
+        const vipHint = isIOS ? '开启VIP亦可秒解' : '开通VIP亦可秒解';
+        toast.info(`✨ 正在预览【${themeOpt.name}】（${progressHint} · ${vipHint}）`);
+        return;
+      }
+
+      // 已解锁（自律时间达成 / VIP特权 / 经典原色）：正式装配并持久化
+      vipService.setVipTheme(themeId, userStats);
+
+      this.setData({
+        activeVipThemeId: themeId,
+        previewVipThemeId: '',
+        activeThemeObj: themeOpt
+      });
+
+      // 通知父级页面立即联动全景背景光效并保存装配
+      this.triggerEvent('themechange', { themeId });
+
+      toast.flame(`🎨 已换上【${themeOpt.name}】流光心境！`);
+    },
+
+    // 退出预览，恢复正式装配的主题
+    onResetThemePreview() {
+      const userStats = {
+        quitDays: this.data.quitDays,
+        totalSubstituted: this.data.totalSubstituted
+      };
+      const realThemeId = vipService.getSelectedThemeId ? vipService.getSelectedThemeId(userStats) : 'classic';
+      const realThemeObj = getThemeById(realThemeId) || VIP_THEME_OPTIONS[0];
+      this.setData({
+        previewVipThemeId: '',
+        activeVipThemeId: realThemeId,
+        activeThemeObj: realThemeObj
+      });
+      this.triggerEvent('themechange', { themeId: realThemeId });
+      toast.info(`已恢复当前正式装配：【${realThemeObj.name}】`);
+    },
+
+    preventBubble() {},
+    preventTouchMove() {},
 
     // 综合同步刷新数据 (具备防死循环防重入保护)
     _syncAllStats() {
@@ -202,6 +382,7 @@ Component({
         this.buildCalendarData();
         this.updateLineChart();
         this.updateAchievementsData();
+        this.refreshVipStatus();
       } finally {
         this._isSyncing = false;
       }
@@ -445,18 +626,9 @@ Component({
     updateOrganMetrics() {
       const days = Number(this.data.quitDays) || 0;
       const subs = Number(this.data.totalSubstituted) || 0;
-
-      // 限制单日虚拟替烟对器官自愈度的最高折算上限，防止首日刷百支瞬间满级
       const cigsPerDay = (this.data.profile && this.data.profile.cigsPerDay) || 15;
-      const maxEffectiveSubs = Math.max(cigsPerDay, (days + 1) * cigsPerDay);
-      const effectiveSubs = Math.min(subs, maxEffectiveSubs);
 
-      // 科学对数自愈饱和曲线 (严肃医学标准 · 契合 WHO 临床里程碑: 首日 12~20%, 7天 ~38-45%, 30天 ~65-72%, 100+天 ~95-99%)
-      // 坚持科学严谨：器官自愈严格基于真实无烟坚持时间与替烟阻断量，坚决不进行商业付费伪科学数值篡改
-      const lungPercent = Math.min(99, Math.max(12, Math.round(12 + Math.log10(1 + days * 0.8 + effectiveSubs * 0.08) * 32)));
-      const heartPercent = Math.min(99, Math.max(18, Math.round(18 + Math.log10(1 + days * 0.85 + effectiveSubs * 0.08) * 30)));
-      const bloodPercent = Math.min(100, Math.max(20, Math.round(20 + Math.log10(1 + days * 0.9 + effectiveSubs * 0.09) * 30)));
-      const brainPercent = Math.min(96, Math.max(15, Math.round(15 + Math.log10(1 + days * 0.8 + effectiveSubs * 0.08) * 31)));
+      const { lungPercent, heartPercent, bloodPercent, brainPercent } = calculateOrganMetrics(days, subs, cigsPerDay);
 
       this.setData({
         lungPercent,
@@ -600,13 +772,13 @@ Component({
         try {
           audioManager.playClick();
         } catch (e) {}
-        toast.info(`今日已完成自律打卡 ✓ 连续坚持 ${calStats.streakDays || 1} 天，保持纯净呼吸！`);
+        toast.info(`今日自律已点亮入册 ✓ 连续坚持 ${calStats.streakDays || 1} 天，保持纯净呼吸！`);
         return;
       }
 
-      // 未打卡 -> 触发敲章盖印仪式感 (Haptic + Stamping Animation + Sound + Flame Toast)
+      // 未打卡 -> 触发点亮心灯仪式感 (Haptic + Zen Illumination Animation + Sound + Flame Toast)
       try {
-        if (wx.vibrateShort) wx.vibrateShort({ type: 'heavy' });
+        if (wx.vibrateShort) wx.vibrateShort({ type: 'medium' });
       } catch (err) {}
       try {
         audioManager.playClick();
@@ -621,7 +793,7 @@ Component({
       storageService.recordDailyCheckIn();
       this.buildCalendarData();
       const updatedStats = this.data.calendarStats || {};
-      toast.flame(`自律觉醒！今日已成功盖印打卡 ✓ 连续坚持 ${updatedStats.streakDays || 1} 天！`);
+      toast.flame(`自律觉醒！今日自律已点亮入册 ✓ 连续坚持 ${updatedStats.streakDays || 1} 天！`);
     },
 
     onTapCalendarDay(e) {
@@ -656,7 +828,7 @@ Component({
         if (item.isPunched) {
           statusTag = '今日已打卡';
           statusEmoji = '🎖️';
-          headline = '今日自律觉醒 · 战报达成';
+          headline = '今日自律觉醒 · 成果达成';
           quote = '今日已成功完成自律打卡，每一次对真烟的拒绝，都是对健康最深刻的尊重！';
         } else {
           statusTag = '今日待盖印';
@@ -667,8 +839,8 @@ Component({
       } else if (item.isPunched) {
         statusTag = '自律已达成';
         statusEmoji = '🏆';
-        headline = '历史胜利战报 · 功德圆满';
-        quote = '该日坚决战胜烟瘾心魔，每一分钟抢回的寿命都是您生命的无价资产！';
+        headline = '历史自律徽记 · 功德圆满';
+        quote = '该日坚决战胜烟瘾心魔，每一分钟延展的健康时光都是您生命的无价资产！';
       } else {
         statusTag = '该日未记录';
         statusEmoji = '☕';
@@ -728,14 +900,16 @@ Component({
     },
 
     onNicknameChange(e) {
-      const nickName = (e.detail && e.detail.value ? e.detail.value : '').trim();
+      const raw = (e.detail && e.detail.value ? e.detail.value : '');
+      const nickName = raw.replace(/[\r\n\t]/g, '').trim().slice(0, 16);
       if (nickName) {
         this.triggerEvent('updatenickname', { nickName });
       }
     },
 
     onNicknameBlur(e) {
-      const nickName = (e.detail && e.detail.value ? e.detail.value : '').trim();
+      const raw = (e.detail && e.detail.value ? e.detail.value : '');
+      const nickName = raw.replace(/[\r\n\t]/g, '').trim().slice(0, 16);
       if (nickName) {
         this.triggerEvent('updatenickname', { nickName });
       }
@@ -775,7 +949,7 @@ Component({
       const quotes = [
         '一张1元，少抽一支就多存一张！',
         '老板，来一包……不抽了，省钱！',
-        '这可是凭毅力抢回来的真金白银！',
+        '这可是凭毅力积攒下的真金白银！',
         '少抽烟多存钱，钱包鼓鼓身体棒！'
       ];
       const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
@@ -906,36 +1080,92 @@ Component({
 
     preventTouchMove() {},
 
+    onGoToVip() {
+      if (this._isNavigating) return;
+      this._isNavigating = true;
+      audioManager.playSwitchSound();
+      wx.navigateTo({
+        url: '/pages/vip/vip',
+        complete: () => {
+          setTimeout(() => {
+            this._isNavigating = false;
+          }, 800);
+        }
+      });
+    },
+
     /* ==========================================================================
-     * [DEV_ADMIN_TEST] 管理员测试模式快速入口 (可整块安全删除)
+     * 微信审核合规协议与隐私政策查看通道
+     * ========================================================================== */
+    onOpenUserAgreement() {
+      triggerHaptic('light');
+      this.setData({
+        showProtocolModal: true,
+        protocolType: 'user'
+      });
+    },
+
+    onOpenPrivacyPolicy() {
+      triggerHaptic('light');
+      this.setData({
+        showProtocolModal: true,
+        protocolType: 'privacy'
+      });
+    },
+
+    closeProtocolModal() {
+      triggerHaptic('light');
+      this.setData({
+        showProtocolModal: false
+      });
+    },
+
+    onOpenPlatformDisclaimer() {
+      wx.showModal({
+        title: '版权与免责合规声明',
+        content: '1. 本小程序为数字化行为替代减压工具，不具有任何医疗诊断与处方功能。\n2. 全站所有拟态名烟视觉均属数字化原创艺术致敬与防伪辨识，不销售任何真实烟草制品。\n3. 用户本地打卡数据均存储于用户终端设备，严格遵守隐私保护法规。',
+        showCancel: false,
+        confirmText: '我已了解',
+        confirmColor: '#10b981'
+      });
+    },
+
+    /* ==========================================================================
+     * [DEV_ADMIN_TEST] 管理员测试模式快速入口 (点击即开/关 · 联动首页DOCK栏)
      * ========================================================================== */
     onTapCopyright() {
-      const isAlreadyUnlocked = !!wx.getStorageSync('__DEV_ADMIN_MODE__');
-      if (isAlreadyUnlocked) {
-        try {
-          if (wx.vibrateShort) wx.vibrateShort({ type: 'medium' });
-        } catch (e) {}
-        this.triggerEvent('openadmintest');
-        return;
-      }
-
-      const now = Date.now();
-      if (!this._lastAdminClickTime || now - this._lastAdminClickTime > 4000) {
-        this._adminClickCount = 0;
-      }
-      this._lastAdminClickTime = now;
-      this._adminClickCount = (this._adminClickCount || 0) + 1;
-
+      // 生产环境 (release) 严格封禁测试入口，防止普通用户触发提权后门
       try {
-        if (wx.vibrateShort) wx.vibrateShort({ type: 'light' });
+        const accountInfo = wx.getAccountInfoSync ? wx.getAccountInfoSync() : null;
+        const envVersion = (accountInfo && accountInfo.miniProgram) ? accountInfo.miniProgram.envVersion : 'release';
+        if (envVersion === 'release') {
+          return;
+        }
       } catch (e) {}
 
-      if (this._adminClickCount >= 10) {
-        this._adminClickCount = 0;
+      // 仅限开发与体验版：需在 3 秒内连续点击 7 次才可唤起，彻底杜绝误触
+      const now = Date.now();
+      if (!this._copyrightTapCount || (now - (this._lastCopyrightTapTime || 0) > 3000)) {
+        this._copyrightTapCount = 1;
+      } else {
+        this._copyrightTapCount++;
+      }
+      this._lastCopyrightTapTime = now;
+
+      if (this._copyrightTapCount < 7) {
+        return;
+      }
+      this._copyrightTapCount = 0;
+
+      const isAlreadyUnlocked = !!wx.getStorageSync('__DEV_ADMIN_MODE__');
+      if (isAlreadyUnlocked) {
+        wx.removeStorageSync('__DEV_ADMIN_MODE__');
+        try { if (wx.vibrateShort) wx.vibrateShort({ type: 'medium' }); } catch (e) {}
+        toast.info('🛠️ 测试模式已关闭，首页DOCK按钮已隐藏');
+      } else {
         wx.setStorageSync('__DEV_ADMIN_MODE__', true);
-        try {
-          if (wx.vibrateShort) wx.vibrateShort({ type: 'heavy' });
-        } catch (e) {}
+        try { if (wx.vibrateShort) wx.vibrateShort({ type: 'heavy' }); } catch (e) {}
+        toast.success('🛠️ 测试模式已开启，首页DOCK栏已就绪测试按钮');
         this.triggerEvent('openadmintest');
       }
     }

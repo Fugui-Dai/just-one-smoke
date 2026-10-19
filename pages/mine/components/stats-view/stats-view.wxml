@@ -11,27 +11,34 @@
     <!-- 0. 个人微信头像、昵称与打卡卡片 (VIP 尊享曜石黑金名片 + 皇冠铭牌) -->
     <view class="user-profile-header-card {{ vipInfo.isVip ? 'is-vip-profile-card' : '' }}">
       <view class="user-profile-row">
-        <!-- 左侧区域：头像严格靠左，名字紧随头像 -->
+        <!-- 左侧区域：头像与VIP纵向居左，名字紧随其后 -->
         <view class="user-profile-left">
-          <view class="user-avatar-wrap">
-            <!-- 微信原生选择头像按钮 (严格靠左，尺寸锁定，防止微信默认button样式拉伸) -->
-            <button 
-              class="user-avatar-btn" 
-              open-type="chooseAvatar" 
-              bindchooseavatar="onChooseAvatar"
-              size="mini"
-              style="width: 96rpx; min-width: 96rpx; max-width: 96rpx; height: 96rpx; min-height: 96rpx; max-height: 96rpx; margin: 0; padding: 0; border: none; background: transparent; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"
-            >
-              <image 
-                class="user-avatar-img {{ vipInfo.isVip ? 'vip-avatar-img' : '' }}" 
-                src="{{ profile.avatarUrl || defaultAvatarSvg }}" 
-                mode="aspectFill" 
-                binderror="onAvatarError"
-              />
-            </button>
+          <view class="user-avatar-col">
+            <view class="user-avatar-wrap">
+              <!-- 微信原生选择头像按钮 (严格靠左，尺寸锁定，防止微信默认button样式拉伸) -->
+              <button 
+                class="user-avatar-btn" 
+                open-type="chooseAvatar" 
+                bindchooseavatar="onChooseAvatar"
+                size="mini"
+                style="width: 96rpx; min-width: 96rpx; max-width: 96rpx; height: 96rpx; min-height: 96rpx; max-height: 96rpx; margin: 0; padding: 0; border: none; background: transparent; display: flex; align-items: center; justify-content: center; flex-shrink: 0;"
+              >
+                <image 
+                  class="user-avatar-img {{ vipInfo.isVip ? 'vip-avatar-img' : '' }}" 
+                  src="{{ profile.avatarUrl || defaultAvatarSvg }}" 
+                  mode="aspectFill" 
+                  binderror="onAvatarError"
+                />
+              </button>
+            </view>
+            <!-- VIP 荣耀身份铭牌：显示在头像正下方 -->
+            <view class="profile-vip-nameplate {{ (isVip || vipInfo.isVip) ? 'is-vip' : 'is-vip-inactive' }}" catchtap="onGoToVip">
+              <text class="pvn-crown">👑</text>
+              <text class="pvn-text">{{ (isVip || vipInfo.isVip) ? 'VIP' : (isIOS ? 'VIP专区' : '开通VIP') }}</text>
+            </view>
           </view>
 
-          <!-- 昵称紧随头像：微信官方昵称选择控件 + VIP 荣耀身份铭牌 -->
+          <!-- 昵称紧随头像：微信官方昵称选择控件 -->
           <view class="user-info-col">
             <view class="user-nickname-row">
               <view class="user-nickname-wrap">
@@ -46,10 +53,6 @@
                   cursor-color="transparent"
                 />
               </view>
-              <view class="profile-vip-nameplate {{ (isVip || vipInfo.isVip) ? 'is-vip' : 'is-vip-inactive' }}" catchtap="onGoToVip">
-                <text class="pvn-crown">👑</text>
-                <text class="pvn-text">{{ (isVip || vipInfo.isVip) ? 'VIP' : (isIOS ? 'VIP专区' : '开通VIP') }}</text>
-              </view>
             </view>
             <view class="user-meta-subrow" bindtap="onOpenProfileModal">
               <text class="user-meta-smoke-tag">烟龄 {{ profile.smokeYears || 5 }}年 · 日均 {{ profile.cigsPerDay || 15 }}支</text>
@@ -58,35 +61,147 @@
           </view>
         </view>
 
-        <!-- 最右边打卡状态方卡 (主动盖印自律状态 / 敲章仪式感) -->
+        <!-- 最右边打卡状态卡片 (精简高定版 · 自律打卡) -->
         <view class="user-punch-card {{ isTodayPunched ? 'is-punched-card' : 'is-pending-card' }} {{ isStamping ? 'is-stamping-active' : '' }}" bindtap="onTapPunchCard">
           <view class="punch-card-badge-row">
             <text class="punch-card-status-dot {{ isTodayPunched ? 'dot-punched' : 'dot-pending' }}"></text>
-            <text class="punch-card-title {{ isTodayPunched ? 'title-punched' : 'title-pending' }}">{{ isTodayPunched ? '今日已打卡 ✓' : '今日打卡 ✦' }}</text>
+            <text class="punch-card-title {{ isTodayPunched ? 'title-punched' : 'title-pending' }}">{{ isTodayPunched ? '已打卡' : '待打卡' }}</text>
           </view>
           <view class="punch-card-days-row">
             <text class="punch-card-num {{ isTodayPunched ? 'num-punched' : 'num-pending' }}">{{ calendarStats.streakDays }}</text>
             <text class="punch-card-unit {{ isTodayPunched ? 'unit-punched' : 'unit-pending' }}">天</text>
           </view>
-          <text class="punch-card-action-hint {{ isTodayPunched ? 'hint-punched' : 'hint-pending' }}">{{ isTodayPunched ? '已盖印 ✓' : '点击盖印' }}</text>
         </view>
       </view>
     </view>
 
-    <!-- 2. 生理机能自愈数字孪生体 (上半身透光人体与脏器生物荧光) -->
+    <!-- ==================== 1. 曜石黑金 VIP 尊享特权卡片 (高转化专属入口) ==================== -->
+    <view class="mine-vip-banner-card {{ (isVip || vipInfo.isVip) ? 'is-vip-active-card' : 'is-vip-promo-card' }}" bindtap="onGoToVip">
+      <!-- 流光极光底晕与星芒粒子 -->
+      <view class="mvb-ambient-glow"></view>
+      <view class="mvb-sparkle s1"></view>
+      <view class="mvb-sparkle s2"></view>
+      <view class="mvb-crown-watermark">👑</view>
+
+      <view class="mvb-main-content">
+        <!-- 左侧皇冠与特权文案 -->
+        <view class="mvb-left-col">
+          <view class="mvb-title-row">
+            <view class="mvb-crown-badge">
+              <text class="mcb-icon">👑</text>
+            </view>
+            <text class="mvb-title-text">{{ (isVip || vipInfo.isVip) ? (vipInfo.isLifetime ? '至尊终身特权生效中' : '尊享 VIP 特权生效中') : (isIOS ? '纯净自律 · VIP 礼遇专区' : '尊享 VIP 终身特权') }}</text>
+            <view class="mvb-tier-tag {{ (isVip || vipInfo.isVip) ? 'tag-vip' : 'tag-hot' }}">{{ (isVip || vipInfo.isVip) ? (vipInfo.isLifetime ? '终身会籍' : '生效中') : '6大特权' }}</view>
+          </view>
+          
+          <view class="mvb-subtitle-row">
+            <text class="mvb-subtitle-text" wx:if="{{ isVip || vipInfo.isVip }}">
+              {{ vipInfo.isLifetime ? '已解锁37款名烟全图鉴 · 无限拆新盒 · 专属黑金座舱' : (vipInfo.formattedExpire + ' 到期 · 享专属主题与特权') }}
+            </text>
+            <text class="mvb-subtitle-text" wx:else>
+              37款典藏名烟全免 · 无限拆新盒 · 专属黑金主题
+            </text>
+          </view>
+        </view>
+
+        <!-- 右侧行动胶囊按钮 -->
+        <view class="mvb-right-action">
+          <view class="mvb-cta-pill {{ (isVip || vipInfo.isVip) ? 'pill-active' : 'pill-gold' }}">
+            <text class="mcp-text">{{ (isVip || vipInfo.isVip) ? '特权专区' : (isIOS ? '去了解' : '去开启') }}</text>
+            <text class="mcp-arrow">➔</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 1.1 全域流光心境换肤 (页面内嵌伸缩折叠卡片 · 零弹窗) -->
+    <view class="mine-wardrobe-card {{ isWardrobeExpanded ? 'is-expanded' : 'is-collapsed' }}">
+      <!-- 头部触控栏：支持点击展开/收起 -->
+      <view class="mwb-header" bindtap="onToggleWardrobeExpand">
+        <view class="mwb-left">
+          <view class="mwb-dot" style="background: radial-gradient(circle at 35% 30%, #ffffff 0%, {{ activeThemeObj.dotColor || '#38bdf8' }} 50%, #050508 100%); box-shadow: 0 0 14rpx {{ activeThemeObj.dotColor || '#38bdf8' }};">
+            <view class="mwb-dot-specular"></view>
+          </view>
+          <view class="mwb-text-box">
+            <text class="mwb-title">🎨 全域流光心境换肤</text>
+            <view class="mwb-tag-row">
+              <text class="mwb-tag">{{ activeThemeObj.name || '原色深曜' }}</text>
+              <view class="mwb-preview-pill" wx:if="{{ previewVipThemeId }}" catchtap="onResetThemePreview">
+                <text class="mwb-preview-pill-text">预览中 · 恢复</text>
+              </view>
+            </view>
+          </view>
+        </view>
+        <view class="mwb-right">
+          <text class="mwb-action">{{ isWardrobeExpanded ? '收起' : ((isVip || vipInfo.isVip) ? '点击更换' : '随心试换') }}</text>
+          <text class="mwb-chevron {{ isWardrobeExpanded ? 'chevron-up' : 'chevron-down' }}"></text>
+        </view>
+      </view>
+
+      <!-- 伸缩展开区：内嵌色块微距矩阵 -->
+      <view class="mwb-body" wx:if="{{ isWardrobeExpanded }}">
+        <!-- 分类切换 Tabs -->
+        <view class="mwb-tabs-row">
+          <block wx:for="{{ themeCategories }}" wx:key="id">
+            <view 
+              class="mwb-tab {{ currentThemeCategory === item.id ? 'tab-active' : '' }}"
+              catchtap="onSelectThemeCategory"
+              data-category="{{ item.id }}"
+            >
+              <text class="mwb-tab-name">{{ item.name }}</text>
+              <text class="mwb-tab-count">{{ item.count }}</text>
+            </view>
+          </block>
+        </view>
+
+        <!-- 4列微距色块网格 -->
+        <view class="mwb-grid">
+          <block wx:for="{{ filteredThemeOptions }}" wx:key="id">
+            <view 
+              class="mwb-pill {{ (previewVipThemeId ? previewVipThemeId === item.id : activeVipThemeId === item.id) ? 'pill-active' : '' }} {{ (previewVipThemeId && previewVipThemeId === item.id) ? 'pill-previewing' : '' }} {{ item.isLocked ? 'pill-locked' : '' }}"
+              catchtap="onSelectVipTheme"
+              data-id="{{ item.id }}"
+              style="{{ ((previewVipThemeId ? previewVipThemeId === item.id : activeVipThemeId === item.id)) ? ('border-color: ' + item.dotColor + '; box-shadow: 0 0 20rpx ' + item.dotColor + '88, inset 0 2rpx 8rpx rgba(255,255,255,0.3); background: ' + item.dotColor + '28;') : '' }}"
+            >
+              <view class="mwb-pill-dot-box">
+                <view class="mwb-car-dot" style="background: radial-gradient(circle at 35% 30%, #ffffff 0%, {{ item.dotColor }} 45%, #050508 100%); box-shadow: 0 0 12rpx {{ item.dotColor }}, inset 0 2rpx 3rpx rgba(255,255,255,0.85);">
+                  <view class="mwb-dot-glint"></view>
+                </view>
+                <text class="mwb-lock-badge" wx:if="{{ item.isLocked }}">🔒</text>
+              </view>
+              <text class="mwb-pill-title">{{ item.name }}</text>
+              <view class="mwb-pill-status-slot">
+                <text class="mwb-preview-mini-badge" wx:if="{{ item.isLocked && previewVipThemeId === item.id }}">预览中</text>
+                <text class="mwb-pill-time-req" wx:elif="{{ item.isLocked && item.unlockDays }}">{{ item.unlockDays }}天</text>
+                <text class="mwb-pill-unlocked" wx:elif="{{ !item.isLocked }}">已解锁</text>
+                <text class="mwb-pill-placeholder" wx:else></text>
+              </view>
+            </view>
+          </block>
+        </view>
+
+        <!-- 条件与进度提示条：预览未解锁时呈现 (置于网格下方，绝不引发网格与页面上下跳动) -->
+        <view class="mwb-unlock-hint-bar" wx:if="{{ previewVipThemeId && activeThemeObj.unlockDesc }}">
+          <text class="mwb-uh-icon">⏳</text>
+          <text class="mwb-uh-text">免费解锁：{{ activeThemeObj.unlockDesc }}（开通VIP免等待）</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 2. 身心律动 · 纯净活力模型 (上半身全息体与脏器生物光晕) -->
     <view class="body-twin-card">
       <view class="twin-top-header">
         <view class="twin-title-wrap">
           <text class="sec-dot green"></text>
-          <text class="sec-heading">机能透视 · 自愈数字孪生体</text>
+          <text class="sec-heading">身心律动 · 纯净活力模型</text>
         </view>
         <view class="twin-badge-live">
           <text class="live-dot"></text>
-          <text class="live-text">生物拟态透视</text>
+          <text class="live-text">活力状态感知</text>
         </view>
       </view>
 
-      <!-- 科技全息人体上半身透视视窗 (科幻与医疗科技风格 · 3D 全息医学透明人体内脏扫描) -->
+      <!-- 科技全息人体上半身透视视窗 (全息生物光影 · 3D 全息纯净活力模型) -->
       <view class="twin-torso-stage">
         <!-- HUD 护角装饰与科技边框 -->
         <view class="hud-bracket hud-bracket-tl"></view>
@@ -94,13 +209,13 @@
         <view class="hud-bracket hud-bracket-bl"></view>
         <view class="hud-bracket hud-bracket-br"></view>
 
-        <!-- 顶部科幻医疗扫描状态条 -->
+        <!-- 顶部身心纯净状态条 -->
         <view class="hud-stage-banner">
           <view class="hud-banner-left">
-            <text class="hud-scanner-code">SYSTEM // BIO-SCAN V3.4</text>
+            <text class="hud-scanner-code">BIOMETRIC HUD · 全息机能状态感知</text>
           </view>
           <view class="hud-banner-right">
-            <text class="hud-scanner-status">● REALTIME 3D RECOVERY</text>
+            <text class="hud-scanner-status">● 实时身心纯净律动</text>
           </view>
         </view>
 
@@ -114,6 +229,10 @@
 
         <!-- 纯 GPU 硬件加速·仿生血流动力学与生理微物理视效层 (0卡顿·零JS占用·60fps满帧) -->
         <view class="torso-hemodynamic-layer">
+          <!-- 0. 腾讯总监级 · 双肺仿生呼吸节律舒张与自愈光晕 (Pulmonary Respiratory Auras) -->
+          <view class="pulmonary-lobe-aura lobe-left"></view>
+          <view class="pulmonary-lobe-aura lobe-right"></view>
+
           <!-- 1. 心脏真实生理节律泵核 (Cardiac Pulse Core · lub-dub 1.25s 心动射血) -->
           <view class="cardiac-chamber-core"></view>
           <view class="cardiac-aorta-wave"></view>
@@ -291,7 +410,7 @@
           </view>
         </view>
 
-        <!-- WHO 临床病理自愈解读 -->
+        <!-- 科学文献 · 呼吸改善推演 -->
         <view class="detail-clinical-box">
           <text class="cb-icon">📋</text>
           <text class="cb-text">{{ organInfo.clinicalDesc }}</text>
@@ -299,17 +418,17 @@
       </view>
     </view>
 
-    <!-- 3. 钱包 (一张纸币是一元 × 金额，腾讯风格调皮搞笑 1 元纸币) -->
+    <!-- 3. 自律金库 (健康资产账本) -->
     <view class="wallet-section-card">
       <view class="section-top-header wallet-top-header">
         <view class="section-name-wrap">
           <text class="sec-dot green"></text>
-          <text class="sec-heading">钱包</text>
-          <text class="sec-pill-tag gold-pill">自律金库</text>
+          <text class="sec-heading">自律金库</text>
+          <text class="sec-pill-tag gold-pill">资产结余</text>
         </view>
       </view>
 
-      <!-- 核心算式展台：[自律金券] × 金额 = 累计省下 -->
+      <!-- 核心算式展台：[自律金券] 少抽支数 × 单支均价 = 累计节余 -->
       <view class="wallet-formula-stage">
         
         <!-- 24K 黑金自律储备金券 (支持轻触弹跳互动) -->
@@ -328,25 +447,31 @@
           </view>
         </view>
 
+        <!-- 因子 1: 累计少抽支数 -->
+        <view class="formula-multiplier-box">
+          <text class="multiplier-num">{{ totalSubstituted }}</text>
+          <text class="multiplier-label">少抽 (支)</text>
+        </view>
+
         <!-- 乘号 -->
         <view class="formula-operator formula-multiply">×</view>
 
-        <!-- 乘数金额 (例如: 10) -->
+        <!-- 因子 2: 单支烟价 -->
         <view class="formula-multiplier-box">
-          <text class="multiplier-num">{{ totalSavedYuan }}</text>
-          <text class="multiplier-label">自律金券 (张)</text>
+          <text class="multiplier-num">¥{{ singleStickPrice || '1.25' }}</text>
+          <text class="multiplier-label">单支折算</text>
         </view>
 
         <!-- 等号 -->
         <view class="formula-operator formula-equal">=</view>
 
-        <!-- 累计省下 -->
+        <!-- 累计节余 -->
         <view class="formula-result-box">
           <view class="result-val-row">
             <text class="result-yen">¥</text>
             <text class="result-val">{{ totalSavedMoney }}</text>
           </view>
-          <text class="result-label">累计省下</text>
+          <text class="result-label">累计节余</text>
         </view>
 
       </view>
@@ -354,7 +479,7 @@
       <!-- 科学省钱算法说明条 -->
       <view class="wallet-humor-footer">
         <text class="whf-icon">💰</text>
-        <text class="whf-text">按每包 ¥{{ profile.packPrice || 25 }}（每支 ¥{{ singleStickPrice || '1.25' }}）计算 · 累计少抽 {{ totalSubstituted }} 支真烟</text>
+        <text class="whf-text">按每包 ¥{{ profile.packPrice || 25 }}（每支 ¥{{ singleStickPrice || '1.25' }}）计算 · 相当于沉淀 {{ totalSavedYuan }} 张自律金券</text>
       </view>
     </view>
 
@@ -444,9 +569,9 @@
         </view>
       </view>
 
-      <!-- 抢回健康寿命 (只显示字) -->
+      <!-- 延展健康寿命 (只显示字) -->
       <view class="stats-life-text-row">
-        <text class="life-text-label">抢回健康寿命：</text>
+        <text class="life-text-label">延展健康寿命：</text>
         <text class="life-text-val">{{ totalLifeRegained }} 分钟</text>
         <text class="life-text-sub">（约 {{ lifeRegainedHours }} 小时）</text>
       </view>
@@ -530,12 +655,12 @@
       </view>
     </view>
 
-    <!-- 7. WHO 身体自愈临床里程碑 (20分钟到10年，图标，默认折叠隐藏) -->
+    <!-- 7. 纯净呼吸成长轨迹 (20分钟到10年，图标，默认折叠隐藏) -->
     <view class="who-section-card">
       <view class="section-top-header">
         <view class="section-name-wrap">
           <text class="sec-dot green"></text>
-          <text class="sec-heading">身体自愈临床里程碑</text>
+          <text class="sec-heading">纯净呼吸成长轨迹</text>
         </view>
         <view class="who-quick-toggle" bindtap="toggleWhoCollapse">
           <text class="wqt-text">{{ isWhoCollapsed ? '展开全部 ▾' : '收起 ▴' }}</text>
@@ -562,7 +687,7 @@
                 <text class="node-title">{{ item.title }}</text>
               </view>
               <view class="node-status-tag {{ item.unlocked ? 'tag-passed' : 'tag-progress' }}">
-                {{ item.unlocked ? '已达成 ✓' : '自愈中' }}
+                {{ item.unlocked ? '已达成 ✓' : '进行中' }}
               </view>
             </view>
             <text class="node-clinical-desc">{{ item.description }}</text>
@@ -572,7 +697,7 @@
 
       <!-- 展开/折叠长按钮 -->
       <view class="who-expand-footer-btn" bindtap="toggleWhoCollapse">
-        <text class="wef-text">{{ isWhoCollapsed ? '展开查看完整 10 年自愈里程碑 (共' + (whoStages.length || 12) + '项) ▾' : '收起部分里程碑 ▴' }}</text>
+        <text class="wef-text">{{ isWhoCollapsed ? '展开查看完整 10 年纯净呼吸历程 (共' + (whoStages.length || 12) + '项) ▾' : '收起部分历程 ▴' }}</text>
       </view>
     </view>
 
@@ -593,13 +718,13 @@
       </button>
     </view>
 
-    <!-- 9. 医生寄语与微循环卡片 -->
+    <!-- 9. 健康纯净呼吸自律寄语卡片 -->
     <view class="doctor-quote-card">
       <view class="quote-header">
-        <text class="quote-icon">🩺</text>
-        <text class="quote-title">科学替瘾自愈寄语</text>
+        <text class="quote-icon">🌿</text>
+        <text class="quote-title">纯净呼吸健康寄语</text>
       </view>
-      <text class="quote-body">“每一次使用【我抽一支】代替真烟，支气管纤毛就重新获得一次微循环清洁，血液含氧量也在稳步提升，为你多抢回 11 分钟生命。”</text>
+      <text class="quote-body">“每一次使用【我抽一支】代替真烟，支气管纤毛就重新获得一次微循环清洁，血液含氧量也在稳步提升，为你多延展 11 分钟健康时光。”</text>
     </view>
 
     <!-- 10. 官方免责说明与健康指引 -->
@@ -609,10 +734,20 @@
         <text class="disclaimer-title">免责说明与健康指引</text>
       </view>
       <view class="disclaimer-body">
-        <text class="disclaimer-p">1. 【我抽一支】是一款旨在通过行为替代与心理暗示协助戒烟与减烟的数字化健康辅助工具，不具有任何医疗诊断、疾病治疗或处方戒烟功能。</text>
-        <text class="disclaimer-p">2. 本应用展示之健康数据、节余估算及身体机能自愈推演指标，均依据世界卫生组织（WHO）公共医学文献及戒烟统计模型推导得出，仅供参考，不作为个性化临床依据。</text>
+        <text class="disclaimer-p">1. 【我抽一支】是一款旨在通过行为替代与心理暗示协助控烟与减烟的数字化生活辅助工具，不具有任何医疗诊断、疾病治疗或医疗戒烟处方功能。</text>
+        <text class="disclaimer-p">2. 本应用展示之健康数据、节余估算及身心状态推演指标，均依据公共卫生控烟文献统计模型推导得出，旨在激励自律与健康习惯，仅供参考，不作为任何个性化医学诊断依据。</text>
         <text class="disclaimer-p">3. 若您存在严重心脑血管疾病、严重呼吸系统病变或重度尼古丁戒断反应，请务必前往正规医疗机构戒烟门诊就诊并遵从执业医师指导。</text>
       </view>
+
+      <!-- 微信审核必备：用户服务协议与隐私保护指引直达通道 -->
+      <view class="disclaimer-links-row">
+        <text class="dlr-link" bindtap="onOpenUserAgreement">《用户服务协议》</text>
+        <text class="dlr-sep">|</text>
+        <text class="dlr-link" bindtap="onOpenPrivacyPolicy">《隐私保护指引》</text>
+        <text class="dlr-sep">|</text>
+        <text class="dlr-link" bindtap="onOpenPlatformDisclaimer">《版权与合规声明》</text>
+      </view>
+
       <!-- ==================== [DEV_ADMIN_TEST] 版权区域连击入口 (可随时安全删除) ==================== -->
       <view class="disclaimer-copy" bindtap="onTapCopyright" hover-class="disclaimer-copy-hover">
         <text>© 2026 我抽一支 · 倡导健康纯净呼吸</text>
@@ -731,7 +866,7 @@
       </view>
       <view class="cdd-metric-item">
         <text class="cdd-m-val purple">+{{ selectedCalendarDay.lifeRegained }}<text class="cdd-m-unit">分</text></text>
-        <text class="cdd-m-lbl">夺回寿命</text>
+        <text class="cdd-m-lbl">重获健康时光</text>
       </view>
     </view>
 
@@ -743,7 +878,7 @@
     <!-- 操作区：若今日且未打卡，支持直接一键打卡 -->
     <view class="cdd-action-box" wx:if="{{ selectedCalendarDay.isToday && !selectedCalendarDay.isPunched }}">
       <button class="cdd-punch-btn" catchtap="onQuickPunchFromModal">
-        <text>✦ 立即盖印今日自律打卡 ✦</text>
+        <text>✦ 点亮今日自律心灯 · 入册 ✦</text>
       </button>
     </view>
     <view class="cdd-action-box" wx:else>
@@ -753,5 +888,61 @@
     </view>
   </view>
 </view>
+
+<!-- ==================== 用户服务协议与隐私条款独立合规弹窗 (Protocol Modal) ==================== -->
+<view class="glass-modal-backdrop" wx:if="{{ showProtocolModal }}" catchtouchmove="preventTouchMove">
+  <view class="protocol-dialog-card">
+    <view class="protocol-top-bar">
+      <text class="proto-title">{{ protocolType === 'privacy' ? '《隐私保护指引》' : '《用户服务协议》' }}</text>
+      <view class="proto-close-btn" bindtap="closeProtocolModal">✕</view>
+    </view>
+    <scroll-view class="proto-scroll" scroll-y enhanced show-scrollbar="{{ true }}">
+      <!-- 1. 用户服务协议内容 -->
+      <view class="proto-content" wx:if="{{ protocolType === 'user' }}">
+        <text class="proto-date">更新日期：2026 年 10 月 19 日</text>
+        <text class="proto-lead">欢迎您使用【我抽一支】数字化自律减压小程序。本协议是您与本小程序运营团队就相关服务订立的法律协议。<text class="proto-bold">请您在使用前仔细阅读并充分理解本协议全部内容，特别是加粗标注的免责声明、使用规范与健康提示。</text></text>
+
+        <text class="proto-h2">一、服务性质与定位</text>
+        <text class="proto-p">1.1 【我抽一支】是一款旨在通过拟态行为替代与心理暗示，协助用户控烟、记录自律打卡与日常减压的数字化虚拟生活工具。</text>
+        <text class="proto-p">1.2 <text class="proto-bold">非医疗与非诊断声明</text>：本小程序不具有任何医疗诊断、疾病治疗或医疗戒烟处方功能。全站展示之健康节余指标、器官自愈推演数据均根据公共卫生控烟文献统计模型推导得出，仅供自律激励与健康参考，绝不构成任何个性化医学诊断依据。</text>
+        <text class="proto-p">1.3 <text class="proto-bold">非烟草销售声明</text>：本小程序所有香烟视觉均属数字化原创艺术致敬与拟态图形展示，绝不销售任何真实卷烟、电子烟或其他烟草实物制品，严禁任何烟草交易行为。</text>
+
+        <text class="proto-h2">二、用户行为规范</text>
+        <text class="proto-p">2.1 <text class="proto-bold">未成年人保护限制</text>：吸烟有害健康，本小程序倡导无烟健康生活。未满 18 周岁的未成年人严禁使用本小程序。</text>
+        <text class="proto-p">2.2 用户应妥善保管个人微信账号及本地打卡数据，不得利用本小程序从事违反法律法规、公序良俗或侵害他人合法权益的活动。</text>
+        <text class="proto-p">2.3 严禁对本小程序进行反编译、破解、外挂篡改或恶意攻击。若发现违规行为，运营方有权立即封禁相关服务。</text>
+
+        <text class="proto-h2">三、服务变更与免责声明</text>
+        <text class="proto-p">3.1 因不可抗力、系统维护、网络中断或平台政策调整导致服务暂时中断的，运营方将在合理范围内尽力恢复，在法律法规允许范围内不承担额外损害赔偿责任。</text>
+        <text class="proto-p">3.2 因用户个人原因（如卸载微信、主动清除微信存储缓存、更换终端设备等）造成本地打卡记录丢失的，运营方不承担数据找回义务。</text>
+
+        <text class="proto-h2">四、法律适用与管辖</text>
+        <text class="proto-p">4.1 本协议的订立、执行与解释均适用中华人民共和国法律法规。</text>
+        <text class="proto-p">4.2 如双方就本协议发生争议，应优先友好协商解决；协商不成的，任何一方均可向运营方住所地有管辖权的人民法院提起诉讼。</text>
+      </view>
+
+      <!-- 2. 隐私保护指引内容 -->
+      <view class="proto-content" wx:else>
+        <text class="proto-date">更新日期：2026 年 10 月 19 日</text>
+        <text class="proto-lead">【我抽一支】极度重视用户的个人信息安全与隐私权保护。本指引旨在向您清晰说明我们如何收集、使用和保护您的个人信息。<text class="proto-bold">我们坚持“最小化调用、数据优先本地加密存储”原则，绝不出售或非法共享您的任何个人数据。</text></text>
+
+        <text class="proto-h2">一、我们如何收集与使用信息</text>
+        <text class="proto-p">1.1 <text class="proto-bold">打卡与健康数据本地化存储</text>：您的替烟打卡记录、节约金额偏好、历史戒烟天数及自律成就数据，均默认采用微信本地缓存（wx.setStorage）直接加密保存在您的移动设备本地，未经您主动授权绝不上传至任何第三方服务器。</text>
+        <text class="proto-p">1.2 <text class="proto-bold">麦克风权限（可选）</text>：仅在您主动开启“吹气助燃/交互”功能时，经您明确弹窗授权后调用麦克风硬件。音频数据仅在移动终端内存中实时计算环境分贝振幅数值，<text class="proto-bold">绝不录音、绝不暂存、绝不上传云端</text>，交互结束立即释放占用。</text>
+        <text class="proto-p">1.3 <text class="proto-bold">个人头像与昵称（可选）</text>：仅在您于个人中心主动点击修改头像和昵称时，通过微信官方标准能力获取并在本地名片卡上展示，支持随时清除或重置。</text>
+
+        <text class="proto-h2">二、信息安全与保护机制</text>
+        <text class="proto-p">2.1 我们运用多重安全防线（包括端侧数据隔离、输入安全清洗等）保护用户设备数据免遭未经授权的访问、泄露或篡改。</text>
+        <text class="proto-p">2.2 本小程序绝不接入任何非法第三方数据爬虫或广告追踪 SDK，切实保障纯净安全的自律体验。</text>
+
+        <text class="proto-h2">三、用户权利与联系方式</text>
+        <text class="proto-p">3.1 您可随时在微信设置中撤回已授予的小程序权限，亦可通过清除微信小程序缓存彻底清空所有本地存储数据。</text>
+        <text class="proto-p">3.2 若您对本隐私保护指引有任何疑问、意见或建议，可通过小程序内意见反馈通道与我们取得联系。</text>
+      </view>
+    </scroll-view>
+    <button class="dialog-primary-btn" bindtap="closeProtocolModal">我已阅读并知晓</button>
+  </view>
+</view>
+
 
 

@@ -14,15 +14,17 @@ Page({
     isIOS: false,
 
     tiers: VIP_TIERS,
+    lifetimeTier: VIP_TIERS.find(t => t.id === 'lifetime') || VIP_TIERS[2],
+    subTiers: VIP_TIERS.filter(t => t.id !== 'lifetime'),
     themeOptions: VIP_THEME_OPTIONS,
     themeCategories: VIP_THEME_CATEGORIES,
-    currentThemeCategory: 'all',
-    filteredThemeOptions: VIP_THEME_OPTIONS,
-    selectedTierId: 'month', // 腾讯游戏默认选中最高转化率推荐款（月卡）
-    selectedTier: VIP_TIERS[1],
-    currentTheme: 'month', // 动态氛围主题
-    activeVipThemeId: 'month',
-    activeVipThemeName: '极光紫晶',
+    currentThemeCategory: 'classic',
+    filteredThemeOptions: VIP_THEME_OPTIONS.filter(t => t.category === 'classic'),
+    selectedTierId: 'lifetime', // 默认选中全宽至尊终身大卡
+    selectedTier: VIP_TIERS.find(t => t.id === 'lifetime') || VIP_TIERS[2],
+    currentTheme: 'lifetime', // 动态曜世黑金沉浸主题
+    activeVipThemeId: 'lifetime',
+    activeVipThemeName: '曜世黑金',
 
     privileges: VIP_PRIVILEGES,
     compareRows: VIP_COMPARE_ROWS,
@@ -35,11 +37,14 @@ Page({
     activatedTierName: ''
   },
 
-  onLoad() {
+  onLoad(options) {
     this.measureSafeArea();
     const isIOS = detectIsIOS();
     this.setData({ isIOS });
     this.refreshVipStatus();
+    if (options && (options.showProtocol === 'true' || options.showProtocol === true)) {
+      this.setData({ showProtocolModal: true });
+    }
   },
 
   onShow() {
@@ -51,29 +56,25 @@ Page({
   },
 
   computeFilteredThemes(themeOptions, category) {
-    if (!category || category === 'all') return themeOptions;
-    return themeOptions.filter(t => t.category === category);
+    const cat = (!category || category === 'all') ? 'classic' : category;
+    return themeOptions.filter(t => t.category === cat);
   },
 
   computeThemeCategories(themeOptions) {
-    return VIP_THEME_CATEGORIES.map(cat => {
-      const count = cat.id === 'all'
-        ? themeOptions.length
-        : themeOptions.filter(t => t.category === cat.id).length;
-      return { ...cat, count };
-    });
+    return VIP_THEME_CATEGORIES.map(cat => ({
+      ...cat,
+      count: themeOptions.filter(t => t.category === cat.id).length
+    }));
   },
 
   buildThemeOptionsWithLock(vipInfo) {
     const isVip = !!(vipInfo && vipInfo.isVip);
     const tierId = vipInfo ? vipInfo.tierId : '';
     const isLifetime = !!(vipInfo && vipInfo.isLifetime);
-    const TIER_LEVELS = { '': 0, 'day': 1, 'month': 2, 'lifetime': 3 };
-    const userLevel = isLifetime || tierId === 'lifetime' ? 3 : (TIER_LEVELS[tierId] || (isVip ? 1 : 0));
+    const userStats = vipService.getUserTimeStats ? vipService.getUserTimeStats() : {};
 
     return VIP_THEME_OPTIONS.map(opt => {
-      const requiredLevel = TIER_LEVELS[opt.minTier || 'month'] || 2;
-      const isLocked = !isVip || (userLevel < requiredLevel);
+      const isAllowed = vipService.isThemeAllowed(opt.id, tierId, isLifetime, userStats);
       let requiredTierText = '';
       if (opt.minTier === 'day') requiredTierText = '日卡解锁';
       else if (opt.minTier === 'month') requiredTierText = '月卡解锁';
@@ -81,7 +82,7 @@ Page({
 
       return {
         ...opt,
-        isLocked,
+        isLocked: !isAllowed,
         requiredTierText
       };
     });
@@ -93,18 +94,24 @@ Page({
     const themeCategories = this.computeThemeCategories(themeOptions);
 
     // 腾讯总监设计级：恢复用户上次所选分类分组（持久化记忆）
-    let category = this.data.currentThemeCategory || 'all';
+    let category = this.data.currentThemeCategory || 'classic';
     try {
       const savedCat = wx.getStorageSync('JUST_ONE_SMOKE_VIP_THEME_CAT');
-      if (savedCat && themeCategories.some(c => c.id === savedCat)) {
+      if (savedCat && savedCat !== 'all' && themeCategories.some(c => c.id === savedCat)) {
         category = savedCat;
+      } else if (category === 'all' || !themeCategories.some(c => c.id === category)) {
+        category = 'classic';
       }
-    } catch (e) {}
+    } catch (e) {
+      if (category === 'all' || !themeCategories.some(c => c.id === category)) {
+        category = 'classic';
+      }
+    }
 
     const filteredThemeOptions = this.computeFilteredThemes(themeOptions, category);
 
     if (vipInfo && vipInfo.isVip) {
-      let savedThemeId = vipInfo.customTheme || vipInfo.tierId || 'month';
+      let savedThemeId = vipService.getSelectedThemeId ? vipService.getSelectedThemeId() : (vipInfo.customTheme || vipInfo.tierId || 'classic');
       if (!vipService.isThemeAllowed(savedThemeId, vipInfo.tierId, vipInfo.isLifetime)) {
         savedThemeId = vipInfo.tierId === 'day' ? 'day' : 'month';
         vipService.setVipTheme(savedThemeId);
@@ -127,11 +134,7 @@ Page({
         currentTheme: savedThemeId
       });
     } else {
-      let previewTheme = 'month';
-      try {
-        const storedPreview = wx.getStorageSync('JUST_ONE_SMOKE_PREVIEW_THEME');
-        if (storedPreview) previewTheme = storedPreview;
-      } catch (e) {}
+      const previewTheme = vipService.getSelectedThemeId ? vipService.getSelectedThemeId() : 'classic';
       const previewOpt = VIP_THEME_OPTIONS.find(o => o.id === previewTheme) || VIP_THEME_OPTIONS[0];
       this.setData({
         vipInfo,
@@ -147,7 +150,7 @@ Page({
   },
 
   onSelectThemeCategory(e) {
-    const category = e.currentTarget.dataset.category || 'all';
+    const category = e.currentTarget.dataset.category || 'classic';
     if (category === this.data.currentThemeCategory) return;
     triggerHaptic('light');
     try {
@@ -177,11 +180,12 @@ Page({
     } catch (err) {}
 
     const vipInfo = this.data.vipInfo || {};
-    const isAllowed = vipService.isThemeAllowed(themeId, vipInfo.tierId, vipInfo.isLifetime);
+    const userStats = vipService.getUserTimeStats ? vipService.getUserTimeStats() : {};
+    const isAllowed = vipService.isThemeAllowed(themeId, vipInfo.tierId, vipInfo.isLifetime, userStats);
     const themeOpt = VIP_THEME_OPTIONS.find(o => o.id === themeId) || VIP_THEME_OPTIONS[0];
 
-    // 如果未达到权限（如日卡点月卡色，或月卡点永久色）：
-    // 联动下方推荐套餐卡片，并在当前页面实时预览该车身色彩，友善提示
+    // 如果未达到权限（既非VIP也未达时间自律条件）：
+    // 联动下方推荐套餐卡片，并在当前页面实时预览该色彩，友善提示
     if (!isAllowed) {
       const targetTierId = themeOpt.minTier === 'lifetime' ? 'lifetime' : (themeOpt.minTier === 'day' ? 'day' : 'month');
       const matchedTier = this.data.tiers.find(t => t.id === targetTierId) || this.data.tiers[0];
@@ -190,12 +194,20 @@ Page({
         selectedTier: matchedTier,
         currentTheme: themeId
       });
-      toast.info(this.data.isIOS ? `【${themeOpt.name}】需开启${matchedTier.name}解锁` : `【${themeOpt.name}】需开通${matchedTier.name}解锁`);
+      const daysLeft = Math.max(0, (themeOpt.unlockDays || 0) - (userStats.quitDays || 0));
+      const subsLeft = Math.max(0, (themeOpt.unlockSubs || 0) - (userStats.totalSubstituted || 0));
+      let progressHint = '';
+      if (daysLeft > 0 && subsLeft > 0) {
+        progressHint = `还需自律${daysLeft}天或替烟${subsLeft}支免费解锁`;
+      } else {
+        progressHint = themeOpt.unlockDesc || '达成自律条件即可免费解锁';
+      }
+      toast.info(`【${themeOpt.name}】${progressHint}，或开启${matchedTier.name}立即解锁`);
       return;
     }
 
     if (vipInfo.isVip) {
-      vipService.setVipTheme(themeId);
+      vipService.setVipTheme(themeId, userStats);
       const updatedVipInfo = vipService.getVipInfo();
       this.setData({
         vipInfo: updatedVipInfo,
@@ -203,14 +215,16 @@ Page({
         activeVipThemeName: themeOpt.name,
         currentTheme: themeId
       });
+      toast.flame(`🎨 已装配【${themeOpt.name}】全站背景！`);
     } else {
-      // 腾讯总监设计级：非 VIP 用户体验点击时，同样写入预览主题，在返回首页时能够即时体验
-      vipService.setVipTheme(themeId);
+      // 普通用户已达成自律条件：同样正式装配
+      vipService.setVipTheme(themeId, userStats);
       this.setData({
         activeVipThemeId: themeId,
         activeVipThemeName: themeOpt.name,
         currentTheme: themeId
       });
+      toast.flame(`🎉 自律成就达成！已装配【${themeOpt.name}】心境背景！`);
     }
   },
 
@@ -316,9 +330,27 @@ Page({
 
   closeSuccessModal() {
     triggerHaptic('light');
+    try {
+      audioManager.playClick();
+    } catch (e) {}
     this.setData({ showSuccessModal: false });
-    // 立即返回展柜品吸体验 (优先 navigateBack 回展柜或主页，栈底则 reLaunch)
-    this.onNavigateBack();
+    this.refreshVipStatus();
+  },
+
+  onLifetimeBadgeTap() {
+    triggerHaptic('light');
+    try {
+      audioManager.playClick();
+    } catch (e) {}
+    toast.flame('👑 您已尊享至尊终身特权，全场名烟与全套特权永久生效中！');
+  },
+
+  goToShelfAfterSuccess() {
+    this.closeSuccessModal();
+  },
+
+  stayInVipAfterSuccess() {
+    this.closeSuccessModal();
   },
 
   openProtocolModal() {

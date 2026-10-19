@@ -55,9 +55,19 @@ function formatColorWithAlpha(color, alpha, fallbackRgb = '240, 246, 255') {
 }
 
 // 高性能 Canvas 2D 径向渐变模板单例缓存池 (0 内存分配 · 彻底消除 60FPS 渲染循环中的 GC 断崖与微卡顿)
+let _lastGradCtx = null;
 const _radialGradCache = new Map();
 
+export function clearRadialGradientCache() {
+  _radialGradCache.clear();
+  _lastGradCtx = null;
+}
+
 function getCachedUnitRadialGradient(ctx, cacheKey, colorStops) {
+  if (_lastGradCtx !== ctx) {
+    _radialGradCache.clear();
+    _lastGradCtx = ctx;
+  }
   let grad = _radialGradCache.get(cacheKey);
   if (!grad) {
     try {
@@ -822,12 +832,12 @@ export class ParticleSystem {
       this.smokeRings = this.smokeRings.slice(-1);
     }
     const isSecond = this.smokeRings.length === 1;
-    const ringOffsetX = options.offsetX !== undefined ? options.offsetX : (isSecond ? 20 : (this.smokeRings.length === 0 ? 0 : -20));
+    const ringOffsetX = options.offsetX !== undefined ? options.offsetX : 0;
     const ringSpeed = options.speedMul || 1.0;
     const ring = {
       x: x + ringOffsetX,
       y: y + (options.offsetY || 0),
-      vx: (options.vx !== undefined) ? options.vx : (isSecond ? 0.18 : (this.smokeRings.length === 0 ? 0 : -0.18)),
+      vx: (options.vx !== undefined) ? options.vx : 0,
       vy: (options.vy !== undefined) ? options.vy : (-2.45 * ringSpeed * (isSecond ? 0.94 : 1.0)),
       radius: (options.initialRadius || 11) * scale * (isSecond ? 0.92 : 1.0),
       targetMaxRadius: (options.maxRadius || 46) * scale,
@@ -836,7 +846,7 @@ export class ParticleSystem {
       maxTubeThickness: 13.5 * scale,
       tubeGrowRate: 0.065,
       aspectRatio: 0.42, // 3D 俯仰透视压缩比
-      tilt: (options.tilt !== undefined) ? options.tilt : (isSecond ? 0.10 : -0.08),
+      tilt: (options.tilt !== undefined) ? options.tilt : 0,
       age: 0,
       maxAge: options.maxAge || 165,
       color: color,
@@ -882,6 +892,40 @@ export class ParticleSystem {
         maxLife: 20,
         color: '#ff6600',
         isSpark: true
+      });
+    }
+  }
+
+  // 4.0.1 触摸微风排斥力场接口 (Touch Turbulence Field)
+  setTouchTurbulence(x, y, active = true) {
+    if (!this.touchWind) {
+      this.touchWind = { x: 0, y: 0, active: false };
+    }
+    this.touchWind.x = x;
+    this.touchWind.y = y;
+    this.touchWind.active = active;
+  }
+
+  // 4.0.2 🍂 心绪便笺燃散升华星火粒子 (Ember Sparks for Mood Note)
+  emitMoodNoteEmberSparks(x, y, count = 25) {
+    for (let i = 0; i < count; i++) {
+      const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.3;
+      const speed = 1.6 + Math.random() * 2.8;
+      this._pushParticle({
+        x: x + (Math.random() - 0.5) * 44,
+        y: y + (Math.random() - 0.5) * 22,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        radius: 1.2 + Math.random() * 2.0,
+        maxRadius: 3.5,
+        growRate: -0.015,
+        alpha: 1.0,
+        baseAlpha: 1.0,
+        life: 0,
+        maxLife: 55 + Math.floor(Math.random() * 45),
+        color: Math.random() > 0.4 ? 'rgba(251, 191, 36, ' : 'rgba(245, 158, 11, ',
+        isEmberSpark: true,
+        gravity: -0.04
       });
     }
   }
@@ -1008,6 +1052,29 @@ export class ParticleSystem {
     });
   }
 
+  // 4.25 腾讯总监级 · 爆珠瞬态脆裂微米晶莹原液飞溅 (Bead Rupture Micro-Aerosol Spray)
+  emitBeadSpray(x, y, beadColor = '#10b981') {
+    const dropCount = 10;
+    for (let i = 0; i < dropCount; i++) {
+      const angle = (i / dropCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.45;
+      const speed = 1.6 + Math.random() * 2.4;
+      this._pushParticle({
+        x: x + Math.cos(angle) * 3,
+        y: y + Math.sin(angle) * 3,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed + 0.35, // 优雅自然微重力
+        drag: 0.93,
+        radius: 0.75 + Math.random() * 0.95,
+        alpha: 0.92,
+        baseAlpha: 0.92,
+        life: 0,
+        maxLife: 22 + Math.random() * 14,
+        color: beadColor,
+        isBeadDroplet: true
+      });
+    }
+  }
+
   // 4.3 起火处真实流体微烟羽 (Volumetric Combustion Smoke from Cherry Ember)
   emitVolumetricCombustionSmoke(emberX, emberY, color) {
     let activeCount = 0;
@@ -1065,9 +1132,7 @@ export class ParticleSystem {
       }
     }
 
-    const hasExisting = this.particles && this.particles.some(p => p.goldWaveId && p.alpha > 0.05);
-    const offsetX = hasExisting ? 32 : -32;
-    const originX = hasExisting ? (x + offsetX) : x;
+    const originX = x;
 
     // 基础黑曜石烟雾：大团横向分散 (主波 16 团，补给波 6 团)
     const cloudCount = spawnWave ? 16 : 6;
@@ -1176,21 +1241,18 @@ export class ParticleSystem {
     if (this.heartRings.length >= 4) {
       this.heartRings = this.heartRings.slice(-2);
     }
-    const isSecond = this.heartRings.length === 2;
-    const baseOffsetX = isSecond ? 26 : -26;
-    const baseVx = isSecond ? 0.16 : -0.16;
-    const originX = isSecond ? (x + baseOffsetX) : x;
+    const originX = x;
 
     const outerHeart = {
-      x: originX - 4,
+      x: originX,
       y: y,
-      vx: baseVx - 0.08,
+      vx: 0,
       vy: -2.30,
       scale: 0.45,
       targetScale: 1.62,
       growRate: 0.012,
-      tilt: isSecond ? 0.06 : -0.06,
-      tiltSpeed: isSecond ? -0.0025 : 0.0025,
+      tilt: 0,
+      tiltSpeed: 0,
       age: 0,
       maxAge: 165,
       color: color,
@@ -1200,15 +1262,15 @@ export class ParticleSystem {
       isOuter: true
     };
     const innerHeart = {
-      x: originX + 4,
-      y: y + 8,
-      vx: baseVx + 0.08,
+      x: originX,
+      y: y + 6,
+      vx: 0,
       vy: -2.10,
       scale: 0.28,
       targetScale: 1.10,
       growRate: 0.010,
-      tilt: isSecond ? -0.05 : 0.05,
-      tiltSpeed: isSecond ? 0.002 : -0.002,
+      tilt: 0,
+      tiltSpeed: 0,
       age: 0,
       maxAge: 155,
       color: 'rgba(253, 232, 240, ',
@@ -1220,33 +1282,13 @@ export class ParticleSystem {
 
     this.heartRings.push(outerHeart, innerHeart);
 
-    // 丘比特神圣爱神金箭疾速破空贯穿双心 (独立实体系统 · 严格支持双箭伴飞)
-    if (!this.cupidArrows) this.cupidArrows = [];
-    if (this.cupidArrows.length >= 2) {
-      this.cupidArrows = this.cupidArrows.slice(-1);
-    }
-    const arrowVariant = this.cupidArrows.length === 1 ? 1 : 0;
-    this.cupidArrows.push({
-      x: originX - 58,
-      y: y + 38,
-      vx: 4.1 + (arrowVariant === 1 ? 0.3 : 0),
-      vy: -3.15 + (arrowVariant === 1 ? -0.2 : 0),
-      length: 46,
-      angle: -Math.PI * 0.21,
-      alpha: 0.98,
-      baseAlpha: 0.98,
-      life: 0,
-      maxLife: 80,
-      variant: arrowVariant
-    });
-
-    // 漫天飘逸舞动的 3D 玫瑰花瓣雨 (Falling Rose Petals)
+    // 漫天飘逸舞动的 3D 玫瑰花瓣雨 (Falling Rose Petals) - 沿中轴对称飘落
     for (let i = 0; i < 9; i++) {
       const rad = Math.random() * Math.PI * 2;
       this._pushParticle({
         x: originX + Math.cos(rad) * 22,
         y: y + Math.sin(rad) * 14,
-        vx: (Math.random() - 0.5) * 1.2 + baseVx * 0.5,
+        vx: (Math.random() - 0.5) * 1.2,
         vy: -1.2 + Math.random() * 0.8,
         radius: 4.2 + Math.random() * 2.8,
         rotation: Math.random() * Math.PI * 2,
@@ -1262,14 +1304,14 @@ export class ParticleSystem {
       });
     }
 
-    // 浪漫粉钻晶莹星屑雨 (Pink Diamond Shards)
+    // 浪漫粉钻晶莹星屑雨 (Pink Diamond Shards) - 沿中轴对称绽放
     for (let i = 0; i < 14; i++) {
       const angle = Math.random() * Math.PI * 2;
       const spd = Math.random() * 2.2 + 0.6;
       this._pushParticle({
         x: originX + Math.cos(angle) * 16,
         y: y + Math.sin(angle) * 12,
-        vx: Math.cos(angle) * spd + baseVx * 0.5,
+        vx: Math.cos(angle) * spd,
         vy: -1.8 + Math.sin(angle) * spd * 0.8,
         outerRadius: 3.8 + Math.random() * 3.5,
         innerRadius: 1.0 + Math.random() * 0.8,
@@ -1287,13 +1329,13 @@ export class ParticleSystem {
       });
     }
 
-    // 柔美微粉心动爱心云雾
+    // 柔美微粉心动爱心云雾 - 沿中轴自然漫开
     for (let i = 0; i < 10; i++) {
       const angle = (i / 10) * Math.PI * 2;
       this._pushParticle({
         x: originX + Math.cos(angle) * 16,
         y: y + Math.sin(angle) * 10,
-        vx: Math.cos(angle) * 0.45 + baseVx * 0.5,
+        vx: Math.cos(angle) * 0.45,
         vy: -1.55 + Math.sin(angle) * 0.35,
         radius: 4.0,
         maxRadius: 14.0,
@@ -1465,9 +1507,8 @@ export class ParticleSystem {
       }
     }
 
-    const hasExisting = this.particles && this.particles.some(p => p.galaxyWaveId && p.alpha > 0.05);
-    const originX = hasExisting ? (x + 32) : (x - 24);
-    const baseArmOffset = hasExisting ? Math.PI * 0.5 : 0;
+    const originX = x;
+    const baseArmOffset = (spawnWave && this.particles && this.particles.some(p => p.galaxyWaveId && p.alpha > 0.05)) ? Math.PI * 0.5 : 0;
     const galaxyColors = [
       'rgba(240, 249, 255, ', // 炽亮星核白
       'rgba(56, 189, 248, ',  // 冰晶星海蓝
@@ -1585,15 +1626,10 @@ export class ParticleSystem {
       if (this.baguaMatrices.length >= 2) {
         this.baguaMatrices = this.baguaMatrices.slice(-1);
       }
-      const isSecond = this.baguaMatrices.length === 1;
-      const spawnX = isSecond ? (x + 44) : (this.baguaMatrices.length === 0 ? x : (x - 44));
-      const newMatrix = new BaguaMatrix(spawnX, y, {
-        variant: isSecond ? 1 : 0,
-        vx: isSecond ? 0.36 : 0
+      const newMatrix = new BaguaMatrix(x, y, {
+        variant: 0,
+        vx: 0
       });
-      if (isSecond && this.baguaMatrices.length === 1) {
-        this.baguaMatrices[0].vx = -0.36;
-      }
       this.baguaMatrices.push(newMatrix);
     }
 
@@ -1654,15 +1690,10 @@ export class ParticleSystem {
       if (this.buddhaLights.length >= 2) {
         this.buddhaLights = this.buddhaLights.slice(-1);
       }
-      const isSecond = this.buddhaLights.length === 1;
-      const spawnX = isSecond ? (x + 44) : (this.buddhaLights.length === 0 ? x : (x - 44));
-      const newBuddha = new BuddhaLightAscension(spawnX, y, {
-        variant: isSecond ? 1 : 0,
-        vx: isSecond ? 0.34 : 0
+      const newBuddha = new BuddhaLightAscension(x, y, {
+        variant: 0,
+        vx: 0
       });
-      if (isSecond && this.buddhaLights.length === 1) {
-        this.buddhaLights[0].vx = -0.34;
-      }
       this.buddhaLights.push(newBuddha);
     }
 
@@ -1825,9 +1856,8 @@ export class ParticleSystem {
       }
     }
 
-    const hasExisting = this.particles && this.particles.some(p => p.blessingWaveId && p.alpha > 0.05);
-    const spawnOffsetX = hasExisting ? 32 : -32;
-    const originX = hasExisting ? (x + spawnOffsetX) : x;
+    const hasExisting = spawnWave && this.particles && this.particles.some(p => p.blessingWaveId && p.alpha > 0.05);
+    const originX = x;
 
     // 沉香暖金烟雾 (主波 14 团，补给波 6 团)
     const cloudCount = spawnWave ? 14 : 6;
@@ -2137,11 +2167,11 @@ export class ParticleSystem {
       }
     }
 
-    // 1. 更新真实“一缕青烟”连续流体节点：轻柔升腾、曼妙 S 形曲线行波、半路自然扩散淡出
+    // 1. 腾讯总监物理级 · 三阶段流体青烟动力学 (Laminar Jet -> Kelvin-Helmholtz Roll-up -> Turbulent Dissipation)
     if (this.silkStreams) {
-      // 空间行波参数：波长 lambda1 = 60px (180px 高度内呈现 2.5~3 个优雅 S 弯曲周期), lambda2 = 34px (次级谐波扰动)
-      const k1 = (Math.PI * 2) / 60;
-      const k2 = (Math.PI * 2) / 34;
+      // 空间行波参数：基频波长 lambda1 = 58px, 次级扰动谐波 lambda2 = 32px
+      const k1 = (Math.PI * 2) / 58;
+      const k2 = (Math.PI * 2) / 32;
 
       for (const stream of this.silkStreams) {
         for (let i = stream.nodes.length - 1; i >= 0; i--) {
@@ -2149,42 +2179,61 @@ export class ParticleSystem {
           n.age++;
           const p = n.age / n.maxAge;
 
-          // 浮力上升：慢速平缓推进 (~1.15 - 1.35 px/frame * speedFactor)
-          const vy = (1.15 + p * 0.20) * speedFactor;
+          // 浮力上升：结合空气浮力与热对流平缓推进 (~1.18 - 1.38 px/frame * speedFactor)
+          const vy = (1.18 + p * 0.20) * speedFactor;
           n.y -= vy;
 
           // 距离烟头燃烧端的上升垂直跨度
           const tipRefY = stream.nodes[stream.nodes.length - 1] ? stream.nodes[stream.nodes.length - 1].y : n.y;
           const distFromTip = Math.max(0, tipRefY - n.y);
 
-          // 烟头根部锚定过渡：离开烟头前 12px 逐渐由 0 展开到满偏摆，防止脱离烟头
-          const rootAnchor = Math.min(1.0, distFromTip / 12);
+          // 阶段一：层流区 (Laminar Jet Base: 0 ~ 26px)
+          // 极度凝聚、笔直微挺，横向偏摆受流体粘性牢牢锚定于烟头
+          const rootAnchor = Math.min(1.0, Math.pow(distFromTip / 26, 1.85));
 
-          // 振幅包络：随着上升，烟气受空气对流扰动，摆动幅度柔和增大 (由 3.5px 缓慢展开到 ~15px)
-          const waveAmp = (3.5 + Math.min(14.0, (distFromTip / 120) * 12.0)) * stream.widthScale * rootAnchor;
+          // 阶段二：开尔文-亥姆霍兹剪切失稳区 (Kelvin-Helmholtz Instability: 26 ~ 85px)
+          // 热对流与周围静止冷空气产生摩擦剪切差，萌生高频微涡旋卷曲 (Micro-Vortex Curls)
+          const khTransition = Math.max(0, Math.min(1.0, (distFromTip - 26) / 59));
+          const curlNoise = Math.sin(distFromTip * 0.12 - this.time * 3.8 + stream.phase * 1.3) * (khTransition * 4.2);
 
-          // 向上行进的空间行波 (Traveling Wave: k * dist - omega * t)：曼妙起伏的 S 形袅袅青烟，杜绝任何僵硬直线
+          // 振幅包络：随着上升，对流涡旋幅度从紧致细缕优雅放大到 ~16px
+          const waveAmp = (2.8 + Math.min(14.5, (distFromTip / 115) * 12.5)) * stream.widthScale * rootAnchor;
+
+          // 向上行进的连续流体空间行波 (次级谐波与基频叠加)
           const wave1 = Math.sin(k1 * distFromTip - this.time * 2.2 + stream.phase) * waveAmp;
-          const wave2 = Math.sin(k2 * distFromTip - this.time * 3.6 + stream.phase * 0.7) * (waveAmp * 0.32);
+          const wave2 = Math.sin(k2 * distFromTip - this.time * 3.1 + stream.phase * 1.5) * (waveAmp * 0.35);
+          n.x = n.baseX + wave1 + wave2 + curlNoise * rootAnchor;
 
-          n.x = n.baseX + wave1 + wave2;
+          // 触摸微风排斥力场 (Touch Turbulence Repulsion)
+          if (this.touchWind && this.touchWind.active) {
+            const twDx = n.x - this.touchWind.x;
+            const twDy = n.y - this.touchWind.y;
+            const twDistSq = twDx * twDx + twDy * twDy;
+            const touchRadius = 95;
+            if (twDistSq < touchRadius * touchRadius && twDistSq > 1) {
+              const twDist = Math.sqrt(twDistSq);
+              const twForce = (1 - twDist / touchRadius) * 28 * rootAnchor;
+              n.x += (twDx / twDist) * twForce;
+            }
+          }
 
-          // 宽度随高度平滑展开：由烟头的 2.0px 细缕柔和扩展到顶部的羽化丝绢 (~16px)
-          n.width = 2.0 + Math.min(16.0, (distFromTip / 130) * 14.0 * stream.widthScale);
+          // 阶段三：湍流耗散区 (Turbulent Dissipation & Soft Diffusion: 85 ~ 180px)
+          // 宽度由烟头 1.8px 紧致细缕平滑羽化扩展到顶部的半透明丝绢 (~18px)
+          n.width = 1.8 + Math.min(17.5, Math.pow(distFromTip / 130, 1.2) * 15.5 * stream.widthScale);
 
-          // 点火初生爬升生长锋面淡出截断 (锋面顶部 16px 柔和羽化消融，实现从无到有“慢慢长上去”的过程)
+          // 点火初生爬升生长锋面淡出截断 (锋面顶部 18px 柔和羽化消融，实现从无到有“慢慢长上去”的过程)
           let climbFrontFade = 1.0;
           if (distFromTip > climbLimit) {
             climbFrontFade = 0.0;
-          } else if (distFromTip > climbLimit - 16) {
-            climbFrontFade = Math.max(0, (climbLimit - distFromTip) / 16);
+          } else if (distFromTip > climbLimit - 18) {
+            climbFrontFade = Math.max(0, (climbLimit - distFromTip) / 18);
           }
 
-          // 用户需求核心：半路自然进入淡出 (70px 处开始羽化渐隐，180px 处彻底消散融入空气)
+          // 用户核心需求：半路自然进入淡出 (65px 处开始羽化渐隐，180px 处彻底消散融入空气)
           let midwayFade = 1.0;
-          if (distFromTip > 70) {
-            const fadeProg = Math.max(0, 1 - (distFromTip - 70) / 110);
-            midwayFade = Math.pow(fadeProg, 1.4);
+          if (distFromTip > 65) {
+            const fadeProg = Math.max(0, 1 - (distFromTip - 65) / 115);
+            midwayFade = Math.pow(fadeProg, 1.6);
           }
 
           // 顶部绝对安全屏障：绝不上到屏幕顶部 (接近 ceilingY 处加速渐隐)
@@ -2193,10 +2242,10 @@ export class ParticleSystem {
             ceilingFade = Math.max(0, (n.y - ceilingY) / 80);
           }
 
-          // 根部初生阶段平滑过渡 (前 12px)，防止烟头交界处出现生硬切口
-          const birthFade = Math.min(1.0, distFromTip / 12);
+          // 根部初生阶段平滑过渡 (前 10px)，防止烟头交界处出现生硬切口
+          const birthFade = Math.min(1.0, distFromTip / 10);
 
-          n.alpha = (stream.id === 'main' ? 0.58 : 0.38) * birthFade * midwayFade * ceilingFade * climbFrontFade;
+          n.alpha = (stream.id === 'main' ? 0.60 : 0.40) * birthFade * midwayFade * ceilingFade * climbFrontFade;
 
           // 升至半路消散高度 (约 180px)、超出当前点火生长限制、触及安全天花板、寿命耗尽或透明度极低时自然移除
           if (distFromTip >= 180 || distFromTip > climbLimit || n.y <= ceilingY || n.age >= n.maxAge || n.alpha <= 0.005) {
@@ -2510,6 +2559,12 @@ export class ParticleSystem {
         p.vy += 0.08;
         p.vx *= 0.97;
         p.alpha = Math.max(0, p.alpha - 1 / p.maxLife);
+      } else if (p.isBeadDroplet) {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= (p.drag || 0.93);
+        p.vy = p.vy * (p.drag || 0.93) + 0.06;
+        p.alpha = Math.max(0, (p.baseAlpha || 0.92) * (1 - p.life / p.maxLife));
       } else if (p.isGold) {
         p.x += p.vx;
         p.y += p.vy;
@@ -2866,21 +2921,36 @@ export class ParticleSystem {
       ctx.beginPath();
       ctx.arc(0, 0, r.radius, 0, Math.PI * 2);
       ctx.lineWidth = r.tubeThickness * 2.2 + 8;
-      ctx.strokeStyle = `${colorPrefix}${r.alpha * 0.20})`;
+      ctx.strokeStyle = `${colorPrefix}${r.alpha * 0.18})`;
       ctx.stroke();
 
-      // 2. 中层致密环形涡管核心 (Toroidal Core - 烟圈核心管体)
+      // 2. 中层致密环形涡管核心 (Toroidal Vortex Tube Core)
       ctx.beginPath();
       ctx.arc(0, 0, r.radius, 0, Math.PI * 2);
       ctx.lineWidth = r.tubeThickness;
-      ctx.strokeStyle = `${colorPrefix}${r.alpha * 0.85})`;
+      ctx.strokeStyle = `${colorPrefix}${r.alpha * 0.88})`;
       ctx.stroke();
 
-      // 3. 迎风面 3D 高光微弧 (Specular Crescent Highlight)
+      // 3. 左右对称反向旋转涡核微斑 (Counter-Rotating Poloidal Vortex Nodes - 呈现立体自旋流动感)
+      const poloidalAlpha = r.alpha * 0.72;
+      ctx.fillStyle = `${colorPrefix}${poloidalAlpha})`;
       ctx.beginPath();
-      ctx.arc(0, 0, Math.max(2, r.radius - r.tubeThickness * 0.3), -Math.PI * 0.85, -Math.PI * 0.15);
-      ctx.lineWidth = Math.max(1.2, r.tubeThickness * 0.38);
-      ctx.strokeStyle = `rgba(255, 255, 255, ${r.alpha * 0.70})`;
+      ctx.arc(-r.radius, 0, r.tubeThickness * 0.42, 0, Math.PI * 2);
+      ctx.arc(r.radius, 0, r.tubeThickness * 0.42, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 4. 迎风面空气动阻压缩高光微弧 (Aerodynamic Compression Specular Arc)
+      ctx.beginPath();
+      ctx.arc(0, 0, Math.max(2, r.radius - r.tubeThickness * 0.28), -Math.PI * 0.85, -Math.PI * 0.15);
+      ctx.lineWidth = Math.max(1.4, r.tubeThickness * 0.36);
+      ctx.strokeStyle = `rgba(255, 255, 255, ${r.alpha * 0.78})`;
+      ctx.stroke();
+
+      // 5. 迎风微扁透视压缩微光
+      ctx.beginPath();
+      ctx.arc(0, -r.tubeThickness * 0.25, Math.max(2, r.radius * 0.92), -Math.PI * 0.72, -Math.PI * 0.28);
+      ctx.lineWidth = Math.max(0.9, r.tubeThickness * 0.22);
+      ctx.strokeStyle = `rgba(255, 255, 255, ${r.alpha * 0.45})`;
       ctx.stroke();
 
       ctx.restore();
@@ -3099,6 +3169,15 @@ export class ParticleSystem {
       } else if (p.isAshFlake) {
         ctx.fillStyle = p.color || '#6b7280';
         ctx.globalAlpha = p.alpha || 0.8;
+      } else if (p.isBeadDroplet) {
+        // 爆珠瞬态晶莹原液微珠
+        ctx.fillStyle = p.color || '#10b981';
+        ctx.globalAlpha = p.alpha || 0.9;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius || 1.0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        continue;
       } else if (p.isGold) {
         // 24K 金箔闪烁
         const shimmer = 0.6 + 0.4 * Math.sin(p.shimmerPhase || 0);
@@ -3331,5 +3410,6 @@ export class ParticleSystem {
 
   clear() {
     this.cleanseAir(false);
+    clearRadialGradientCache();
   }
 }

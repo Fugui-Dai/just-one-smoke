@@ -22,8 +22,8 @@ export const VIP_TIERS = [
     themeId: 'day',
     themeName: '翡翠晨曦',
     accentColor: '#10b981',
-    heroTitle: '灵动轻盈 · 24小时极速解压',
-    heroSlogan: '0门槛尝鲜体验 ｜ 免除所有激励广告 ｜ 轻松畅享'
+    heroTitle: '浮生半日 · 24小时静心沉浸',
+    heroSlogan: '0门槛尝鲜体验 ｜ 免除所有激励打扰 ｜ 沉浸身心'
   },
   {
     id: 'month',
@@ -41,7 +41,7 @@ export const VIP_TIERS = [
     themeName: '极光紫晶',
     accentColor: '#a855f7',
     heroTitle: '极光沉浸 · 30夜深情陪伴',
-    heroSlogan: '跳过全部激励视频 ｜ 33款名烟全图鉴免解锁 ｜ 极致性价比'
+    heroSlogan: '跳过全部激励视频 ｜ 37款名烟全图鉴免解锁 ｜ 极致性价比'
   },
   {
     id: 'lifetime',
@@ -58,8 +58,8 @@ export const VIP_TIERS = [
     themeId: 'lifetime',
     themeName: '曜世黑金',
     accentColor: '#fbbf24',
-    heroTitle: '曜世帝王 · 终身一劳永逸',
-    heroSlogan: '全版本永久免广 ｜ 尊崇黑金荣耀标识 ｜ 专属至高特权'
+    heroTitle: '岁月知己 · 终身恒久相伴',
+    heroSlogan: '全版本永久免广 ｜ 专属黑金雅座印记 ｜ 尊享终身礼遇'
   }
 ];
 
@@ -75,16 +75,24 @@ export const VIP_PRIVILEGES = [
   {
     id: 'all_packs',
     icon: '📦',
-    title: '全套名烟畅吸',
-    subtitle: '软中华/炫赫门/牛来/心动女神等33款名烟免解锁',
+    title: '全套37款名烟畅吸',
+    subtitle: '全系列37款典藏名烟与艺术爆珠外观免解锁畅享',
     color: '#38bdf8',
     bgGradient: 'linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(14, 165, 233, 0.05))'
   },
   {
+    id: 'car_themes',
+    icon: '🎨',
+    title: '全域流光心境换肤',
+    subtitle: '经典原色、灵动光影、幽山深境等20款高奢光影氛围自由切换',
+    color: '#06b6d4',
+    bgGradient: 'linear-gradient(135deg, rgba(6, 182, 212, 0.18), rgba(8, 145, 178, 0.05))'
+  },
+  {
     id: 'unlimited_refill',
-    icon: '♾️',
-    title: '无限极速补满',
-    subtitle: '空盒随时一键拆封复位，无支数限制',
+    icon: '👑',
+    title: '尊享极速拆盒直通',
+    subtitle: '空盒免等待即拆即品，专享自律拆盒翻倍特权',
     color: '#a855f7',
     bgGradient: 'linear-gradient(135deg, rgba(168, 85, 247, 0.18), rgba(126, 34, 206, 0.05))'
   },
@@ -99,26 +107,20 @@ export const VIP_PRIVILEGES = [
   {
     id: 'noble_identity',
     icon: '👑',
-    title: '贵族金冠铭牌',
-    subtitle: '英雄榜专属金冠标识与尊崇高光展示',
+    title: 'VIP金色铭牌',
+    subtitle: '风云榜专属金色徽记与静心留名',
     color: '#f59e0b',
     bgGradient: 'linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(180, 83, 9, 0.05))'
-  },
-  {
-    id: 'double_heal',
-    icon: '✨',
-    title: '双倍自愈收益',
-    subtitle: '戒烟打卡与健康成就点数获取加速 100%',
-    color: '#10b981',
-    bgGradient: 'linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(4, 120, 87, 0.05))'
   }
 ];
 
 export const VIP_COMPARE_ROWS = [
-  { feature: '激励视频广告', freeText: '需看30秒视频', vipText: '⚡ 0秒免广直通' },
-  { feature: '名烟展柜全解锁', freeText: '需逐一积累解锁', vipText: '🌟 全系列立即开抽' },
-  { feature: '烟盒补充次数', freeText: '单日有限限额', vipText: '♾️ 无限次即拆即满' },
-  { feature: '尊贵身份外显', freeText: '普通烟民标识', vipText: '👑 荣耀VIP流光铭牌' }
+  { feature: '激励视频广告', freeText: '需看视频或按需解锁', vipText: '⚡ 0秒免广直通' },
+  { feature: '全域心境换肤', freeText: '替烟里程碑逐步解锁', vipText: '🎨 20款高奢流光即刻畅享' },
+  { feature: '37款名烟图鉴', freeText: '随自律坚持逐步点亮', vipText: '🌟 全系列37款即刻开抽' },
+  { feature: '专属特效/天幕', freeText: '积累替烟支数免费解锁', vipText: '🌌 全套灵动天幕粒子即享' },
+  { feature: '拆盒补烟特权', freeText: '基础限额与抽屉应急', vipText: '👑 尊享拆盒直通（配额翻倍）' },
+  { feature: '尊崇身份外显', freeText: '自律行者铭牌', vipText: '👑 荣耀VIP流光铭牌' }
 ];
 
 function formatVipExpireDate(timestamp) {
@@ -133,15 +135,46 @@ function formatVipExpireDate(timestamp) {
 import { VIP_THEME_OPTIONS, VIP_THEME_CATEGORIES, getThemeById } from '../configs/vipThemes.js';
 export { VIP_THEME_OPTIONS, VIP_THEME_CATEGORIES, getThemeById };
 
+function generateVipSignature(tierId, expireTime, activatedAt) {
+  const salt = 'SMOKE_FREE_VIP_SALT_2026_@TENCENT_SEC';
+  const str = `${tierId}#${expireTime}#${activatedAt}#${salt}`;
+  let hash1 = 5381;
+  let hash2 = 0;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i);
+    hash1 = ((hash1 << 5) + hash1) + ch;
+    hash1 |= 0;
+    hash2 = ((hash2 << 7) - hash2) + ch;
+    hash2 |= 0;
+  }
+  return `V1_${Math.abs(hash1).toString(36)}_${Math.abs(hash2).toString(36)}`;
+}
+
 export const vipService = {
   getVipInfo() {
     try {
       const data = wx.getStorageSync(STORAGE_KEY_VIP);
-      if (!data) {
+      if (!data || typeof data !== 'object') {
         return { isVip: false, expireTime: 0, tierId: '', isLifetime: false, customTheme: '' };
       }
       const now = Date.now();
       const isLifetime = data.tierId === 'lifetime';
+
+      // 防篡改签名鉴权校验
+      const expectedSig = generateVipSignature(data.tierId, data.expireTime, data.activatedAt);
+      const isSignatureValid = data.sig && data.sig === expectedSig;
+
+      // 兼容历史老版本升级：若无签名但数据结构完整，补全签名；若签名存在但不匹配，判定为非法篡改
+      if (data.sig && !isSignatureValid) {
+        console.warn('[vipService] 检测到本地 VIP 数据被非法篡改，已阻断越权！');
+        return { isVip: false, expireTime: 0, tierId: '', isLifetime: false, customTheme: '' };
+      }
+      if (!data.sig && (data.isVip || isLifetime)) {
+        // 自动补签防老用户丢失合法权益
+        data.sig = expectedSig;
+        try { wx.setStorageSync(STORAGE_KEY_VIP, data); } catch (e) {}
+      }
+
       const isVip = isLifetime || (data.expireTime > now);
       return {
         isVip,
@@ -164,55 +197,116 @@ export const vipService = {
     return this.isVip();
   },
 
-  isThemeAllowed(themeId, currentTierId, isLifetime) {
+  // 获取当前用户的自律天数与替烟进度
+  getUserTimeStats() {
+    let quitDays = 0;
+    let totalSubstituted = 0;
+    try {
+      const records = wx.getStorageSync('JUST_ONE_SMOKE_RECORDS_V1') || [];
+      totalSubstituted = Array.isArray(records) ? records.length : 0;
+    } catch (e) {}
+
+    try {
+      const profile = wx.getStorageSync('JUST_ONE_SMOKE_USER_PROFILE') || {};
+      if (profile && profile.quitStartDate) {
+        const start = new Date(profile.quitStartDate);
+        const now = new Date();
+        const startMidnight = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
+        const nowMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const diffMs = nowMidnight - startMidnight;
+        quitDays = diffMs > 0 ? Math.round(diffMs / 86400000) : 0;
+      }
+    } catch (e) {}
+
+    return { quitDays, totalSubstituted };
+  },
+
+  isThemeAllowed(themeId, currentTierId, isLifetime, userStats) {
     if (!themeId || themeId === 'classic') return true;
     const theme = getThemeById(themeId);
     if (!theme) return false;
+
+    // 1. VIP 尊享特权：根据档位免时长要求，直接直通解锁
     const TIER_LEVELS = { '': 0, 'day': 1, 'month': 2, 'lifetime': 3 };
     const userLevel = isLifetime || currentTierId === 'lifetime' ? 3 : (TIER_LEVELS[currentTierId] || 0);
     const requiredLevel = TIER_LEVELS[theme.minTier || 'month'] || 2;
-    return userLevel >= requiredLevel;
+    if (userLevel >= requiredLevel) {
+      return true;
+    }
+
+    // 2. 普通用户花时间成长体系（自律天数 / 累计替烟支数满足其一即免费获取）
+    let stats = userStats;
+    if (!stats || (stats.quitDays === undefined && stats.days === undefined)) {
+      stats = this.getUserTimeStats();
+    }
+    const days = Number(stats.quitDays !== undefined ? stats.quitDays : stats.days) || 0;
+    const subs = Number(stats.totalSubstituted !== undefined ? stats.totalSubstituted : stats.subs) || 0;
+
+    if (theme.unlockDays !== undefined && theme.unlockDays > 0 && days >= theme.unlockDays) {
+      return true;
+    }
+    if (theme.unlockSubs !== undefined && theme.unlockSubs > 0 && subs >= theme.unlockSubs) {
+      return true;
+    }
+
+    return false;
   },
 
-  getVipTheme() {
+  // 获取用户当前选中的主题 ID (始终返回有效的主题 ID 字符串，默认 'classic')
+  getSelectedThemeId(userStats) {
     const info = this.getVipInfo();
-    if (!info || !info.isVip) {
-      // 腾讯总监设计级：若尚未正式支付或激活VIP，但用户在专属背景装扮中点击了心仪车色，
-      // 读取预览装扮缓存，让用户在首页与全站均能真实感受沉浸情绪价值
-      try {
-        const previewTheme = wx.getStorageSync('JUST_ONE_SMOKE_PREVIEW_THEME');
-        if (previewTheme && previewTheme !== 'classic') {
-          return previewTheme;
-        }
-      } catch (e) {}
-      return ''; // 会员未开通且无预览，返回空字符串，全应用保持默认纯黑背景
+    const tierId = info ? info.tierId : '';
+    const isLifetime = !!(info && info.isLifetime);
+
+    // 优先读取用户已持久化保存的主题（必须校验已解锁权限）
+    try {
+      const last = wx.getStorageSync('JUST_ONE_SMOKE_LAST_SELECTED_THEME');
+      if (last && this.isThemeAllowed(last, tierId, isLifetime, userStats)) {
+        return last;
+      }
+    } catch (e) {}
+
+    // VIP 用户专属自定义装配主题
+    if (info && info.customTheme && this.isThemeAllowed(info.customTheme, tierId, isLifetime, userStats)) {
+      return info.customTheme;
     }
-    if (info.customTheme === 'classic') {
-      return ''; // VIP用户主动选择原色深曜纯黑背景，保留全部VIP特权但使用经典暗黑底色
+    // VIP 套餐默认对应的主题
+    if (info && info.tierId && this.isThemeAllowed(info.tierId, tierId, isLifetime, userStats)) {
+      return info.tierId;
     }
-    const theme = info.customTheme || info.tierId || 'month';
-    if (!this.isThemeAllowed(theme, info.tierId, info.isLifetime)) {
-      return info.tierId === 'day' ? 'day' : 'month';
-    }
-    return theme;
+
+    // 默认所有人通用的经典原色
+    return 'classic';
   },
 
-  setVipTheme(themeId) {
+  getVipTheme(userStats) {
+    const selected = this.getSelectedThemeId(userStats);
+    if (!selected || selected === 'classic') {
+      return ''; // 经典黑使用默认纯黑背景
+    }
+    return selected;
+  },
+
+  setVipTheme(themeId, userStats) {
+    if (!themeId) return false;
+    const info = this.getVipInfo();
+    const tierId = info ? info.tierId : '';
+    const isLifetime = !!(info && info.isLifetime);
+
+    // 校验色彩权限：如果未开通 VIP 且未达成自律时间条件，严禁持久化保存为正式装配（只能临时预览）
+    if (!this.isThemeAllowed(themeId, tierId, isLifetime, userStats)) {
+      return false;
+    }
+
     try {
-      const info = this.getVipInfo();
-      if (!info || !info.isVip) {
-        // 未激活VIP时，将心仪车色保存至预览装扮缓存，实现无缝全站漫游
-        try {
-          wx.setStorageSync('JUST_ONE_SMOKE_PREVIEW_THEME', themeId);
-        } catch (e) {}
-        return true;
+      // 永久持久化记录选中的有效已解锁颜色
+      wx.setStorageSync('JUST_ONE_SMOKE_LAST_SELECTED_THEME', themeId);
+
+      if (info && info.isVip) {
+        const data = wx.getStorageSync(STORAGE_KEY_VIP) || {};
+        data.customTheme = themeId;
+        wx.setStorageSync(STORAGE_KEY_VIP, data);
       }
-      if (!this.isThemeAllowed(themeId, info.tierId, info.isLifetime)) {
-        return false;
-      }
-      const data = wx.getStorageSync(STORAGE_KEY_VIP) || {};
-      data.customTheme = themeId;
-      wx.setStorageSync(STORAGE_KEY_VIP, data);
       return true;
     } catch (e) {
       console.error('Set VIP theme error', e);
@@ -238,7 +332,8 @@ export const vipService = {
       customTheme: tier.id,
       activatedAt: now,
       expireTime,
-      isLifetime: tier.id === 'lifetime'
+      isLifetime: tier.id === 'lifetime',
+      sig: generateVipSignature(tier.id, expireTime, now)
     };
 
     try {

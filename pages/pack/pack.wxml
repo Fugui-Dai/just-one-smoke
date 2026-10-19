@@ -57,24 +57,7 @@
           <text class="inv-text">剩余 {{ packCount }} / {{ packCapacity }} 支</text>
         </view>
         <view class="pack-unwrap-mini-btn" wx:if="{{ isCurrentUnlocked && !isTrialMode && packCount < packCapacity }}" bindtap="onUnwrapNewPack">
-          <text class="unwrap-mini-text">↻ 换新盒</text>
-        </view>
-      </view>
-
-      <!-- 🏆 腾讯设计总监级：品鉴出鞘特效四阶切换器 (普通 · 日卡 · 月卡 · 至尊) -->
-      <view class="pack-vfx-selector-row">
-        <view class="vfx-tier-tabs">
-          <view
-            wx:for="{{ vfxTierOptions }}"
-            wx:key="id"
-            class="vfx-tier-chip tier-{{ item.id }} {{ currentVfxTier === item.id ? 'active-tier' : '' }}"
-            catchtap="onSelectVfxTier"
-            data-tier="{{ item.id }}"
-          >
-            <text class="vt-icon">{{ item.icon }}</text>
-            <text class="vt-name">{{ item.name }}</text>
-            <view class="vt-indicator" wx:if="{{ currentVfxTier === item.id }}"></view>
-          </view>
+          <text class="unwrap-mini-text">{{ unwrapQuota.isVip ? '↻ 换新盒 👑无限' : ('↻ 换新盒 (免' + unwrapQuota.remainingFree + '次)') }}</text>
         </view>
       </view>
     </view>
@@ -152,6 +135,8 @@
         <view class="pack-shoulder-cascade left"></view>
         <view class="pack-shoulder-cascade right"></view>
         <view class="pack-spotlight-surface-sheen"></view>
+        <!-- 腾讯总监级：整个烟壳一体化珠光全息扫光 (贯通盒盖与盒身，浑然一体) -->
+        <view class="pack-shell-unified-sheen"></view>
         
         <!-- ==================== 盒内烟支与金箔层 (内胆) ==================== -->
         <view class="pack-inner-chamber" bindtap="togglePackLid">
@@ -168,10 +153,10 @@
             <view class="collar-card-rim"></view>
           </view>
 
-          <!-- 盒内整齐排布的立体香烟过滤嘴与延伸烟身: 支持模式 A (6支宽幕轻奢单排) 与模式 B (20支双排阶梯，原20支代码无损保留备用) -->
-          <view class="cigarettes-matrix {{ (packLayoutMode === 'row6' && !currentCigarette.isCigar) ? 'row6-matrix' : (currentCigarette.packType + '-matrix') }}">
+          <!-- 盒内整齐排布的立体香烟过滤嘴与延伸烟身: 经典 20 支双排阶梯矩阵 (雪茄 5 支) -->
+          <view class="cigarettes-matrix {{ currentCigarette.packType }}-matrix">
             <view 
-              class="cig-filter-slot {{ currentCigarette.isCigar ? 'cigar-row-slot' : (packLayoutMode === 'row6' ? 'row6-slot' : (index < 10 ? 'back-row-slot' : 'front-row-slot')) }} {{ (slotStates[index] && (pulledSlotIndex !== index || !isSlotEjected)) ? 'has-cigarette' : 'empty-slot' }} {{ (pulledSlotIndex === index && !isSlotEjected) ? 'is-slot-launching' : '' }}"
+              class="cig-filter-slot {{ currentCigarette.isCigar ? 'cigar-row-slot' : (index < 10 ? 'back-row-slot' : 'front-row-slot') }} {{ (slotStates[index] && (pulledSlotIndex !== index || !isSlotEjected)) ? 'has-cigarette' : 'empty-slot' }} {{ (pulledSlotIndex === index && !isSlotEjected) ? 'is-slot-launching' : '' }}"
               wx:for="{{ slotArray }}"
               wx:key="*this"
               catchtap="onTapCigaretteSlot"
@@ -194,6 +179,39 @@
                   <view class="slot-hanyan-stick">
                     <view class="slot-hanyan-top"></view>
                     <view class="slot-hanyan-body"></view>
+                  </view>
+                </block>
+                <!-- 埃菲尔铁塔专属槽位模型：微型通天钢构外形与拱门底座 -->
+                <block wx:elif="{{ currentCigarette.id === 'eiffel_tower' }}">
+                  <view class="slot-eiffel-stick">
+                    <view class="slot-eiffel-spire"></view>
+                    <view class="slot-eiffel-deck2"></view>
+                    <view class="slot-eiffel-body"></view>
+                    <view class="slot-eiffel-deck1"></view>
+                    <view class="slot-eiffel-arch"></view>
+                  </view>
+                </block>
+                <!-- 比萨斜塔专属槽位模型：倾斜大理石回廊 -->
+                <block wx:elif="{{ currentCigarette.id === 'pisa_leaning' }}">
+                  <view class="slot-pisa-stick">
+                    <view class="slot-pisa-belfry"></view>
+                    <view class="slot-pisa-arcades"></view>
+                  </view>
+                </block>
+                <!-- 吉萨金字塔专属槽位模型：曜金阶梯金字塔 -->
+                <block wx:elif="{{ currentCigarette.id === 'pyramid_giza' }}">
+                  <view class="slot-pyramid-stick">
+                    <view class="slot-pyramid-cap"></view>
+                    <view class="slot-pyramid-steps"></view>
+                  </view>
+                </block>
+                <!-- 东方明珠专属槽位模型：太空舱双球天际线 -->
+                <block wx:elif="{{ currentCigarette.id === 'oriental_pearl' }}">
+                  <view class="slot-pearl-stick">
+                    <view class="slot-pearl-needle"></view>
+                    <view class="slot-pearl-s2"></view>
+                    <view class="slot-pearl-shaft"></view>
+                    <view class="slot-pearl-s1"></view>
                   </view>
                 </block>
                 <!-- 普通名烟 / 细支 / 雪茄：上方过滤嘴 + 下方白色/雪茄烟身纸管 -->
@@ -237,8 +255,6 @@
               mode="scaleToFill" 
               wx:if="{{ currentCigarette.packImage }}" 
             />
-            <!-- 表面高光反光涂层 -->
-            <view class="facade-sheen-overlay"></view>
             <!-- 闭合时底部极细物理缝隙阴影 -->
             <view class="lid-bottom-slit-shadow"></view>
           </view>
@@ -272,9 +288,6 @@
               mode="scaleToFill" 
               wx:if="{{ currentCigarette.packImage }}" 
             />
-
-            <!-- 表面高光反光涂层 -->
-            <view class="facade-sheen-overlay"></view>
 
             <!-- 未解锁时的磨砂锁罩 -->
             <view class="pack-locked-overlay" wx:if="{{ !isCurrentUnlocked }}">
@@ -412,7 +425,7 @@
         </view>
 
         <!-- 香烟 3D 实体 (100% 纯正完整烟支还原，烟头与滤嘴干净纯粹无杂色) -->
-        <view class="ssr-hero-cigarette-body {{ currentCigarette.widthType === 'hand_rolled' ? 'is-hanyan-body' : '' }}">
+        <view class="ssr-hero-cigarette-body {{ currentCigarette.widthType === 'hand_rolled' ? 'is-hanyan-body' : '' }} {{ currentCigarette.isLandmark ? 'is-landmark-body' : '' }}">
           <!-- 分支 A: 老辈白纸手卷旱烟专属一体式白纸喇叭筒 (与首页 1:1 严密对齐) -->
           <block wx:if="{{ currentCigarette.widthType === 'hand_rolled' }}">
             <view class="ssr-hanyan-cone">
@@ -426,7 +439,130 @@
             </view>
           </block>
 
-          <!-- 分支 B: 标准名烟 / 细支爆珠 / 古巴雪茄 3D 纯正完整模型 -->
+          <!-- 分支 B: 埃菲尔铁塔专属 3D 钢构全景一根烟 (整根香烟即巴黎埃菲尔铁塔) -->
+          <block wx:elif="{{ currentCigarette.id === 'eiffel_tower' }}">
+            <view class="ssr-eiffel-stick">
+              <!-- 塔尖避雷针与信标球 -->
+              <view class="eiffel-hero-spire">
+                <view class="eiffel-hero-beacon"></view>
+              </view>
+              <!-- 3层顶层观景台穹顶 -->
+              <view class="eiffel-hero-deck3"></view>
+              <!-- 上段修长镂空塔身 (带密集交叉桁架) -->
+              <view class="eiffel-hero-upper-shaft">
+                <view class="eiffel-hero-truss t1"></view>
+                <view class="eiffel-hero-truss t2"></view>
+                <view class="eiffel-hero-truss t3"></view>
+              </view>
+              <!-- 2层主观景台 (Deuxième étage 观景连廊与护栏) -->
+              <view class="eiffel-hero-deck2">
+                <view class="deck2-railing"></view>
+              </view>
+              <!-- 中下段外扩塔身 (带密集交叉桁架与中央电梯柱) -->
+              <view class="eiffel-hero-mid-shaft">
+                <view class="eiffel-hero-truss t4"></view>
+                <view class="eiffel-hero-truss t5"></view>
+                <view class="eiffel-hero-elevator"></view>
+              </view>
+              <!-- 1层平台 (Premier étage 烫金 PARIS 1889 铭牌) -->
+              <view class="eiffel-hero-deck1">
+                <text class="deck1-label">PARIS 1889</text>
+              </view>
+              <!-- 底部双曲拱门基座 (滤嘴吸嘴端：四柱外展、宏大中空拱门与支承石) -->
+              <view class="eiffel-hero-base">
+                <view class="base-leg leg-left">
+                  <view class="leg-truss"></view>
+                </view>
+                <view class="base-grand-arch"></view>
+                <view class="base-leg leg-right">
+                  <view class="leg-truss"></view>
+                </view>
+                <view class="base-feet-row">
+                  <view class="foot-stone stone-left"></view>
+                  <view class="foot-stone stone-right"></view>
+                </view>
+              </view>
+            </view>
+          </block>
+
+          <!-- 分支 C: 比萨斜塔专属 3D 罗马柱廊白大理石回廊 (整根香烟即斜而不倒的比萨斜塔) -->
+          <block wx:elif="{{ currentCigarette.id === 'pisa_leaning' }}">
+            <view class="ssr-pisa-stick">
+              <!-- 顶部钟楼与古钟 -->
+              <view class="pisa-hero-belfry">
+                <view class="belfry-dome"></view>
+                <view class="belfry-bell"></view>
+              </view>
+              <!-- 6层罗马大理石柱廊回廊 -->
+              <view class="pisa-hero-gallery">
+                <view class="pisa-gallery-tier pt-1"><view class="tier-cornice"></view><view class="tier-columns"></view></view>
+                <view class="pisa-gallery-tier pt-2"><view class="tier-cornice"></view><view class="tier-columns"></view></view>
+                <view class="pisa-gallery-tier pt-3"><view class="tier-cornice"></view><view class="tier-columns"></view></view>
+                <view class="pisa-gallery-tier pt-4"><view class="tier-cornice"></view><view class="tier-columns"></view></view>
+                <view class="pisa-gallery-tier pt-5"><view class="tier-cornice"></view><view class="tier-columns"></view></view>
+                <view class="pisa-gallery-tier pt-6"><view class="tier-cornice"></view><view class="tier-columns"></view></view>
+              </view>
+              <!-- 底部大理石盲拱底座 -->
+              <view class="pisa-hero-base">
+                <view class="base-blind-arcades"></view>
+                <view class="base-plinth"></view>
+              </view>
+            </view>
+          </block>
+
+          <!-- 分支 D: 吉萨金字塔专属 3D 曜金阶梯金字塔 (整根香烟即法老秘藏大金字塔) -->
+          <block wx:elif="{{ currentCigarette.id === 'pyramid_giza' }}">
+            <view class="ssr-pyramid-stick">
+              <!-- 塔顶纯金尖顶 (Pyramidion Capstone) -->
+              <view class="pyr-hero-capstone"></view>
+              <!-- 巨石阶梯与全知之眼 -->
+              <view class="pyr-hero-body">
+                <view class="pyr-hero-eye">
+                  <text class="eye-symbol">✦</text>
+                  <view class="eye-rays"></view>
+                </view>
+                <view class="pyr-ashlar-courses"></view>
+              </view>
+              <!-- 宏伟黑金巨石基座 (带圣书体金字) -->
+              <view class="pyr-hero-base">
+                <text class="pyr-base-inscription">KHUFU · GIZA BC2560</text>
+              </view>
+            </view>
+          </block>
+
+          <!-- 分支 E: 东方明珠专属 3D 太空舱双球天际线 (整根香烟即上海东方明珠广播电视塔) -->
+          <block wx:elif="{{ currentCigarette.id === 'oriental_pearl' }}">
+            <view class="ssr-pearl-stick">
+              <!-- 发射天线针尖与航空信标 -->
+              <view class="pearl-hero-needle">
+                <view class="needle-beacon"></view>
+              </view>
+              <!-- 太空舱小球 (14m) -->
+              <view class="pearl-hero-capsule"></view>
+              <!-- 上球体 (45m 带旋转餐厅与霓虹环) -->
+              <view class="pearl-hero-sphere-upper">
+                <view class="sphere-window-ring"></view>
+                <view class="sphere-neon-halo"></view>
+              </view>
+              <!-- 三主立柱与观光电梯 -->
+              <view class="pearl-hero-columns">
+                <view class="col-shaft left"></view>
+                <view class="col-elevator center"></view>
+                <view class="col-shaft right"></view>
+              </view>
+              <!-- 下球体 (50m 巨型红宝石主球) -->
+              <view class="pearl-hero-sphere-lower">
+                <view class="sphere-lower-sheen"></view>
+              </view>
+              <!-- 三斜撑斜支基座 -->
+              <view class="pearl-hero-tripod-base">
+                <view class="tripod-leg tl-1"></view>
+                <view class="tripod-leg tl-2"></view>
+              </view>
+            </view>
+          </block>
+
+          <!-- 分支 F: 标准名烟 / 细支爆珠 / 古巴雪茄 3D 纯正完整模型 -->
           <block wx:else>
             <!-- 上段：纯正过滤嘴 (真实本色 + 圆柱光影 + 爆珠标识 + 烫金箍圈) -->
             <view class="ssr-cig-filter">

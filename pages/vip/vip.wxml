@@ -77,56 +77,7 @@
 
       </view>
 
-      <!-- 🎨 VIP 专属流光主题衣橱 (速7 · 驭7 先锋名车全系高定色彩) -->
-      <view class="vip-theme-wardrobe-card">
-        <view class="vtw-header">
-          <view class="vtw-header-left">
-            <text class="vtw-title">🎨 专属全站背景装扮</text>
-          </view>
-          <text class="vtw-current">{{ vipInfo.isVip ? ('当前装扮：' + activeVipThemeName) : (isIOS ? '点亮全系主题车色' : '开通点亮全系车色') }}</text>
-        </view>
-
-        <!-- 🏎️ 分类过滤标签栏 (全部 / 速7电跑 / 驭7奢享 / 经典尊享) -->
-        <view class="vtw-category-tabs">
-          <block wx:for="{{ themeCategories }}" wx:key="id">
-            <view 
-              class="vtw-cat-tab {{ currentThemeCategory === item.id ? 'active' : '' }}"
-              bindtap="onSelectThemeCategory"
-              data-category="{{ item.id }}"
-            >
-              <text class="vtw-cat-name">{{ item.name }}</text>
-              <text class="vtw-cat-count">{{ item.count }}</text>
-            </view>
-          </block>
-        </view>
-
-        <!-- 药丸/色块矩阵 (4列自适应微距网格) -->
-        <scroll-view class="vtw-pills-scroll" scroll-y enhanced show-scrollbar="{{ false }}">
-          <view class="vtw-pills-row">
-            <block wx:for="{{ filteredThemeOptions }}" wx:key="id">
-              <view 
-                class="vtw-pill {{ activeVipThemeId === item.id ? 'vtw-pill-active' : '' }} {{ item.isLocked ? 'vtw-pill-locked' : '' }}"
-                bindtap="onSelectVipTheme"
-                data-id="{{ item.id }}"
-                style="{{ activeVipThemeId === item.id ? ('border-color: ' + item.dotColor + '; box-shadow: 0 0 20rpx ' + item.dotColor + '66, inset 0 2rpx 8rpx rgba(255,255,255,0.25); background: ' + item.dotColor + '20;') : '' }}"
-              >
-                <view class="vtw-pill-icon-box">
-                  <view class="vtw-car-dot" style="background: radial-gradient(circle at 35% 30%, #ffffff 0%, {{ item.dotColor }} 45%, #050508 100%); box-shadow: 0 0 12rpx {{ item.dotColor }}, inset 0 2rpx 3rpx rgba(255,255,255,0.8);">
-                    <view class="car-dot-specular"></view>
-                  </view>
-                  <text class="vtw-lock-badge" wx:if="{{ item.isLocked }}">🔒</text>
-                </view>
-                <view class="vtw-pill-texts">
-                  <text class="vtw-pill-name" style="{{ activeVipThemeId === item.id ? ('color: ' + item.dotColor + ';') : '' }}">{{ item.name }}</text>
-                </view>
-              </view>
-            </block>
-          </view>
-        </scroll-view>
-      </view>
-
-
-      <!-- 2. 腾讯游戏经典 3 档横向对比定价套餐 (Horizontal 3-Tier Selector) -->
+      <!-- 1. 腾讯游戏经典 3 档横向对比定价套餐 (Horizontal 3-Tier Selector) -->
       <view class="pricing-section">
         <view class="section-badge-bar">
           <text class="sb-dot"></text>
@@ -181,7 +132,7 @@
                   <text class="price-feature-badge {{ item.id === 'month' ? 'badge-hot' : (item.id === 'lifetime' ? 'badge-gold' : '') }}">{{ item.id === 'day' ? '24H 极速体验' : (item.id === 'month' ? '30天 深度陪伴' : '终身 曜世特权') }}</text>
                 </view>
                 <view class="tier-daily-box">
-                  <text class="daily-label ios-label {{ item.id === 'lifetime' ? 'gold' : '' }}">{{ item.id === 'day' ? '免广告 · 快速体验' : (item.id === 'month' ? '全33款名烟畅吸' : '全版本终身免广') }}</text>
+                  <text class="daily-label ios-label {{ item.id === 'lifetime' ? 'gold' : '' }}">{{ item.id === 'day' ? '免广告 · 快速体验' : (item.id === 'month' ? '全37款名烟畅吸' : '全版本终身免广') }}</text>
                 </view>
                 <text class="tier-original-price ios-sub">{{ item.id === 'day' ? '零门槛体验' : (item.id === 'month' ? '全图鉴解锁' : '专属黑金标') }}</text>
               </block>
@@ -211,8 +162,7 @@
         </view>
       </view>
 
-
-      <!-- 3. 腾讯游戏标配：6 大核心特权矩阵 (Visual Privileges Grid) -->
+      <!-- 2. 腾讯游戏标配：6 大核心特权矩阵 (Visual Privileges Grid) -->
       <view class="privileges-section">
         <view class="section-badge-bar">
           <text class="sb-dot gold"></text>
@@ -325,7 +275,7 @@
             <text class="cpl-lifetime-badge">👑 终身有效</text>
             <text class="cpl-lifetime-status">全量特权生效中</text>
           </view>
-          <text class="cpl-tip">已尊享：全域免广告 · 33款名烟全图鉴畅吸</text>
+          <text class="cpl-tip">已尊享：全域免广告 · 37款名烟全图鉴畅吸</text>
         </block>
         <block wx:elif="{{ isIOS }}">
           <view class="cpl-amount-row">
@@ -387,7 +337,7 @@
 
       <view class="dialog-rights-list">
         <view class="drl-item"><text class="drl-tick">✓</text><text>已免除所有激励视频等待</text></view>
-        <view class="drl-item"><text class="drl-tick">✓</text><text>中华/炫赫门/牛来/心动女神等33款名烟已全解锁</text></view>
+        <view class="drl-item"><text class="drl-tick">✓</text><text>中华/炫赫门/牛来/心动女神等37款名烟已全解锁</text></view>
         <view class="drl-item"><text class="drl-tick">✓</text><text>已点亮 VIP 专属荣耀金冠标识</text></view>
       </view>
 
@@ -406,14 +356,14 @@
       <scroll-view class="proto-scroll" scroll-y enhanced show-scrollbar="{{ true }}">
         <!-- iOS 纯净健康合规协议展示 -->
         <view class="proto-content" wx:if="{{ isIOS }}">
-          <text class="proto-date">更新日期：2026 年 10 月 13 日</text>
+          <text class="proto-date">更新日期：2026 年 10 月 19 日</text>
 
           <text class="proto-lead">欢迎您使用本小程序的自律特权与健康辅助服务。本协议是您与本小程序运营方就自律特权服务及隐私保护相关事项所订立的协议。<text class="proto-bold">请您在开启特权服务前，仔细阅读并充分理解本协议的全部内容，特别是以加粗标注的免责声明、权利限制及未成年人保护条款。</text>一旦您进入并使用本功能，即视为您已阅读、理解并同意接受本协议的全部约定。</text>
 
           <text class="proto-h2">一、服务范围</text>
           <text class="proto-p">1.1 本小程序自律特权服务为数字化虚拟健康减压辅助服务，您开启后可在特权有效期内享受以下专属权益：</text>
           <text class="proto-li">（1）免除观看激励视频直接获得相应权益（包括整盒拆封补满、解锁名烟图鉴、切换动态场景、使用专属特效等操作）；</text>
-          <text class="proto-li">（2）免门槛解锁并使用小程序内全部已上线的 33 款替烟艺术外观图鉴；</text>
+          <text class="proto-li">（2）免门槛解锁并使用小程序内全部已上线的 37 款替烟艺术外观图鉴；</text>
           <text class="proto-li">（3）解锁并使用小程序内全部已上线的沉浸环境主题与定制火机焰色；</text>
           <text class="proto-li">（4）解锁并使用小程序内全部已上线的拟真烟雾特效与专属身份标识；</text>
           <text class="proto-li">（5）运营方不时推出的其他自律专属权益（以届时页面实际公布内容为准）。</text>
@@ -423,7 +373,9 @@
           <text class="proto-li">（2）<text class="proto-bold">自律月卡</text>：有效期为自开启成功之日起 30 个自然日，到期后自动失效；</text>
           <text class="proto-li">（3）<text class="proto-bold">永久自律卡</text>：自开启成功之日起在本小程序存续期内长期有效。</text>
 
-          <text class="proto-p"><text class="proto-bold">1.3 本服务范围仅限于小程序内的虚拟数字减压与控烟辅助功能体验，绝不包含任何烟草制品实物商品、线下服务或其他实体附加权益，亦不构成任何形式的烟草销售或变相交易。</text></text>
+          <text class="proto-p"><text class="proto-bold">1.3 自律双轨制与非垄断声明</text>：本小程序所有已上线之名烟图鉴、流光心境换肤、沉浸天幕与拟真烟雾特效，均已全面支持普通用户通过积累真实替烟自律支数免费获取；本特权专区系为支持产品长线运营的用户提供“即刻免解锁、免看激励广告”之专属便利。</text>
+
+          <text class="proto-p"><text class="proto-bold">1.4 本服务范围仅限于小程序内的虚拟数字减压与控烟辅助功能体验，绝不包含任何烟草制品实物商品、线下服务或其他实体附加权益，亦不构成任何形式的烟草销售或变相交易。</text></text>
 
           <text class="proto-h2">二、特权开启与规则</text>
           <text class="proto-p">2.1 您可在自律成长专区选择相应方案并开启。开启成功后，特权权益即时生效。</text>
@@ -456,14 +408,14 @@
 
         <!-- 安卓 / 默认标准商业服务协议展示 -->
         <view class="proto-content" wx:else>
-          <text class="proto-date">更新日期：2026 年 10 月 13 日</text>
+          <text class="proto-date">更新日期：2026 年 10 月 19 日</text>
 
           <text class="proto-lead">欢迎您使用本小程序的 VIP 会员服务。本协议是您与本小程序运营方就 VIP 会员服务及隐私保护相关事项所订立的协议。<text class="proto-bold">请您在开通 VIP 会员服务前，仔细阅读并充分理解本协议的全部内容，特别是以加粗标注的免责声明、权利限制及未成年人保护条款。</text>一旦您勾选同意本协议并完成开通，即视为您已阅读、理解并同意接受本协议的全部约定。</text>
 
           <text class="proto-h2">一、服务范围</text>
           <text class="proto-p">1.1 本小程序 VIP 会员服务为数字化虚拟增值服务，您开通后可在会员有效期内享受以下专属权益：</text>
           <text class="proto-li">（1）免除观看激励视频广告即可直接获得相应权益（包括但不限于整盒拆封补满、解锁名烟图鉴、切换动态场景、使用专属特效等操作）；</text>
-          <text class="proto-li">（2）免门槛解锁并使用小程序内全部已上线的 33 款替烟艺术外观图鉴；</text>
+          <text class="proto-li">（2）免门槛解锁并使用小程序内全部已上线的 37 款替烟艺术外观图鉴；</text>
           <text class="proto-li">（3）解锁并使用小程序内全部已上线的沉浸环境主题与定制火机焰色；</text>
           <text class="proto-li">（4）解锁并使用小程序内全部已上线的拟真烟雾特效与专属 VIP 皇冠身份标识；</text>
           <text class="proto-li">（5）运营方不时推出的其他 VIP 专属权益（以届时页面实际公布内容为准）。</text>
@@ -473,7 +425,9 @@
           <text class="proto-li">（2）<text class="proto-bold">尊享月卡</text>：有效期为自开通成功之日起 30 个自然日，到期后自动失效；</text>
           <text class="proto-li">（3）<text class="proto-bold">至尊永久卡</text>：自开通成功之日起在本小程序存续期内长期有效。</text>
 
-          <text class="proto-p"><text class="proto-bold">1.3 本服务范围仅限于小程序内的虚拟数字减压与控烟辅助功能体验，绝不包含任何烟草制品实物商品、线下服务或其他实体附加权益，亦不构成任何形式的烟草销售或变相交易。</text></text>
+          <text class="proto-p"><text class="proto-bold">1.3 自律双轨制与非垄断声明</text>：本小程序所有已上线之名烟图鉴、流光心境换肤、沉浸天幕与拟真烟雾特效，均已全面支持普通用户通过积累真实替烟自律支数免费获取；本服务系为支持产品独立维护与长期陪伴的用户提供“即刻全免解锁、免看激励广告”之专属便利体验。</text>
+
+          <text class="proto-p"><text class="proto-bold">1.4 本服务范围仅限于小程序内的虚拟数字减压与控烟辅助功能体验，绝不包含任何烟草制品实物商品、线下服务或其他实体附加权益，亦不构成任何形式的烟草销售或变相交易。</text></text>
 
           <text class="proto-h2">二、开通与支付</text>
           <text class="proto-p">2.1 您可在 VIP 会员特权中心选择相应套餐并完成开通。开通成功后，会员权益即时生效。</text>

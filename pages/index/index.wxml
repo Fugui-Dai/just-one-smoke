@@ -13,9 +13,8 @@
   <!-- ==================== 沉浸式模拟器主页 ==================== -->
   <view class="tab-page simulator-tab active">
 
-    <!-- ==================== 右侧主控 DOCK 栏 (极简无界 · 纯净通透悬浮 · 零外壳边框) ==================== -->
-    <view class="right-arc-dock">
-
+    <!-- ==================== 左侧主控 DOCK 栏 (黑曜石微距悬浮太空坞 · 一体化毛玻璃外壳) ==================== -->
+    <view class="left-arc-dock right-arc-dock">
       <!-- 1. 点燃 / 掐灭 / 抽新烟 (单击点燃/掐灭，UNLIT状态长按弹出器具选择) -->
       <view
         class="dock-btn-wrap ignite-dock-wrap"
@@ -38,15 +37,13 @@
         >
           <image class="dock-svg-icon draw-svg-icon" src="{{ drawCigIconUri }}" mode="aspectFit" wx:if="{{ simulatorState === 'FINISHED' }}" />
           <image class="dock-svg-icon extinguish-svg-icon" src="{{ extinguishIconUri }}" mode="aspectFit" wx:elif="{{ simulatorState !== 'UNLIT' }}" />
-          <!-- 未点燃时：优先显示当前点火器具的高清矢量SVG或emoji图标 -->
-          <image class="dock-svg-icon ignite-svg-icon {{ isSparking ? 'ignite-icon-spark' : '' }}" src="{{ currentIgnitionTool.iconImage }}" mode="aspectFit" wx:elif="{{ currentIgnitionTool.iconImage }}" />
-          <text class="dock-char-icon ignite-tool-icon {{ isSparking ? 'ignite-icon-spark' : '' }}" wx:elif="{{ currentIgnitionTool.icon }}">{{ currentIgnitionTool.icon }}</text>
-          <image class="dock-svg-icon ignite-svg-icon" src="{{ igniteIconUri }}" mode="aspectFit" wx:else />
+          <!-- 未点燃时：优先显示当前点火器具的高清矢量SVG或烈火图标，杜绝裸露文字emoji -->
+          <image class="dock-svg-icon ignite-svg-icon {{ isSparking ? 'ignite-icon-spark' : '' }}" src="{{ currentIgnitionTool.iconImage || igniteIconUri }}" mode="aspectFit" wx:else />
         </view>
         <text class="dock-title">{{ simulatorState === 'FINISHED' ? '抽新烟' : (simulatorState === 'UNLIT' ? '点燃' : '掐灭') }}</text>
       </view>
 
-      <!-- 3. 抖灰 (圆形烟灰进度条 + 顺时针烟灰环 + 灰图标) -->
+      <!-- 2. 抖灰 (圆形烟灰进度条 + 顺时针烟灰环 + 45°落灰图标) -->
       <view class="dock-btn-wrap" bindtap="manualTapAsh">
         <view class="dock-circle-btn ash-btn-circle {{ isAshTapping ? 'is-tapping' : '' }} {{ ashPercent >= 70 ? 'alert-ash' : (ashPercent > 0 ? 'has-ash' : '') }}">
           <!-- 圆形烟灰进度条 (根据当前烟灰长度顺时针环绕) -->
@@ -62,7 +59,7 @@
         <text class="dock-title">抖灰</text>
       </view>
 
-      <!-- 4. 抽烟环境 (单击快速切换环境 · 长按开启列表 · 首次气泡引导) -->
+      <!-- 3. 抽烟环境 (单击快速切换环境 · 长按开启列表 · 首次气泡引导 · 纯矢量天地穹顶) -->
       <view 
         class="dock-btn-wrap scene-dock-wrap" 
         bindtap="toggleScene" 
@@ -82,13 +79,12 @@
           class="dock-circle-btn scene-btn-circle" 
           style="{{ currentSceneInfo.accentColor ? ('border-color: ' + currentSceneInfo.accentColor + '; box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.65), 0 0 14rpx ' + currentSceneInfo.accentColor + '44;') : '' }}"
         >
-          <text class="dock-char-icon scene-char-icon" wx:if="{{ currentSceneInfo.id !== 'obsidian' && currentSceneInfo.icon }}">{{ currentSceneInfo.icon }}</text>
-          <image class="dock-svg-icon scene-svg-icon" wx:else src="{{ sceneAmbientIconUri }}" mode="aspectFit" />
+          <image class="dock-svg-icon scene-svg-icon" src="{{ sceneAmbientIconUri }}" mode="aspectFit" />
         </view>
         <text class="dock-title">环境</text>
       </view>
 
-      <!-- 5. 烟雾特效 (分段刻度环 + 动态字/图标 + 试抽角标) -->
+      <!-- 4. 烟雾特效 (分段刻度环 + 3D烟圈与星芒) -->
       <view 
         class="dock-btn-wrap smoke-dock-wrap" 
         bindtap="toggleSmokeEffect" 
@@ -100,39 +96,55 @@
           wx:if="{{ showSmokeEffectGuide }}"
           catchtap="onTapSmokeGuideTooltip"
         >
-          <text class="sgt-text">💡 长按烟雾特效开启列表</text>
+          <text class="sgt-text">💡 长按烟雾开启列表</text>
           <view class="sgt-arrow"></view>
         </view>
 
         <view 
           class="dock-circle-btn smoke-effect-btn" 
-          style="border-color: {{ currentSmokeEffect.accentBorder }};"
+          style="{{ currentSmokeEffect.accentBorder ? ('border-color: ' + currentSmokeEffect.accentBorder + ';') : '' }}"
         >
           <image class="dock-img-icon" wx:if="{{ currentSmokeEffect.iconImage }}" src="{{ currentSmokeEffect.iconImage }}" mode="aspectFit" />
-          <image class="dock-svg-icon vfx-svg-icon" wx:elif="{{ currentSmokeEffect.id === 'ring_classic' || !currentSmokeEffect.icon || currentSmokeEffect.icon === '⭕' || currentSmokeEffect.icon === '雾' }}" src="{{ smokeVfxIconUri }}" mode="aspectFit" />
-          <text class="dock-char-icon effect-char-icon" wx:else>{{ currentSmokeEffect.icon }}</text>
-          <!-- 30秒试抽倒计时角标 -->
-          <view class="trial-dock-badge" wx:if="{{ isTrialActive }}">{{ trialSecondsLeft }}s</view>
+          <image class="dock-svg-icon vfx-svg-icon" wx:else src="{{ smokeVfxIconUri }}" mode="aspectFit" />
         </view>
-        <text class="dock-title">烟雾特效</text>
+        <text class="dock-title">烟雾</text>
       </view>
 
-      <!-- 6. 递烟 (微信原生分享 + 动态烟盒余量进度环 + 🤲 + 点击递出一支) -->
-      <button class="dock-btn-wrap share-dock-item" open-type="{{ currentPackRemaining > 0 ? 'share' : '' }}" bindtap="giveCigarette">
+      <!-- 5. 递烟 (盒内有烟: 微信原生分享; 盒内已空: 触发拆新盒闭环) -->
+      <button 
+        class="dock-btn-wrap share-dock-item" 
+        open-type="share" 
+        bindtap="giveCigarette"
+        wx:if="{{ currentPackRemaining > 0 }}"
+      >
         <view class="dock-circle-btn share-btn-circle">
-          <!-- 动态烟盒余量进度圆环 -->
+          <!-- 仅外层圆圈显示进度环 (薄边径向遮罩) -->
           <view 
             class="share-progress-ring" 
             style="background: conic-gradient(#34d399 0deg, #10b981 {{ shareProgressDeg }}deg, rgba(255, 255, 255, 0.14) {{ shareProgressDeg }}deg 360deg);"
           ></view>
-          <view class="share-btn-inner">
-            <image class="dock-svg-icon share-svg-icon" src="{{ giveCigIconUri }}" mode="aspectFit" />
-          </view>
+          <image class="dock-svg-icon share-svg-icon" src="{{ giveCigIconUri }}" mode="aspectFit" />
         </view>
         <text class="dock-title">递烟</text>
       </button>
 
-      <!-- 7. 商店 (纯净无24字样矢量图标 + 仅显示“商店”) -->
+      <view 
+        class="dock-btn-wrap share-dock-item" 
+        bindtap="giveCigarette"
+        wx:else
+      >
+        <view class="dock-circle-btn share-btn-circle">
+          <!-- 动态烟盒余量进度圆环 (0支空环) -->
+          <view 
+            class="share-progress-ring" 
+            style="background: rgba(255, 255, 255, 0.14);"
+          ></view>
+          <image class="dock-svg-icon share-svg-icon" src="{{ giveCigIconUri }}" mode="aspectFit" />
+        </view>
+        <text class="dock-title">递烟</text>
+      </view>
+
+      <!-- 6. 商店 (经典双色雨篷精品店铺，选烟与烟盒馆) -->
       <view class="dock-btn-wrap store-dock-wrap" bindtap="openCigarettePicker">
         <view class="dock-circle-btn store-btn-circle">
           <image class="dock-svg-icon store-svg-icon" src="{{ storeIconUri }}" mode="aspectFit" />
@@ -140,7 +152,7 @@
         <text class="dock-title">商店</text>
       </view>
 
-      <!-- 8. 排行榜 (曜金奖杯图标 + 下方“排行榜”) -->
+      <!-- 7. 排行榜 (曜金奖杯图标 + 下方“排行榜”) -->
       <view class="dock-btn-wrap rank-dock-wrap" bindtap="switchToLeaderboard">
         <view class="dock-circle-btn rank-btn-circle">
           <image class="dock-svg-icon rank-svg-icon" src="{{ leaderboardIconUri }}" mode="aspectFit" />
@@ -148,28 +160,25 @@
         <text class="dock-title">排行榜</text>
       </view>
 
-      <!-- 9. 我的 (金字“我” + 下方“我的”) -->
-      <view class="dock-btn-wrap" bindtap="switchToStats">
+      <!-- 8. 我的 (金冠头像 + 下方“我的”，支持长按直接唤醒管理员测试) -->
+      <view class="dock-btn-wrap" bindtap="switchToStats" bindlongpress="devQuickUnlockAdmin">
         <view class="dock-circle-btn my-btn-circle {{ vipTheme ? 'is-vip-my-btn' : '' }}">
           <image class="dock-svg-icon my-svg-icon" src="{{ myProfileIconUri }}" mode="aspectFit" />
         </view>
         <text class="dock-title {{ vipTheme ? 'gold-title' : '' }}">我的</text>
       </view>
 
+      <!-- 9. 管理员测试 (点击我的页面底部版权单次开启后，在此显现) -->
+      <view class="dock-btn-wrap dev-dock-wrap" wx:if="{{ isDevAdminMode }}" bindtap="openAdminTest">
+        <view class="dock-circle-btn dev-btn-circle">
+          <text class="dock-char-icon dev-char-icon">🛠️</text>
+        </view>
+        <text class="dock-title dev-gold-title">测试</text>
+      </view>
     </view>
 
     <!-- 画布区域 (居中展示 3D 拟真卷烟/雪茄与袅袅青烟) -->
     <view class="canvas-wrapper">
-
-      <!-- 30秒特效试抽中动态浮动胶囊 -->
-      <view class="trial-floating-capsule" wx:if="{{ isTrialActive }}" bindtap="openSmokeEffectDrawer">
-        <image class="tfc-img-icon" wx:if="{{ currentSmokeEffect.iconImage }}" src="{{ currentSmokeEffect.iconImage }}" mode="aspectFit" />
-        <text class="tfc-icon" wx:else>{{ currentSmokeEffect.icon }}</text>
-        <text class="tfc-name">尊享【{{ currentSmokeEffect.name }}】试抽中 ({{ trialSecondsLeft }}s)</text>
-        <text class="tfc-link">去解锁 ➔</text>
-      </view>
-
-
 
       <!-- 微信原生 Canvas 2D 高清画布 -->
       <canvas
@@ -177,15 +186,422 @@
         id="smokeCanvas"
         class="smoke-canvas"
         bindtouchstart="onTouchStart"
+        bindtouchmove="onTouchMove"
         bindtouchend="onTouchEnd"
         bindtouchcancel="onTouchEnd"
       ></canvas>
 
+
+      <!-- 腾讯总监级 · 电影级沉浸呼吸暗角 (长按深吸时凝聚视线 · 呼气释然平滑消散) -->
+      <view class="cinematic-vignette-mask {{ simulatorState === 'INHALING' ? 'active-inhale' : '' }}"></view>
+
     </view>
 
-    <!-- 底部核心操作栏已移至右侧Dock -->
+    <!-- 腾讯总监设计级：赛博贤者时刻 · 动态灵动浮岛 (Dynamic Zen Island HUD) -->
+    <view 
+      class="zen-hud-capsule {{ showZenHud ? 'zen-hud-visible' : '' }}" 
+      wx:if="{{ showZenHud }}" 
+      bindtap="openRewardModal"
+      style="top: {{ (capsuleTop && capsuleTop > 0) ? (capsuleTop + 42) : 108 }}px;"
+    >
+      <view class="zhc-ambient-glow"></view>
+      <view class="zhc-aura-border"></view>
+      <view class="zhc-inner-layout">
+        <view class="zhc-icon-badge">
+          <text class="zib-icon">🌿</text>
+          <view class="zib-breath-dot"></view>
+        </view>
+        <view class="zhc-content-col">
+          <view class="zhc-headline-row">
+            <text class="zhr-title">贤者时刻 · 身心澄澈</text>
+            <view class="zhr-tag">替烟达成</view>
+          </view>
+          <view class="zhc-subtext-row">
+            <text class="zsr-text">{{ zenHudText }}</text>
+          </view>
+        </view>
+        <view class="zhc-arrow-action">
+          <text class="zaa-text">成果</text>
+          <text class="zaa-arrow">➔</text>
+        </view>
+      </view>
+    </view>
 
-  </view>
+
+    <!-- 🪙 桌面极简冷淡风微距铜托盘/烟灰缸 (生活真实留存与空间沉淀) -->
+    <view class="desk-ashtray-wrap" bindtap="onTapAshtray">
+      <view class="ashtray-dish">
+        <view class="ashtray-rim"></view>
+        <view class="ashtray-bed">
+          <!-- 灰渣沉淀底晕 (随抖灰次数自然加深) -->
+          <view class="ashtray-ash-layer" style="opacity: {{ ashtrayAshLevel > 0 ? (ashtrayAshLevel * 0.007 + 0.15) : 0 }};"></view>
+
+          <!-- 真实散落的立体炭灰粉末微粒 -->
+          <block wx:for="{{ ashtrayAshFlakes }}" wx:key="id">
+            <view class="ashtray-ash-flake" style="left: {{ item.x }}rpx; top: {{ item.y }}rpx; width: {{ item.size }}rpx; height: {{ item.size }}rpx; opacity: {{ item.opacity }}; transform: rotate({{ item.rot }}deg); background: {{ item.color }};"></view>
+          </block>
+
+          <block wx:for="{{ ashtrayButts }}" wx:key="id">
+            <view class="ashtray-butt butt-pos-{{ index % 20 }}" style="--butt-filter-color: {{ item.filterColor || '#ca8a04' }}; z-index: {{ index + 1 }};">
+              <view class="butt-filter"></view>
+              <view class="butt-stub"></view>
+              <view class="butt-ash-tip"></view>
+            </view>
+          </block>
+          <view class="ashtray-cold-smoke" wx:if="{{ showAshtraySmoke }}"></view>
+        </view>
+      </view>
+      <text class="ashtray-badge" wx:if="{{ ashtrayButts.length > 0 }}">{{ ashtrayButts.length }}</text>
+    </view>
+
+    <!-- 🍂 桌面雅致心绪笺 (写下心事 · 随吸烟青烟消散升华 · 情绪价值拉满) -->
+    <view class="desk-mood-note-wrap {{ currentMoodText ? 'has-mood-note' : '' }} {{ isMoodDissolving ? 'mood-dissolving' : '' }}" bindtap="openMoodModal">
+      <view class="mood-note-paper">
+        <view class="mood-paper-texture"></view>
+        <block wx:if="{{ currentMoodText }}">
+          <text class="mood-note-tag">“{{ currentMoodText }}”</text>
+          <text class="mood-note-sub">随烟散尽 ➔</text>
+        </block>
+        <block wx:else>
+          <text class="mood-note-icon">📜</text>
+          <text class="mood-note-label">心绪笺</text>
+        </block>
+        <view class="mood-smoke-wisp" wx:if="{{ isMoodDissolving }}"></view>
+      </view>
+    </view>
+
+    <!-- 🍵 饮茶润喉模式 (连续吸食生理关怀阻尼 · 东方禅意高奢静心空间) -->
+    <view class="glass-modal-backdrop tea-soothing-backdrop" wx:if="{{ showTeaModal }}" catchtouchmove="preventTouchMove" bindtap="closeTeaModal">
+      <view class="tea-soothing-card" catchtap="stopBubble">
+        <!-- 顶部柔光与流光装饰框 -->
+        <view class="tea-card-ambient-glow"></view>
+        <view class="tea-card-aura-border"></view>
+        <view class="tea-card-close" bindtap="closeTeaModal">✕</view>
+
+        <!-- 禅意茶盏灵动舞台 -->
+        <view class="tea-cup-stage">
+          <view class="tea-stage-ring-outer"></view>
+          <view class="tea-stage-ring-inner"></view>
+          <view class="tea-steam-wisp wisp-1"></view>
+          <view class="tea-steam-wisp wisp-2"></view>
+          <view class="tea-steam-wisp wisp-3"></view>
+          <view class="tea-cup-glow"></view>
+          <view class="tea-cup-icon">🍵</view>
+        </view>
+
+        <!-- 典雅主标题与副标 -->
+        <view class="tea-header-group">
+          <text class="tea-badge-tag">{{ teaBadgeText || (isVipUser ? '👑 VIP尊享关怀 · 今日抽吸已超40支' : '🌿 今日抽吸较多 · 请歇一歇') }}</text>
+          <text class="tea-soothing-title">喉咙需要休息一下了</text>
+        </view>
+
+        <!-- 关怀解释文案 -->
+        <view class="tea-quote-box">
+          <text class="tea-soothing-quote">{{ teaDescriptionText || '您今天已经连续抽吸较多。频繁抽吸容易引起喉咙干涩与心率加快，建议放下手机喝口温水，休息片刻。' }}</text>
+        </view>
+
+        <!-- 控烟实用贴士 -->
+        <view class="tea-breathing-guide">
+          <view class="tbg-icon-wrap">
+            <text class="tbg-leaf">💧</text>
+          </view>
+          <view class="tbg-content">
+            <text class="tbg-title">控烟实用贴士</text>
+            <text class="tbg-text">喝一杯温水或深呼吸，能迅速冲淡对尼古丁的急迫渴望</text>
+          </view>
+        </view>
+
+        <!-- 确定按钮 -->
+        <button class="tea-action-btn" hover-class="tea-btn-hover" bindtap="closeTeaModal">
+          <view class="tea-btn-shine"></view>
+          <text class="tea-btn-emoji">🍵</text>
+          <text class="tea-btn-label">知道了，去喝口水休息</text>
+        </button>
+      </view>
+    </view>
+
+    <!-- 🪵 桌面应急小抽屉抽屉板 (居中拟物原木/黑金暗屉 · 人体工学舒适区) -->
+    <view class="glass-modal-backdrop drawer-modal-backdrop" wx:if="{{ showDeskDrawerModal }}" catchtouchmove="preventTouchMove" bindtap="closeDeskDrawerModal">
+      <view class="desk-drawer-card {{ isVipUser ? 'vip-drawer-card' : '' }}" catchtap="stopBubble">
+        
+        <!-- 抽屉顶部黄铜横梁与拉环装饰 -->
+        <view class="drawer-top-brass-beam">
+          <view class="brass-beam-stud left"></view>
+          <view class="brass-beam-handle"></view>
+          <view class="brass-beam-stud right"></view>
+        </view>
+
+        <!-- 标题栏 -->
+        <view class="dds-header">
+          <view class="dds-title-wrap">
+            <text class="dds-title">{{ isVipUser ? '👑 尊享典藏暗屉 · 无限开盒' : '🪵 桌下胡桃木暗屉 · 应急修心' }}</text>
+            <text class="dds-sub-tag">{{ isVipUser ? 'VIP 专属无限开盒' : '生活化应急链路' }}</text>
+          </view>
+          <view class="sheet-close-btn" bindtap="closeDeskDrawerModal">✕</view>
+        </view>
+
+        <!-- 选项列表 -->
+        <view class="dds-options-grid">
+          
+          <!-- VIP 专属选项: 无限开箱拆新盒 -->
+          <view class="dds-card dds-vip-unwrap-card" wx:if="{{ isVipUser }}" bindtap="onVipDirectUnwrapNewPack" hover-class="dds-card-active">
+            <view class="ddsc-icon-wrap vip-gold-icon">
+              <text class="ddsc-emoji">✨</text>
+            </view>
+            <view class="ddsc-info">
+              <text class="ddsc-name gold-shine-text">典藏无限开盒 · 撕开金拉线</text>
+              <text class="ddsc-desc">尊享私藏典藏特权 · 开箱即享满盒</text>
+            </view>
+            <view class="ddsc-action-btn vip-btn">开新盒</view>
+          </view>
+
+          <!-- 普通选项 1: 拆新盒 (若有未拆库存) -->
+          <view class="dds-card dds-unwrap-card" wx:elif="{{ unopenedPacksCount > 0 }}" bindtap="onUnwrapNewPackFromDrawer" hover-class="dds-card-active">
+            <view class="ddsc-icon-wrap pack-icon">
+              <text class="ddsc-emoji">📦</text>
+            </view>
+            <view class="ddsc-info">
+              <text class="ddsc-name">拆开未拆烟盒 · 撕开金拉线</text>
+              <text class="ddsc-desc">抽屉存量：{{ unopenedPacksCount }} 包 · 撕拉金线开盒</text>
+            </view>
+            <view class="ddsc-action-btn unwrap-btn">拆封</view>
+          </view>
+
+          <!-- 选项 2: 翻抽屉摸应急散烟 -->
+          <view class="dds-card dds-single-card" bindtap="onTakeSingleEmergencyStick" hover-class="dds-card-active">
+            <view class="ddsc-icon-wrap single-icon">
+              <text class="ddsc-emoji">🚬</text>
+            </view>
+            <view class="ddsc-info">
+              <text class="ddsc-name">翻寻案底暗屉 · 偶得单支散烟</text>
+              <text class="ddsc-desc">屉底落单的 1 支经典好烟 · 即点即抽</text>
+            </view>
+            <view class="ddsc-action-btn single-btn">取出</view>
+          </view>
+
+          <!-- 选项 3: 4-7-8 静心顺顺气 (普通用户获得新包入库，VIP进入心境冥想) -->
+          <view class="dds-card dds-zen-card" bindtap="openBreathingSpace" hover-class="dds-card-active">
+            <view class="ddsc-icon-wrap zen-icon">
+              <text class="ddsc-emoji">🌿</text>
+            </view>
+            <view class="ddsc-info">
+              <text class="ddsc-name">4-7-8 静心吐纳 · 顺气平燥</text>
+              <text class="ddsc-desc">{{ isVipUser ? 'VIP 专属颂钵音疗 · 涤净心胸平复焦躁' : '平复焦躁冲动 · 顺气安顿奖赏 1 包存入暗屉' }}</text>
+            </view>
+            <view class="ddsc-action-btn zen-btn">去顺气</view>
+          </view>
+
+          <!-- 选项 4: 借个火 (微信好友互敬赠烟) -->
+          <view class="dds-card dds-share-card" hover-class="dds-card-active">
+            <button class="dds-share-button-mask" open-type="share" bindtap="giveCigarette"></button>
+            <view class="ddsc-icon-wrap fire-icon">
+              <text class="ddsc-emoji">🤝</text>
+            </view>
+            <view class="ddsc-info">
+              <text class="ddsc-name">微信递烟敬友 · 赠友留香</text>
+              <text class="ddsc-desc">递一支给兄弟 · 双方各得 1 整包体面好烟</text>
+            </view>
+            <view class="ddsc-action-btn share-btn">敬烟</view>
+          </view>
+
+        </view>
+      </view>
+    </view>
+
+    <!-- 🌿 4-7-8 顺顺气 · 沉浸式静心吐纳空间 (拒绝顺完气粗暴塞烟) -->
+    <view class="glass-modal-backdrop breathing-space-backdrop" wx:if="{{ showBreathingSpaceModal }}" catchtouchmove="preventTouchMove">
+      <view class="breathing-space-container">
+        
+        <!-- 顶部状态栏与关闭 -->
+        <view class="bsc-header">
+          <view class="bsc-badge">
+            <text class="bsc-badge-dot"></text>
+            <text class="bsc-badge-text">4-7-8 科学呼吸减压法</text>
+          </view>
+          <view class="bsc-close-btn" bindtap="closeBreathingSpace">✕ 收气归元</view>
+        </view>
+
+        <!-- 吐纳进行中视效 -->
+        <block wx:if="{{ !breathingCompleted }}">
+          <!-- 呼吸指示语 (19秒黄金正念周期) -->
+          <view class="bsc-cycle-indicator">
+            <text class="bsc-cycle-text">4-7-8 静心吐纳</text>
+            <text class="bsc-cycle-sub">平复交感神经 · 抚去心瘾焦躁 (19秒)</text>
+          </view>
+
+          <!-- 核心呼吸光环动效区 (独立层级 · 黄金留白 · 绝不遮挡圆圈) -->
+          <view class="bsc-halo-stage">
+            <view class="bsc-halo-outer {{ 'phase-' + breathingPhase }}"></view>
+            <view class="bsc-halo-inner {{ 'phase-' + breathingPhase }}"></view>
+            <!-- 中心独立文字区：不随圆环过度缩放变形，永远完美居中且留白宽裕，绝不遮挡圆圈 -->
+            <view class="bsc-center-content">
+              <text class="bsc-timer-num">{{ breathingCountdown }}</text>
+              <text class="bsc-phase-label">{{ breathingPhaseLabel }}</text>
+            </view>
+          </view>
+
+          <!-- 底部引导语与轻柔跳过 -->
+          <view class="bsc-footer">
+            <text class="bsc-guide-hint">“{{ breathingGuideQuote }}”</text>
+            <view class="bsc-quick-finish-btn" bindtap="finishBreathingEarly">提前平复</view>
+          </view>
+        </block>
+
+        <!-- 吐纳完成后的因果闭环成果卡片 (绝不粗暴强塞烟！) -->
+        <block wx:else>
+          <view class="bsc-success-card">
+            <view class="bsc-success-icon-wrap">
+              <text class="bsc-success-emoji">🌿</text>
+            </view>
+            <text class="bsc-success-title">吐纳圆满 · 身心安顿</text>
+            <text class="bsc-success-quote">“呼吸深长，胸中烦热已如微云消散。你的克制与自律，已为你赢下 1 整包崭新好烟，稳妥收入桌下暗屉，作为自律资产备用。”</text>
+
+            <view class="bsc-asset-reward-badge">
+              <text class="barb-icon">📦</text>
+              <text class="barb-text">暗屉备用烟包 +1（现有存量: {{ unopenedPacksCount }} 包）</text>
+            </view>
+
+            <!-- 尊严自选双通道 -->
+            <view class="bsc-action-duo">
+              <!-- 选项 A: 自律胜利，今天到此为止 (推荐) -->
+              <button class="bsc-choice-btn btn-zen-peace" bindtap="onBreathingChoicePeace">
+                <text class="bcb-title">身心已平 · 今日自律到此</text>
+                <text class="bcb-sub">平复心瘾 ➔ 存入资产 ➔ 退出留白</text>
+              </button>
+
+              <!-- 选项 B: 体面取单支品吸 -->
+              <button class="bsc-choice-btn btn-zen-draw" bindtap="onBreathingChoiceTakeSingle">
+                <text class="bcb-title">取 1 支应急 · 慢吸品味</text>
+                <text class="bcb-sub">从暗屉取出一支好烟，温和点燃</text>
+              </button>
+            </view>
+          </view>
+        </block>
+
+      </view>
+    </view>
+
+    <!-- 🪙 桌面青铜/紫砂烟灰缸 · 沉淀自律微观展台弹窗 -->
+    <view class="glass-modal-backdrop ashtray-modal-backdrop" wx:if="{{ showAshtrayModal }}" catchtouchmove="preventTouchMove" bindtap="closeAshtrayModal">
+      <view class="ashtray-dialog-card" catchtap="stopBubble">
+        <view class="dialog-drag-handle"></view>
+        <view class="adc-header">
+          <view class="adc-title-box">
+            <image class="adc-icon-svg" src="{{ ashtrayBronzeIcon }}" mode="aspectFit"></image>
+            <view class="adc-title-col">
+              <text class="adc-title">紫铜托盘 · 岁月留痕</text>
+              <text class="adc-sub-tag">生活微距沉淀 · 真实自律见证</text>
+            </view>
+          </view>
+          <view class="adc-close-btn" bindtap="closeAshtrayModal">✕</view>
+        </view>
+
+        <!-- 拟物微距托盘特写展示区 -->
+        <view class="adc-visual-stage">
+          <view class="adc-tray-mock">
+            <view class="atm-ring-glow"></view>
+            <view class="atm-inner-bed">
+              <view class="atm-sweep-brush {{ isCleaningAshtray ? 'sweep-active' : '' }}" wx:if="{{ isCleaningAshtray }}"></view>
+              <view class="atm-ash-shadow" style="opacity: {{ ashtrayAshLevel > 0 ? (ashtrayAshLevel * 0.008 + 0.2) : 0 }};"></view>
+              <!-- 弹窗微距特写：散落立体炭灰颗粒 (忠实呈现全部微距灰屑) -->
+              <block wx:for="{{ ashtrayAshFlakes }}" wx:key="id">
+                <view class="atm-ash-flake" style="left: {{ item.x * 1.5 }}rpx; top: {{ item.y * 1.5 }}rpx; width: {{ item.size * 1.4 }}rpx; height: {{ item.size * 1.4 }}rpx; opacity: {{ item.opacity }}; transform: rotate({{ item.rot }}deg); background: {{ item.color }};"></view>
+              </block>
+              <block wx:for="{{ ashtrayButts }}" wx:key="id">
+                <view class="atm-butt-item butt-pos-{{ index % 20 }}" style="--butt-filter-color: {{ item.filterColor || '#ca8a04' }}; z-index: {{ index + 1 }};">
+                  <view class="butt-filter"></view>
+                  <view class="butt-stub"></view>
+                  <view class="butt-ash-tip"></view>
+                </view>
+              </block>
+              <view class="atm-empty-hint" wx:if="{{ ashtrayButts.length === 0 }}">
+                <text class="aeh-icon">🌿</text>
+                <text class="aeh-text">一尘不染 · 今日极尽克制</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 自律见证状态与容量胶囊 (忠实记录今日抽吸痕迹) -->
+        <view class="adc-metric-strip">
+          <view class="ams-item">
+            <text class="ams-val">{{ ashtrayButts.length }}<text class="ams-unit">支</text></text>
+            <text class="ams-lbl">今日沉淀烟蒂</text>
+          </view>
+          <view class="ams-divider"></view>
+          <view class="ams-item">
+            <text class="ams-val">{{ ashtrayAshLevel > 0 ? (ashtrayAshLevel + '%') : '无积灰' }}</text>
+            <text class="ams-lbl">余灰沉淀厚度</text>
+          </view>
+          <view class="ams-divider"></view>
+          <view class="ams-item">
+            <text class="ams-val ams-gold">{{ ashtrayButts.length === 0 ? '极佳' : (ashtrayButts.length <= 5 ? '清简' : (ashtrayButts.length <= 20 ? '适度' : '堆叠过厚')) }}</text>
+            <text class="ams-lbl">自律心境评价</text>
+          </view>
+        </view>
+
+        <!-- 人文寄语 -->
+        <view class="adc-quote-box">
+          <text class="adc-quote-text" wx:if="{{ ashtrayButts.length === 0 }}">“干净的烟灰缸，是成年人最不声张的克制与自律。”</text>
+          <text class="adc-quote-text" wx:elif="{{ ashtrayButts.length <= 5 }}">“晨起日暮各一支，不多贪、不放纵，恰到好处的茶歇慢调。”</text>
+          <text class="adc-quote-text" wx:elif="{{ ashtrayButts.length <= 20 }}">“烟蒂渐次成排，生活节奏亦当缓和，多饮两盏清茶。”</text>
+          <text class="adc-quote-text" wx:else>“一池烟尘如浮生杂念。不妨倾倒洗净，给身心换一片清朗。”</text>
+        </view>
+
+        <!-- 底部操作按钮 -->
+        <view class="adc-actions">
+          <button class="adc-clean-btn {{ ashtrayButts.length === 0 && ashtrayAshLevel === 0 ? 'btn-disabled' : '' }}" bindtap="clearAshtrayNow" disabled="{{ ashtrayButts.length === 0 && ashtrayAshLevel === 0 }}">
+            <image class="acb-icon-svg" src="{{ broomCleanIcon }}" mode="aspectFit"></image>
+            <text class="acb-text">倾倒清洗 · 拂去烟尘</text>
+          </button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 🍂 心绪便笺 · 随烟散尽弹窗 -->
+    <view class="glass-modal-backdrop mood-modal-backdrop" wx:if="{{ showMoodModal }}" catchtouchmove="preventTouchMove" bindtap="closeMoodModal">
+      <view class="mood-dialog-card" catchtap="stopBubble">
+        <view class="dialog-drag-handle"></view>
+        <view class="mdc-header">
+          <view class="mdc-title-box">
+            <text class="mdc-icon">🍂</text>
+            <text class="mdc-title">心绪便笺 · 随烟散尽</text>
+          </view>
+          <view class="mdc-close-btn" bindtap="closeMoodModal">✕</view>
+        </view>
+        <text class="mdc-subtitle">“心头若有琐碎与烦忧，写在笺上。伴着深吸长呼，让它随缕缕青烟散入虚空。”</text>
+        
+        <!-- 快捷心绪标签 -->
+        <view class="mdc-chips-grid">
+          <block wx:for="{{ moodPresets }}" wx:key="*this">
+            <view 
+              class="mdc-chip {{ currentMoodText === item ? 'chip-selected' : '' }}" 
+              bindtap="onSelectMoodPreset" 
+              data-mood="{{ item }}"
+            >
+              <text class="chip-text">{{ item }}</text>
+            </view>
+          </block>
+        </view>
+
+        <!-- 自定义写心绪 -->
+        <view class="mdc-input-row">
+          <input 
+            class="mdc-input" 
+            placeholder="或写下此刻的烦闷 (8字以内)" 
+            placeholder-class="mdc-placeholder"
+            maxlength="8"
+            value="{{ customMoodInput }}"
+            bindinput="onInputCustomMood"
+          />
+          <view class="mdc-confirm-btn" bindtap="onConfirmCustomMood">入笺</view>
+        </view>
+
+        <view class="mdc-footer-actions" wx:if="{{ currentMoodText }}">
+          <text class="mdc-clear-link" bindtap="onClearMood">清空当前笺文</text>
+        </view>
+      </view>
+    </view>
 
   <!-- ==================== 弹窗 1: 抽完结算达成弹窗 (腾讯高品质游戏化胜利战报) ==================== -->
   <view class="glass-modal-backdrop reward-modal-backdrop" wx:if="{{ showRewardModal }}" catchtouchmove="preventTouchMove">
@@ -200,17 +616,17 @@
         <view class="crest-badge-circle">
           <image class="dialog-medal-img" src="{{ victoryMedalSvgUri }}" mode="aspectFit" />
         </view>
-        <view class="crest-tag-pill">✦ VICTORY · 替瘾战报 ✦</view>
+        <view class="crest-tag-pill">✦ 替烟成果 ✦</view>
       </view>
 
-      <text class="dialog-title">战胜心魔！成功替瘾 1 支</text>
-      <text class="dialog-subtitle">阻断焦油与尼古丁侵袭 · 身体自愈力 UP!</text>
+      <text class="dialog-title">心神渐静 · 成功替烟 1 支</text>
+      <text class="dialog-subtitle">阻断焦油摄入 · 呼吸日渐清润</text>
 
-      <!-- 每日自律打卡自动盖印闭环提示条 (腾讯大厂仪式感激励 · 消除断层) -->
+      <!-- 每日自律点亮入册闭环提示条 (腾讯大厂仪式感激励 · 消除断层) -->
       <view class="reward-punch-stamp-strip">
         <view class="rpss-left">
           <text class="rpss-dot"></text>
-          <text class="rpss-title">今日自律打卡已自动盖印 ✓</text>
+          <text class="rpss-title">今日自律心灯已自动点亮入册 ✓</text>
         </view>
         <view class="rpss-right">
           <text class="rpss-streak-label">连续自律</text>
@@ -266,7 +682,7 @@
         <view class="reward-cell purple-cell">
           <view class="rc-header">
             <text class="rc-icon">❤️</text>
-            <text class="reward-cell-label">抢回寿命</text>
+            <text class="reward-cell-label">健康时光</text>
           </view>
           <view class="rc-body">
             <text class="reward-cell-val purple-text">+{{ lastReward.lifeRegained }}<text class="unit-text">分</text></text>
@@ -290,19 +706,19 @@
         <text class="rmb-text">累计替烟 {{ totalSubstituted }} 次 · 累计已省 ¥{{ totalSavedMoney }}<block wx:if="{{ myRankInfo }}"> · 英雄榜第{{ myRankInfo.rank }}席</block></text>
       </view>
 
-      <!-- 调皮搞笑鼓励金句气泡 -->
+      <!-- 鼓励金句气泡 -->
       <view class="reward-humor-bubble">
         <text class="rhb-emoji">💬</text>
-        <text class="rhb-quote">“{{ rewardPunchline || '尼古丁骂骂咧咧地退出了群聊！' }}”</text>
+        <text class="rhb-quote">“{{ rewardPunchline || '指间清风过，心头杂念消。' }}”</text>
       </view>
 
       <!-- 操作按钮阶梯 -->
       <view class="dialog-btn-stack">
         <button class="primary-gold-btn reward-confirm-btn" catchtap="closeRewardModal">
-          <text class="btn-main-text">💪 收下战果 · 功德+1</text>
+          <text class="btn-main-text">收下记录</text>
         </button>
         <button class="secondary-dark-btn reward-again-btn" catchtap="drawNewCigarette">
-          <text class="btn-sub-text">🚬 意犹未尽 · 再抽一支</text>
+          <text class="btn-sub-text">再抽一支</text>
         </button>
       </view>
 
@@ -319,7 +735,7 @@
       <view class="sheet-top-handle"></view>
       <view class="sheet-title-row">
         <view class="sheet-title-left">
-          <text class="sheet-main-title">🌿 抽烟环境 · 18大典藏声景</text>
+          <text class="sheet-main-title">🌿 抽烟环境 · 典藏声景</text>
           <text class="sheet-sub-title-tag">支持「吸烟火光映照」实时联动</text>
         </view>
         <view class="sheet-close-btn" bindtap="closeSceneModal">✕</view>
@@ -364,7 +780,7 @@
               <text class="sst-icon">{{ isAmbientEnabled ? '🎧' : '🔇' }}</text>
               <view class="sst-info">
                 <text class="sst-title">大师级柔绒微声景伴吸</text>
-                <text class="sst-desc">{{ isAmbientEnabled ? '已开启 -26dB 暖频呼吸柔音 · 久听静心不吵耳' : '已静音 · 纯享无声' }}</text>
+                <text class="sst-desc">{{ isAmbientEnabled ? '已开启暖频环境声景 · 伴您静心呼吸冥想' : '已静音 · 纯享无声' }}</text>
               </view>
             </view>
             <switch checked="{{ isAmbientEnabled }}" color="#10b981" style="pointer-events: none;" />
@@ -388,7 +804,8 @@
                   <text class="skill-card-icon">{{ item.icon }}</text>
                   <view class="scene-accent-dot" style="background: {{ item.accentColor || '#10b981' }}; box-shadow: 0 0 10rpx {{ item.accentColor || '#10b981' }};"></view>
                 </view>
-                <view class="scene-item-badge {{ item.id === currentScene ? 'active-badge' : '' }}" wx:if="{{ item.badge }}">{{ item.badge }}</view>
+                <view class="scene-item-lock-badge" wx:if="{{ !isVipUser && item.requiredCount > 0 && totalSubstituted < item.requiredCount }}">🔒 {{ item.requiredCount }}支</view>
+                <view class="scene-item-badge {{ item.id === currentScene ? 'active-badge' : '' }}" wx:elif="{{ item.badge }}">{{ item.badge }}</view>
               </view>
               <view class="skill-card-info">
                 <view class="skill-card-title">{{ item.name }}</view>
@@ -419,9 +836,9 @@
       <view class="effects-drawer-header">
         <view class="ed-header-left">
           <view class="ed-title-row">
-            <text class="ed-main-title">💨 烟雾特工坊 · 尊享展厅</text>
+            <text class="ed-main-title">💨 烟雾工坊 · 灵动展厅</text>
           </view>
-          <text class="ed-sub-title">已替烟节省开支 ¥{{ totalSavedMoney }} · 支持替烟基金零元换购</text>
+          <text class="ed-sub-title">已省烟资 ¥{{ totalSavedMoney }} · 每一支少抽皆是勋绩点亮</text>
         </view>
         <view class="sheet-close-btn" bindtap="closeSmokeEffectDrawer">✕</view>
       </view>
@@ -457,7 +874,7 @@
               </view>
             </view>
 
-            <!-- 卡片右侧：操作区 (装配 / 试抽 / 替烟基金兑换) -->
+            <!-- 卡片右侧：操作区 (装配 / 替烟基金兑换) -->
             <view class="effect-card-actions">
               <button 
                 class="ec-btn ec-equip-btn" 
@@ -469,13 +886,6 @@
               </button>
 
               <block wx:if="{{ !item.unlocked }}">
-                <button 
-                  class="ec-btn ec-trial-btn"
-                  bindtap="startTrialSmokeEffect"
-                  data-item="{{ item }}"
-                >
-                  试抽
-                </button>
                 <button 
                   class="ec-btn ec-unlock-btn {{ item.canBuyWithSavings ? 'can-buy-btn' : '' }}"
                   bindtap="onUnlockSmokeEffectWithSavings"
@@ -491,7 +901,7 @@
 
       <!-- 底部提示栏 -->
       <view class="effects-drawer-footer">
-        <text class="edf-tip">💡 真实承诺：每少抽 1 根实体烟省 ¥{{ singleStickSavedPrice }}，替烟基金可 100% 免费兑换全场尊享特效！</text>
+        <text class="edf-tip">💡 真实积累：每少抽 1 支真烟省 ¥{{ singleStickSavedPrice }}，皆可点亮灵动意境特效。</text>
       </view>
 
     </view>
@@ -526,12 +936,12 @@
         <view class="gift-stat-box">
           <text class="gsb-icon">❤️</text>
           <text class="gsb-val purple-text">+11<text class="gsb-unit">分</text></text>
-          <text class="gsb-label">抢回寿命</text>
+          <text class="gsb-label">健康时光</text>
         </view>
         <view class="gift-stat-box">
           <text class="gsb-icon">✨</text>
           <text class="gsb-val gold-text">+10<text class="gsb-unit">分</text></text>
-          <text class="gsb-label">社交功德</text>
+          <text class="gsb-label">老友情谊</text>
         </view>
       </view>
 
@@ -550,11 +960,11 @@
   <view class="glass-modal-backdrop matrix-vault-backdrop" wx:if="{{ showIgnitionToolDrawer }}" catchtouchmove="preventTouchMove" bindtap="closeIgnitionToolDrawer">
     <view class="matrix-vault-container" catchtap="stopBubble">
 
-      <!-- 顶栏：赛博解压工坊标题 + 情绪解压计数勋章 + 优雅关闭按钮 -->
+      <!-- 顶栏：点火器具工坊标题 + 情绪解压计数勋章 + 优雅关闭按钮 -->
       <view class="matrix-top-bar">
         <view class="mtb-title-group">
-          <text class="mtb-en-tag">EDC FIDGET ARSENAL // 掌心解压</text>
-          <text class="mtb-main-title">🔥 掌心机巧把玩所</text>
+          <text class="mtb-en-tag">LIGHTER & IGNITION WORKSHOP // 点火解压</text>
+          <text class="mtb-main-title">🔥 点火器具工坊</text>
         </view>
         <view class="mtb-right-actions">
           <view class="fidget-counter-pill {{ fidgetCounterBumping ? 'fcp-bump' : '' }}" wx:if="{{ fidgetCount > 0 }}">
@@ -597,11 +1007,11 @@
       <!-- 试火与手势指引胶囊（向下独立外置，不再遮挡机身与光轮） -->
       <view class="matrix-action-indicator-dock" catchtap="onTapHeroStage">
         <view class="matrix-action-indicator" style="border-color: {{ previewIgnitionTool.themeColor }}55;">
-          <text class="mai-text" style="{{ isPreviewTesting ? 'color:' + previewIgnitionTool.themeColor + '; font-weight:800;' : '' }}">{{ isPreviewTesting ? '🔥 机巧引燃 · 物理共振' : (previewIgnitionTool.id === 'zippo_vintage' && isZippoLidOpen ? '🪙 已掀开纯铜顶盖 · 轻触搓动打火' : (previewIgnitionTool.fidgetHint ? '👆 ' + previewIgnitionTool.fidgetHint : '👆 轻触机体 释放专属物理点火')) }}</text>
+          <text class="mai-text" style="{{ isPreviewTesting ? 'color:' + previewIgnitionTool.themeColor + '; font-weight:800;' : '' }}">{{ isPreviewTesting ? '🔥 器具引燃 · 物理声效' : (previewIgnitionTool.id === 'zippo_vintage' && isZippoLidOpen ? '🪙 已掀开纯铜顶盖 · 轻触搓动打火' : (previewIgnitionTool.fidgetHint ? '👆 ' + previewIgnitionTool.fidgetHint : '👆 轻触器具 释放专属物理点火')) }}</text>
         </view>
       </view>
 
-      <!-- 核心 2：悬浮解构机巧铭牌与情绪心境金句 (严格恒高，杜绝切换大小跳变) -->
+      <!-- 核心 2：悬浮解构器具铭牌与情绪心境金句 (严格恒高，杜绝切换大小跳变) -->
       <view class="matrix-spec-card">
         <view class="msc-header">
           <view class="msc-title-left">
@@ -614,7 +1024,7 @@
             <text class="fidget-material-tag">{{ previewIgnitionTool.craftMaterial || previewIgnitionTool.subTitle }}</text>
             <view class="msc-equipped-chip" wx:if="{{ previewIgnitionTool.id === currentIgnitionTool.id }}">
               <text class="chip-dot"></text>
-              <text class="chip-label">专属伴侣</text>
+              <text class="chip-label">当前使用</text>
             </view>
           </view>
         </view>
@@ -641,6 +1051,7 @@
             <image class="msu-svg" wx:if="{{ item.iconImage }}" src="{{ item.iconImage }}" mode="aspectFit" />
             <text class="msu-emoji" wx:else>{{ item.icon }}</text>
             <view class="msu-active-pip" wx:if="{{ item.id === currentIgnitionTool.id }}"></view>
+            <view class="msu-lock-pip" wx:elif="{{ !isVipUser && item.requiredCount > 0 && totalSubstituted < item.requiredCount }}">🔒</view>
           </view>
           <text class="msu-label" style="{{ item.id === previewIgnitionTool.id ? 'color:' + item.themeColor + '; font-weight:800;' : '' }}">{{ item.name }}</text>
         </view>
@@ -649,19 +1060,285 @@
       <!-- 核心 4：悬浮胶囊装配主操作键 (单行无换行，严格绝对几何双居中) -->
       <view class="matrix-action-dock">
         <view
-          class="matrix-equip-btn {{ previewIgnitionTool.id === currentIgnitionTool.id ? 'meb-equipped' : '' }} {{ justEquippedAnim ? 'meb-just-equipped' : '' }}"
+          class="matrix-equip-btn {{ previewIgnitionTool.id === currentIgnitionTool.id ? 'meb-equipped' : (!isVipUser && previewIgnitionTool.requiredCount > 0 && totalSubstituted < previewIgnitionTool.requiredCount ? 'meb-locked' : '') }} {{ justEquippedAnim ? 'meb-just-equipped' : '' }}"
           catchtap="onConfirmEquipTool"
-          style="background: {{ previewIgnitionTool.id === currentIgnitionTool.id ? 'rgba(255,255,255,0.08)' : (previewIgnitionTool.buttonGradient || 'linear-gradient(135deg, ' + previewIgnitionTool.themeColor + ' 0%, #d97706 100%)') }}; border-color: {{ previewIgnitionTool.id === currentIgnitionTool.id ? 'rgba(52,211,153,0.35)' : previewIgnitionTool.themeColor }};"
+          style="background: {{ previewIgnitionTool.id === currentIgnitionTool.id ? 'rgba(255,255,255,0.08)' : (!isVipUser && previewIgnitionTool.requiredCount > 0 && totalSubstituted < previewIgnitionTool.requiredCount ? 'rgba(255,255,255,0.04)' : (previewIgnitionTool.buttonGradient || 'linear-gradient(135deg, ' + previewIgnitionTool.themeColor + ' 0%, #d97706 100%)')) }}; border-color: {{ previewIgnitionTool.id === currentIgnitionTool.id ? 'rgba(52,211,153,0.35)' : (!isVipUser && previewIgnitionTool.requiredCount > 0 && totalSubstituted < previewIgnitionTool.requiredCount ? 'rgba(255,255,255,0.15)' : previewIgnitionTool.themeColor) }};"
         >
-          <text class="meb-text {{ previewIgnitionTool.id === currentIgnitionTool.id ? 'text-is-equipped' : 'text-need-equip' }}">{{ justEquippedAnim ? '✨ 契约已缔结 · 专属点火伴侣' : (previewIgnitionTool.id === currentIgnitionTool.id ? '✓ 当前已装配为专属点火器具' : '立即装配为专属点火器具') }}</text>
+          <text class="meb-text {{ previewIgnitionTool.id === currentIgnitionTool.id ? 'text-is-equipped' : 'text-need-equip' }}">{{ justEquippedAnim ? '✨ 换装成功 · 专属点火器具' : (previewIgnitionTool.id === currentIgnitionTool.id ? '✓ 当前正在使用的点火器具' : (!isVipUser && previewIgnitionTool.requiredCount > 0 && totalSubstituted < previewIgnitionTool.requiredCount ? '🔒 累计替烟 ' + previewIgnitionTool.requiredCount + ' 支解锁（差 ' + (previewIgnitionTool.requiredCount - totalSubstituted) + ' 支）' : '立即换用此点火器具')) }}</text>
         </view>
       </view>
 
     </view>
   </view>
 
+  <!-- ==========================================================================
+       [DEV_ADMIN_TEST] 首页管理员极速测试控制台抽屉 (点击我的页面底部版权单次开启)
+       ========================================================================== -->
+  <view class="dev-admin-backdrop {{ showAdminTestModal ? 'dev-admin-backdrop-active' : '' }}" 
+        wx:if="{{ showAdminTestModal }}" 
+        bindtap="closeAdminTest" 
+        catchtouchmove="preventTouchMove">
+    <view class="dev-admin-drawer" catchtap="stopBubble">
+      
+      <!-- 顶部简易标题栏 -->
+      <view class="dev-admin-header">
+        <view class="dev-admin-title-wrap">
+          <text class="dev-admin-title">🛠️ 首页管理员测试工具箱</text>
+          <text class="dev-admin-sub-tag">所见即所得</text>
+        </view>
+        <view class="dev-admin-close-btn" bindtap="closeAdminTest" hover-class="dev-btn-active">✕ 关闭</view>
+      </view>
+
+      <!-- 实时状态条 -->
+      <view class="dev-admin-hud-bar">
+        <text class="dev-hud-txt">VIP: <text class="{{ devVipActive ? 'dev-c-gold' : 'dev-c-dim' }}">{{ devVipActive ? (devVipInfo.isLifetime ? '永久VIP' : '已开通') : '未开通' }}</text></text>
+        <text class="dev-hud-txt">今日: <text class="dev-c-gold">{{ devDailySmokedCount || 0 }}支</text></text>
+        <text class="dev-hud-txt">替烟: <text class="dev-c-green">{{ devTotalSubs }}支</text></text>
+        <text class="dev-hud-txt">当前盒: <text class="dev-c-purple">{{ currentPackRemaining }}支</text></text>
+        <text class="dev-hud-txt">状态: <text class="dev-c-cyan">{{ simulatorState }}</text></text>
+      </view>
+
+      <!-- 滚动操作面板 (支持上下顺畅平滑滚动) -->
+      <scroll-view class="dev-admin-scroll" scroll-y enable-passive scroll-with-animation>
+        <view class="dev-admin-content-pad">
+
+          <!-- 分组 1: 首页吸烟与燃烧物理动力学 (实时响应 · 烟灰保留自弹) -->
+          <view class="dev-group">
+            <view class="dev-group-label">🔥 实时吸烟与燃烧物理动力学 (今日已抽: {{ devDailySmokedCount || 0 }} 支)</view>
+            <view class="dev-row-grid cols-4">
+              <view class="dev-btn btn-amber" bindtap="devSetSmokeProgress90" hover-class="dev-btn-active">吸烟90%(厚灰)</view>
+              <view class="dev-btn btn-amber" bindtap="devSetSmokeProgress50" hover-class="dev-btn-active">吸烟50%(半灰)</view>
+              <view class="dev-btn btn-blue" bindtap="devSetSmokeProgress10" hover-class="dev-btn-active">吸烟10%(轻灰)</view>
+              <view class="dev-btn btn-purple" bindtap="devSetSmokeAsh100" hover-class="dev-btn-active">烟灰拉满100%</view>
+              <view class="dev-btn btn-orange" bindtap="devIgniteNow" hover-class="dev-btn-active">立即点燃</view>
+              <view class="dev-btn btn-cyan" bindtap="devInhaleOnce" hover-class="dev-btn-active">深吸一口</view>
+              <view class="dev-btn btn-gray" bindtap="devExtinguishNow" hover-class="dev-btn-active">立即掐灭</view>
+              <view class="dev-btn btn-purple" bindtap="devToggleBead" hover-class="dev-btn-active">捏/复爆珠</view>
+            </view>
+            <view class="dev-row-grid cols-4" style="margin-top: 8rpx;">
+              <view class="dev-btn btn-green" bindtap="devResetFullSmoke" hover-class="dev-btn-active">全新烟支</view>
+              <view class="dev-btn btn-cyan" bindtap="devTapAshNow" hover-class="dev-btn-active">弹落烟灰</view>
+              <view class="dev-btn btn-gold" bindtap="devFinishSmokeNow" hover-class="dev-btn-active">吸尽(+1)</view>
+              <view class="dev-btn btn-orange" bindtap="devAddDailySmoked10" hover-class="dev-btn-active">⚡ 今日+10支</view>
+            </view>
+          </view>
+
+          <!-- 分组 2: 🍂 心绪便笺 · 随烟散尽与赛博贤者时刻 -->
+          <view class="dev-group">
+            <view class="dev-group-label">🍂 心绪便笺 · 随烟散尽与贤者时刻</view>
+            <view class="dev-row-grid cols-4">
+              <view class="dev-btn btn-amber" bindtap="devSetMoodNote" data-mood="琐事心烦" hover-class="dev-btn-active">笺:琐事心烦</view>
+              <view class="dev-btn btn-amber" bindtap="devSetMoodNote" data-mood="身心疲惫" hover-class="dev-btn-active">笺:身心疲惫</view>
+              <view class="dev-btn btn-amber" bindtap="devSetMoodNote" data-mood="焦虑紧绷" hover-class="dev-btn-active">笺:焦虑紧绷</view>
+              <view class="dev-btn btn-gray" bindtap="devClearMoodNote" hover-class="dev-btn-active">清空便笺</view>
+            </view>
+            <view class="dev-row-grid cols-2" style="margin-top: 8rpx;">
+              <view class="dev-btn btn-purple" bindtap="devTriggerZenToast" hover-class="dev-btn-active">🌿 预览顶部赛博灵动岛 HUD</view>
+              <view class="dev-btn btn-gold" bindtap="devTestMoodDissolveAndFinish" hover-class="dev-btn-active">⚡ 便笺随青烟散尽 + 吸尽</view>
+            </view>
+          </view>
+
+          <!-- 分组 3: 🍵 桌面微距烟灰缸与物理沉淀留存 (有多少显示多少) -->
+          <view class="dev-group">
+            <view class="dev-group-label">
+              <text>🍵 桌面微距烟灰缸 (缸内: {{ ashtrayButts.length }}蒂 · {{ ashtrayAshLevel }}%灰 · {{ ashtrayAshFlakes.length }}屑)</text>
+            </view>
+            <!-- 烟蒂测试: 累计加1、加10、满盒20、堆叠50 -->
+            <view class="dev-row-grid cols-4">
+              <view class="dev-btn btn-gold" bindtap="devAddAshtrayButt1" hover-class="dev-btn-active">烟蒂 +1</view>
+              <view class="dev-btn btn-gold" bindtap="devAddAshtrayButt10" hover-class="dev-btn-active">烟蒂 +10</view>
+              <view class="dev-btn btn-amber" bindtap="devFill20Butts" hover-class="dev-btn-active">满盒20蒂</view>
+              <view class="dev-btn btn-orange" bindtap="devFill50Butts" hover-class="dev-btn-active">堆叠50蒂</view>
+            </view>
+            <!-- 烟灰测试: 累计加1、加10、满灰100%、厚灰300% -->
+            <view class="dev-row-grid cols-4" style="margin-top: 8rpx;">
+              <view class="dev-btn btn-cyan" bindtap="devAddAshtrayAsh1" hover-class="dev-btn-active">烟灰 +1</view>
+              <view class="dev-btn btn-cyan" bindtap="devAddAshtrayAsh10" hover-class="dev-btn-active">烟灰 +10</view>
+              <view class="dev-btn btn-purple" bindtap="devSetAshtrayAsh100" hover-class="dev-btn-active">烟灰100%</view>
+              <view class="dev-btn btn-purple" bindtap="devSetAshtrayAsh300" hover-class="dev-btn-active">烟灰300%</view>
+            </view>
+            <!-- 弹窗查看与清洁控制 -->
+            <view class="dev-row-grid cols-3" style="margin-top: 8rpx;">
+              <view class="dev-btn btn-blue" bindtap="onTapAshtray" hover-class="dev-btn-active">🔍 打开烟灰缸弹窗</view>
+              <view class="dev-btn btn-purple" bindtap="devToggleAshtraySmoke" hover-class="dev-btn-active">开关余温微烟</view>
+              <view class="dev-btn btn-green" bindtap="devClearAshtrayTray" hover-class="dev-btn-active">🧹 一键倾倒洗缸</view>
+            </view>
+          </view>
+
+          <!-- 分组 3.5: 🔥 经典点火器具即时切换 (6款经典) -->
+          <view class="dev-group">
+            <view class="dev-group-label">🔥 经典点火器具即时切换 (当前: {{ currentIgnitionTool.name }})</view>
+            <view class="dev-row-grid cols-3">
+              <view class="dev-btn btn-gold" bindtap="devSwitchIgnitionTool" data-tool="zippo_vintage" hover-class="dev-btn-active">🪙 经典Zippo</view>
+              <view class="dev-btn btn-orange" bindtap="devSwitchIgnitionTool" data-tool="flint_lighter" hover-class="dev-btn-active">🔥 经典砂轮</view>
+              <view class="dev-btn btn-amber" bindtap="devSwitchIgnitionTool" data-tool="vintage_match" hover-class="dev-btn-active">🪵 复古火柴</view>
+              <view class="dev-btn btn-purple" bindtap="devSwitchIgnitionTool" data-tool="plasma_arc" hover-class="dev-btn-active">⚡ 赛博双弧</view>
+              <view class="dev-btn btn-cyan" bindtap="devSwitchIgnitionTool" data-tool="blue_torch" hover-class="dev-btn-active">🔵 蓝焰喷枪</view>
+            </view>
+          </view>
+
+          <!-- 分组 4: 🗄️ 空盒应急闭环与桌面抽屉 -->
+          <view class="dev-group">
+            <view class="dev-group-label">🗄️ 空盒应急闭环与桌面抽屉</view>
+            <view class="dev-row-grid cols-3">
+              <view class="dev-btn btn-blue" bindtap="devOpenDeskDrawer" hover-class="dev-btn-active">拉出桌面抽屉</view>
+              <view class="dev-btn btn-green" bindtap="devTriggerZenBreathing" hover-class="dev-btn-active">4-7-8顺气解封</view>
+              <view class="dev-btn btn-purple" bindtap="devAddUnopenedPack" data-delta="1" hover-class="dev-btn-active">抽屉新包+1</view>
+            </view>
+          </view>
+
+          <!-- 分组 5: 🍵 40支生理阻尼 · 饮茶润喉模式 -->
+          <view class="dev-group">
+            <view class="dev-group-label">🍵 40支生理阻尼 · 饮茶润喉模式 (今日累计: {{ devDailySmokedCount || 0 }} 支)</view>
+            <view class="dev-row-grid cols-3">
+              <view class="dev-btn btn-orange" bindtap="devAddDailySmoked10" hover-class="dev-btn-active">⚡ 今日累计+10</view>
+              <view class="dev-btn btn-purple" bindtap="devSetDailySmoked40" hover-class="dev-btn-active">直达40支上限</view>
+              <view class="dev-btn btn-gray" bindtap="devClearDailySmoked" hover-class="dev-btn-active">清零今日吸烟</view>
+            </view>
+            <view class="dev-row-grid cols-2" style="margin-top: 8rpx;">
+              <view class="dev-btn btn-amber" bindtap="devTriggerTeaModal" hover-class="dev-btn-active">唤出饮茶润喉模态框</view>
+              <view class="dev-btn btn-green" bindtap="devResetTeaDamping" hover-class="dev-btn-active">解除/关闭饮茶阻尼</view>
+            </view>
+          </view>
+
+          <!-- 分组 6: 🌌 全景心境天幕与情感陪伴即时切换 -->
+          <view class="dev-group">
+            <view class="dev-group-label">🌌 全景心境天幕与情感陪伴 (当前: {{ currentSceneInfo.name }})</view>
+            <view class="dev-row-grid cols-4">
+              <view class="dev-btn btn-green" bindtap="devSetAtmosphereScene" data-scene="totoro_rain" hover-class="dev-btn-active">🍃 雨夜龙猫</view>
+              <view class="dev-btn btn-orange" bindtap="devSetAtmosphereScene" data-scene="snoopy_stargazing" hover-class="dev-btn-active">🐶 史努比</view>
+              <view class="dev-btn btn-amber" bindtap="devSetAtmosphereScene" data-scene="cat_companion" hover-class="dev-btn-active">🐱 暖阁喵眠</view>
+              <view class="dev-btn btn-gold" bindtap="devSetAtmosphereScene" data-scene="cozy_family" hover-class="dev-btn-active">🏡 温馨小家</view>
+            </view>
+            <view class="dev-row-grid cols-2" style="margin-top: 8rpx;">
+              <view class="dev-btn btn-purple" bindtap="devCycleVipTheme" hover-class="dev-btn-active">🌌 循环切下一款天幕 (12款)</view>
+              <view class="dev-btn btn-gray" bindtap="devResetClassicTheme" hover-class="dev-btn-active">🌑 复原经典曜黑</view>
+            </view>
+          </view>
+
+          <!-- 分组 7: 🤝 好友社交礼遇与单支品鉴 -->
+          <view class="dev-group">
+            <view class="dev-group-label">🤝 好友社交礼遇与单支品鉴</view>
+            <view class="dev-row-grid cols-3">
+              <view class="dev-btn btn-amber" bindtap="devSimulateReceiveGift" data-cigid="huanghelou_1916" hover-class="dev-btn-active">受赠【黄鹤楼】</view>
+              <view class="dev-btn btn-gold" bindtap="devSimulateReceiveGift" data-cigid="cohiba_esplendidos" hover-class="dev-btn-active">受赠【古巴雪茄】</view>
+              <view class="dev-btn btn-red" bindtap="devSimulateReceiveGift" data-cigid="chunghwa_soft" hover-class="dev-btn-active">受赠【软中华】</view>
+            </view>
+          </view>
+
+          <!-- 分组 8: 📳 阶梯通感触觉与 528Hz 磬音 -->
+          <view class="dev-group">
+            <view class="dev-group-label">📳 阶梯通感触觉与治愈音效</view>
+            <view class="dev-row-grid cols-2">
+              <view class="dev-btn btn-cyan" bindtap="devTestSensoryHaptics" hover-class="dev-btn-active">📳 负压+红热微震通感</view>
+              <view class="dev-btn btn-green" bindtap="devPlayZenChimeSound" hover-class="dev-btn-active">🔔 528Hz 禅意磬音</view>
+            </view>
+          </view>
+
+          <!-- 分组 9: 📜 16 阶成语境界称号快速步进 -->
+          <view class="dev-group">
+            <view class="dev-group-label">📜 16 阶成语境界称号快速步进 (实时换徽章)</view>
+            <view class="dev-row-grid cols-2">
+              <view class="dev-btn btn-blue" bindtap="devStepTitlePrev" hover-class="dev-btn-active">◀ 上一阶称号</view>
+              <view class="dev-btn btn-gold" bindtap="devStepTitleNext" hover-class="dev-btn-active">下一阶称号 ▶</view>
+            </view>
+            <view class="dev-row-grid cols-4" style="margin-top: 8rpx;">
+              <view class="dev-btn btn-green" bindtap="devSetTitleTier" data-title="积微成著" hover-class="dev-btn-active">积微成著</view>
+              <view class="dev-btn btn-cyan" bindtap="devSetTitleTier" data-title="从容自若" hover-class="dev-btn-active">从容自若</view>
+              <view class="dev-btn btn-amber" bindtap="devSetTitleTier" data-title="金石为开" hover-class="dev-btn-active">金石为开</view>
+              <view class="dev-btn btn-purple" bindtap="devSetTitleTier" data-title="返璞归真" hover-class="dev-btn-active">返璞归真</view>
+            </view>
+          </view>
+
+          <!-- 分组 10: 打卡天数与时间跨度模拟 (生命健康周期演进) -->
+          <view class="dev-group">
+            <view class="dev-group-label">📅 打卡天数与时间跨度测试</view>
+            <view class="dev-row-grid cols-4">
+              <view class="dev-btn btn-blue" bindtap="devAddQuitDays" data-days="1" hover-class="dev-btn-active">打卡+1天</view>
+              <view class="dev-btn btn-blue" bindtap="devAddQuitDays" data-days="7" hover-class="dev-btn-active">打卡+7天</view>
+              <view class="dev-btn btn-blue" bindtap="devAddQuitDays" data-days="30" hover-class="dev-btn-active">打卡+30天</view>
+              <view class="dev-btn btn-gray" bindtap="devSetQuitDays" data-days="1" hover-class="dev-btn-active">设为第1天</view>
+              <view class="dev-btn btn-purple" bindtap="devSetQuitDays" data-days="21" hover-class="dev-btn-active">设为21天</view>
+              <view class="dev-btn btn-gold" bindtap="devSetQuitDays" data-days="100" hover-class="dev-btn-active">设为100天</view>
+              <view class="dev-btn btn-cyan" bindtap="devSetQuitDays" data-days="365" hover-class="dev-btn-active">设为1年</view>
+              <view class="dev-btn btn-amber" bindtap="devSetQuitDays" data-days="1825" hover-class="dev-btn-active">设为5年</view>
+            </view>
+          </view>
+
+          <!-- 分组 11: 替烟支数与 7 日自律数据趋势 -->
+          <view class="dev-group">
+            <view class="dev-group-label">📊 替烟支数与健康趋势数据</view>
+            <view class="dev-row-grid cols-4">
+              <view class="dev-btn btn-cyan" bindtap="devAddRecords" data-count="1" hover-class="dev-btn-active">替烟+1</view>
+              <view class="dev-btn btn-cyan" bindtap="devAddRecords" data-count="5" hover-class="dev-btn-active">替烟+5</view>
+              <view class="dev-btn btn-cyan" bindtap="devAddRecords" data-count="20" hover-class="dev-btn-active">替烟+20</view>
+              <view class="dev-btn btn-blue" bindtap="devSetTotalRecords" data-count="60" hover-class="dev-btn-active">设为60支</view>
+              <view class="dev-btn btn-blue" bindtap="devSetTotalRecords" data-count="100" hover-class="dev-btn-active">设为100支</view>
+              <view class="dev-btn btn-blue" bindtap="devSetTotalRecords" data-count="500" hover-class="dev-btn-active">设为500支</view>
+              <view class="dev-btn btn-gray" bindtap="devClearRecords" hover-class="dev-btn-active">清空记录</view>
+              <view class="dev-btn btn-green" bindtap="devFill7DaysTrends" hover-class="dev-btn-active">填满7天图</view>
+            </view>
+          </view>
+
+          <!-- 分组 12: 烟盒库存与余量边界调试 -->
+          <view class="dev-group">
+            <view class="dev-group-label">📦 烟盒库存与余量边界调试</view>
+            <view class="dev-row-grid cols-4">
+              <view class="dev-btn btn-orange" bindtap="devSetCurrentPackCount" data-count="0" hover-class="dev-btn-active">当前盒0支</view>
+              <view class="dev-btn btn-orange" bindtap="devSetCurrentPackCount" data-count="1" hover-class="dev-btn-active">当前盒1支</view>
+              <view class="dev-btn btn-green" bindtap="devRefillCurrentPack" hover-class="dev-btn-active">当前盒补满</view>
+              <view class="dev-btn btn-green" bindtap="devRefillAllPacks" hover-class="dev-btn-active">37款盒全满</view>
+            </view>
+          </view>
+
+          <!-- 分组 13: VIP 特权与到期模拟 (全周期体验) -->
+          <view class="dev-group">
+            <view class="dev-group-label">👑 VIP特权与到期模拟</view>
+            <view class="dev-row-grid cols-4">
+              <view class="dev-btn btn-gold" bindtap="devActivateVipLifetime" hover-class="dev-btn-active">永久VIP</view>
+              <view class="dev-btn btn-purple" bindtap="devActivateVipMonth" hover-class="dev-btn-active">30天月卡</view>
+              <view class="dev-btn btn-green" bindtap="devActivateVipDay" hover-class="dev-btn-active">24小时卡</view>
+              <view class="dev-btn btn-orange" bindtap="devExpireVipNow" hover-class="dev-btn-active">过期1秒</view>
+            </view>
+            <view class="dev-row-grid cols-1" style="margin-top: 8rpx;">
+              <view class="dev-btn btn-gray" bindtap="devClearVip" hover-class="dev-btn-active">恢复非VIP (清除全部VIP特权)</view>
+            </view>
+          </view>
+
+          <!-- 分组 14: 展柜名烟、烟雾与成就解锁 -->
+          <view class="dev-group">
+            <view class="dev-group-label">🌟 展馆名烟、烟雾与成就解锁</view>
+            <view class="dev-row-grid cols-4">
+              <view class="dev-btn btn-gold" bindtap="devUnlockAllCigarettes" hover-class="dev-btn-active">解锁37款烟</view>
+              <view class="dev-btn btn-gray" bindtap="devLockAllCigarettes" hover-class="dev-btn-active">锁定名烟</view>
+              <view class="dev-btn btn-purple" bindtap="devUnlockAllSmokeEffects" hover-class="dev-btn-active">解锁6款雾</view>
+              <view class="dev-btn btn-gray" bindtap="devLockAllSmokeEffects" hover-class="dev-btn-active">重置烟雾</view>
+            </view>
+            <view class="dev-row-grid cols-1" style="margin-top: 8rpx;">
+              <view class="dev-btn btn-gold" bindtap="devUnlockAllAchievements" hover-class="dev-btn-active">👑 一键点亮全部 16 阶成就与佩戴【无烟圣尊】</view>
+            </view>
+          </view>
+
+          <!-- 分组 15: 系统维护与数据快照 -->
+          <view class="dev-group">
+            <view class="dev-group-label">⚙️ 系统维护与数据快照</view>
+            <view class="dev-row-grid cols-3">
+              <view class="dev-btn btn-cyan" bindtap="devShowDataSnapshot" hover-class="dev-btn-active">数据快照</view>
+              <view class="dev-btn btn-orange" bindtap="devResetAllStorage" hover-class="dev-btn-active">恢复出厂数据</view>
+              <view class="dev-btn btn-red" bindtap="devLockAdminMode" hover-class="dev-btn-active">关闭测试模式</view>
+            </view>
+          </view>
+
+        </view>
+      </scroll-view>
+
+    </view>
+  </view>
+  <!-- ==================== [DEV_ADMIN_TEST] 结束 ==================== -->
+
   <!-- 全局腾讯级灵动微胶囊 Toast HUD -->
   <custom-toast id="customToast" />
 
+  </view>
 </view>
 

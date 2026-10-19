@@ -14,6 +14,10 @@ import { getThemeById } from '../../configs/vipThemes.js';
 import { measureSafeAreaSync, detectIsIOS } from '../../utils/safeArea.js';
 
 function resolveCigaretteCategory(item) {
+  // 0. 奇趣名筑 (世界奇迹恶搞名筑系列：埃菲尔铁塔、比萨斜塔、吉萨金字塔、东方明珠)
+  if (item.isParody || ['eiffel_tower', 'pisa_leaning', 'pyramid_giza', 'oriental_pearl'].includes(item.id)) {
+    return 'wonder';
+  }
   // 1. 细支爆珠 (所有带爆珠或细支的名烟：炫赫门、贵烟跨越、利群江南韵、万宝路冰蓝、七星蓝莓双爆、宽窄五粮浓香、芙蓉王硬细支、中华双中支等)
   if (item.hasBead || item.widthType === 'slender' || ['xuanhemen_slender', 'guiyan_kuayue', 'liqun_jiangnan', 'kuanzhai_wuliang', 'furongwang_slender', 'chunghwa_double', 'marlboro_ice', 'mevius_blueberry'].includes(item.id)) {
     return 'slender';
@@ -31,7 +35,9 @@ function resolveCigaretteCategory(item) {
 }
 
 function formatShelfFields(item) {
-  const shelfTitle = item.name || '';
+  let shelfTitle = item.name || '';
+  // 过滤中英文括号及括号内的多余后缀，确保名称简短规整，绝不溢出省略号
+  shelfTitle = shelfTitle.replace(/\s*[\(（][^\)）]*[\)）]\s*/g, '').trim();
   const shelfSpecTag = item.id === 'pure_oxygen_zen'
     ? '0mg空气卷'
     : ((item.packTheme && item.packTheme.tar) ? item.packTheme.tar : '10mg');
@@ -241,15 +247,8 @@ Page({
     });
   },
 
-  // 在货架上点击某个烟盒卡片：进入新的烟盒开盒页面
+  // 在货架上点击某个烟盒卡片：直接进入名烟品鉴页面
   onTapShelfPack(e) {
-    // 腾讯游戏防重规范：首触独占生效 (Leading-Edge Throttle Lock)
-    const now = Date.now();
-    if (this._isNavigatingToPack || (this._lastCigaretteTapTime && (now - this._lastCigaretteTapTime < 800))) {
-      return;
-    }
-    this._lastCigaretteTapTime = now;
-
     const item = e.currentTarget.dataset.item;
     if (!item) return;
 
@@ -260,6 +259,12 @@ Page({
       return;
     }
 
+    // 防重独占锁 (Leading-Edge Throttle Lock)
+    const now = Date.now();
+    if (this._isNavigatingToPack || (this._lastCigaretteTapTime && (now - this._lastCigaretteTapTime < 800))) {
+      return;
+    }
+    this._lastCigaretteTapTime = now;
     this._isNavigatingToPack = true;
 
     const isCurrent = item.id === storageService.getSelectedCigaretteId();
@@ -292,9 +297,7 @@ Page({
   },
 
   onNavigateBack() {
-    audioManager.unlockAudio();
-    audioManager.playSwitchSound();
-    wx.navigateBack({ delta: 1 });
+    navigateBackWithSound('/pages/index/index');
   },
 
   // 开启双路径解锁决策弹窗 (Tencent Games Conversion Modal)
@@ -372,7 +375,7 @@ Page({
     storageService.unlockCigaretteForToday(cig.id);
 
     // 补齐一整盒初始库存
-    const cap = cig.packCapacity || (cig.isCigar ? 5 : 6);
+    const cap = cig.packCapacity || (cig.isCigar ? 5 : 20);
     storageService.resetPackCount(cig.id, cap);
 
     // 切换当前装配

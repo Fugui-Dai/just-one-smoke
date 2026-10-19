@@ -30,37 +30,55 @@
  */
 
 import { getThemeById } from '../configs/vipThemes.js';
+import { vipService } from '../services/vipService.js';
 
 export const SCENE_CATEGORIES = [
   { id: 'all', name: '全部', icon: '✨' },
-  { id: 'life', name: '烟火', icon: '🏙️' },
-  { id: 'nature', name: '自然', icon: '🌧️' },
-  { id: 'cosmos', name: '星空', icon: '🌌' }
+  { id: 'life', name: '人间烟火', icon: '🏙️' },
+  { id: 'nature', name: '自然治愈', icon: '🌧️' },
+  { id: 'cosmos', name: '奇幻星宇', icon: '🌌' }
 ];
 
 export const ATMOSPHERE_SCENES = [
-  // ================= 1. 🏙️ 人间烟火系列 (Everyday Life & Urban Vibes) =================
+  // ================= 1. 🏙️ 人间烟火系列 (生活避风港 · 情感共鸣巅峰) =================
+  {
+    id: 'rainy_car',
+    name: '雨夜车窗',
+    subtitle: '成年人的私密避风港 · 细雨霓虹',
+    icon: '🌧️',
+    category: 'life',
+    accentColor: '#38bdf8',
+    soundType: 'rain',
+    ambientDesc: '沙沙窗外夜雨声 · 治愈解压',
+    badge: '最治愈 · 必选',
+    requiredCount: 0,
+    unlockDesc: '初始默认开放'
+  },
   {
     id: 'convenience_store',
-    name: '便利店门口',
-    subtitle: '24H霓虹灯箱 · 关东煮暖雾',
+    name: '便利店',
+    subtitle: '24H暖灯 · 街角热气微雾',
     icon: '🏪',
     category: 'life',
     accentColor: '#10b981',
     soundType: 'city',
     ambientDesc: '深夜街角温暖灯影',
-    badge: '打工人避风港'
+    badge: '日常小憩',
+    requiredCount: 20,
+    unlockDesc: '累计替烟 20 支解锁'
   },
   {
     id: 'stairwell',
-    name: '楼道安全通道',
-    subtitle: '防火门后摸鱼 · 丁达尔光束',
+    name: '楼梯间',
+    subtitle: '防火门后独处 · 丁达尔光束与水泥静谧',
     icon: '🚪',
     category: 'life',
     accentColor: '#34d399',
     soundType: 'echo',
     ambientDesc: '安静楼道微弱风声',
-    badge: '摸鱼圣地'
+    badge: '片刻放空',
+    requiredCount: 50,
+    unlockDesc: '累计替烟 50 支解锁'
   },
   {
     id: 'underground_garage',
@@ -71,7 +89,9 @@ export const ATMOSPHERE_SCENES = [
     accentColor: '#eab308',
     soundType: 'garage',
     ambientDesc: '车库排风机低频沉浸音',
-    badge: '独处时刻'
+    badge: '独处时刻',
+    requiredCount: 100,
+    unlockDesc: '累计替烟 100 支解锁'
   },
   {
     id: 'midnight_rooftop',
@@ -82,144 +102,131 @@ export const ATMOSPHERE_SCENES = [
     accentColor: '#f59e0b',
     soundType: 'wind',
     ambientDesc: '天台旷野徐徐晚风',
-    badge: '开阔解忧'
-  },
-  {
-    id: 'rainy_car',
-    name: '雨夜车窗',
-    subtitle: '成年人的私密避风港 · 细雨霓虹',
-    icon: '🌧️',
-    category: 'life',
-    accentColor: '#38bdf8',
-    soundType: 'rain',
-    ambientDesc: '沙沙窗外夜雨声',
-    badge: '最治愈'
+    badge: '开阔解忧',
+    requiredCount: 150,
+    unlockDesc: '累计替烟 150 支解锁'
   },
   {
     id: 'whisky_bar',
-    name: '微醺威士忌吧',
-    subtitle: '暗调胡桃木吧台 · 冰球与琥珀液',
+    name: '小酒馆',
+    subtitle: '暗调胡桃木吧台 · 冰球与琥珀酒液',
     icon: '🥃',
     category: 'life',
     accentColor: '#f59e0b',
     soundType: 'lounge',
     ambientDesc: '复古黑胶与微醺暖频余韵',
-    badge: '高奢独酌'
+    badge: '微醺慢调',
+    requiredCount: 600,
+    unlockDesc: '累计替烟 600 支解锁'
+  },
+  {
+    id: 'cat_companion',
+    name: '暖阁喵眠',
+    subtitle: '案头打盹橘猫 · 4 paws揣手起伏打呼',
+    icon: '🐱',
+    category: 'life',
+    accentColor: '#f97316',
+    soundType: 'cat_companion',
+    ambientDesc: '案头暖灯 · 绵密呼噜 · 治愈陪伴',
+    badge: '治愈萌宠 · 陪伴',
+    requiredCount: 1300,
+    unlockDesc: '累计替烟 1300 支解锁'
+  },
+  {
+    id: 'cozy_family',
+    name: '温馨小家',
+    subtitle: '壁炉暖木 · 小熊一家三口依偎安睡',
+    icon: '🏡',
+    category: 'life',
+    accentColor: '#f59e0b',
+    soundType: 'cozy_family',
+    ambientDesc: '壁炉柴火 · 暖被安睡 · 亲情治愈',
+    badge: '亲情陪伴 · 家',
+    requiredCount: 1600,
+    unlockDesc: '累计替烟 1600 支解锁'
   },
 
-  // ================= 2. 🌧️ 自然治愈系列 (Nature & Zen Healing) =================
-  {
-    id: 'night_fishing',
-    name: '江湖夜钓',
-    subtitle: '静水芦苇微澜 · 夜光浮漂顿口',
-    icon: '🎣',
-    category: 'nature',
-    accentColor: '#22c55e',
-    soundType: 'fishing',
-    ambientDesc: '静夜湖水微澜与空灵夜色',
-    badge: '钓鱼佬狂喜'
-  },
+  // ================= 2. 🌧️ 自然治愈系列 (心境释怀 · 治愈陪伴) =================
   {
     id: 'snowy_lamp',
     name: '雪夜孤灯',
-    subtitle: '复古暖黄街灯 · 漫天飞雪静落',
+    subtitle: '复古暖黄街灯 · 漫天飞雪静谧轻落',
     icon: '❄️',
     category: 'nature',
     accentColor: '#bae6fd',
     soundType: 'snow',
     ambientDesc: '凛冬落雪静谧空气声',
-    badge: '极致唯美'
-  },
-  {
-    id: 'zen_bamboo',
-    name: '禅院听竹',
-    subtitle: '东方水墨月夜 · 翠竹随风轻摇',
-    icon: '🎋',
-    category: 'nature',
-    accentColor: '#4ade80',
-    soundType: 'bamboo',
-    ambientDesc: '竹海清风与禅院静心音',
-    badge: '东方禅意'
+    badge: '极致寂静',
+    requiredCount: 250,
+    unlockDesc: '累计替烟 250 支解锁'
   },
   {
     id: 'rainy_camp',
     name: '雨夜露营',
-    subtitle: '天幕听雨 · 暖光马灯与远山',
+    subtitle: '旷野天幕听雨 · 暖光马灯与远山静气',
     icon: '⛺',
     category: 'nature',
     accentColor: '#fbbf24',
     soundType: 'rain',
     ambientDesc: '天幕轻柔雨声与微风',
-    badge: '旷野松弛'
+    badge: '旷野松弛',
+    requiredCount: 400,
+    unlockDesc: '累计替烟 400 支解锁'
   },
   {
-    id: 'ocean',
-    name: '蔚蓝深海',
-    subtitle: '海上明月潮汐 · 层叠涌浪与飞沫',
-    icon: '🌊',
+    id: 'night_fishing',
+    name: '江湖夜钓',
+    subtitle: '静水芦苇微澜 · 三色夜光浮漂与流萤',
+    icon: '🎣',
     category: 'nature',
-    accentColor: '#06b6d4',
-    soundType: 'ocean',
-    ambientDesc: '舒缓浪潮与海风微鸣',
-    badge: '治愈解压'
-  },
-  {
-    id: 'campfire',
-    name: '森林篝火',
-    subtitle: '松林夜幕围炉 · 跃动火苗与火星',
-    icon: '🔥',
-    category: 'nature',
-    accentColor: '#f97316',
-    soundType: 'crackle',
-    ambientDesc: '木柴轻柔温暖呼吸声',
-    badge: '温暖围炉'
+    accentColor: '#22c55e',
+    soundType: 'fishing',
+    ambientDesc: '静夜湖水微澜与空灵夜色',
+    badge: '空灵夜钓',
+    requiredCount: 800,
+    unlockDesc: '累计替烟 800 支解锁'
   },
   {
     id: 'sakura_night',
     name: '落樱夜庭',
-    subtitle: '绯月薄雾 · 3D物理落樱与水镜涟漪',
+    subtitle: '东方绯月薄雾 · 3D落樱随风与水镜微澜',
     icon: '🌸',
     category: 'nature',
     accentColor: '#f472b6',
     soundType: 'sakura',
     ambientDesc: '春夜微风抚枝与幽弦夜音',
-    badge: '极致物哀'
+    badge: '夜樱静谧',
+    requiredCount: 1000,
+    unlockDesc: '累计替烟 1000 支解锁'
+  },
+  {
+    id: 'totoro_rain',
+    name: '雨夜龙猫',
+    subtitle: '森林小站 · 荷叶撑伞与圆滚大肚',
+    icon: '🍃',
+    category: 'nature',
+    accentColor: '#10b981',
+    soundType: 'totoro_rain',
+    ambientDesc: '森林细雨 · 荷叶滴答 · 温暖治愈',
+    badge: '吉卜力治愈',
+    requiredCount: 2000,
+    unlockDesc: '累计替烟 2000 支解锁'
+  },
+  {
+    id: 'snoopy_stargazing',
+    name: '史努比星空',
+    subtitle: '红屋顶仰望星空 · 糊涂塌客相依安睡',
+    icon: '🐶',
+    category: 'nature',
+    accentColor: '#ef4444',
+    soundType: 'snoopy_stargazing',
+    ambientDesc: '星夜微风 · 经典红屋顶 · 纯真治愈',
+    badge: '童年经典 · 陪伴',
+    requiredCount: 2400,
+    unlockDesc: '累计替烟 2400 支解锁'
   },
 
-  // ================= 3. 🌌 奇幻星宇系列 (Cosmic Wonders & Pure Studio) =================
-  {
-    id: 'solar_system',
-    name: '浩瀚太阳系',
-    subtitle: '恒星金辉普照 · 八大行星公转',
-    icon: '🪐',
-    category: 'cosmos',
-    accentColor: '#fde047',
-    soundType: 'cosmos',
-    ambientDesc: '深空引力波空灵冥想',
-    badge: '宇宙奇观'
-  },
-  {
-    id: 'deep_cosmos',
-    name: '深空宇宙',
-    subtitle: '双色星云漫渺 · 银河流星划过',
-    icon: '🌌',
-    category: 'cosmos',
-    accentColor: '#a855f7',
-    soundType: 'cosmos',
-    ambientDesc: '深空虚空静谧之声',
-    badge: '浪漫星海'
-  },
-  {
-    id: 'lunar_planet',
-    name: '荒原星球',
-    subtitle: '环形山月表 · 巨型母星升起',
-    icon: '🌑',
-    category: 'cosmos',
-    accentColor: '#38bdf8',
-    soundType: 'cosmos',
-    ambientDesc: '异星地平线寂静微风',
-    badge: '孤寂异境'
-  },
+  // ================= 3. 🌌 奇幻星宇系列 (Cosmic Wonders & Pure Space) =================
   {
     id: 'starship_bridge',
     name: '星港巨舰',
@@ -227,9 +234,11 @@ export const ATMOSPHERE_SCENES = [
     icon: '🚀',
     category: 'cosmos',
     accentColor: '#38bdf8',
-    soundType: 'starship',
+    soundType: 'starship_bridge',
     ambientDesc: '猛禽低频轰鸣与筷子臂精准回收',
-    badge: '马斯克星舰'
+    badge: '马斯克星舰',
+    requiredCount: 3000,
+    unlockDesc: '累计替烟 3000 支解锁'
   },
   {
     id: 'starlink_orbit',
@@ -238,26 +247,51 @@ export const ATMOSPHERE_SCENES = [
     icon: '🛰️',
     category: 'cosmos',
     accentColor: '#38bdf8',
-    soundType: 'cosmos',
+    soundType: 'starlink_orbit',
     ambientDesc: '星轨交织与深空遥测脉冲',
-    badge: '赛博星轨'
+    badge: '赛博星轨',
+    requiredCount: 3650,
+    unlockDesc: '累计替烟 3650 支解锁'
   },
   {
     id: 'obsidian',
-    name: '极简黑曜',
-    subtitle: '专注一呼一吸 · 侘寂纯境',
+    name: '静心暗室',
+    subtitle: '专注一呼一吸 · 纯黑微距案头',
     icon: '🖤',
-    category: 'cosmos',
+    category: 'all',
     accentColor: '#94a3b8',
     soundType: 'zen',
-    ambientDesc: '侘寂静心白噪音',
-    badge: '纯享侘寂'
+    ambientDesc: '静心白噪音',
+    badge: '返璞归真',
+    requiredCount: 0,
+    unlockDesc: '初始默认开放'
   }
 ];
 
+export function isSceneUnlocked(sceneId, totalSubstituted = 0) {
+  try {
+    if (vipService && vipService.isVip && vipService.isVip()) return true;
+  } catch (e) {}
+  const scene = getSceneById(sceneId);
+  if (!scene) return true;
+  if (!scene.requiredCount || scene.requiredCount === 0) return true;
+  return totalSubstituted >= scene.requiredCount;
+}
+
 export function getSceneById(id) {
+  if (!id) return ATMOSPHERE_SCENES[0];
   if (id === 'midnight_balcony') id = 'midnight_rooftop';
   if (id === 'golden_amber') id = 'whisky_bar';
+  if (id === 'moonlit_dance') id = 'totoro_rain';
+  if (id === 'jazz_sway') id = 'snoopy_stargazing';
+  if (id === 'starship_launch') id = 'starship_bridge';
+  // 优雅降级兼容已移除场景，确保老用户无缝过渡
+  if (['solar_system', 'deep_cosmos', 'lunar_planet'].includes(id)) {
+    id = 'starlink_orbit';
+  }
+  if (['ocean', 'campfire', 'zen_bamboo'].includes(id)) {
+    id = 'rainy_camp';
+  }
   return ATMOSPHERE_SCENES.find(s => s.id === id) || ATMOSPHERE_SCENES[0];
 }
 
@@ -283,6 +317,12 @@ export class SceneRenderer {
     this.bambooStalks = [];
     this.sakuraPetals = [];
     this.starshipStars = [];
+    this.catDustMotes = [];
+    this.catLastPetTime = 0;
+    this.totoroLastBounceTime = 0;
+    this.snoopyLastBounceTime = 0;
+    this.familyLastBounceTime = 0;
+    this.hearthEmbers = [];
     // 星舰交互状态机: 'IDLE' -> 'HOLD_MID_AIR' (长按在半空点火等待) -> 'RELEASE_ORBIT' (松手直插云霄发射出屏幕) -> 'RE_ENTRY' (反推扎入) -> 'CATCH' (筷子臂捕获)
     this.starshipState = 'IDLE';
     this.starshipStateTime = 0;
@@ -599,6 +639,33 @@ export class SceneRenderer {
       { lat: -25, lon: 135, isCity: false }
     ];
 
+    // 15. 暖阁喵眠：案头台灯暖金光尘微粒
+    this.catDustMotes = [];
+    for (let i = 0; i < 18; i++) {
+      this.catDustMotes.push({
+        x: w * 0.10 + Math.random() * (w * 0.36),
+        y: h * 0.28 + Math.random() * (h * 0.40),
+        r: 0.8 + Math.random() * 1.5,
+        speedY: (Math.random() - 0.5) * 6,
+        speedX: (Math.random() - 0.5) * 8,
+        alpha: 0.16 + Math.random() * 0.38
+      });
+    }
+
+    // 16. 温馨小家：壁炉柴火升腾的火星微粒
+    this.hearthEmbers = [];
+    for (let i = 0; i < 14; i++) {
+      this.hearthEmbers.push({
+        x: w * 0.12 + Math.random() * 24,
+        y: h * 0.65 + Math.random() * 20,
+        r: 0.9 + Math.random() * 1.5,
+        speedY: 18 + Math.random() * 24,
+        speedX: (Math.random() - 0.5) * 8,
+        life: Math.random(),
+        maxLife: 1.5 + Math.random() * 1.2
+      });
+    }
+
     this.initialized = true;
     this.lastW = w;
     this.lastH = h;
@@ -641,6 +708,16 @@ export class SceneRenderer {
       case 'golden_amber':
         this.renderWhiskyBar(ctx, w, h, dt, totalTime);
         break;
+      case 'snoopy_stargazing':
+      case 'jazz_sway':
+        this.renderSnoopyStargazing(ctx, w, h, dt, totalTime, emberIntensity);
+        break;
+      case 'cat_companion':
+        this.renderCatCompanion(ctx, w, h, dt, totalTime, emberIntensity);
+        break;
+      case 'cozy_family':
+        this.renderCozyFamily(ctx, w, h, dt, totalTime, emberIntensity);
+        break;
       case 'night_fishing':
         this.renderNightFishing(ctx, w, h, dt, totalTime);
         break;
@@ -649,6 +726,10 @@ export class SceneRenderer {
         break;
       case 'zen_bamboo':
         this.renderZenBamboo(ctx, w, h, dt, totalTime);
+        break;
+      case 'totoro_rain':
+      case 'moonlit_dance':
+        this.renderTotoroRain(ctx, w, h, dt, totalTime, emberIntensity);
         break;
       case 'rainy_car':
         this.renderRainyCar(ctx, w, h, dt, totalTime);
@@ -3676,6 +3757,2016 @@ export class SceneRenderer {
     ctx.fillText(hudText, pillX + 20, hudY);
     ctx.restore();
   }
+
+  // 触发龙猫大肚子软弹跳反馈
+  triggerTotoroBounce() {
+    this.totoroLastBounceTime = Date.now();
+  }
+
+  // ==========================================
+  // 20. 宫崎骏吉卜力经典 · 雨夜龙猫 (Totoro Forest Rain Station)
+  // 森林小站、复古木质站牌、温润细雨、圆滚滚大龙猫巨肚呼吸、碧绿荷叶伞水滴弹跳与萌趣煤球精灵
+  // ==========================================
+  renderTotoroRain(ctx, w, h, dt, t, emberIntensity = 0) {
+    ctx.save();
+    // 1. 幽深森林雨夜天幕 (Deep Forest Night Sky)
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, h);
+    skyGrad.addColorStop(0, "#05110d");
+    skyGrad.addColorStop(0.40, "#0a1d17");
+    skyGrad.addColorStop(0.75, "#0e261f");
+    skyGrad.addColorStop(1, "#050f0b");
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    // 1.1 远景与中景层叠森林树冠剪影 (Layered Forest Canopy Silhouettes)
+    const groundY = h * 0.72;
+
+    // 远景墨绿森林树冠
+    ctx.fillStyle = "#030c08";
+    ctx.beginPath();
+    ctx.moveTo(0, groundY);
+    for (let tx = 0; tx <= w; tx += 28) {
+      const treeH = 65 + Math.sin(tx * 0.04) * 25 + Math.cos(tx * 0.08) * 15;
+      ctx.lineTo(tx, groundY - treeH);
+    }
+    ctx.lineTo(w, groundY);
+    ctx.closePath();
+    ctx.fill();
+
+    // 中景层次树丛
+    ctx.fillStyle = "#061710";
+    ctx.beginPath();
+    ctx.moveTo(0, groundY);
+    for (let tx = 0; tx <= w; tx += 20) {
+      const treeH = 42 + Math.sin(tx * 0.06 + 1.2) * 18;
+      ctx.lineTo(tx, groundY - treeH);
+    }
+    ctx.lineTo(w, groundY);
+    ctx.closePath();
+    ctx.fill();
+
+    // 1.2 森林温润细雨 (Forest Rain Streaks)
+    ctx.strokeStyle = "rgba(186, 230, 253, 0.22)";
+    ctx.lineWidth = 1.0;
+    ctx.lineCap = "round";
+    const rainCount = 26;
+    for (let r = 0; r < rainCount; r++) {
+      const rx = ((r * 43 + t * 45) % w);
+      const ry = ((r * 67 + t * 240) % groundY);
+      ctx.beginPath();
+      ctx.moveTo(rx, ry);
+      ctx.lineTo(rx - 3, ry + 16);
+      ctx.stroke();
+    }
+
+    // 2. 湿润泥土路面与雨水浅滩 (Wet Forest Ground & Puddles)
+    const groundGrad = ctx.createLinearGradient(0, groundY, 0, h);
+    groundGrad.addColorStop(0, "#101c15");
+    groundGrad.addColorStop(0.12, "#0c1611");
+    groundGrad.addColorStop(1, "#040806");
+    ctx.fillStyle = groundGrad;
+    ctx.fillRect(0, groundY, w, h - groundY);
+
+    // 路面水洼与涟漪 (Puddle with Ripples)
+    const puddleX = w * 0.28;
+    const puddleY = groundY + 12;
+    const puddleGrad = ctx.createRadialGradient(puddleX, puddleY, 4, puddleX, puddleY, 65);
+    puddleGrad.addColorStop(0, "rgba(56, 189, 248, 0.12)");
+    puddleGrad.addColorStop(0.7, "rgba(16, 185, 129, 0.06)");
+    puddleGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
+    ctx.fillStyle = puddleGrad;
+    ctx.beginPath();
+    ctx.ellipse(puddleX, puddleY, 62, 14, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 水洼雨滴涟漪动画
+    const ripplePhase = (t * 1.4) % 1.0;
+    const rippleR = 4 + ripplePhase * 28;
+    const rippleAlpha = (1.0 - ripplePhase) * 0.35;
+    ctx.strokeStyle = "rgba(224, 242, 254, " + rippleAlpha + ")";
+    ctx.lineWidth = 1.0;
+    ctx.beginPath();
+    ctx.ellipse(puddleX - 12, puddleY - 2, rippleR, rippleR * 0.32, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // 3. 复古乡间小站木质站牌与暖光马灯 (Rustic Bus Stop & Lantern)
+    const postX = w * 0.12;
+
+    // 木质立柱
+    ctx.fillStyle = "#271b12";
+    ctx.fillRect(postX - 2.5, groundY - 110, 5, 112);
+    // 木纹拉线
+    ctx.strokeStyle = "rgba(251, 191, 36, 0.15)";
+    ctx.lineWidth = 1.0;
+    ctx.beginPath();
+    ctx.moveTo(postX - 1, groundY - 108);
+    ctx.lineTo(postX - 1, groundY);
+    ctx.stroke();
+
+    // 站牌圆盘 (Classic Round Stop Sign)
+    const signY = groundY - 100;
+    ctx.fillStyle = "#f1f5f9";
+    ctx.beginPath();
+    ctx.arc(postX, signY, 14, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#1e293b";
+    ctx.lineWidth = 2.0;
+    ctx.stroke();
+    // 站牌内部文字/符号（七国山 / 稻荷前标志）
+    ctx.strokeStyle = "#475569";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(postX - 8, signY); ctx.lineTo(postX + 8, signY);
+    ctx.moveTo(postX, signY - 8); ctx.lineTo(postX + 8, signY);
+    ctx.stroke();
+
+    // 悬挂马灯 (Hanging Kerosene Lantern)
+    const lanternX = postX + 11;
+    const lanternY = groundY - 74;
+
+    // 铸铁弯钩
+    ctx.strokeStyle = "#1e293b";
+    ctx.lineWidth = 2.0;
+    ctx.beginPath();
+    ctx.moveTo(postX, groundY - 82);
+    ctx.lineTo(lanternX, groundY - 82);
+    ctx.lineTo(lanternX, lanternY - 10);
+    ctx.stroke();
+
+    // 马灯暖光光锥 (Cozy Amber Glow)
+    const lanternGlow = ctx.createRadialGradient(lanternX, lanternY, 4, lanternX, lanternY, 85);
+    lanternGlow.addColorStop(0, "rgba(254, 240, 138, 0.42)");
+    lanternGlow.addColorStop(0.3, "rgba(245, 158, 11, 0.18)");
+    lanternGlow.addColorStop(0.7, "rgba(217, 119, 6, 0.05)");
+    lanternGlow.addColorStop(1, "rgba(0, 0, 0, 0)");
+    ctx.fillStyle = lanternGlow;
+    ctx.beginPath();
+    ctx.arc(lanternX, lanternY, 85, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 马灯罩与金属提手
+    ctx.fillStyle = "#451a03";
+    ctx.fillRect(lanternX - 5, lanternY - 10, 10, 3);
+    ctx.fillRect(lanternX - 5, lanternY + 8, 10, 3);
+    // 玻璃罩与灯芯
+    ctx.fillStyle = "rgba(254, 243, 199, 0.85)";
+    ctx.beginPath();
+    ctx.ellipse(lanternX, lanternY, 4.5, 7, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 4. 灰尘精灵 / 煤球精灵 (Soot Sprites · 欢快跳跃)
+    const sootSprites = [
+      { x: postX + 16, baseY: groundY - 2, r: 5.5, phase: 0 },
+      { x: postX + 28, baseY: groundY - 1, r: 4.8, phase: 1.8 }
+    ];
+    sootSprites.forEach(s => {
+      const hop = Math.max(0, Math.sin(t * 3.4 + s.phase)) * 6.5;
+      const sy = s.baseY - hop;
+
+      // 黑色小煤球主体 (带微小刺刺毛绒感)
+      ctx.fillStyle = "#090d16";
+      ctx.beginPath();
+      ctx.arc(s.x, sy, s.r, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 绒毛小细刺
+      ctx.strokeStyle = "#090d16";
+      ctx.lineWidth = 1.0;
+      for (let a = 0; a < Math.PI * 2; a += Math.PI * 0.35) {
+        ctx.beginPath();
+        ctx.moveTo(s.x + Math.cos(a) * (s.r - 1), sy + Math.sin(a) * (s.r - 1));
+        ctx.lineTo(s.x + Math.cos(a) * (s.r + 2.5), sy + Math.sin(a) * (s.r + 2.5));
+        ctx.stroke();
+      }
+
+      // 圆溜溜的大白眼睛
+      ctx.fillStyle = "#ffffff";
+      ctx.beginPath();
+      ctx.arc(s.x - 1.8, sy - 1, 1.8, 0, Math.PI * 2);
+      ctx.arc(s.x + 1.8, sy - 1, 1.8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 黑色小眼珠 (好奇朝上看着大龙猫和下雨)
+      ctx.fillStyle = "#090d16";
+      ctx.beginPath();
+      ctx.arc(s.x - 1.6, sy - 1.4, 0.8, 0, Math.PI * 2);
+      ctx.arc(s.x + 1.6, sy - 1.4, 0.8, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // 5. 大龙猫主体 (Big Totoro · 荷叶撑伞与大白肚皮)
+    const totoroX = w * 0.33;
+    const totoroY = groundY - 4;
+
+    // 触控抚摸巨肚弹性果冻微震 (Belly bounce squash & stretch)
+    const now = Date.now();
+    const isBounced = (now - (this.totoroLastBounceTime || 0)) < 2600;
+    const bounceFactor = isBounced ? ((now - this.totoroLastBounceTime) / 2600) : 1;
+    const bounceJiggle = isBounced ? Math.sin(bounceFactor * Math.PI * 4) * (1 - bounceFactor) * 6.5 : 0;
+
+    // 3.6秒慢周期催眠巨肚深呼吸 (Giant Belly Breathing)
+    const breathPhase = Math.sin(t * 1.5);
+    const breathRise = breathPhase * 2.8;
+    const breathScaleY = 1.0 + breathPhase * 0.025;
+    const breathScaleX = 1.0 - breathPhase * 0.015;
+
+    ctx.save();
+    ctx.translate(totoroX, totoroY - breathRise * 0.5 - bounceJiggle);
+    ctx.scale(breathScaleX, breathScaleY);
+
+    // 5.1 龙猫庞大圆滚身躯 (Big Pear-shaped Body)
+    ctx.beginPath();
+    ctx.moveTo(-35, 4); // 左底脚
+    ctx.quadraticCurveTo(-46, -42, -26, -78); // 左侧丰满躯体
+    ctx.quadraticCurveTo(0, -96, 26, -78); // 圆浑头顶
+    ctx.quadraticCurveTo(46, -42, 35, 4); // 右侧丰满躯体
+    ctx.quadraticCurveTo(0, 8, -35, 4); // 底部平稳贴地
+    ctx.closePath();
+
+    // 灰炭毛绒渐变色 (Classic Soft Grey-Charcoal Fur)
+    const furGrad = ctx.createRadialGradient(-6, -45, 10, 0, -40, 58);
+    furGrad.addColorStop(0, "#64748b"); // 上部受光柔灰
+    furGrad.addColorStop(0.5, "#475569"); // 经典龙猫主灰
+    furGrad.addColorStop(1, "#1e293b"); // 阴影深灰
+    ctx.fillStyle = furGrad;
+    ctx.fill();
+
+    // 5.2 尖尖竖立的长耳朵 (Tall Leaf-like Ears)
+    const earTwitch = Math.sin(t * 0.8) > 0.85 ? Math.sin(t * 26) * 0.12 : 0;
+
+    // 左耳
+    ctx.save();
+    ctx.translate(-16, -86);
+    ctx.rotate(-0.08 + earTwitch);
+    ctx.fillStyle = "#475569";
+    ctx.beginPath();
+    ctx.moveTo(-6, 4);
+    ctx.quadraticCurveTo(-8, -20, 0, -32);
+    ctx.quadraticCurveTo(8, -20, 6, 4);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    // 右耳
+    ctx.save();
+    ctx.translate(16, -86);
+    ctx.rotate(0.08 - earTwitch);
+    ctx.fillStyle = "#475569";
+    ctx.beginPath();
+    ctx.moveTo(-6, 4);
+    ctx.quadraticCurveTo(-8, -20, 0, -32);
+    ctx.quadraticCurveTo(8, -20, 6, 4);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    // 5.3 标志性大白肚皮 (Huge Cream-White Belly)
+    const bellyY = -28 + bounceJiggle * 0.5;
+    const bellyGrad = ctx.createRadialGradient(0, bellyY - 4, 8, 0, bellyY, 38);
+    bellyGrad.addColorStop(0, "#ffffff");
+    bellyGrad.addColorStop(0.75, "#fef9c3");
+    bellyGrad.addColorStop(1, "#f1f5f9");
+    ctx.fillStyle = bellyGrad;
+    ctx.beginPath();
+    ctx.ellipse(0, bellyY, 32, 33, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 肚皮上经典灰色倒三角箭头花纹 (7 Iconic Grey Chevrons)
+    ctx.fillStyle = "#475569";
+    // 上排 3 个
+    const topRow = [-16, 0, 16];
+    topRow.forEach(cx => {
+      ctx.beginPath();
+      ctx.moveTo(cx - 4.5, bellyY - 17);
+      ctx.lineTo(cx, bellyY - 22);
+      ctx.lineTo(cx + 4.5, bellyY - 17);
+      ctx.lineTo(cx + 2.5, bellyY - 17);
+      ctx.lineTo(cx, bellyY - 20);
+      ctx.lineTo(cx - 2.5, bellyY - 17);
+      ctx.closePath();
+      ctx.fill();
+    });
+    // 下排 4 个
+    const bottomRow = [-22, -7.5, 7.5, 22];
+    bottomRow.forEach(cx => {
+      ctx.beginPath();
+      ctx.moveTo(cx - 4.5, bellyY - 9);
+      ctx.lineTo(cx, bellyY - 14);
+      ctx.lineTo(cx + 4.5, bellyY - 9);
+      ctx.lineTo(cx + 2.5, bellyY - 9);
+      ctx.lineTo(cx, bellyY - 12);
+      ctx.lineTo(cx - 2.5, bellyY - 9);
+      ctx.closePath();
+      ctx.fill();
+    });
+
+    // 5.4 憨厚面庞 (Facial Expression & Whiskers)
+    const faceY = -72;
+
+    // 圆圆的大白眼睛
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(-13, faceY, 6.0, 0, Math.PI * 2);
+    ctx.arc(13, faceY, 6.0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 黑色圆黑眼珠
+    ctx.fillStyle = "#0f172a";
+    ctx.beginPath();
+    ctx.arc(-13, faceY, 2.6, 0, Math.PI * 2);
+    ctx.arc(13, faceY, 2.6, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 纯洁晶莹眼神光点
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(-14, faceY - 1, 1.2, 0, Math.PI * 2);
+    ctx.arc(12, faceY - 1, 1.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 黑色倒三角小鼻头
+    ctx.fillStyle = "#0f172a";
+    ctx.beginPath();
+    ctx.moveTo(-3.5, faceY + 4);
+    ctx.lineTo(3.5, faceY + 4);
+    ctx.lineTo(0, faceY + 6.5);
+    ctx.closePath();
+    ctx.fill();
+
+    // 温暖萌萌小微笑着线
+    ctx.strokeStyle = "#1e293b";
+    ctx.lineWidth = 1.4;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.arc(0, faceY + 6, 5.5, 0.25, Math.PI - 0.25);
+    ctx.stroke();
+
+    // 标志性长胡须 (3 Whiskers on Each Cheek)
+    ctx.strokeStyle = "#1e293b";
+    ctx.lineWidth = 1.2;
+    // 左胡须
+    ctx.beginPath();
+    ctx.moveTo(-20, faceY + 2); ctx.lineTo(-38, faceY);
+    ctx.moveTo(-21, faceY + 5); ctx.lineTo(-39, faceY + 6);
+    ctx.moveTo(-20, faceY + 8); ctx.lineTo(-37, faceY + 12);
+    // 右胡须
+    ctx.moveTo(20, faceY + 2); ctx.lineTo(38, faceY);
+    ctx.moveTo(21, faceY + 5); ctx.lineTo(39, faceY + 6);
+    ctx.moveTo(20, faceY + 8); ctx.lineTo(37, faceY + 12);
+    ctx.stroke();
+
+    // 5.5 抱伞的小短手与荷叶伞柄 (Little Paws & Leaf Umbrella)
+    // 粗圆深绿伞柄
+    ctx.strokeStyle = "#15803d";
+    ctx.lineWidth = 3.2;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(8, -52);
+    ctx.quadraticCurveTo(14, -75, 6, -112);
+    ctx.stroke();
+
+    // 双手环抱小短爪
+    ctx.fillStyle = "#475569";
+    ctx.beginPath();
+    ctx.ellipse(6, -50, 7.5, 4.5, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 5.6 头顶硕大碧绿荷叶大伞 (Big Green Lotus Leaf Umbrella)
+    ctx.save();
+    ctx.translate(6, -112);
+    const leafSway = Math.sin(t * 1.8) * 0.04;
+    ctx.rotate(leafSway);
+
+    // 荷叶伞盖 (Luscious Green Leaf Canopy)
+    const leafGrad = ctx.createRadialGradient(0, 0, 4, 0, 0, 46);
+    leafGrad.addColorStop(0, "#4ade80"); // 伞心鲜嫩明绿
+    leafGrad.addColorStop(0.55, "#22c55e"); // 主体翡翠绿
+    leafGrad.addColorStop(1, "#15803d"); // 边缘深绿
+    ctx.fillStyle = leafGrad;
+
+    ctx.beginPath();
+    // 带有自然波浪弧度的荷叶外缘
+    ctx.ellipse(0, 0, 46, 20, -0.05, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 荷叶辐射叶脉 (Delicate Leaf Veins)
+    ctx.strokeStyle = "rgba(240, 253, 244, 0.45)";
+    ctx.lineWidth = 1.0;
+    for (let la = 0; la < Math.PI * 2; la += Math.PI * 0.25) {
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(Math.cos(la) * 40, Math.sin(la) * 17);
+      ctx.stroke();
+    }
+
+    // 荷叶上的水滴弹跳与涟漪 (Water Droplet Splashes on Leaf)
+    const splashT = (t * 2.2) % 1.0;
+    const splashR = 2.0 + splashT * 10;
+    const splashAlpha = (1.0 - splashT) * 0.75;
+    ctx.strokeStyle = "rgba(255, 255, 255, " + splashAlpha + ")";
+    ctx.lineWidth = 1.0;
+    ctx.beginPath();
+    ctx.ellipse(-6, -4, splashR, splashR * 0.45, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // 溅起的水珠颗粒
+    ctx.fillStyle = "rgba(255, 255, 255, " + splashAlpha + ")";
+    ctx.beginPath();
+    ctx.arc(-8, -4 - splashT * 8, 1.2, 0, Math.PI * 2);
+    ctx.arc(-3, -4 - splashT * 6, 1.0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 荷叶垂尖凝结欲滴的大水珠 (Dripping Dew Drop)
+    const dropY = 16 + ((t * 1.6) % 1.0) * 18;
+    const dropAlpha = 1.0 - (((t * 1.6) % 1.0) * 0.65);
+    ctx.fillStyle = "rgba(224, 242, 254, " + dropAlpha + ")";
+    ctx.beginPath();
+    ctx.arc(38, dropY, 2.0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore(); // 结束荷叶伞
+
+    // 5.7 吸烟火光映境通感 (Warm Ember Rim Light on Totoro)
+    if (emberIntensity > 0.05) {
+      ctx.strokeStyle = "rgba(239, 68, 68, " + (emberIntensity * 0.60) + ")";
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.arc(16, -86, 7, -0.2, 1.2);
+      ctx.moveTo(26, -78);
+      ctx.quadraticCurveTo(46, -42, 35, 4);
+      ctx.stroke();
+
+      // 大白肚皮上的温暖炭火反光
+      ctx.fillStyle = "rgba(249, 115, 22, " + (emberIntensity * 0.28) + ")";
+      ctx.beginPath();
+      ctx.ellipse(12, bellyY, 16, 22, 0.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.restore(); // 结束龙猫本体变形
+
+    // 6. 抚摸大肚皮时的飘浮绿叶与治愈光环 (Floating Leaves & Sparkles on Pet)
+    if (isBounced) {
+      const floatY = totoroY - 110 - (1 - bounceFactor) * 32;
+      const floatAlpha = Math.sin(bounceFactor * Math.PI) * 0.9;
+      ctx.fillStyle = "rgba(34, 197, 94, " + floatAlpha + ")";
+      ctx.font = "bold 16px -apple-system, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("🍃", totoroX - 22, floatY);
+      ctx.fillText("✨", totoroX + 26, floatY - 8);
+    }
+
+    ctx.restore(); // 结束整景绘制
+  }
+
+  // 史努比与糊涂塌客屋顶触控弹性微反馈
+  triggerSnoopyBounce() {
+    this.snoopyLastBounceTime = Date.now();
+  }
+
+  // ========================================== 
+  // 21. 经典治愈 · 史努比星空 (Snoopy on the Red Doghouse)
+  // 经典红色小狗屋、史努比仰望星空安睡、糊涂塌客依偎相伴、流星划过与暖月疏星
+  // ========================================== 
+  renderSnoopyStargazing(ctx, w, h, dt, t, emberIntensity = 0) {
+    ctx.save();
+
+    // 1. 经典深蓝静谧夜空 (Deep Midnight Indigo Sky)
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, h);
+    skyGrad.addColorStop(0, "#050914");
+    skyGrad.addColorStop(0.35, "#0a142c");
+    skyGrad.addColorStop(0.70, "#101d3b");
+    skyGrad.addColorStop(1, "#070c18");
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    // 1.1 璀璨星空与微弱闪烁繁星 (Twinkling Starlight)
+    ctx.fillStyle = "#ffffff";
+    const starPositions = [
+      { x: w * 0.08, y: h * 0.12, r: 1.2, phase: 0 },
+      { x: w * 0.18, y: h * 0.08, r: 1.5, phase: 1.2 },
+      { x: w * 0.42, y: h * 0.14, r: 1.0, phase: 2.1 },
+      { x: w * 0.14, y: h * 0.28, r: 1.4, phase: 0.8 },
+      { x: w * 0.48, y: h * 0.22, r: 1.2, phase: 2.7 },
+      { x: w * 0.06, y: h * 0.42, r: 1.0, phase: 1.6 },
+      { x: w * 0.22, y: h * 0.48, r: 1.5, phase: 3.2 },
+      { x: w * 0.38, y: h * 0.36, r: 1.1, phase: 0.4 }
+    ];
+    starPositions.forEach(st => {
+      const twinkle = 0.35 + 0.65 * Math.sin(t * 2.2 + st.phase);
+      ctx.globalAlpha = twinkle * 0.75;
+      ctx.beginPath();
+      ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1.0;
+
+    // 1.2 暖黄治愈新月 (Warm Crescent Moon)
+    const moonX = w * 0.18;
+    const moonY = h * 0.18;
+    const moonR = 18;
+
+    // 月晕光环
+    const moonHalo = ctx.createRadialGradient(moonX, moonY, moonR * 0.5, moonX, moonY, moonR * 2.8);
+    moonHalo.addColorStop(0, "rgba(254, 240, 138, 0.26)");
+    moonHalo.addColorStop(0.5, "rgba(245, 158, 11, 0.08)");
+    moonHalo.addColorStop(1, "rgba(0, 0, 0, 0)");
+    ctx.fillStyle = moonHalo;
+    ctx.beginPath();
+    ctx.arc(moonX, moonY, moonR * 2.8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 新月弧形 (Crescent)
+    ctx.save();
+    ctx.fillStyle = "#fef08a";
+    ctx.beginPath();
+    ctx.arc(moonX, moonY, moonR, 0, Math.PI * 2, false);
+    ctx.arc(moonX + 6, moonY - 3, moonR * 0.88, 0, Math.PI * 2, true);
+    ctx.fill();
+    ctx.restore();
+
+    // 1.3 偶发浪漫流星划过 (Passing Shooting Star)
+    const meteorCycle = (t * 0.18) % 1.0;
+    if (meteorCycle < 0.24) {
+      const mt = meteorCycle / 0.24;
+      const startMx = w * 0.45;
+      const startMy = h * 0.06;
+      const currMx = startMx - mt * 95;
+      const currMy = startMy + mt * 75;
+      const mAlpha = Math.sin(mt * Math.PI) * 0.85;
+      ctx.strokeStyle = "rgba(254, 243, 199, " + mAlpha + ")";
+      ctx.lineWidth = 1.4;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(currMx, currMy);
+      ctx.lineTo(currMx + 28, currMy - 22);
+      ctx.stroke();
+    }
+
+    // 2. 查理布朗后院地面与木栅栏 (Yard Horizon & Wooden Fence)
+    const groundY = h * 0.72;
+    const groundGrad = ctx.createLinearGradient(0, groundY, 0, h);
+    groundGrad.addColorStop(0, "#08131d");
+    groundGrad.addColorStop(0.2, "#050d14");
+    groundGrad.addColorStop(1, "#020508");
+    ctx.fillStyle = groundGrad;
+    ctx.fillRect(0, groundY, w, h - groundY);
+
+    // 地面青草绒毯上缘微光
+    ctx.fillStyle = "rgba(56, 189, 248, 0.12)";
+    ctx.fillRect(0, groundY, w, 1.2);
+
+    // 远方木栅栏木桩 (Charlie Brown's Backyard Fence on the Left)
+    ctx.fillStyle = "#0c1824";
+    ctx.fillRect(0, groundY - 22, w * 0.48, 2.8); // 横栏杆
+    for (let fx = w * 0.04; fx < w * 0.48; fx += 16) {
+      ctx.fillStyle = "#0e1c2b";
+      ctx.fillRect(fx - 2, groundY - 32, 4, 32);
+      // 栅栏尖顶
+      ctx.beginPath();
+      ctx.moveTo(fx - 2, groundY - 32);
+      ctx.lineTo(fx, groundY - 36);
+      ctx.lineTo(fx + 2, groundY - 32);
+      ctx.fill();
+    }
+
+    // 3. 经典红色小狗屋 (The Red Doghouse)
+    const houseX = w * 0.32;
+    const houseY = groundY - 4;
+
+    // 触控抚摸果冻弹性微振 (Bounce squash & stretch)
+    const now = Date.now();
+    const isBounced = (now - (this.snoopyLastBounceTime || 0)) < 2600;
+    const bounceFactor = isBounced ? ((now - this.snoopyLastBounceTime) / 2600) : 1;
+    const bounceJiggle = isBounced ? Math.sin(bounceFactor * Math.PI * 4) * (1 - bounceFactor) * 5.5 : 0;
+
+    // 3.6秒舒适平稳呼吸起伏 (Snoopy Belly Breathing)
+    const breath = Math.sin(t * 1.6);
+    const breathRise = breath * 2.2;
+
+    ctx.save();
+    ctx.translate(houseX, houseY - bounceJiggle * 0.4);
+
+    // 3.1 狗屋投影
+    ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
+    ctx.beginPath();
+    ctx.ellipse(0, 4, 46, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 3.2 狗屋墙体主体 (Red Wooden Board Wall)
+    const wallW = 60;
+    const wallH = 44;
+    const wallY = -wallH;
+    ctx.fillStyle = "#dc2626";
+    ctx.fillRect(-wallW / 2, wallY, wallW, wallH);
+
+    // 狗屋黑色拱形入口门 (Arch Doorway)
+    ctx.fillStyle = "#09090b";
+    ctx.beginPath();
+    ctx.arc(0, 0 - 24, 13, Math.PI, 0, false);
+    ctx.lineTo(13, 0);
+    ctx.lineTo(-13, 0);
+    ctx.closePath();
+    ctx.fill();
+
+    // 墙板水平拼缝刻线 (Comic Style Lines)
+    ctx.strokeStyle = "#991b1b";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(-wallW / 2, wallY + 14); ctx.lineTo(-14, wallY + 14);
+    ctx.moveTo(14, wallY + 14); ctx.lineTo(wallW / 2, wallY + 14);
+    ctx.moveTo(-wallW / 2, wallY + 28); ctx.lineTo(-14, wallY + 28);
+    ctx.moveTo(14, wallY + 28); ctx.lineTo(wallW / 2, wallY + 28);
+    ctx.stroke();
+
+    // 狗屋粗黑美式漫画边框 (Bold Comic Outlines)
+    ctx.strokeStyle = "#18181b";
+    ctx.lineWidth = 2.0;
+    ctx.strokeRect(-wallW / 2, wallY, wallW, wallH);
+
+    // 3.3 人字形鲜红屋顶 (Pitched Red Roof)
+    const roofApexY = wallY - 24;
+    const roofOverhang = 8;
+    const roofLeftX = -wallW / 2 - roofOverhang;
+    const roofRightX = wallW / 2 + roofOverhang;
+
+    // 屋顶三角形底板
+    ctx.fillStyle = "#b91c1c";
+    ctx.beginPath();
+    ctx.moveTo(-wallW / 2, wallY);
+    ctx.lineTo(0, roofApexY + 4);
+    ctx.lineTo(wallW / 2, wallY);
+    ctx.closePath();
+    ctx.fill();
+
+    // 人字形鲜艳屋顶板 (Snoopy lies on this roof!)
+    ctx.fillStyle = "#ef4444";
+    ctx.beginPath();
+    ctx.moveTo(roofLeftX, wallY + 4);
+    ctx.lineTo(0, roofApexY);
+    ctx.lineTo(roofRightX, wallY + 4);
+    ctx.lineTo(roofRightX - 2, wallY - 2);
+    ctx.lineTo(0, roofApexY - 6);
+    ctx.lineTo(roofLeftX + 2, wallY - 2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // 4. 史努比主体 (Snoopy · 躺在红屋顶数星星)
+    // 史努比躺在屋脊偏右侧斜坡上，头部朝左靠在屋脊尖，肚子朝天，双脚朝右翘起
+    const snoopyBaseY = roofApexY - 4 - bounceJiggle;
+    ctx.save();
+    ctx.translate(-4, snoopyBaseY);
+
+    // 4.1 史努比身躯与朝天大肚子 (White Body & Belly Breathing)
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    // 颈部连接
+    ctx.moveTo(-10, -2);
+    // 朝天圆滚滚肚皮 (随呼吸平缓鼓起)
+    ctx.quadraticCurveTo(4, -14 - breathRise, 18, -4);
+    // 脚部过渡
+    ctx.lineTo(26, -2);
+    // 贴着屋顶背脊的下侧背部
+    ctx.lineTo(-10, -2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = "#18181b";
+    ctx.lineWidth = 1.8;
+    ctx.stroke();
+
+    // 红色项圈 (Iconic Red Collar)
+    ctx.fillStyle = "#dc2626";
+    ctx.fillRect(-12, -4, 3.5, 6);
+
+    // 背部经典黑斑 (Black Spot)
+    ctx.fillStyle = "#18181b";
+    ctx.beginPath();
+    ctx.ellipse(8, -2, 5.5, 3.5, 0.1, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 4.2 朝天翘起的两只白脚丫 (Upright Feet)
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.ellipse(25, -5, 4.5, 6.5, 0.25, 0, Math.PI * 2);
+    ctx.ellipse(28, -3, 4.2, 6.0, 0.25, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#18181b";
+    ctx.lineWidth = 1.6;
+    ctx.stroke();
+    // 脚趾分叉线
+    ctx.beginPath();
+    ctx.moveTo(25, -9); ctx.lineTo(25, -7);
+    ctx.moveTo(28, -7); ctx.lineTo(28, -5);
+    ctx.stroke();
+
+    // 放在肚皮上的两只乖乖小爪爪 (Resting Paws)
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.ellipse(6, -8 - breathRise * 0.7, 4.0, 3.0, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // 4.3 经典长圆鼻子头部 (Iconic Beagle Head & Snout)
+    const headX = -18;
+    const headY = -8;
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    // 丰满椭圆小脑门与长鼻子
+    ctx.ellipse(headX, headY, 11, 7.5, -0.15, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#18181b";
+    ctx.lineWidth = 1.8;
+    ctx.stroke();
+
+    // 黑色大圆纽扣鼻子 (Black Button Nose)
+    ctx.fillStyle = "#09090b";
+    ctx.beginPath();
+    ctx.ellipse(headX - 11, headY - 2, 3.8, 3.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 惬意闭目养神笑眼 (Smiling Closed Eye ◡)
+    ctx.strokeStyle = "#18181b";
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.arc(headX - 1, headY - 1, 3.2, 0.2, Math.PI - 0.2);
+    ctx.stroke();
+
+    // 4.4 垂落在屋顶侧面的黑色长耳朵 (Floppy Black Ear)
+    // 微风吹拂下轻柔飘拂 (Ear sway in breeze)
+    const earSway = Math.sin(t * 2.2) * 0.10 + (isBounced ? Math.sin(bounceFactor * Math.PI * 6) * 0.25 : 0);
+    ctx.save();
+    ctx.translate(headX + 4, headY - 1);
+    ctx.rotate(0.35 + earSway);
+    ctx.fillStyle = "#18181b";
+    ctx.beginPath();
+    ctx.ellipse(0, 8, 4.8, 9.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // 5. 糊涂塌客 (Woodstock · 呆萌黄色小鸟)
+    // 安睡依偎在史努比翘起的小脚边
+    const woodstockX = 35;
+    const woodstockY = -4;
+    const woodstockHop = Math.sin(t * 2.8) * 1.2;
+
+    ctx.save();
+    ctx.translate(woodstockX, woodstockY - woodstockHop);
+
+    // 亮黄小鸟身躯
+    ctx.fillStyle = "#facc15";
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 4.2, 3.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#ca8a04";
+    ctx.lineWidth = 1.0;
+    ctx.stroke();
+
+    // 圆圆黄色小脑袋
+    ctx.beginPath();
+    ctx.arc(-2, -4, 3.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // 头顶炸毛呆毛 (Feather Crest)
+    ctx.strokeStyle = "#ca8a04";
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(-3, -7); ctx.lineTo(-4, -10);
+    ctx.moveTo(-2, -7); ctx.lineTo(-1, -11);
+    ctx.moveTo(-1, -7); ctx.lineTo(1, -9);
+    ctx.stroke();
+
+    // 橙色小尖嘴 (Orange Beak)
+    ctx.fillStyle = "#f97316";
+    ctx.beginPath();
+    ctx.moveTo(-5, -4);
+    ctx.lineTo(-8, -3.5);
+    ctx.lineTo(-5, -2.5);
+    ctx.closePath();
+    ctx.fill();
+
+    // 黑色睡着小眯眼
+    ctx.strokeStyle = "#78350f";
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.arc(-2, -4, 1.2, 0.2, Math.PI - 0.2);
+    ctx.stroke();
+    ctx.restore(); // 结束糊涂塌客
+
+    // 5.1 吸烟火光映境通感 (Warm Ember Glow on Snoopy & Roof)
+    if (emberIntensity > 0.05) {
+      ctx.strokeStyle = "rgba(239, 68, 68, " + (emberIntensity * 0.55) + ")";
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.arc(headX - 11, headY - 2, 4.5, -0.4, 1.2);
+      ctx.moveTo(18, -4);
+      ctx.quadraticCurveTo(4, -14 - breathRise, -10, -2);
+      ctx.stroke();
+
+      // 屋顶亮暖光
+      ctx.fillStyle = "rgba(251, 146, 60, " + (emberIntensity * 0.25) + ")";
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 36, 12, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.restore(); // 结束史努比
+    ctx.restore(); // 结束狗屋
+
+    // 6. 抚摸/戳史努比时的飘浮音符与爱心 (Floating Notes & Hearts on Tap)
+    if (isBounced) {
+      const floatY = houseY - 75 - (1 - bounceFactor) * 28;
+      const floatAlpha = Math.sin(bounceFactor * Math.PI) * 0.9;
+      ctx.fillStyle = "rgba(251, 191, 36, " + floatAlpha + ")";
+      ctx.font = "bold 15px -apple-system, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("♪", houseX - 16, floatY);
+      ctx.fillText("♥", houseX + 18, floatY - 6);
+    }
+
+    ctx.restore(); // 结束整景绘制
+  }
+
+  // 抚摸猫咪触控触发器
+  triggerCatPet() {
+    this.catLastPetTime = Date.now();
+  }
+
+  // ==========================================
+  // 17. 暖阁喵眠：案头打盹橘猫、金渐层发腮包子脸、4 paws 农民揣、胸腔缓起伏打呼、台灯暖锥与火光通感
+  // ==========================================
+  renderCatCompanion(ctx, w, h, dt, t, emberIntensity = 0) {
+    ctx.save();
+
+    // 1. 暖木书房暗夜背景 (Walnut Ambient Night)
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+    bgGrad.addColorStop(0, '#160c07');
+    bgGrad.addColorStop(0.45, '#0e0704');
+    bgGrad.addColorStop(1, '#050201');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    // 1.1 背景暗调胡桃木书架与复古书脊微影 (Depth of field background)
+    const shelfY = h * 0.22;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.035)';
+    ctx.fillRect(0, shelfY, w * 0.42, 2.5);
+
+    // 书脊剪影
+    const books = [
+      { x: w * 0.04, w: 10, h: 42, color: '#382218' },
+      { x: w * 0.04 + 11, w: 13, h: 48, color: '#26160e' },
+      { x: w * 0.04 + 25, w: 9, h: 38, color: '#452b1e' },
+      { x: w * 0.04 + 35, w: 14, h: 45, color: '#1f130b' },
+      { x: w * 0.04 + 50, w: 11, h: 40, color: '#2f1d14' }
+    ];
+    books.forEach(b => {
+      ctx.fillStyle = b.color;
+      ctx.fillRect(b.x, shelfY - b.h, b.w, b.h);
+      ctx.fillStyle = 'rgba(251, 191, 36, 0.18)';
+      ctx.fillRect(b.x + 2, shelfY - b.h + 8, b.w - 4, 1.2);
+    });
+
+    // 1.2 复古黄铜百褶台灯 (Vintage Pleated Banker's Lamp)
+    const lampX = w * 0.24;
+    const lampY = h * 0.27;
+
+    // 黄铜弯管灯臂
+    ctx.strokeStyle = '#b45309';
+    ctx.lineWidth = 3.2;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(w * 0.08, h * 0.70);
+    ctx.quadraticCurveTo(w * 0.08, lampY + 10, lampX - 6, lampY - 4);
+    ctx.stroke();
+
+    // 纯铜金属高光
+    ctx.strokeStyle = 'rgba(253, 230, 138, 0.45)';
+    ctx.lineWidth = 1.0;
+    ctx.beginPath();
+    ctx.moveTo(w * 0.08, h * 0.65);
+    ctx.quadraticCurveTo(w * 0.08, lampY + 12, lampX - 6, lampY - 2);
+    ctx.stroke();
+
+    // 复古暖杏百褶灯罩
+    ctx.save();
+    ctx.translate(lampX, lampY);
+    ctx.rotate(0.12);
+    const shadeGrad = ctx.createLinearGradient(-26, -14, 26, 14);
+    shadeGrad.addColorStop(0, '#78350f');
+    shadeGrad.addColorStop(0.5, '#d97706');
+    shadeGrad.addColorStop(1, '#92400e');
+    ctx.fillStyle = shadeGrad;
+    ctx.beginPath();
+    ctx.moveTo(-12, -12);
+    ctx.lineTo(12, -12);
+    ctx.lineTo(24, 12);
+    ctx.lineTo(-24, 12);
+    ctx.closePath();
+    ctx.fill();
+
+    // 灯罩百褶褶皱细线
+    ctx.strokeStyle = 'rgba(254, 243, 199, 0.22)';
+    ctx.lineWidth = 1.0;
+    for (let px = -18; px <= 18; px += 4) {
+      ctx.beginPath();
+      ctx.moveTo(px * 0.5, -12);
+      ctx.lineTo(px, 12);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // 1.3 台灯柔和暖杏光锥 (Volumetric Warm Light Cone)
+    const deskY = h * 0.70;
+    const coneGrad = ctx.createRadialGradient(lampX, lampY + 12, 10, lampX, lampY + 140, 240);
+    coneGrad.addColorStop(0, 'rgba(254, 240, 138, 0.38)');
+    coneGrad.addColorStop(0.25, 'rgba(245, 158, 11, 0.16)');
+    coneGrad.addColorStop(0.65, 'rgba(217, 119, 6, 0.05)');
+    coneGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = coneGrad;
+    ctx.beginPath();
+    ctx.moveTo(lampX - 20, lampY + 14);
+    ctx.lineTo(w * 0.04, deskY);
+    ctx.lineTo(w * 0.55, deskY);
+    ctx.lineTo(lampX + 22, lampY + 14);
+    ctx.closePath();
+    ctx.fill();
+
+    // 光锥内悬浮游弋的暖金微尘 (Ambient Dust Motes)
+    if (this.catDustMotes && this.catDustMotes.length) {
+      this.catDustMotes.forEach((mote, i) => {
+        mote.x += mote.speedX * dt;
+        mote.y += mote.speedY * dt;
+        if (mote.x < w * 0.08) mote.x = w * 0.45;
+        if (mote.x > w * 0.48) mote.x = w * 0.10;
+        if (mote.y < lampY + 10) mote.y = deskY - 10;
+        if (mote.y > deskY) mote.y = lampY + 20;
+
+        const twinkle = 0.5 + 0.5 * Math.sin(t * 2.2 + i);
+        ctx.fillStyle = `rgba(254, 240, 138, ${mote.alpha * twinkle})`;
+        ctx.beginPath();
+        ctx.arc(mote.x, mote.y, mote.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    // 2. 胡桃木实木案头桌面 (Walnut Wood Desktop)
+    const deskGrad = ctx.createLinearGradient(0, deskY, 0, h);
+    deskGrad.addColorStop(0, '#2b150b');
+    deskGrad.addColorStop(0.08, '#1d0e07');
+    deskGrad.addColorStop(1, '#090402');
+    ctx.fillStyle = deskGrad;
+    ctx.fillRect(0, deskY, w, h - deskY);
+
+    // 案头边缘高光金丝拉线 (Beveled Edge Highlight)
+    ctx.fillStyle = 'rgba(254, 215, 170, 0.28)';
+    ctx.fillRect(0, deskY, w, 1.4);
+
+    // 2.1 案头左侧香浓马克杯与微弱白汽 (Ceramic Mug & Gentle Steam)
+    const mugX = w * 0.12;
+    const mugY = deskY - 1;
+    // 杯身阴影
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+    ctx.beginPath();
+    ctx.ellipse(mugX, mugY, 14, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 哑光墨绿陶瓷杯身
+    const mugGrad = ctx.createLinearGradient(mugX - 11, 0, mugX + 11, 0);
+    mugGrad.addColorStop(0, '#064e3b');
+    mugGrad.addColorStop(0.5, '#047857');
+    mugGrad.addColorStop(1, '#065f46');
+    ctx.fillStyle = mugGrad;
+    ctx.beginPath();
+    ctx.moveTo(mugX - 10, mugY - 26);
+    ctx.lineTo(mugX + 10, mugY - 26);
+    ctx.lineTo(mugX + 8, mugY);
+    ctx.lineTo(mugX - 8, mugY);
+    ctx.closePath();
+    ctx.fill();
+
+    // 杯把手
+    ctx.strokeStyle = '#047857';
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    ctx.arc(mugX - 11, mugY - 14, 7, Math.PI * 0.5, Math.PI * 1.5);
+    ctx.stroke();
+
+    // 杯口热气微雾袅袅
+    ctx.strokeStyle = 'rgba(254, 243, 199, 0.16)';
+    ctx.lineWidth = 1.4;
+    ctx.lineCap = 'round';
+    for (let si = -4; si <= 4; si += 4) {
+      const steamSway = Math.sin(t * 2.5 + si) * 3.5;
+      ctx.beginPath();
+      ctx.moveTo(mugX + si, mugY - 28);
+      ctx.quadraticCurveTo(mugX + si + steamSway, mugY - 42, mugX + si - steamSway * 0.5, mugY - 54);
+      ctx.stroke();
+    }
+
+    // 3. 羊毛粗花呢编织坐垫 (Knitted Woolen Cat Mat)
+    const catX = w * 0.28;
+    const catY = deskY - 12;
+
+    // 垫子投影
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+    ctx.beginPath();
+    ctx.ellipse(catX, deskY, 58, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 编织垫主体 (粗棒针燕麦灰粗呢)
+    const matGrad = ctx.createRadialGradient(catX, deskY - 3, 8, catX, deskY - 3, 56);
+    matGrad.addColorStop(0, '#3f3f46');
+    matGrad.addColorStop(0.7, '#27272a');
+    matGrad.addColorStop(1, '#18181b');
+    ctx.fillStyle = matGrad;
+    ctx.beginPath();
+    ctx.ellipse(catX, deskY - 3, 54, 16, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 垫子边缘锁边缝线
+    ctx.strokeStyle = 'rgba(251, 191, 36, 0.35)';
+    ctx.lineWidth = 1.2;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.ellipse(catX, deskY - 3, 50, 14, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 4. 暖绒金渐层/橘猫主体 (The Cat Loafing Companion)
+    // 抚摸反馈微弹动 (Petting squash & stretch)
+    const now = Date.now();
+    const isPetted = (now - (this.catLastPetTime || 0)) < 2600;
+    const petFactor = isPetted ? ((now - this.catLastPetTime) / 2600) : 1;
+    const petBounce = isPetted ? Math.sin(petFactor * Math.PI * 3.5) * (1 - petFactor) * 5.0 : 0;
+
+    // 3.8秒拟真猫咪呼吸周期 (3.8s Feline Respiratory Sinus Arrhythmia)
+    const breathPhase = Math.sin(t * 1.65);
+    const breathRise = breathPhase * 2.2;
+    const breathScaleY = 1.0 + breathPhase * 0.035;
+    const breathScaleX = 1.0 - breathPhase * 0.015;
+
+    ctx.save();
+    ctx.translate(catX, catY - breathRise - petBounce);
+    ctx.scale(breathScaleX, breathScaleY);
+
+    // 4.1 毛茸茸大尾巴 (Curled Fluffy Tail)
+    const tailWag = Math.sin(t * 1.3) * Math.cos(t * 0.5) * 5.5;
+    ctx.save();
+    ctx.strokeStyle = '#c2410c';
+    ctx.lineWidth = 12.0;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    // 尾根从后臀延伸，侧向环抱至身前
+    ctx.moveTo(28, 8);
+    ctx.bezierCurveTo(44, 6, 42 + tailWag * 0.6, 18, 26 + tailWag, 18);
+    ctx.stroke();
+
+    // 尾部橘黄暖光高光
+    ctx.strokeStyle = '#ea580c';
+    ctx.lineWidth = 9.0;
+    ctx.beginPath();
+    ctx.moveTo(28, 7);
+    ctx.bezierCurveTo(42, 6, 40 + tailWag * 0.6, 17, 26 + tailWag, 17);
+    ctx.stroke();
+
+    // 尾尖白绒毛 (White Tail Tip)
+    ctx.strokeStyle = '#fef3c7';
+    ctx.lineWidth = 9.0;
+    ctx.beginPath();
+    ctx.moveTo(30 + tailWag * 0.8, 17.5);
+    ctx.lineTo(25 + tailWag, 17.5);
+    ctx.stroke();
+    ctx.restore();
+
+    // 4.2 烤面包农民揣身体轮廓 (The Loaf Body)
+    ctx.beginPath();
+    ctx.moveTo(-26, 14); // 颈胸交界
+    ctx.quadraticCurveTo(-38, 4, -30, -8); // 前胸丰满圆弧
+    ctx.bezierCurveTo(-22, -26, 16, -28, 32, -8); // 浑圆背脊拱起
+    ctx.quadraticCurveTo(39, 8, 25, 16); // 丰满臀部
+    ctx.lineTo(-26, 16); // 腹底贴垫线
+    ctx.closePath();
+
+    // 金渐层渐变皮毛暖色层 (Rich Orange & Golden Tabby Gradient)
+    const bodyGrad = ctx.createRadialGradient(-4, -8, 6, -4, -4, 46);
+    bodyGrad.addColorStop(0, '#fed7aa'); // 背部向阳亮杏色
+    bodyGrad.addColorStop(0.35, '#fb923c'); // 温暖金渐层主色
+    bodyGrad.addColorStop(0.75, '#ea580c'); // 经典暖橙
+    bodyGrad.addColorStop(1, '#9a3412'); // 底部深琥珀阴影
+    ctx.fillStyle = bodyGrad;
+    ctx.fill();
+
+    // 背部与侧腹虎斑纹 (Tabby Stripes)
+    ctx.strokeStyle = 'rgba(124, 45, 18, 0.42)';
+    ctx.lineWidth = 2.4;
+    ctx.lineCap = 'round';
+    // 纹理 1: 背脊前侧
+    ctx.beginPath();
+    ctx.moveTo(-10, -22);
+    ctx.quadraticCurveTo(-7, -10, -12, 0);
+    ctx.stroke();
+    // 纹理 2: 背脊中段
+    ctx.beginPath();
+    ctx.moveTo(4, -23);
+    ctx.quadraticCurveTo(7, -8, 2, 4);
+    ctx.stroke();
+    // 纹理 3: 后臀上方
+    ctx.beginPath();
+    ctx.moveTo(18, -18);
+    ctx.quadraticCurveTo(22, -6, 16, 6);
+    ctx.stroke();
+
+    // 4.3 揣在胸前的一双白手套小爪爪 (Tucked White Paws · 农民揣)
+    ctx.fillStyle = '#fef3c7';
+    // 左爪小山竹
+    ctx.beginPath();
+    ctx.ellipse(-23, 14, 6.5, 4.0, 0.1, 0, Math.PI * 2);
+    ctx.fill();
+    // 右爪小山竹
+    ctx.beginPath();
+    ctx.ellipse(-12, 14.5, 6.0, 3.8, -0.1, 0, Math.PI * 2);
+    ctx.fill();
+    // 粉粉小指缝
+    ctx.strokeStyle = 'rgba(251, 113, 133, 0.45)';
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(-24, 15.5); ctx.lineTo(-24, 17);
+    ctx.moveTo(-13, 16); ctx.lineTo(-13, 17.5);
+    ctx.stroke();
+
+    // 4.4 发腮大圆脑袋 (Chubby Round Head)
+    const headX = -26;
+    const headY = -6;
+
+    // 脑袋大圆
+    const headGrad = ctx.createRadialGradient(headX - 2, headY - 4, 3, headX, headY, 20);
+    headGrad.addColorStop(0, '#ffedd5');
+    headGrad.addColorStop(0.4, '#fb923c');
+    headGrad.addColorStop(0.85, '#ea580c');
+    headGrad.addColorStop(1, '#c2410c');
+    ctx.fillStyle = headGrad;
+    ctx.beginPath();
+    ctx.ellipse(headX, headY, 19, 16.5, -0.06, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 胖乎乎发腮小脸颊 (包子脸颊)
+    ctx.fillStyle = '#fef3c7';
+    ctx.beginPath();
+    ctx.arc(headX - 11, headY + 5, 8.5, 0, Math.PI * 2);
+    ctx.arc(headX + 2, headY + 5.5, 8.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 4.5 萌系猫耳朵 (Triangular Ears & Twitch Kinematics)
+    // 左耳偶发微抽动 (Twitch animation)
+    const earTwitch = Math.sin(t * 0.85) > 0.86 ? Math.sin(t * 26) * 0.14 : 0;
+    // 抚摸时享受的"飞机耳" (Airplane ears on pet)
+    const airplaneAngle = isPetted ? (1 - petFactor) * 0.22 : 0;
+
+    // 左耳
+    ctx.save();
+    ctx.translate(headX - 9, headY - 14);
+    ctx.rotate(earTwitch - airplaneAngle);
+    ctx.fillStyle = '#ea580c';
+    ctx.beginPath();
+    ctx.moveTo(-7, 4);
+    ctx.lineTo(-2, -13);
+    ctx.lineTo(8, 2);
+    ctx.closePath();
+    ctx.fill();
+    // 左耳内粉粉绒毛
+    ctx.fillStyle = '#fda4af';
+    ctx.beginPath();
+    ctx.moveTo(-4, 3);
+    ctx.lineTo(-1, -9);
+    ctx.lineTo(5, 2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    // 右耳
+    ctx.save();
+    ctx.translate(headX + 8, headY - 14);
+    ctx.rotate(airplaneAngle);
+    ctx.fillStyle = '#ea580c';
+    ctx.beginPath();
+    ctx.moveTo(-6, 3);
+    ctx.lineTo(3, -13);
+    ctx.lineTo(8, 5);
+    ctx.closePath();
+    ctx.fill();
+    // 右耳内粉粉绒毛
+    ctx.fillStyle = '#fda4af';
+    ctx.beginPath();
+    ctx.moveTo(-3, 3);
+    ctx.lineTo(2, -9);
+    ctx.lineTo(6, 4);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    // 额头经典小 "M" 纹理
+    ctx.strokeStyle = '#9a3412';
+    ctx.lineWidth = 1.4;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(headX - 6, headY - 10);
+    ctx.lineTo(headX - 3, headY - 7);
+    ctx.lineTo(headX - 0.5, headY - 10);
+    ctx.lineTo(headX + 2, headY - 7);
+    ctx.lineTo(headX + 5, headY - 10);
+    ctx.stroke();
+
+    // 4.6 闭眼甜睡与吸烟通感微睁交互 (Smiling Crescent Sleeping Eyes vs Inhale Peek)
+    // 吸烟时/火光微亮时，猫咪好奇微睁双眸 (Curious amber slit eyes on inhale)
+    const isAwakePeeking = emberIntensity > 0.08;
+
+    if (isAwakePeeking) {
+      // 微睁眼裂：高贵清透琥珀金瞳孔
+      const eyeOpenRatio = Math.min(1.0, (emberIntensity - 0.08) * 4.0);
+      const eyeH = 2.0 + eyeOpenRatio * 2.8;
+
+      ctx.fillStyle = '#fbbf24';
+      ctx.beginPath();
+      ctx.ellipse(headX - 10, headY - 1, 4.2, eyeH, -0.08, 0, Math.PI * 2);
+      ctx.ellipse(headX - 1, headY - 0.8, 4.2, eyeH, 0.08, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 竖线瞳孔
+      ctx.fillStyle = '#1c1917';
+      ctx.beginPath();
+      ctx.ellipse(headX - 10, headY - 1, 1.2, eyeH * 0.9, 0, 0, Math.PI * 2);
+      ctx.ellipse(headX - 1, headY - 0.8, 1.2, eyeH * 0.9, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 眼神高光小萌点
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(headX - 11, headY - 2, 1.0, 0, Math.PI * 2);
+      ctx.arc(headX - 2, headY - 1.8, 1.0, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      // 闭眼甜睡：笑眯眯弯弯睫毛弧线 (Peaceful Sleeping Arc)
+      ctx.strokeStyle = '#7c2d12';
+      ctx.lineWidth = 1.6;
+      ctx.lineCap = 'round';
+      // 左眼笑弯弧
+      ctx.beginPath();
+      ctx.arc(headX - 10, headY - 1.5, 4.2, 0.2, Math.PI - 0.2);
+      ctx.stroke();
+      // 右眼笑弯弧
+      ctx.beginPath();
+      ctx.arc(headX - 1, headY - 1.2, 4.2, 0.2, Math.PI - 0.2);
+      ctx.stroke();
+    }
+
+    // 粉粉小鼻头 (Pink Nose)
+    ctx.fillStyle = '#fb7185';
+    ctx.beginPath();
+    ctx.moveTo(headX - 6.5, headY + 3.5);
+    ctx.lineTo(headX - 4.5, headY + 3.5);
+    ctx.lineTo(headX - 5.5, headY + 5.2);
+    ctx.closePath();
+    ctx.fill();
+
+    // 倒"人"字小嘴巴 (Cute Cat Mouth)
+    ctx.strokeStyle = '#7c2d12';
+    ctx.lineWidth = 1.0;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(headX - 5.5, headY + 5.2);
+    ctx.lineTo(headX - 5.5, headY + 6.6);
+    ctx.moveTo(headX - 5.5, headY + 6.6);
+    ctx.quadraticCurveTo(headX - 7.5, headY + 8.5, headX - 9.5, headY + 7.2);
+    ctx.moveTo(headX - 5.5, headY + 6.6);
+    ctx.quadraticCurveTo(headX - 3.5, headY + 8.5, headX - 1.5, headY + 7.2);
+    ctx.stroke();
+
+    // 细密白胡须 (Delicate Whiskers)
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.52)';
+    ctx.lineWidth = 0.85;
+    // 左侧 3 根小胡须
+    ctx.beginPath();
+    ctx.moveTo(headX - 12, headY + 5); ctx.lineTo(headX - 26, headY + 3);
+    ctx.moveTo(headX - 13, headY + 7); ctx.lineTo(headX - 27, headY + 7.5);
+    ctx.moveTo(headX - 12, headY + 9); ctx.lineTo(headX - 24, headY + 12);
+    // 右侧 3 根小胡须
+    ctx.moveTo(headX + 2, headY + 5.2); ctx.lineTo(headX + 16, headY + 3.5);
+    ctx.moveTo(headX + 3, headY + 7.2); ctx.lineTo(headX + 17, headY + 8);
+    ctx.moveTo(headX + 2, headY + 9.2); ctx.lineTo(headX + 15, headY + 12.5);
+    ctx.stroke();
+
+    // 4.7 烟头火光映境交互轮廓 (Warm Ember Rim Glow on Silhouette)
+    if (emberIntensity > 0.05) {
+      ctx.strokeStyle = `rgba(239, 68, 68, ${emberIntensity * 0.55})`;
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.arc(headX + 1, headY, 18, -Math.PI * 0.35, Math.PI * 0.15);
+      ctx.moveTo(14, -22);
+      ctx.bezierCurveTo(24, -16, 36, -4, 32, 10);
+      ctx.stroke();
+    }
+
+    ctx.restore(); // 结束猫咪本体变形
+
+    // 5. 呼噜声波与治愈光环 (Floating Purr Wave Rings & Pet Hearts)
+    // 5.1 抚摸萌宠时飘出的治愈爱心
+    if (isPetted) {
+      const heartY = catY - 26 - (1 - petFactor) * 28;
+      const heartAlpha = Math.sin(petFactor * Math.PI) * 0.85;
+      ctx.fillStyle = `rgba(251, 113, 133, ${heartAlpha})`;
+      ctx.font = 'bold 15px -apple-system, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('♥', catX - 18, heartY);
+      ctx.fillText('✨', catX + 14, heartY - 6);
+    }
+
+    // 5.2 周期性呼噜打盹波纹 (Rhythmic Purr Rings: "Zzz... 呼噜")
+    const purrRingPhase = (t * 0.35) % 1.0;
+    const purrRingR = 12 + purrRingPhase * 26;
+    const purrRingAlpha = (1.0 - purrRingPhase) * 0.28;
+    ctx.strokeStyle = `rgba(254, 240, 138, ${purrRingAlpha})`;
+    ctx.lineWidth = 1.0;
+    ctx.beginPath();
+    ctx.ellipse(catX - 22, catY - 14 - purrRingPhase * 18, purrRingR * 0.8, purrRingR * 0.45, -0.2, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.restore(); // 结束暖阁喵眠整景绘制
+  }
+
+  // 温馨小家：触控互动触发器
+  triggerFamilyBounce() {
+    this.familyLastBounceTime = Date.now();
+  }
+
+  // ==========================================
+  // 18. 温馨小家：壁炉暖木、小熊一家三口依偎安睡、百衲棉被、柴火轻鸣、528Hz家庭治愈通感
+  // ==========================================
+  renderCozyFamily(ctx, w, h, dt, t, emberIntensity = 0) {
+    ctx.save();
+
+    const floorY = Math.round(h * 0.72);
+    const fireX = Math.round(w * 0.13);
+    const fireY = floorY - 12;
+    const familyX = Math.round(w * 0.32);
+    const familyY = floorY - 8;
+
+    // 1. 暖木小木屋暗夜环境背景 (Cozy Cabin Ambient Night)
+    const cabinBg = ctx.createLinearGradient(0, 0, 0, h);
+    cabinBg.addColorStop(0, '#1c0c06');
+    cabinBg.addColorStop(0.4, '#120703');
+    cabinBg.addColorStop(0.72, '#0c0502');
+    cabinBg.addColorStop(1, '#050201');
+    ctx.fillStyle = cabinBg;
+    ctx.fillRect(0, 0, w, h);
+
+    // 1.1 墙面复古原木板条纹理 (Subtle Timber Wall Slats)
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.025)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < w; x += 32) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, floorY);
+      ctx.stroke();
+    }
+
+    // 1.2 右上角拱形小木窗 (Arched Cottage Window & Snowy Night Outside)
+    const winX = Math.round(w * 0.74);
+    const winY = Math.round(h * 0.16);
+    const winW = 44;
+    const winH = 62;
+
+    // 窗外静谧深蓝夜空 (Deep Indigo Night Outdoors)
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(winX - winW / 2, winY + winH / 2);
+    ctx.lineTo(winX - winW / 2, winY - winH / 2 + 16);
+    ctx.arc(winX, winY - winH / 2 + 16, winW / 2, Math.PI, 0, false);
+    ctx.lineTo(winX + winW / 2, winY + winH / 2);
+    ctx.closePath();
+    ctx.clip();
+
+    const skyGrad = ctx.createLinearGradient(winX, winY - winH / 2, winX, winY + winH / 2);
+    skyGrad.addColorStop(0, '#0f172a');
+    skyGrad.addColorStop(0.6, '#1e1b4b');
+    skyGrad.addColorStop(1, '#1e293b');
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(winX - winW / 2, winY - winH / 2, winW, winH);
+
+    // 窗外弯弯暖金月牙 (Gentle Crescent Moon)
+    ctx.fillStyle = '#fef08a';
+    ctx.beginPath();
+    ctx.arc(winX + 10, winY - 10, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#1e1b4b';
+    ctx.beginPath();
+    ctx.arc(winX + 7, winY - 12, 7.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 窗外漂浮的静谧雪花 (Gentle Drifting Snowflakes Outdoors)
+    for (let s = 0; s < 6; s++) {
+      const snowX = winX - winW / 2 + ((s * 17 + t * 6) % winW);
+      const snowY = winY - winH / 2 + ((s * 23 + t * 14) % winH);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+      ctx.beginPath();
+      ctx.arc(snowX, snowY, 1.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore(); // 结束窗外裁剪
+
+    // 窗框与十字木格 (Window Frame & Mullions)
+    ctx.strokeStyle = '#451a03';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(winX - winW / 2, winY + winH / 2);
+    ctx.lineTo(winX - winW / 2, winY - winH / 2 + 16);
+    ctx.arc(winX, winY - winH / 2 + 16, winW / 2, Math.PI, 0, false);
+    ctx.lineTo(winX + winW / 2, winY + winH / 2);
+    ctx.closePath();
+    ctx.stroke();
+
+    ctx.strokeStyle = '#5c2406';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(winX, winY - winH / 2 + 2);
+    ctx.lineTo(winX, winY + winH / 2);
+    ctx.moveTo(winX - winW / 2 + 2, winY);
+    ctx.lineTo(winX + winW / 2 - 2, winY);
+    ctx.stroke();
+
+    // 窗台积雪微白 (Snow Dust on Window Sill)
+    ctx.fillStyle = 'rgba(241, 245, 249, 0.45)';
+    ctx.fillRect(winX - winW / 2 - 2, winY + winH / 2, winW + 4, 3);
+
+    // 2. 左侧复古石砌壁炉 (Rustic Fieldstone Fireplace & Hearth)
+    const hearthW = 54;
+    const hearthH = 74;
+    const hearthTop = fireY - hearthH;
+
+    // 壁炉石砌外框 (Fieldstone Masonry Mantle)
+    const stoneGrad = ctx.createLinearGradient(fireX - hearthW / 2, 0, fireX + hearthW / 2, 0);
+    stoneGrad.addColorStop(0, '#2e190d');
+    stoneGrad.addColorStop(0.5, '#442514');
+    stoneGrad.addColorStop(1, '#24130a');
+    ctx.fillStyle = stoneGrad;
+    ctx.beginPath();
+    ctx.roundRect ? ctx.roundRect(fireX - hearthW / 2, hearthTop, hearthW, hearthH, [6, 6, 0, 0]) : ctx.rect(fireX - hearthW / 2, hearthTop, hearthW, hearthH);
+    ctx.fill();
+
+    // 壁炉实木顶台梁 (Oak Mantle Shelf)
+    ctx.fillStyle = '#673012';
+    ctx.fillRect(fireX - hearthW / 2 - 4, hearthTop - 4, hearthW + 8, 6);
+    // 顶台暖烛光 (Mantle Candle)
+    ctx.fillStyle = '#fef3c7';
+    ctx.fillRect(fireX + 10, hearthTop - 14, 4, 10);
+    // 烛芯小火苗
+    const candleFlicker = Math.sin(t * 8) * 0.8;
+    ctx.fillStyle = '#f59e0b';
+    ctx.beginPath();
+    ctx.ellipse(fireX + 12, hearthTop - 17, 1.8, 3.2 + candleFlicker, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 壁炉内膛拱门火膛 (Firebox Arched Opening)
+    const archW = 34;
+    const archH = 46;
+    const archX = fireX;
+    const archY = fireY - 2;
+
+    ctx.fillStyle = '#140803';
+    ctx.beginPath();
+    ctx.moveTo(archX - archW / 2, archY);
+    ctx.lineTo(archX - archW / 2, archY - archH + 12);
+    ctx.arc(archX, archY - archH + 12, archW / 2, Math.PI, 0, false);
+    ctx.lineTo(archX + archW / 2, archY);
+    ctx.closePath();
+    ctx.fill();
+
+    // 炉底炭火火床 (Glowing Ember Bed)
+    const emberBedGrad = ctx.createRadialGradient(archX, archY - 6, 2, archX, archY - 6, 20);
+    emberBedGrad.addColorStop(0, '#fef08a');
+    emberBedGrad.addColorStop(0.35, '#f97316');
+    emberBedGrad.addColorStop(0.8, '#dc2626');
+    emberBedGrad.addColorStop(1, '#450a0a');
+    ctx.fillStyle = emberBedGrad;
+    ctx.beginPath();
+    ctx.ellipse(archX, archY - 4, archW / 2 - 3, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 柴火原木交叉柴堆 (Firewood Logs)
+    ctx.strokeStyle = '#271207';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(archX - 12, archY - 2);
+    ctx.lineTo(archX + 11, archY - 8);
+    ctx.moveTo(archX + 12, archY - 2);
+    ctx.lineTo(archX - 11, archY - 8);
+    ctx.stroke();
+
+    // 动态跳跃火舌 (Dancing Animated Hearth Flames)
+    const flameCount = 4;
+    for (let f = 0; f < flameCount; f++) {
+      const fx = archX - 9 + f * 6;
+      const fH = 14 + Math.sin(t * 7.5 + f * 1.6) * 5 + Math.cos(t * 4.2 + f) * 3;
+      const fW = 4.2 + Math.sin(t * 5 + f) * 1.2;
+      const flameGrad = ctx.createLinearGradient(fx, archY - 4, fx, archY - 4 - fH);
+      flameGrad.addColorStop(0, '#fef08a');
+      flameGrad.addColorStop(0.4, '#fb923c');
+      flameGrad.addColorStop(0.85, '#ef4444');
+      flameGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+      ctx.fillStyle = flameGrad;
+      ctx.beginPath();
+      ctx.moveTo(fx - fW, archY - 4);
+      ctx.quadraticCurveTo(fx - fW * 0.5, archY - 4 - fH * 0.6, fx, archY - 4 - fH);
+      ctx.quadraticCurveTo(fx + fW * 0.5, archY - 4 - fH * 0.6, fx + fW, archY - 4);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // 壁炉升腾火星微粒 (Floating Hearth Embers)
+    if (this.hearthEmbers && this.hearthEmbers.length) {
+      this.hearthEmbers.forEach((ember) => {
+        ember.y -= ember.speedY * dt;
+        ember.x += (Math.sin(t * 3 + ember.speedX) * 12) * dt;
+        ember.life += dt;
+        if (ember.life > ember.maxLife || ember.y < hearthTop - 25) {
+          ember.x = fireX - 8 + Math.random() * 16;
+          ember.y = archY - 6;
+          ember.life = 0;
+        }
+        const emberAlpha = Math.sin((ember.life / ember.maxLife) * Math.PI) * 0.85;
+        ctx.fillStyle = `rgba(254, 215, 170, ${emberAlpha})`;
+        ctx.beginPath();
+        ctx.arc(ember.x, ember.y, ember.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    // 壁炉漫反射全室暖光晕 (Hearth Volumetric Radial Amber Glow & Smoke Inhale Resonance)
+    const glowRadius = 240 + emberIntensity * 90;
+    const glowAlphaBase = 0.32 + Math.sin(t * 4.2) * 0.04 + emberIntensity * 0.28;
+    const hearthGlow = ctx.createRadialGradient(fireX + 4, fireY - 14, 8, fireX + 4, fireY - 14, glowRadius);
+    hearthGlow.addColorStop(0, `rgba(251, 146, 60, ${glowAlphaBase})`);
+    hearthGlow.addColorStop(0.3, `rgba(245, 158, 11, ${glowAlphaBase * 0.5})`);
+    hearthGlow.addColorStop(0.7, `rgba(217, 119, 6, ${glowAlphaBase * 0.15})`);
+    hearthGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = hearthGlow;
+    ctx.beginPath();
+    ctx.arc(fireX + 4, fireY - 14, glowRadius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 3. 复古暗调胡桃木地板 (Walnut Wood Flooring)
+    const floorGrad = ctx.createLinearGradient(0, floorY, 0, h);
+    floorGrad.addColorStop(0, '#271308');
+    floorGrad.addColorStop(0.08, '#1b0c05');
+    floorGrad.addColorStop(1, '#090301');
+    ctx.fillStyle = floorGrad;
+    ctx.fillRect(0, floorY, w, h - floorY);
+
+    // 地板踢脚线与接缝 (Baseboard & Plank Seams)
+    ctx.fillStyle = 'rgba(254, 215, 170, 0.20)';
+    ctx.fillRect(0, floorY, w, 1.2);
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+    ctx.lineWidth = 1;
+    for (let py = floorY + 18; py < h; py += 22) {
+      ctx.beginPath();
+      ctx.moveTo(0, py);
+      ctx.lineTo(w, py);
+      ctx.stroke();
+    }
+
+    // 4. 波西米亚手工编织毛绒圆地毯 (Bohemian Hand-woven Wool Rug)
+    const rugRx = 80;
+    const rugRy = 22;
+    // 地毯投影
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+    ctx.beginPath();
+    ctx.ellipse(familyX, familyY + 4, rugRx + 4, rugRy + 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 地毯主体外圈 (Warm Terracotta / Oat Ring)
+    const rugGrad = ctx.createRadialGradient(familyX, familyY, 10, familyX, familyY, rugRx);
+    rugGrad.addColorStop(0, '#78350f');
+    rugGrad.addColorStop(0.65, '#52240b');
+    rugGrad.addColorStop(0.9, '#361706');
+    rugGrad.addColorStop(1, '#210e04');
+    ctx.fillStyle = rugGrad;
+    ctx.beginPath();
+    ctx.ellipse(familyX, familyY, rugRx, rugRy, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 地毯编织民族风虚线缝针装饰圈
+    ctx.strokeStyle = 'rgba(251, 191, 36, 0.38)';
+    ctx.lineWidth = 1.4;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.ellipse(familyX, familyY, rugRx - 8, rugRy - 4, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(244, 63, 94, 0.28)';
+    ctx.beginPath();
+    ctx.ellipse(familyX, familyY, rugRx - 18, rugRy - 8, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 5. 森林小熊一家三口依偎安睡 (The Cozy Bear Family: Papa, Mama & Sleeping Cub)
+    // 触控互动弹性反馈 (Interactive gentle bounce on tap)
+    const now = Date.now();
+    const isBounced = (now - (this.familyLastBounceTime || 0)) < 2400;
+    const bounceFactor = isBounced ? ((now - this.familyLastBounceTime) / 2400) : 1;
+    const bounceSquash = isBounced ? Math.sin(bounceFactor * Math.PI * 3.5) * (1 - bounceFactor) * 4.5 : 0;
+
+    // 呼吸律动 (Respiration Sinus Kinematics)
+    const papaBreath = Math.sin(t * 1.35) * 1.8;
+    const mamaBreath = Math.sin(t * 1.5 + 0.5) * 1.6;
+    const cubBreath = Math.sin(t * 2.0) * 2.4;
+
+    // ================= 5.1 稳重大熊爸爸 (Papa Bear on Left) =================
+    const papaX = familyX - 25;
+    const papaY = familyY - 26 - bounceSquash;
+
+    ctx.save();
+    ctx.translate(papaX, papaY);
+
+    // 爸爸身体轮廓 (宽厚安稳的深巧克力色毛皮)
+    const papaBodyGrad = ctx.createLinearGradient(-26, -26, 26, 26);
+    papaBodyGrad.addColorStop(0, '#78350f');
+    papaBodyGrad.addColorStop(0.5, '#5b2609');
+    papaBodyGrad.addColorStop(1, '#3b1605');
+    ctx.fillStyle = papaBodyGrad;
+    ctx.beginPath();
+    ctx.ellipse(0, -4, 25, 23, -0.08, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 爸爸身上的深绿罗纹针织毛背心 (Forest Green Knitted Vest)
+    ctx.fillStyle = '#14532d';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 23, 17, -0.06, 0, Math.PI * 2);
+    ctx.fill();
+    // 毛背心V领
+    ctx.strokeStyle = '#166534';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(-6, -15);
+    ctx.lineTo(0, -6);
+    ctx.lineTo(6, -15);
+    ctx.stroke();
+
+    // 爸爸大脑袋 (Friendly Rounded Head with Breathing)
+    const papaHeadY = -28 - papaBreath;
+    const papaHeadGrad = ctx.createRadialGradient(-3, papaHeadY - 4, 4, 0, papaHeadY, 22);
+    papaHeadGrad.addColorStop(0, '#92400e');
+    papaHeadGrad.addColorStop(0.6, '#78350f');
+    papaHeadGrad.addColorStop(1, '#502208');
+    ctx.fillStyle = papaHeadGrad;
+    ctx.beginPath();
+    ctx.ellipse(0, papaHeadY, 21, 19, -0.05, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 爸爸圆圆的熊耳朵 (Round Bear Ears)
+    // 左耳
+    ctx.fillStyle = '#6d2e0a';
+    ctx.beginPath();
+    ctx.arc(-16, papaHeadY - 14, 7.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#fed7aa'; // 浅桃耳窝
+    ctx.beginPath();
+    ctx.arc(-16, papaHeadY - 14, 4.2, 0, Math.PI * 2);
+    ctx.fill();
+    // 右耳
+    ctx.fillStyle = '#6d2e0a';
+    ctx.beginPath();
+    ctx.arc(14, papaHeadY - 15, 7.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#fed7aa';
+    ctx.beginPath();
+    ctx.arc(14, papaHeadY - 15, 4.2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 爸爸脸颊发腮与奶油色大嘴套 (Warm Cream Snout / Muzzle)
+    ctx.fillStyle = '#fde68a';
+    ctx.beginPath();
+    ctx.ellipse(3, papaHeadY + 4, 11, 8.5, 0.05, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 黑色纽扣熊鼻子 (Shiny Button Bear Nose)
+    ctx.fillStyle = '#18181b';
+    ctx.beginPath();
+    ctx.ellipse(4, papaHeadY + 1.5, 4.2, 3.0, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // 鼻子微光高光
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(3.0, papaHeadY + 0.8, 1.0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 满足安睡闭眼 (Peaceful Sleeping Arcs: ⌒ ⌒)
+    ctx.strokeStyle = '#271308';
+    ctx.lineWidth = 1.8;
+    ctx.lineCap = 'round';
+    // 左眼
+    ctx.beginPath();
+    ctx.arc(-6, papaHeadY - 2, 4.0, Math.PI * 1.15, Math.PI * 1.85);
+    ctx.stroke();
+    // 右眼
+    ctx.beginPath();
+    ctx.arc(7, papaHeadY - 1.5, 4.0, Math.PI * 1.15, Math.PI * 1.85);
+    ctx.stroke();
+
+    // 慈祥安睡微笑
+    ctx.beginPath();
+    ctx.arc(4, papaHeadY + 5.5, 3.5, 0.2, Math.PI * 0.8);
+    ctx.stroke();
+
+    // 爸爸宽厚有力的大手臂抱护着全家
+    ctx.strokeStyle = '#78350f';
+    ctx.lineWidth = 9;
+    ctx.beginPath();
+    ctx.moveTo(10, -10);
+    ctx.quadraticCurveTo(24, 0, 36, 12);
+    ctx.stroke();
+
+    ctx.restore(); // 结束爸爸绘制
+
+    // ================= 5.2 温柔恬静熊妈妈 (Mama Bear on Right) =================
+    const mamaX = familyX + 22;
+    const mamaY = familyY - 22 - bounceSquash;
+
+    ctx.save();
+    ctx.translate(mamaX, mamaY);
+
+    // 妈妈身体轮廓 (蜜糖焦糖色柔亮毛皮)
+    const mamaBodyGrad = ctx.createLinearGradient(-22, -22, 22, 22);
+    mamaBodyGrad.addColorStop(0, '#b45309');
+    mamaBodyGrad.addColorStop(0.5, '#92400e');
+    mamaBodyGrad.addColorStop(1, '#5e270a');
+    ctx.fillStyle = mamaBodyGrad;
+    ctx.beginPath();
+    ctx.ellipse(0, -3, 21, 20, 0.08, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 妈妈身上的红陶玫瑰花暖绒针织开衫 (Warm Terracotta Knitted Cardigan)
+    ctx.fillStyle = '#991b1b';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 19, 15, 0.06, 0, Math.PI * 2);
+    ctx.fill();
+    // 珍珠小纽扣
+    ctx.fillStyle = '#fef08a';
+    ctx.beginPath();
+    ctx.arc(-2, -5, 1.3, 0, Math.PI * 2);
+    ctx.arc(-2, 1, 1.3, 0, Math.PI * 2);
+    ctx.arc(-2, 7, 1.3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 妈妈头部 (Soft Rounded Head gently resting towards papa)
+    const mamaHeadY = -24 - mamaBreath;
+    const mamaHeadGrad = ctx.createRadialGradient(-2, mamaHeadY - 3, 3, 0, mamaHeadY, 18);
+    mamaHeadGrad.addColorStop(0, '#d97706');
+    mamaHeadGrad.addColorStop(0.65, '#b45309');
+    mamaHeadGrad.addColorStop(1, '#78350f');
+    ctx.fillStyle = mamaHeadGrad;
+    ctx.beginPath();
+    ctx.ellipse(0, mamaHeadY, 18, 16.5, 0.08, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 妈妈小巧圆润的耳朵
+    ctx.fillStyle = '#92400e';
+    ctx.beginPath();
+    ctx.arc(-12, mamaHeadY - 12, 6.2, 0, Math.PI * 2);
+    ctx.arc(13, mamaHeadY - 11, 6.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#fed7aa';
+    ctx.beginPath();
+    ctx.arc(-12, mamaHeadY - 12, 3.4, 0, Math.PI * 2);
+    ctx.arc(13, mamaHeadY - 11, 3.4, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 奶油色小嘴套与腮红
+    ctx.fillStyle = '#fef3c7';
+    ctx.beginPath();
+    ctx.ellipse(-2, mamaHeadY + 3.5, 9.5, 7.5, -0.05, 0, Math.PI * 2);
+    ctx.fill();
+    // 少女感粉嫩腮红
+    ctx.fillStyle = 'rgba(251, 113, 133, 0.35)';
+    ctx.beginPath();
+    ctx.arc(-9, mamaHeadY + 3, 3.5, 0, Math.PI * 2);
+    ctx.arc(6, mamaHeadY + 3, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 黑色纽扣小鼻子
+    ctx.fillStyle = '#18181b';
+    ctx.beginPath();
+    ctx.ellipse(-2.5, mamaHeadY + 1.2, 3.4, 2.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(-3.2, mamaHeadY + 0.6, 0.8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 恬静闭眼带温柔长睫毛 (Serene Curved Eyelashes)
+    ctx.strokeStyle = '#271308';
+    ctx.lineWidth = 1.6;
+    ctx.lineCap = 'round';
+    // 左眼
+    ctx.beginPath();
+    ctx.arc(-6, mamaHeadY - 1.2, 3.4, Math.PI * 1.15, Math.PI * 1.85);
+    ctx.stroke();
+    // 右眼
+    ctx.beginPath();
+    ctx.arc(4, mamaHeadY - 1.2, 3.4, Math.PI * 1.15, Math.PI * 1.85);
+    ctx.stroke();
+    // 温柔微笑
+    ctx.beginPath();
+    ctx.arc(-2.5, mamaHeadY + 5.0, 3.0, 0.2, Math.PI * 0.8);
+    ctx.stroke();
+
+    // 妈妈手里捧着的热可可马克杯 (Warm Mug of Hot Cocoa)
+    ctx.fillStyle = '#b45309';
+    ctx.fillRect(12, 0, 8, 10);
+    ctx.fillStyle = '#451a03';
+    ctx.fillRect(13, 0, 6, 2);
+    // 杯口微弱热气
+    const steamAlpha = 0.35 + Math.sin(t * 3.5) * 0.2;
+    ctx.strokeStyle = `rgba(255, 255, 255, ${steamAlpha})`;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(16, -2);
+    ctx.quadraticCurveTo(14, -6, 17, -10);
+    ctx.stroke();
+
+    ctx.restore(); // 结束妈妈绘制
+
+    // ================= 5.3 暖被里的可爱小熊宝 (Sleeping Cub in the Center) =================
+    const cubX = familyX - 2;
+    const cubY = familyY - 12 - bounceSquash;
+
+    ctx.save();
+    ctx.translate(cubX, cubY);
+
+    // 小熊宝软萌金杏色毛绒小脑袋 (Apricot Honey Fur Head with Active Breathing)
+    const cubHeadY = -15 - cubBreath;
+    const cubHeadGrad = ctx.createRadialGradient(0, cubHeadY - 2, 2, 0, cubHeadY, 14);
+    cubHeadGrad.addColorStop(0, '#fbbf24');
+    cubHeadGrad.addColorStop(0.7, '#d97706');
+    cubHeadGrad.addColorStop(1, '#92400e');
+    ctx.fillStyle = cubHeadGrad;
+    ctx.beginPath();
+    ctx.arc(0, cubHeadY, 13.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 小熊宝圆滚滚幼崽耳朵
+    ctx.fillStyle = '#b45309';
+    ctx.beginPath();
+    ctx.arc(-10, cubHeadY - 9, 4.8, 0, Math.PI * 2);
+    ctx.arc(10, cubHeadY - 9, 4.8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#fef3c7';
+    ctx.beginPath();
+    ctx.arc(-10, cubHeadY - 9, 2.6, 0, Math.PI * 2);
+    ctx.arc(10, cubHeadY - 9, 2.6, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 睡梦中的复古奶油白小睡帽 (Cream Nightcap with Pompom)
+    ctx.save();
+    ctx.translate(2, cubHeadY - 9);
+    ctx.rotate(0.25 + Math.sin(t * 2.2) * 0.06);
+    ctx.fillStyle = '#fef9c3';
+    ctx.beginPath();
+    ctx.moveTo(-11, 2);
+    ctx.quadraticCurveTo(0, -14, 16, -11);
+    ctx.lineTo(8, 2);
+    ctx.closePath();
+    ctx.fill();
+    // 睡帽白色毛绒绒小绒球 (Pompom)
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(16, -11, 3.8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // 软嫩腮红与微型奶油小嘴套
+    ctx.fillStyle = '#fef3c7';
+    ctx.beginPath();
+    ctx.ellipse(0, cubHeadY + 3, 7.5, 5.8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // 萌萌粉腮红
+    ctx.fillStyle = 'rgba(244, 63, 94, 0.45)';
+    ctx.beginPath();
+    ctx.arc(-5.5, cubHeadY + 2.5, 2.8, 0, Math.PI * 2);
+    ctx.arc(5.5, cubHeadY + 2.5, 2.8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 小巧黑鼻头
+    ctx.fillStyle = '#18181b';
+    ctx.beginPath();
+    ctx.ellipse(0, cubHeadY + 1.2, 2.4, 1.8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // 闭眼甜睡细弧线 (⌒ ⌒)
+    ctx.strokeStyle = '#271308';
+    ctx.lineWidth = 1.4;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.arc(-3.5, cubHeadY - 0.5, 2.4, Math.PI * 1.15, Math.PI * 1.85);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(3.5, cubHeadY - 0.5, 2.4, Math.PI * 1.15, Math.PI * 1.85);
+    ctx.stroke();
+
+    ctx.restore(); // 结束小熊宝头部
+
+    // ================= 5.4 盖在全家身上的百衲暖绒棉被 (Cozy Patchwork Quilt) =================
+    // 棉被随全家呼吸起伏起舞
+    const quiltBreath = (papaBreath + mamaBreath + cubBreath) / 3.0;
+    const quiltY = familyY - 14 - bounceSquash - quiltBreath;
+
+    ctx.save();
+    ctx.beginPath();
+    // 棉被饱满隆起的轮廓
+    ctx.moveTo(familyX - 52, familyY + 6);
+    ctx.quadraticCurveTo(familyX - 50, quiltY, familyX - 22, quiltY - 4);
+    ctx.quadraticCurveTo(familyX, quiltY - 8, familyX + 22, quiltY - 4);
+    ctx.quadraticCurveTo(familyX + 50, quiltY, familyX + 52, familyY + 6);
+    ctx.quadraticCurveTo(familyX, familyY + 14, familyX - 52, familyY + 6);
+    ctx.closePath();
+    ctx.clip(); // 裁剪进棉被范围填充拼布
+
+    // 百衲拼布图案 (Vintage Folk Quilt Patches: 经典红、琥珀黄、墨绿、午夜蓝)
+    const patchColors = ['#991b1b', '#b45309', '#15803d', '#1e3a8a', '#c2410c', '#047857'];
+    const pW = 24;
+    const pH = 18;
+    let colorIdx = 0;
+    for (let px = familyX - 60; px < familyX + 60; px += pW) {
+      for (let py = quiltY - 12; py < familyY + 20; py += pH) {
+        ctx.fillStyle = patchColors[colorIdx % patchColors.length];
+        ctx.fillRect(px, py, pW, pH);
+        // 拼布缝线边
+        ctx.strokeStyle = 'rgba(254, 240, 138, 0.35)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(px + 0.5, py + 0.5, pW - 1, pH - 1);
+        colorIdx++;
+      }
+    }
+    ctx.restore(); // 结束棉被拼布
+
+    // 棉被边缘柔软翻折领边 (Turned Quilt Cuff)
+    ctx.fillStyle = '#fef3c7';
+    ctx.beginPath();
+    ctx.moveTo(familyX - 44, quiltY + 1);
+    ctx.quadraticCurveTo(familyX, quiltY - 6, familyX + 44, quiltY + 1);
+    ctx.quadraticCurveTo(familyX, quiltY - 2, familyX - 44, quiltY + 1);
+    ctx.fill();
+
+    // 小熊宝搭在被子边缘的两只毛茸茸肉垫小爪爪 (Tiny Baby Paws on Quilt)
+    ctx.fillStyle = '#f59e0b';
+    ctx.beginPath();
+    ctx.ellipse(familyX - 8, quiltY + 2, 4.2, 3.2, -0.2, 0, Math.PI * 2);
+    ctx.ellipse(familyX + 8, quiltY + 2, 4.2, 3.2, 0.2, 0, Math.PI * 2);
+    ctx.fill();
+    // 爪垫肉球
+    ctx.fillStyle = '#fed7aa';
+    ctx.beginPath();
+    ctx.arc(familyX - 8, quiltY + 2, 2.0, 0, Math.PI * 2);
+    ctx.arc(familyX + 8, quiltY + 2, 2.0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 5.5 烟头火光映境交互轮廓 (Warm Firelight Rim Highlights on Bears)
+    if (emberIntensity > 0.05) {
+      ctx.strokeStyle = `rgba(251, 191, 36, ${emberIntensity * 0.65})`;
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      // 勾勒爸爸左侧受光轮廓
+      ctx.arc(papaX, papaY - 28 - papaBreath, 21.5, Math.PI * 0.7, Math.PI * 1.4);
+      // 勾勒被子受光边缘
+      ctx.moveTo(familyX - 52, familyY + 4);
+      ctx.quadraticCurveTo(familyX - 48, quiltY, familyX - 10, quiltY - 5);
+      ctx.stroke();
+    }
+
+    // 6. 交互爱心与温情气泡 (Floating Hearth Hearts & Dream "Zzz...")
+    // 6.1 抚摸/触碰小熊一家时升腾的治愈爱心与星光 (Floating Hearts on Tap)
+    if (isBounced) {
+      const heartFloatY = familyY - 65 - (1 - bounceFactor) * 32;
+      const heartAlpha = Math.sin(bounceFactor * Math.PI) * 0.95;
+      ctx.fillStyle = `rgba(251, 113, 133, ${heartAlpha})`;
+      ctx.font = 'bold 15px -apple-system, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('♥', familyX - 18, heartFloatY);
+      ctx.fillStyle = `rgba(254, 240, 138, ${heartAlpha})`;
+      ctx.fillText('✨', familyX + 16, heartFloatY - 8);
+      ctx.fillText('🏡', familyX, heartFloatY - 18);
+    }
+
+    // 6.2 周期性婴儿小熊甜梦气泡 (Rhythmic Baby Dream Bubbles: "z... Z...")
+    const dreamPhase = (t * 0.28) % 1.0;
+    const dreamX = cubX + 8 + Math.sin(dreamPhase * Math.PI * 2) * 5;
+    const dreamY = cubY - 32 - dreamPhase * 24;
+    const dreamAlpha = Math.sin(dreamPhase * Math.PI) * 0.7;
+    ctx.fillStyle = `rgba(254, 240, 138, ${dreamAlpha})`;
+    ctx.font = 'italic 11px -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(dreamPhase > 0.5 ? 'Z' : 'z', dreamX, dreamY);
+
+    ctx.restore(); // 结束温馨小家整景绘制
+  }
 }
 
 export const sceneRenderer = new SceneRenderer();
+

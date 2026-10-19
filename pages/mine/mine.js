@@ -19,7 +19,7 @@ import {
   YEARS_CLOCK_ICON_SVG,
   PROJECTION_SPARK_SVG
 } from '../../utils/vectorIcons.js';
-import { measureSafeAreaSync } from '../../utils/safeArea.js';
+import { measureSafeAreaSync, detectIsIOS } from '../../utils/safeArea.js';
 import { navigateBackWithSound } from '../../utils/navigation.js';
 
 /* ==========================================================================
@@ -28,15 +28,15 @@ import { navigateBackWithSound } from '../../utils/navigation.js';
 import { CIGARETTE_CATALOG } from '../../configs/catalog.js';
 import { SMOKE_EFFECTS } from '../../configs/smokeEffects.js';
 import { ACHIEVEMENTS } from '../../configs/achievements.js';
+import { VIP_THEME_OPTIONS, VIP_THEME_CATEGORIES, getThemeById } from '../../configs/vipThemes.js';
 /* ==================== [DEV_ADMIN_TEST] 结束 ==================== */
 
 const QUICK_PRICE_PRESETS = [
   { val: 15, label: '¥15 白沙' },
-  { val: 18, label: '¥18 炫赫' },
-  { val: 25, label: '¥25 芙蓉' },
-  { val: 26, label: '¥26 江南' },
-  { val: 65, label: '¥65 中华' },
-  { val: 100, label: '¥100' }
+  { val: 25, label: '¥25 芙蓉王' },
+  { val: 45, label: '¥45 硬中华' },
+  { val: 65, label: '¥65 软中华' },
+  { val: 100, label: '¥100 和天下' }
 ];
 
 const QUICK_CIG_PRESETS = [
@@ -170,8 +170,9 @@ function buildInitialMineState() {
       ...payload,
       ...staticPresets,
       projections: computeProfileProjections(payload.profile),
-      vipTheme: vipService.getVipTheme(),
+      vipTheme: vipService.getVipTheme() || 'classic',
       showProfileModal: false,
+      isIOS: detectIsIOS(),
       /* ==================== [DEV_ADMIN_TEST] 初始状态 ==================== */
       showAdminTestModal: false,
       devVipActive: vipService.isVip(),
@@ -195,7 +196,8 @@ function buildInitialMineState() {
       ...safeArea,
       ...staticPresets,
       projections: computeProfileProjections(fallbackProfile),
-      vipTheme: '',
+      vipTheme: 'classic',
+      isIOS: false,
       profile: fallbackProfile,
       myRankInfo: {
         rank: 1,
@@ -289,12 +291,18 @@ Page({
 
   onLoad() {
     this._skipFirstShowRefresh = true;
+    try {
+      storageService.recordDailyCheckIn();
+    } catch (e) {}
     this.measureSafeArea();
     this.refreshAllData();
   },
 
   onShow() {
     this._isNavigating = false;
+    try {
+      storageService.recordDailyCheckIn();
+    } catch (e) {}
     this.measureSafeArea();
     if (this._skipFirstShowRefresh) {
       this._skipFirstShowRefresh = false;
@@ -318,7 +326,11 @@ Page({
       this.setData({
         ...safeArea,
         ...computeMineStatsPayload(),
-        vipTheme: vipService.getVipTheme(),
+        vipTheme: vipService.getVipTheme() || 'classic',
+        isVip: !!(vipInfo && vipInfo.isVip),
+        vipInfo,
+        activeVipThemeId: vipService.getVipTheme() || 'classic',
+        activeThemeObj: getThemeById(vipService.getVipTheme()) || VIP_THEME_OPTIONS[0],
         /* ==================== [DEV_ADMIN_TEST] 动态状态同步 ==================== */
         devVipActive: vipInfo.isVip,
         devVipInfo: vipInfo,
@@ -353,9 +365,10 @@ Page({
   // 微信昵称输入与同步
   onUpdateNickname(e) {
     try {
-      const nickName = (e.detail && e.detail.nickName ? e.detail.nickName : '').trim();
-      if (!nickName) return;
-      const updated = storageService.updateProfile({ nickName });
+      const raw = (e.detail && e.detail.nickName ? e.detail.nickName : '');
+      const sanitized = raw.replace(/[\r\n\t]/g, '').trim().slice(0, 16);
+      if (!sanitized) return;
+      const updated = storageService.updateProfile({ nickName: sanitized });
       this.setData({ profile: updated });
       this.refreshAllData();
     } catch (err) {
@@ -389,6 +402,22 @@ Page({
         }, 500);
       }
     });
+  },
+
+  // 响应 stats-view 内换肤即时切换全站主题
+  onVipThemeChange(e) {
+    const themeId = (e.detail && e.detail.themeId) || vipService.getVipTheme();
+    if (themeId) {
+      this.setData({ vipTheme: themeId });
+    }
+  },
+
+  // 响应未解锁主题临时预览当前页面光影
+  onVipThemePreview(e) {
+    const themeId = e.detail && e.detail.themeId;
+    if (themeId) {
+      this.setData({ vipTheme: themeId });
+    }
   },
 
   // 偏好设置弹窗
@@ -431,14 +460,14 @@ Page({
   adjustPackPrice(e) {
     const delta = Number(e.currentTarget.dataset.delta);
     const cur = Number(this.data.editProfile.packPrice) || 25;
-    const val = Math.min(2000, Math.max(5, cur + delta));
+    const val = Math.min(100, Math.max(5, cur + delta));
     this.updateEditProfile({ packPrice: val });
     triggerHaptic('light');
   },
 
   setQuickPrice(e) {
     const val = Number(e.currentTarget.dataset.val);
-    const clamped = Math.min(2000, Math.max(5, val));
+    const clamped = Math.min(100, Math.max(5, val));
     this.updateEditProfile({ packPrice: clamped });
     triggerHaptic('light');
   },
@@ -451,7 +480,7 @@ Page({
     }
     const num = parseInt(raw, 10);
     if (isNaN(num)) return;
-    const val = Math.min(2000, Math.max(0, num));
+    const val = Math.min(100, Math.max(0, num));
     this.updateEditProfile({ packPrice: val });
   },
 
@@ -459,8 +488,8 @@ Page({
     let num = parseInt(e.detail.value, 10);
     if (isNaN(num) || num < 5) {
       num = (num > 0 && num < 5) ? 5 : 25;
-    } else if (num > 2000) {
-      num = 2000;
+    } else if (num > 100) {
+      num = 100;
     }
     this.updateEditProfile({ packPrice: num });
   },
@@ -542,7 +571,7 @@ Page({
   saveProfile() {
     let packPrice = Number(this.data.editProfile.packPrice);
     if (isNaN(packPrice) || packPrice < 5) packPrice = 25;
-    if (packPrice > 2000) packPrice = 2000;
+    if (packPrice > 100) packPrice = 100;
 
     let cigsPerDay = Number(this.data.editProfile.cigsPerDay);
     if (isNaN(cigsPerDay) || cigsPerDay < 1) cigsPerDay = 15;
@@ -584,11 +613,13 @@ Page({
     const vipInfo = vipService.getVipInfo();
     const curCigId = storageService.getSelectedCigaretteId();
     const curPackCount = storageService.getPackCount(curCigId, 20);
+    const dailySmoked = storageService.getDailySmokedCount();
     this.setData({
       showAdminTestModal: true,
       devVipActive: vipInfo.isVip,
       devVipInfo: vipInfo,
-      devCurrentPackCount: curPackCount
+      devCurrentPackCount: curPackCount,
+      devDailySmokedCount: dailySmoked
     });
   },
 
@@ -854,6 +885,41 @@ Page({
     toast.info('已清空全部替烟记录 (0支)！');
   },
 
+  devAddDailySmoked10() {
+    triggerHaptic('heavy');
+    const newCount = storageService.addDailySmokedCount(10);
+    this.setData({
+      devDailySmokedCount: newCount
+    });
+    this.refreshAllData();
+    toast.flame(`⚡ 今日吸烟累计 +10（当前今日共: ${newCount} 支）`);
+  },
+
+  devSetDailySmoked40() {
+    triggerHaptic('heavy');
+    const cur = storageService.getDailySmokedCount();
+    const delta = Math.max(0, 40 - cur);
+    const newCount = storageService.addDailySmokedCount(delta);
+    this.setData({
+      devDailySmokedCount: newCount
+    });
+    this.refreshAllData();
+    toast.flame('🍵 今日吸烟已直达 40 支生理阻尼上限！');
+  },
+
+  devClearDailySmoked() {
+    triggerHaptic('light');
+    const today = storageService.getTodayDateKey();
+    try {
+      wx.setStorageSync('SMOKEFREE_DAILY_SMOKE_COUNT', { date: today, count: 0 });
+    } catch (e) {}
+    this.setData({
+      devDailySmokedCount: 0
+    });
+    this.refreshAllData();
+    toast.info('🧹 今日吸烟计数已清零 (0 支)');
+  },
+
   // 5. 烟盒库存与陈列
   devSetCurrentPackCount(e) {
     const count = Number(e.currentTarget.dataset.count) || 0;
@@ -880,7 +946,7 @@ Page({
       });
     }
     this.refreshAllData();
-    toast.flame('📦 全部 33 款名烟展柜库存已 100% 补满！');
+    toast.flame('📦 全部 37 款名烟展柜库存已 100% 补满！');
   },
 
   // 6. 展柜与特效全解锁
@@ -893,7 +959,7 @@ Page({
       } catch (err) {}
     }
     this.refreshAllData();
-    toast.flame('🌟 全部 33 款名烟与雪茄已永久全量解锁！');
+    toast.flame('🌟 全部 37 款名烟与雪茄已永久全量解锁！');
   },
 
   devLockAllCigarettes() {
@@ -935,6 +1001,59 @@ Page({
     }
     this.refreshAllData();
     toast.flame('👑 全部 16 阶成就已点亮！已佩戴最高称号【无烟圣尊】！');
+  },
+
+  /* 快速测试：16 阶成语境界称号逐级步进 */
+  devStepTitleNext() {
+    this._stepTitle(1);
+  },
+
+  devStepTitlePrev() {
+    this._stepTitle(-1);
+  },
+
+  devSetTitleTier(e) {
+    const targetTitle = e && e.currentTarget && e.currentTarget.dataset && e.currentTarget.dataset.title;
+    if (!targetTitle) return;
+    triggerHaptic('medium');
+    storageService.setEquippedTitle(targetTitle);
+    this.refreshAllData();
+    toast.flame(`🎖️ 境界称号已设为：【${targetTitle}】！`);
+  },
+
+  _stepTitle(dir) {
+    triggerHaptic('medium');
+    const titles = [
+      '破土初萌', '第一缕风', '晨曦破晓', '三日生机',
+      '积微成著', '日省月试', '七日淬火', '身轻气爽',
+      '从容自若', '重塑新程', '静水流深', '金石为开',
+      '百日涅槃', '千帆历尽', '心如琉璃', '返璞归真',
+      '无烟圣尊'
+    ];
+    const curTitle = storageService.getEquippedTitle() || '破土初萌';
+    let idx = titles.indexOf(curTitle);
+    if (idx === -1) idx = 0;
+    const nextIdx = (idx + dir + titles.length) % titles.length;
+    const nextTitle = titles[nextIdx];
+    storageService.setEquippedTitle(nextTitle);
+    this.refreshAllData();
+    toast.flame(`🎖️ 境界称号切换为 (Lv.${nextIdx + 1}/${titles.length})：【${nextTitle}】！`);
+  },
+
+  /* 快速测试：心境天幕即时循环轮换 */
+  devCycleVipTheme() {
+    triggerHaptic('heavy');
+    const themes = VIP_THEME_OPTIONS || [];
+    if (!themes.length) return;
+    const currentTheme = this.data.vipTheme || 'classic';
+    const currentIndex = themes.findIndex(t => t.id === currentTheme);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    const targetTheme = themes[nextIndex];
+    try {
+      wx.setStorageSync('JUST_ONE_SMOKE_PREVIEW_THEME', targetTheme.id);
+    } catch (e) {}
+    this.setData({ vipTheme: targetTheme.id });
+    toast.flame(`🌌 心境天幕切换至：【${targetTheme.name}】（${targetTheme.tag || ''}）`);
   },
 
   // 7. 调试设置与系统维护

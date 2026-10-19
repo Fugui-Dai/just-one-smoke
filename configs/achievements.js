@@ -8,11 +8,11 @@ import { ACHIEVEMENT_ICONS, getAchievementIconUri } from './achievementIcons.js'
  * 
  * 六阶流光品阶体系：
  * - 启蒙 (翠绿 · Tier 1): Lv.1 ~ Lv.3  (青涩初启，建立心理替代正向反馈)
- * - 进阶 (苍蓝 · Tier 2): Lv.4 ~ Lv.6  (跨越三天生理峰值与省下一整盒)
- * - 稀有 (幽紫 · Tier 3): Lv.7 ~ Lv.9  (七日代谢排空与突破五盒大关)
- * - 史诗 (琥珀金 · Tier 4): Lv.10 ~ Lv.12 (21天习惯闭环与真金白银省钱千元)
- * - 传说 (离火绯 · Tier 5): Lv.13 ~ Lv.14 (百日涅槃与千支封神)
- * - 神话 (曜世金 · Tier 6): Lv.15 ~ Lv.16 (半年金身与无烟圣尊终极殿堂)
+ * - 进阶 (苍蓝 · Tier 2): Lv.4 ~ Lv.6  (跨越三天生理峰值与积微成著)
+ * - 稀有 (幽紫 · Tier 3): Lv.7 ~ Lv.9  (七日代谢排空与从容自若)
+ * - 史诗 (琥珀金 · Tier 4): Lv.10 ~ Lv.12 (重塑新程与金石为开)
+ * - 传说 (离火绯 · Tier 5): Lv.13 ~ Lv.14 (百日涅槃与千帆历尽)
+ * - 神话 (曜世金 · Tier 6): Lv.15 ~ Lv.16 (心如琉璃与返璞归真终极境界)
  */
 export const ACHIEVEMENTS = [
   // ================= 1. 青阶 · 启蒙 (Lv.1 ~ Lv.3) =================
@@ -101,7 +101,7 @@ export const ACHIEVEMENTS = [
   {
     id: 'title_5',
     level: 5,
-    name: '少抽整盒',
+    name: '积微成著',
     tier: 'blue',
     tierTag: '进阶',
     weight: 50,
@@ -121,7 +121,7 @@ export const ACHIEVEMENTS = [
   {
     id: 'title_6',
     level: 6,
-    name: '一顿大餐',
+    name: '日省月试',
     tier: 'blue',
     tierTag: '进阶',
     weight: 60,
@@ -131,8 +131,8 @@ export const ACHIEVEMENTS = [
     borderColor: 'rgba(56, 189, 248, 0.55)',
     category: '生机破浪',
     icon: '🍱',
-    quote: '每一分省下的真金白银，都是你从旧习惯里抢回来的纯粹自由。',
-    description: '累计节省烟钱超 ¥100，健康与财富同时回血，犒劳自己一顿自律大餐。',
+    quote: '每一分省下的真金白银，都是你为自己积攒下的纯粹自由。',
+    description: '累计节省烟钱超 ¥100，健康与财富同时回血，生活更显从容自如。',
     conditionDesc: '累计节省烟钱达到 ¥100',
     targetType: 'money',
     targetVal: 100,
@@ -183,7 +183,7 @@ export const ACHIEVEMENTS = [
   {
     id: 'title_9',
     level: 9,
-    name: '五盒大关',
+    name: '从容自若',
     tier: 'purple',
     tierTag: '稀有',
     weight: 90,
@@ -205,7 +205,7 @@ export const ACHIEVEMENTS = [
   {
     id: 'title_10',
     level: 10,
-    name: '三周蜕变',
+    name: '重塑新程',
     tier: 'gold',
     tierTag: '史诗',
     weight: 100,
@@ -225,7 +225,7 @@ export const ACHIEVEMENTS = [
   {
     id: 'title_11',
     level: 11,
-    name: '整条奇迹',
+    name: '静水流深',
     tier: 'gold',
     tierTag: '史诗',
     weight: 110,
@@ -236,7 +236,7 @@ export const ACHIEVEMENTS = [
     category: '黄金时代',
     icon: '🛡️',
     quote: '整整一条真烟的距离，是你与旧我之间跨越山海的毅力丰碑。',
-    description: '累计替烟 200 支，相当于少抽整整一条真烟，创造属于你的毅力奇迹。',
+    description: '累计替烟 200 支，相当于少抽整整一条真烟，心境从容，静水流深。',
     conditionDesc: '累计替烟达到 200 支',
     targetType: 'subs',
     targetVal: 200,
@@ -245,7 +245,7 @@ export const ACHIEVEMENTS = [
   {
     id: 'title_12',
     level: 12,
-    name: '千元逆袭',
+    name: '金石为开',
     tier: 'gold',
     tierTag: '史诗',
     weight: 120,
@@ -256,7 +256,7 @@ export const ACHIEVEMENTS = [
     category: '黄金时代',
     icon: '💰',
     quote: '四位数财富的积聚见证着：战胜自我不仅重获健康，亦丰盛人生。',
-    description: '累计节省烟钱突破 ¥1000，少抽烟真金白银省出一台大件数码新装备。',
+    description: '累计节省烟钱突破 ¥1000，少抽烟真金白银换回更丰盈美好的生活体验。',
     conditionDesc: '累计节省烟钱达到 ¥1000',
     targetType: 'money',
     targetVal: 1000,
@@ -275,7 +275,7 @@ export const ACHIEVEMENTS = [
     badgeBg: 'rgba(244, 63, 94, 0.2)',
     glowColor: 'rgba(244, 63, 94, 0.75)',
     borderColor: 'rgba(244, 63, 94, 0.85)',
-    category: '涅槃封神',
+    category: '涅槃生辉',
     icon: '🏆',
     quote: '百日无烟，脱胎换骨。那些曾以为无法挣脱的枷锁，如今轻如鸿毛。',
     description: '持续无烟坚持 100 天，意志坚若磐石，彻底告别烟瘾，迎来纯净新生。',
@@ -287,7 +287,7 @@ export const ACHIEVEMENTS = [
   {
     id: 'title_14',
     level: 14,
-    name: '千支封神',
+    name: '千帆历尽',
     tier: 'red',
     tierTag: '传说',
     weight: 140,
@@ -295,10 +295,10 @@ export const ACHIEVEMENTS = [
     badgeBg: 'rgba(244, 63, 94, 0.2)',
     glowColor: 'rgba(244, 63, 94, 0.75)',
     borderColor: 'rgba(244, 63, 94, 0.85)',
-    category: '涅槃封神',
+    category: '涅槃生辉',
     icon: '⚡',
-    quote: '千支替烟的克制史诗，足以让你傲视所有曾经诱惑过你的深渊。',
-    description: '累计替烟 1000 支，登峰造极！身体全面摆脱尼古丁束缚，神清气爽。',
+    quote: '千支替烟的克制历程，足以让你看淡生活一切繁杂浮沉。',
+    description: '累计替烟 1000 支！身体全面摆脱尼古丁束缚，神清气朗，千帆历尽归于从容。',
     conditionDesc: '累计替烟达到 1000 支',
     targetType: 'subs',
     targetVal: 1000,
@@ -309,7 +309,7 @@ export const ACHIEVEMENTS = [
   {
     id: 'title_15',
     level: 15,
-    name: '金身不灭',
+    name: '心如琉璃',
     tier: 'mythic',
     tierTag: '神话',
     weight: 150,
@@ -317,10 +317,10 @@ export const ACHIEVEMENTS = [
     badgeBg: 'rgba(251, 191, 36, 0.22)',
     glowColor: 'rgba(251, 191, 36, 0.85)',
     borderColor: 'rgba(251, 191, 36, 0.95)',
-    category: '万象通玄',
+    category: '纯净之境',
     icon: '👑',
-    quote: '半年金身不破，心脉澄澈如琉璃，你已是自身命运无可撼动的主宰。',
-    description: '持续无烟坚守 180 天（整整半年），心血管机能彻底焕新，成就金身自律。',
+    quote: '半年自律不辍，心脉澄澈如琉璃，内外明澈，尘埃莫能染。',
+    description: '持续无烟坚守 180 天（整整半年），心血管机能彻底焕新，成就心如琉璃境。',
     conditionDesc: '持续无烟达到 180 天',
     targetType: 'days',
     targetVal: 180,
@@ -329,7 +329,7 @@ export const ACHIEVEMENTS = [
   {
     id: 'title_16',
     level: 16,
-    name: '无烟圣尊',
+    name: '返璞归真',
     tier: 'mythic',
     tierTag: '神话',
     weight: 160,
@@ -337,10 +337,10 @@ export const ACHIEVEMENTS = [
     badgeBg: 'rgba(251, 191, 36, 0.25)',
     glowColor: 'rgba(251, 191, 36, 0.95)',
     borderColor: 'rgba(251, 191, 36, 1)',
-    category: '万象通玄',
+    category: '纯净之境',
     icon: '🐉',
-    quote: '登临无烟至高巅峰，天地呼吸一气流转，圣尊之名当立全国英雄殿堂！',
-    description: '持续无烟 365 天或累计替烟 2000 支，傲视全场，终登全国英雄殿堂无烟圣尊！',
+    quote: '天地呼吸一气流转，无挂无碍，复归于婴儿般的纯粹与安详。',
+    description: '持续无烟 365 天或累计替烟 2000 支，身心彻底回归自然本质，返璞归真。',
     conditionDesc: '持续无烟 365 天 或 累计替烟 2000 支',
     targetType: 'ultimate',
     targetVal: 365,

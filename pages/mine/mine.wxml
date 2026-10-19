@@ -21,7 +21,7 @@
 
       <!-- 导航中心标题 -->
       <view class="nav-center-title-box">
-        <text class="nav-center-title-text">我的</text>
+        <text class="nav-center-title-text">机能蜕变</text>
       </view>
 
       <!-- 占位平衡 (已删除设置图标) -->
@@ -56,6 +56,9 @@
     bindgotoleaderboard="goToLeaderboard"
     bindtitlechange="onTitleChange"
     bindopenadmintest="onOpenAdminTest"
+    bindthemechange="onVipThemeChange"
+    bindthemepreview="onVipThemePreview"
+    vipTheme="{{ vipTheme }}"
   />
 
   <!-- ==================== 偏好设置弹窗 (高定一屏无滑动全览) ==================== -->
@@ -108,8 +111,8 @@
           <view class="pref-row-header">
             <view class="pref-title-group">
               <image class="pref-mini-icon" src="{{ priceCoinIcon }}" />
-              <text class="pref-field-title">单包香烟价格</text>
-              <text class="pref-field-hint">(¥5~¥2000)</text>
+              <text class="pref-field-title">日常口粮烟售价</text>
+              <text class="pref-field-hint">(现实测算基准·¥5~¥100)</text>
             </view>
             <view class="mini-stepper">
               <view class="mini-step-btn minus {{ editProfile.packPrice <= 5 ? 'mini-disabled' : '' }}" 
@@ -118,12 +121,12 @@
                 <text class="mini-currency">¥</text>
                 <input class="mini-input" 
                        type="number" 
-                       maxlength="4" 
+                       maxlength="3" 
                        value="{{ editProfile.packPrice }}" 
                        bindinput="onInputPackPrice" 
                        bindblur="onBlurPackPrice" />
               </view>
-              <view class="mini-step-btn plus {{ editProfile.packPrice >= 2000 ? 'mini-disabled' : '' }}" 
+              <view class="mini-step-btn plus {{ editProfile.packPrice >= 100 ? 'mini-disabled' : '' }}" 
                     bindtap="adjustPackPrice" data-delta="1" hover-class="step-hover">+</view>
             </view>
           </view>
@@ -239,7 +242,7 @@
       <!-- 实时状态条 -->
       <view class="dev-admin-hud-bar">
         <text class="dev-hud-txt">VIP: <text class="{{ devVipActive ? 'dev-c-gold' : 'dev-c-dim' }}">{{ devVipActive ? (devVipInfo.isLifetime ? '永久VIP' : '已开通') : '未开通' }}</text></text>
-        <text class="dev-hud-txt">戒烟: <text class="dev-c-cyan">{{ quitDays }}天</text></text>
+        <text class="dev-hud-txt">今日: <text class="dev-c-gold">{{ devDailySmokedCount || 0 }}支</text></text>
         <text class="dev-hud-txt">替烟: <text class="dev-c-green">{{ totalSubstituted }}支</text></text>
         <text class="dev-hud-txt">当前盒: <text class="dev-c-purple">{{ devCurrentPackCount }}支</text></text>
       </view>
@@ -294,17 +297,17 @@
             </view>
           </view>
 
-          <!-- 分组 4: 替烟支数与7日图表 (一行4个) -->
+          <!-- 分组 4: 替烟支数与趋势数据 (一行4个) -->
           <view class="dev-group">
-            <view class="dev-group-label">📊 替烟支数与趋势数据</view>
+            <view class="dev-group-label">📊 替烟支数与趋势数据 (今日已抽: {{ devDailySmokedCount || 0 }} 支)</view>
             <view class="dev-row-grid cols-4">
+              <view class="dev-btn btn-gold" bindtap="devAddDailySmoked10" hover-class="dev-btn-active">⚡ 今日+10支</view>
+              <view class="dev-btn btn-purple" bindtap="devSetDailySmoked40" hover-class="dev-btn-active">今日直达40</view>
               <view class="dev-btn btn-cyan" bindtap="devAddRecords" data-count="1" hover-class="dev-btn-active">替烟+1</view>
               <view class="dev-btn btn-cyan" bindtap="devAddRecords" data-count="5" hover-class="dev-btn-active">替烟+5</view>
-              <view class="dev-btn btn-cyan" bindtap="devAddRecords" data-count="20" hover-class="dev-btn-active">替烟+20</view>
-              <view class="dev-btn btn-blue" bindtap="devSetTotalRecords" data-count="60" hover-class="dev-btn-active">设为60支</view>
               <view class="dev-btn btn-blue" bindtap="devSetTotalRecords" data-count="100" hover-class="dev-btn-active">设为100支</view>
               <view class="dev-btn btn-blue" bindtap="devSetTotalRecords" data-count="500" hover-class="dev-btn-active">设为500支</view>
-              <view class="dev-btn btn-gray" bindtap="devClearRecords" hover-class="dev-btn-active">清空记录</view>
+              <view class="dev-btn btn-gray" bindtap="devClearDailySmoked" hover-class="dev-btn-active">清零今日抽吸</view>
               <view class="dev-btn btn-green" bindtap="devFill7DaysTrends" hover-class="dev-btn-active">填满7天图</view>
             </view>
           </view>
@@ -316,7 +319,7 @@
               <view class="dev-btn btn-orange" bindtap="devSetCurrentPackCount" data-count="0" hover-class="dev-btn-active">当前盒0支</view>
               <view class="dev-btn btn-orange" bindtap="devSetCurrentPackCount" data-count="1" hover-class="dev-btn-active">当前盒1支</view>
               <view class="dev-btn btn-green" bindtap="devRefillCurrentPack" hover-class="dev-btn-active">当前盒补满</view>
-              <view class="dev-btn btn-green" bindtap="devRefillAllPacks" hover-class="dev-btn-active">33款盒全满</view>
+              <view class="dev-btn btn-green" bindtap="devRefillAllPacks" hover-class="dev-btn-active">37款盒全满</view>
             </view>
           </view>
 
@@ -324,9 +327,9 @@
           <view class="dev-group">
             <view class="dev-group-label">🌟 展柜名烟、烟雾与成就解锁</view>
             <view class="dev-row-grid cols-4">
-              <view class="dev-btn btn-gold" bindtap="devUnlockAllCigarettes" hover-class="dev-btn-active">解锁33款烟</view>
+              <view class="dev-btn btn-gold" bindtap="devUnlockAllCigarettes" hover-class="dev-btn-active">解锁37款烟</view>
               <view class="dev-btn btn-gray" bindtap="devLockAllCigarettes" hover-class="dev-btn-active">锁定名烟</view>
-              <view class="dev-btn btn-purple" bindtap="devUnlockAllSmokeEffects" hover-class="dev-btn-active">解锁12款雾</view>
+              <view class="dev-btn btn-purple" bindtap="devUnlockAllSmokeEffects" hover-class="dev-btn-active">解锁6款雾</view>
               <view class="dev-btn btn-gray" bindtap="devLockAllSmokeEffects" hover-class="dev-btn-active">重置烟雾</view>
             </view>
             <view class="dev-row-grid cols-1" style="margin-top: 8rpx;">
@@ -334,7 +337,30 @@
             </view>
           </view>
 
-          <!-- 分组 7: 系统与维护 (一行3个) -->
+          <!-- 分组 7: 📜 16 阶成语境界称号快速步进 (实时换徽章) -->
+          <view class="dev-group">
+            <view class="dev-group-label">📜 16 阶成语境界称号快速步进 (实时换徽章)</view>
+            <view class="dev-row-grid cols-2">
+              <view class="dev-btn btn-blue" bindtap="devStepTitlePrev" hover-class="dev-btn-active">◀ 上一阶称号</view>
+              <view class="dev-btn btn-gold" bindtap="devStepTitleNext" hover-class="dev-btn-active">下一阶称号 ▶</view>
+            </view>
+            <view class="dev-row-grid cols-4" style="margin-top: 8rpx;">
+              <view class="dev-btn btn-green" bindtap="devSetTitleTier" data-title="积微成著" hover-class="dev-btn-active">积微成著</view>
+              <view class="dev-btn btn-cyan" bindtap="devSetTitleTier" data-title="从容自若" hover-class="dev-btn-active">从容自若</view>
+              <view class="dev-btn btn-amber" bindtap="devSetTitleTier" data-title="金石为开" hover-class="dev-btn-active">金石为开</view>
+              <view class="dev-btn btn-purple" bindtap="devSetTitleTier" data-title="返璞归真" hover-class="dev-btn-active">返璞归真</view>
+            </view>
+          </view>
+
+          <!-- 分组 8: 🌌 全域流光心境换肤即时切换 (20款) -->
+          <view class="dev-group">
+            <view class="dev-group-label">🌌 全域流光心境换肤即时切换 (20款高奢流光)</view>
+            <view class="dev-row-grid cols-1">
+              <view class="dev-btn btn-purple" bindtap="devCycleVipTheme" hover-class="dev-btn-active">🌌 循环切下一款换肤 (20款轮换)</view>
+            </view>
+          </view>
+
+          <!-- 分组 9: 系统与维护 (一行3个) -->
           <view class="dev-group">
             <view class="dev-group-label">⚙️ 系统维护与重置</view>
             <view class="dev-row-grid cols-3">
@@ -349,8 +375,6 @@
 
     </view>
   </view>
-  <!-- ==================== [DEV_ADMIN_TEST] 结束 ==================== -->
-
   <!-- 全局腾讯级灵动微胶囊 Toast HUD -->
   <custom-toast id="customToast" />
 

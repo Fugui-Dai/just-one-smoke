@@ -646,7 +646,7 @@ function getUserQuote(substituted = 0, days = 1) {
   if (days >= 30) return '跨过满月大关，呼吸如山风般纯净透亮！';
   if (days >= 7) return '挺过关键首周，意志坚如磐石，彻底告别焦油！';
   if (substituted >= 20) return '每一支被克制的烟，都是重获新生的勋章！';
-  if (substituted >= 5) return '自律起航，多替一支，离健康无烟就更近一步！';
+  if (substituted >= 5) return '自律起航，多少抽一支，离健康无烟就更近一步！';
   return '戒烟最好的时间是十年前，其次是现在！';
 }
 
@@ -686,6 +686,12 @@ export const leaderboardService = {
     // 获取用户称号对应专属品阶样式
     const myTitleMeta = getTitleMetaByName(myTitle);
 
+    // 公共竞技防刷防作弊铁律：
+    // 用户在偏好设置中填写的烟价属于私域个性化核算，绝对不可作为公共排行榜的排序依据！
+    // 否则用户若将烟价拉至最高 ¥2000，便能以数支替烟轻松刷上公域榜一。
+    // 公域榜单中统一以【全国标准参考基准价 ¥2.5/支（¥50/包）】核算公域榜单节余，杜绝作弊，捍卫自律公信力！
+    const publicStandardSavedMoney = Math.round((myStats.substituted || 0) * 2.5);
+
     // 构建当前用户榜单实体
     const meItem = {
       id: 'me',
@@ -694,7 +700,8 @@ export const leaderboardService = {
       avatar: '🌟',
       avatarUrl: (profile && profile.avatarUrl) ? profile.avatarUrl : '',
       substituted: myStats.substituted || 0,
-      savedMoney: myStats.savedMoney || 0,
+      savedMoney: publicStandardSavedMoney,
+      personalSavedMoney: myStats.savedMoney || 0,
       days: myStats.days || 1,
       title: myTitle,
       titleTier: myTitleMeta.tier,
@@ -764,7 +771,8 @@ export const leaderboardService = {
         titleBorderColor: myTitleMeta.borderColor,
         beatPercent,
         substituted: myStats.substituted,
-        savedMoney: myStats.savedMoney,
+        savedMoney: publicStandardSavedMoney,
+        personalSavedMoney: myStats.savedMoney,
         days: myStats.days,
         likes: meItem.likes,
         quote: meItem.quote

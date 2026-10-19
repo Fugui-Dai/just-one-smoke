@@ -85,11 +85,10 @@ export class FirePhoenix {
   constructor(x, y, variant = 0) {
     this.variant = variant;
     this.startX = x;
-    this.startY = y;
-    // 双凰伴飞对飞：variant 0 偏左，variant 1 偏右
-    this.x = variant === 1 ? (x + 30) : (x - 30);
+    // 默认单凰沿香烟中轴严格居中升腾 (vx = 0)；双凰伴飞时错层对称
+    this.x = variant === 1 ? (x + 30) : (variant === 2 ? (x - 30) : x);
     this.y = y;
-    this.vx = variant === 1 ? 0.38 : -0.38;
+    this.vx = variant === 1 ? 0.38 : (variant === 2 ? -0.38 : 0);
     this.vy = -2.25; // 史诗级稳健升腾翱翔速度，给用户充分欣赏视觉细节的时长
 
     this.age = 0;

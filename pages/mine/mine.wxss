@@ -2,7 +2,7 @@
 .mine-page-container {
   width: 100vw;
   height: 100vh;
-  background: radial-gradient(ellipse at 50% 0%, #131a29 0%, #080b12 55%, #020306 100%);
+  background: radial-gradient(ellipse at 50% 0%, #1e283d 0%, #131826 55%, #0e121d 100%);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -13,17 +13,17 @@
 
 .mine-page-container.theme-emerald,
 .mine-page-container.theme-day {
-  background: radial-gradient(circle at 50% 14%, rgba(16, 185, 129, 0.25) 0%, #0a1f19 48%, #060f0c 82%);
+  background: radial-gradient(circle at 50% 14%, rgba(16, 185, 129, 0.42) 0%, #103227 48%, #0a1f18 82%);
 }
 
 .mine-page-container.theme-purple,
 .mine-page-container.theme-month {
-  background: radial-gradient(circle at 50% 14%, rgba(168, 85, 247, 0.28) 0%, #1a0f2e 48%, #090612 82%);
+  background: radial-gradient(circle at 50% 14%, rgba(168, 85, 247, 0.42) 0%, #291747 48%, #140b24 82%);
 }
 
 .mine-page-container.theme-glacier,
 .mine-page-container.theme-lifetime {
-  background: radial-gradient(circle at 50% 14%, rgba(251, 191, 36, 0.28) 0%, rgba(180, 83, 9, 0.14) 38%, #141008 68%, #070604 88%);
+  background: radial-gradient(circle at 50% 14%, rgba(251, 191, 36, 0.45) 0%, rgba(180, 83, 9, 0.22) 38%, #261c0d 68%, #161007 88%);
 }
 
 /* ==================== 顶部自定义导航栏 ==================== */
@@ -398,11 +398,12 @@
 .compact-chip {
   flex: 1;
   text-align: center;
-  padding: 8rpx 0;
+  padding: 8rpx 4rpx;
   border-radius: 14rpx;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.09);
-  font-size: 22rpx;
+  font-size: 20rpx;
+  letter-spacing: -0.5rpx;
   font-weight: 600;
   color: #cbd5e1;
   transition: all 0.15s ease;
@@ -592,11 +593,13 @@
 .dev-c-green { color: #10b981; font-weight: 700; }
 .dev-c-purple { color: #a855f7; font-weight: 700; }
 
-/* 滚动与分区 */
 .dev-admin-scroll {
   flex: 1;
-  max-height: calc(86vh - 140rpx);
+  height: 72vh;
+  max-height: 76vh;
   box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .dev-admin-content-pad {
@@ -721,5 +724,6 @@
   opacity: 0.6;
 }
 /* ==================== [DEV_ADMIN_TEST] 结束 ==================== */
+
 
 

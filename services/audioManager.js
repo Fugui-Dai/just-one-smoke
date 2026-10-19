@@ -472,6 +472,76 @@ class AudioManager {
     }
   }
 
+  // 1.8 赛博等离子双弧高能放电与蜂鸣声 (Plasma Arc Zap & Hum)
+  playPlasmaArcSound() {
+    if (this.muted) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+      const t = ctx.currentTime;
+
+      // 1. 电弧初击穿脉冲噼啪 (Transient Zap Click)
+      const zapBuf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.08), ctx.sampleRate);
+      const zapData = zapBuf.getChannelData(0);
+      for (let i = 0; i < zapData.length; i++) {
+        zapData[i] = (Math.random() * 2 - 1) * Math.exp(-i / (zapData.length * 0.25));
+      }
+      const zapSrc = ctx.createBufferSource();
+      zapSrc.buffer = zapBuf;
+      const zapFilter = ctx.createBiquadFilter();
+      zapFilter.type = 'bandpass';
+      zapFilter.frequency.setValueAtTime(4500, t);
+      zapFilter.Q.setValueAtTime(2.0, t);
+      const zapGain = ctx.createGain();
+      zapGain.gain.setValueAtTime(0.45, t);
+      zapGain.gain.exponentialRampToValueAtTime(0.01, t + 0.08);
+      zapSrc.connect(zapFilter);
+      zapFilter.connect(zapGain);
+      this.connectToMaster(zapGain);
+      zapSrc.start(t);
+
+      // 2. 双载波高频等离子蜂鸣谐波 (Dual carrier high-frequency buzz with organic detuning)
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      osc1.type = 'sawtooth';
+      osc2.type = 'square';
+      osc1.frequency.setValueAtTime(1920, t);
+      osc2.frequency.setValueAtTime(2400, t);
+
+      // 120Hz 调制嗡鸣
+      const modOsc = ctx.createOscillator();
+      modOsc.frequency.setValueAtTime(120, t);
+      const modGain = ctx.createGain();
+      modGain.gain.setValueAtTime(0.3, t);
+      modOsc.connect(modGain.gain);
+
+      const mainGain = ctx.createGain();
+      mainGain.gain.setValueAtTime(0.001, t);
+      mainGain.gain.linearRampToValueAtTime(0.25, t + 0.03);
+      mainGain.gain.setValueAtTime(0.22, t + 0.25);
+      mainGain.gain.exponentialRampToValueAtTime(0.001, t + 0.38);
+
+      const bpFilter = ctx.createBiquadFilter();
+      bpFilter.type = 'bandpass';
+      bpFilter.frequency.setValueAtTime(2100, t);
+      bpFilter.Q.setValueAtTime(3.5, t);
+
+      osc1.connect(bpFilter);
+      osc2.connect(bpFilter);
+      bpFilter.connect(mainGain);
+      this.connectToMaster(mainGain);
+
+      osc1.start(t);
+      osc2.start(t);
+      modOsc.start(t);
+      osc1.stop(t + 0.4);
+      osc2.stop(t + 0.4);
+      modOsc.stop(t + 0.4);
+    } catch (e) {
+      console.warn('播放等离子双弧音效失败:', e);
+    }
+  }
+
   // 统一点火工具分发器
   playIgnitionSoundByTool(toolId) {
     if (this.muted) return;
@@ -484,6 +554,9 @@ class AudioManager {
         break;
       case 'blue_torch':
         this.playTorchSound();
+        break;
+      case 'plasma_arc':
+        this.playPlasmaArcSound();
         break;
       case 'car_lighter':
         this.playSizzleSound();
@@ -698,6 +771,56 @@ class AudioManager {
       this.connectToMaster(gain);
       osc.start(t);
       osc.stop(t + 0.07);
+    } catch {}
+  }
+
+  // 4.1 烟灰缸清空 ASMR 扫灰与微铜回响声
+  playAshtraySweepSound() {
+    if (this.muted) return;
+    try {
+      const ctx = this.getContext();
+      if (!ctx) return;
+      const t = ctx.currentTime;
+
+      // 柔和清风白噪微拂
+      const bufferSize = Math.floor(ctx.sampleRate * 0.25);
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.08));
+      }
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(1400, t);
+      filter.frequency.exponentialRampToValueAtTime(600, t + 0.22);
+
+      const nGain = ctx.createGain();
+      nGain.gain.setValueAtTime(0.32, t);
+      nGain.gain.exponentialRampToValueAtTime(0.005, t + 0.25);
+
+      noise.connect(filter);
+      filter.connect(nGain);
+      this.connectToMaster(nGain);
+      noise.start(t);
+
+      // 紫铜底托余音泛音 (880Hz -> 528Hz 极弱微鸣)
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, t + 0.08);
+      osc.frequency.exponentialRampToValueAtTime(528, t + 0.35);
+
+      const oGain = ctx.createGain();
+      oGain.gain.setValueAtTime(0.001, t);
+      oGain.gain.linearRampToValueAtTime(0.10, t + 0.08);
+      oGain.gain.exponentialRampToValueAtTime(0.001, t + 0.38);
+
+      osc.connect(oGain);
+      this.connectToMaster(oGain);
+      osc.start(t + 0.08);
+      osc.stop(t + 0.38);
     } catch {}
   }
 
@@ -1242,6 +1365,18 @@ class AudioManager {
       } else if (sceneType === 'sakura_night') {
         cutoffFreq = 280;
         targetGain = 0.052;
+      } else if (sceneType === 'cat_companion') {
+        cutoffFreq = 340;
+        targetGain = 0.058;
+      } else if (sceneType === 'totoro_rain' || sceneType === 'moonlit_dance') {
+        cutoffFreq = 360;
+        targetGain = 0.058;
+      } else if (sceneType === 'snoopy_stargazing' || sceneType === 'jazz_sway') {
+        cutoffFreq = 310;
+        targetGain = 0.052;
+      } else if (sceneType === 'cozy_family') {
+        cutoffFreq = 330;
+        targetGain = 0.056;
       }
 
       if (!this._ambientBuffers) {
@@ -1275,6 +1410,60 @@ class AudioManager {
             b1 = 0.988 * b1 + b0 * 0.16;
             const breath = 0.80 + 0.20 * Math.sin((i / bufferLength) * Math.PI * 2);
             raw[i] = b1 * 0.52 * breath;
+          }
+        } else if (sceneType === 'totoro_rain' || sceneType === 'moonlit_dance') {
+          // 雨夜龙猫：幽深森林细雨沙沙声 + 荷叶雨滴清润微鸣 (Forest Rain Bed with Leaf Droplet Harmonics)
+          let b0 = 0, b1 = 0;
+          for (let i = 0; i < totalGen; i++) {
+            const white = Math.random() * 2 - 1;
+            b0 = 0.9950 * b0 + white * 0.028;
+            b1 = 0.9850 * b1 + b0 * 0.17;
+            const forestBreeze = 0.72 + 0.28 * Math.sin((i / bufferLength) * Math.PI * 2);
+            // 荷叶水滴清脆泛音 (680Hz / 840Hz 晶莹露水滴落共鸣)
+            const leafDrop = 0.024 * Math.sin((i / sampleRate) * 2 * Math.PI * 680.0) * Math.exp(-((i % (sampleRate * 2.2)) / (sampleRate * 0.35))) +
+                             0.016 * Math.sin((i / sampleRate) * 2 * Math.PI * 840.0) * Math.exp(-(((i + sampleRate * 1.1) % (sampleRate * 2.2)) / (sampleRate * 0.35)));
+            raw[i] = (b1 * 0.48 + leafDrop) * forestBreeze;
+          }
+        } else if (sceneType === 'snoopy_stargazing' || sceneType === 'jazz_sway') {
+          // 史努比星空：宁静夏夜微风 + 复古留声机黑胶微弱温暖底噪 + 432Hz 疗愈星空和弦
+          let b0 = 0, b1 = 0;
+          for (let i = 0; i < totalGen; i++) {
+            const white = Math.random() * 2 - 1;
+            b0 = 0.9962 * b0 + white * 0.024;
+            b1 = 0.9885 * b1 + b0 * 0.16;
+            const nightBreeze = 0.75 + 0.25 * Math.sin((i / bufferLength) * Math.PI * 2);
+            // 432Hz 治愈大提琴温厚泛音
+            const starChime = 0.035 * Math.sin((i / sampleRate) * 2 * Math.PI * 432.0) * (0.8 + 0.2 * Math.sin((i / bufferLength) * Math.PI * 4));
+            raw[i] = (b1 * 0.50 + starChime) * nightBreeze;
+          }
+        } else if (sceneType === 'cat_companion') {
+          // 暖阁喵眠：案头温润猫咪呼噜呼噜声 (26Hz 基频与 52Hz 次泛音呼吸起伏调制) + 暖木书房静谧微风
+          let b0 = 0, b1 = 0;
+          for (let i = 0; i < totalGen; i++) {
+            const white = Math.random() * 2 - 1;
+            b0 = 0.9965 * b0 + white * 0.022;
+            b1 = 0.9890 * b1 + b0 * 0.16;
+            // 猫咪 3.8 秒一吸一呼的深度呼噜声调制 (Purr LFO)
+            const purrLFO = 0.62 + 0.38 * Math.sin((i / bufferLength) * Math.PI * 2 * (loopDur / 3.8));
+            // 26Hz 喉头颤音基频与 52Hz 温暖泛音
+            const purrTone = (0.052 * Math.sin((i / sampleRate) * 2 * Math.PI * 26.0) +
+                              0.032 * Math.sin((i / sampleRate) * 2 * Math.PI * 52.0)) * purrLFO;
+            raw[i] = (b1 * 0.46 + purrTone);
+          }
+        } else if (sceneType === 'cozy_family') {
+          // 温馨小家：壁炉柴火噼啪微响 + 528Hz 治愈心率泛音 + 窗外微弱夜风
+          let b0 = 0, b1 = 0;
+          for (let i = 0; i < totalGen; i++) {
+            const white = Math.random() * 2 - 1;
+            b0 = 0.9965 * b0 + white * 0.024;
+            b1 = 0.9880 * b1 + b0 * 0.16;
+            // 壁炉慢呼吸火光
+            const hearthBreath = 0.78 + 0.22 * Math.sin((i / bufferLength) * Math.PI * 2 * 1.5);
+            // 偶发木柴微弱爆裂噼啪火星声 (Wood Crackle Sparks)
+            const crackle = (Math.random() < 0.0008) ? (Math.random() * 0.18 - 0.09) : 0;
+            // 528Hz 疗愈泛音
+            const hearthChime = 0.028 * Math.sin((i / sampleRate) * 2 * Math.PI * 528.0) * (0.8 + 0.2 * Math.sin((i / bufferLength) * Math.PI * 2));
+            raw[i] = (b1 * 0.48 + crackle + hearthChime) * hearthBreath;
           }
         } else if (sceneType === 'sakura_night') {
           // 落樱夜庭：春夜微风拂落樱花瓣 + 极轻柔空灵夜音

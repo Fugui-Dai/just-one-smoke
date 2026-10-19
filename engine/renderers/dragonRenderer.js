@@ -261,7 +261,7 @@ export class GoldenDragon {
     this.startY = startY;
     this.variant = variant;
 
-    this.headX = startX + (variant === 0 ? -24 : 24);
+    this.headX = startX + (variant === 0 ? 0 : 24);
     this.headY = startY;
     this.prevHeadY = undefined;
     this.lastHeadAngle = -Math.PI / 2;

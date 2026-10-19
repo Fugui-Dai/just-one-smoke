@@ -540,13 +540,14 @@ export const INHALE_ICON_SVG = svgToUri(`
 </svg>
 `);
 
-// 3. 烟雾特效图标：袅袅仙云 · 3D环绕烟圈与璀璨星芒 (Ethereal Smoke Cloud & 3D Smoke Ring · 一眼辨识烟雾特效)
+// 3. 烟雾特效图标：袅袅仙云 · 3D环绕烟圈与璀璨星芒 (Ethereal Smoke Cloud & 3D Smoke Ring · 饱满视觉权重 · 一眼辨识烟雾特效)
 export const SMOKE_VFX_ICON_SVG = svgToUri(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
   <defs>
     <linearGradient id="cloudGrad" x1="0%" y1="100%" x2="0%" y2="0%">
-      <stop offset="0%" stop-color="#c084fc"/>
-      <stop offset="50%" stop-color="#e9d5ff"/>
+      <stop offset="0%" stop-color="#a855f7"/>
+      <stop offset="35%" stop-color="#c084fc"/>
+      <stop offset="70%" stop-color="#e9d5ff"/>
       <stop offset="100%" stop-color="#ffffff"/>
     </linearGradient>
     <linearGradient id="starGold" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -555,16 +556,197 @@ export const SMOKE_VFX_ICON_SVG = svgToUri(`
       <stop offset="100%" stop-color="#f59e0b"/>
     </linearGradient>
   </defs>
-  <!-- 袅袅升腾的仙气灵动烟云团 (云雾主形，一眼辨识为烟雾) -->
-  <path d="M 17 46 C 12 46 10 41 12 37 C 10 32 14 26 19 27 C 22 21 30 19 35 23 C 39 20 45 22 47 26 C 52 26 55 31 53 36 C 56 41 52 46 47 46 Z" fill="url(#cloudGrad)"/>
-  <!-- 云雾内部翻滚流线 -->
-  <path d="M 21 39 C 25 35 33 35 37 39 C 40 37 45 38 47 41" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" opacity="0.8"/>
-  <!-- 3D 吐出的圆润特效烟圈 (穿云而过) -->
-  <ellipse cx="28" cy="22" rx="12" ry="5.5" fill="none" stroke="#ffffff" stroke-width="2.6" transform="rotate(-15 28 22)"/>
+  <!-- 底部升腾流韵烟雾 (自底部延展，消除下部空旷死区) -->
+  <path d="M 24 58 C 24 53 28 50 32 47 C 36 50 40 53 40 58 Z" fill="#c084fc" opacity="0.35"/>
+  <path d="M 28 57 C 28 53 32 50 34 47 C 36 50 38 53 38 57 Z" fill="#e9d5ff" opacity="0.6"/>
+  <!-- 袅袅升腾的仙气灵动烟云团 (云雾主形，大幅饱满延展至 Y: 14~54，充满画面) -->
+  <path d="M 14 52 C 7 52 5 44 8 38 C 5 31 11 23 18 24 C 22 15 34 13 41 18 C 47 14 56 18 57 24 C 62 26 64 34 60 41 C 63 47 58 52 51 52 Z" fill="url(#cloudGrad)"/>
+  <!-- 云雾内部翻滚流线与通透层次 -->
+  <path d="M 18 42 C 24 36 34 36 40 42 C 44 38 50 40 54 44" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" opacity="0.85"/>
+  <path d="M 26 31 C 32 26 40 27 45 32" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" opacity="0.6"/>
+  <!-- 3D 吐出的圆润特效烟圈 (立体环绕烟云，醒目跃出) -->
+  <ellipse cx="28" cy="20" rx="14" ry="6.2" fill="none" stroke="#ffffff" stroke-width="3" transform="rotate(-15 28 20)"/>
+  <ellipse cx="28" cy="20" rx="14" ry="6.2" fill="none" stroke="#fef08a" stroke-width="1.2" transform="rotate(-15 28 20)" opacity="0.7"/>
   <!-- 魔法特效璀璨四芒星 (✦) -->
-  <path d="M 48 11 Q 48 17 54 17 Q 48 17 48 23 Q 48 17 42 17 Q 48 17 48 11 Z" fill="url(#starGold)"/>
-  <circle cx="48" cy="17" r="1.3" fill="#ffffff"/>
-  <circle cx="15" cy="22" r="1.2" fill="#fef08a"/>
+  <path d="M 50 7 Q 50 14 57 14 Q 50 14 50 21 Q 50 14 43 14 Q 50 14 50 7 Z" fill="url(#starGold)"/>
+  <circle cx="50" cy="14" r="1.6" fill="#ffffff"/>
+  <circle cx="12" cy="19" r="1.5" fill="#fef08a"/>
+</svg>
+`);
+
+// 3.1 经典空灵烟圈图标 (3D Toroidal Smoke Ring · 空灵冰蓝烟圈)
+export const EFFECT_RING_ICON_SVG = svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
+  <defs>
+    <radialGradient id="ringBgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#0284c7" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="50%" stop-color="#bae6fd"/>
+      <stop offset="100%" stop-color="#60a5fa"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="28" fill="url(#ringBgGlow)"/>
+  <!-- 底部升腾微缕轻烟 -->
+  <path d="M 30 54 Q 34 44 28 38 Q 32 34 32 30" fill="none" stroke="#93c5fd" stroke-width="2.2" stroke-linecap="round" opacity="0.6"/>
+  <!-- 主 3D 俯仰透视环形涡流大烟圈 -->
+  <ellipse cx="32" cy="28" rx="20" ry="9" fill="none" stroke="url(#ringGrad)" stroke-width="4.2" transform="rotate(-10 32 28)"/>
+  <!-- 烟圈内圈高光弧 -->
+  <ellipse cx="32" cy="28" rx="16.5" ry="6.5" fill="none" stroke="#ffffff" stroke-width="1.8" transform="rotate(-10 32 28)" opacity="0.9"/>
+  <!-- 伴飞的第2枚灵动微烟圈 -->
+  <ellipse cx="44" cy="16" rx="9" ry="4" fill="none" stroke="#ffffff" stroke-width="2.2" transform="rotate(12 44 16)" opacity="0.85"/>
+  <!-- 璀璨晶莹小星芒 -->
+  <polygon points="18,18 19.5,21 22.5,22 19.5,23 18,26 16.5,23 13.5,22 16.5,21" fill="#ffffff"/>
+  <circle cx="48" cy="38" r="1.5" fill="#bae6fd"/>
+</svg>
+`);
+
+// 3.2 双心微芒图标 (Concentric Double Hearts · 丘比特浪漫粉钻双心)
+export const EFFECT_HEART_ICON_SVG = svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
+  <defs>
+    <radialGradient id="heartBgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ec4899" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#be185d" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="heartGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="40%" stop-color="#f472b6"/>
+      <stop offset="100%" stop-color="#db2777"/>
+    </linearGradient>
+    <linearGradient id="heartGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbcfe8"/>
+      <stop offset="100%" stop-color="#ec4899"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="28" fill="url(#heartBgGlow)"/>
+  <!-- 主爱心轮廓 -->
+  <path d="M 32 48 C 32 48 12 36 12 24 C 12 16 18 12 24 12 C 28 12 31 15 32 18 C 33 15 36 12 40 12 C 46 12 52 16 52 24 C 52 36 32 48 32 48 Z" 
+        fill="none" stroke="url(#heartGrad1)" stroke-width="3.6" stroke-linejoin="round"/>
+  <!-- 同心伴飞内爱心 -->
+  <path d="M 32 40 C 32 40 20 31 20 23 C 20 18 24 16 27 16 C 29.5 16 31.5 18 32 20 C 32.5 18 34.5 16 37 16 C 40 16 44 18 44 23 C 44 31 32 40 32 40 Z" 
+        fill="url(#heartGrad2)" opacity="0.85"/>
+  <!-- 爱心高光切面 -->
+  <path d="M 17 21 C 17 17 21 15 24 15" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+  <!-- 丘比特星尘 -->
+  <polygon points="46,12 47.5,15 50.5,16 47.5,17 46,20 44.5,17 41.5,16 44.5,15" fill="#ffffff"/>
+  <circle cx="16" cy="38" r="1.6" fill="#fbcfe8"/>
+  <circle cx="48" cy="36" r="1.8" fill="#ffffff"/>
+</svg>
+`);
+
+// 3.3 金箔微雨图标 (24K Gold Stardust & Coin Shower · 曜世黑金暴富雨)
+export const EFFECT_GOLD_ICON_SVG = svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
+  <defs>
+    <radialGradient id="goldBgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#78350f" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="coinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="30%" stop-color="#fef08a"/>
+      <stop offset="70%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="28" fill="url(#goldBgGlow)"/>
+  <!-- 中央 3D 翻滚金币 -->
+  <ellipse cx="32" cy="28" rx="14" ry="14" fill="url(#coinGrad)" stroke="#fef08a" stroke-width="1.2"/>
+  <ellipse cx="32" cy="28" rx="10" ry="10" fill="none" stroke="#b45309" stroke-width="1.2"/>
+  <rect x="29" y="25" width="6" height="6" fill="#fef08a" stroke="#b45309" stroke-width="0.8"/>
+  <!-- 左上伴飞金币 -->
+  <ellipse cx="16" cy="20" rx="7" ry="5.5" fill="url(#coinGrad)" transform="rotate(-20 16 20)"/>
+  <!-- 右下坠落小金币 -->
+  <ellipse cx="46" cy="40" rx="8" ry="6" fill="url(#coinGrad)" transform="rotate(25 46 40)"/>
+  <!-- 漫天飘洒金条/金箔粒与金芒 -->
+  <rect x="20" y="42" width="7" height="3" rx="1" fill="#fef08a" transform="rotate(35 20 42)"/>
+  <rect x="42" y="16" width="6" height="2.5" rx="0.8" fill="#fef08a" transform="rotate(-15 42 16)"/>
+  <polygon points="32,8 33.5,12 37.5,13.5 33.5,15 32,19 30.5,15 26.5,13.5 30.5,12" fill="#ffffff"/>
+  <circle cx="14" cy="34" r="1.4" fill="#fef08a"/>
+  <circle cx="48" cy="26" r="1.6" fill="#ffffff"/>
+</svg>
+`);
+
+// 3.4 璀璨星河图标 (Galaxy Stars & Spiral Nebula · 深空幽蓝双旋臂星云)
+export const EFFECT_GALAXY_ICON_SVG = svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
+  <defs>
+    <radialGradient id="nebulaCore" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="35%" stop-color="#67e8f9"/>
+      <stop offset="70%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#1e1b4b" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="spiralGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#c084fc"/>
+    </linearGradient>
+  </defs>
+  <!-- 银河旋涡星云背景 -->
+  <circle cx="32" cy="32" r="28" fill="url(#nebulaCore)"/>
+  <!-- 双旋臂对向螺旋曲线 -->
+  <path d="M 32 32 C 38 28 46 30 50 36 C 54 42 50 50 42 52 C 34 54 24 50 20 42" 
+        fill="none" stroke="url(#spiralGrad)" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+  <path d="M 32 32 C 26 36 18 34 14 28 C 10 22 14 14 22 12 C 30 10 40 14 44 22" 
+        fill="none" stroke="url(#spiralGrad)" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+  <!-- 星核高亮八芒星 (✦) -->
+  <polygon points="32,18 34,28 44,30 34,32 32,42 30,32 20,30 30,28" fill="#ffffff"/>
+  <circle cx="32" cy="30" r="3" fill="#ffffff"/>
+  <!-- 伴星与闪烁微星 -->
+  <circle cx="48" cy="20" r="1.8" fill="#67e8f9"/>
+  <circle cx="16" cy="44" r="1.6" fill="#c084fc"/>
+  <circle cx="22" cy="22" r="1.3" fill="#ffffff"/>
+  <circle cx="42" cy="46" r="1.3" fill="#fef08a"/>
+</svg>
+`);
+
+// 3.5 迎祥福印图标 (Imperial Golden Seal & Blessing Rune · 迎祥纳福宝印)
+export const EFFECT_BLESSING_ICON_SVG = svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
+  <defs>
+    <radialGradient id="sealBgGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#dc2626" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#7f1d1d" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ef4444"/>
+      <stop offset="50%" stop-color="#dc2626"/>
+      <stop offset="100%" stop-color="#991b1b"/>
+    </linearGradient>
+    <linearGradient id="goldFont" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="40%" stop-color="#fef08a"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="28" fill="url(#sealBgGlow)"/>
+  <!-- 朱砂红底印章主体 -->
+  <rect x="14" y="14" width="36" height="36" rx="6" fill="url(#sealGrad)" stroke="#fef08a" stroke-width="2.4"/>
+  <!-- 烫金内边框回纹 -->
+  <rect x="18" y="18" width="28" height="28" rx="3" fill="none" stroke="#fef08a" stroke-width="1.2" opacity="0.85"/>
+  <!-- 印文：传统大篆“福”字立体造型 -->
+  <!-- 左示字旁 -->
+  <line x1="24" y1="23" x2="28" y2="23" stroke="url(#goldFont)" stroke-width="2.2" stroke-linecap="round"/>
+  <line x1="26" y1="23" x2="26" y2="39" stroke="url(#goldFont)" stroke-width="2.2" stroke-linecap="round"/>
+  <line x1="23" y1="29" x2="26" y2="33" stroke="url(#goldFont)" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="29" y1="30" x2="26" y2="35" stroke="url(#goldFont)" stroke-width="1.8" stroke-linecap="round"/>
+  <!-- 右侧一、口、田 -->
+  <line x1="32" y1="23" x2="40" y2="23" stroke="url(#goldFont)" stroke-width="2" stroke-linecap="round"/>
+  <rect x="33" y="26" width="6" height="4.5" rx="0.5" fill="none" stroke="url(#goldFont)" stroke-width="1.6"/>
+  <rect x="32" y="32" width="8" height="8" rx="0.5" fill="none" stroke="url(#goldFont)" stroke-width="1.8"/>
+  <line x1="36" y1="32" x2="36" y2="40" stroke="url(#goldFont)" stroke-width="1.4"/>
+  <line x1="32" y1="36" x2="40" y2="36" stroke="url(#goldFont)" stroke-width="1.4"/>
+  <!-- 四角祥云小金钻 -->
+  <circle cx="18" cy="18" r="1.2" fill="#fef08a"/>
+  <circle cx="46" cy="18" r="1.2" fill="#fef08a"/>
+  <circle cx="18" cy="46" r="1.2" fill="#fef08a"/>
+  <circle cx="46" cy="46" r="1.2" fill="#fef08a"/>
+  <!-- 宝印祥瑞金芒 -->
+  <polygon points="32,6 33.5,9.5 37,10.5 33.5,11.5 32,15 30.5,11.5 27,10.5 30.5,9.5" fill="#fef08a"/>
 </svg>
 `);
 
@@ -582,28 +764,36 @@ export const ASH_TAP_ICON_SVG = svgToUri(`
       <stop offset="60%" stop-color="#f8fafc"/>
       <stop offset="100%" stop-color="#cbd5e1"/>
     </linearGradient>
+    <linearGradient id="ashEmber" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ea580c"/>
+      <stop offset="50%" stop-color="#ef4444"/>
+      <stop offset="100%" stop-color="#fbbf24"/>
+    </linearGradient>
   </defs>
   <!-- 45度倾斜饱满香烟 (加粗加显，一目了然) -->
-  <g transform="rotate(45 32 32)">
+  <g transform="rotate(38 30 28)">
     <!-- 经典黄色过滤嘴 -->
-    <rect x="13" y="26" width="14" height="12" rx="2" fill="url(#corkGrad)"/>
+    <rect x="8" y="24" width="16" height="14" rx="2" fill="url(#corkGrad)"/>
     <!-- 滤嘴金箍圈 -->
-    <rect x="27" y="26" width="2" height="12" fill="#fef08a"/>
+    <rect x="24" y="24" width="2.5" height="14" fill="#fef08a"/>
     <!-- 纯白卷烟纸身 -->
-    <rect x="29" y="26" width="20" height="12" fill="url(#cigWhite)"/>
+    <rect x="26.5" y="24" width="22" height="14" fill="url(#cigWhite)"/>
     <!-- 烟头炭化灰黑环 -->
-    <rect x="49" y="26" width="3" height="12" fill="#475569"/>
+    <rect x="48.5" y="24" width="3.5" height="14" fill="#334155"/>
     <!-- 红热燃烧炭火心 -->
-    <rect x="52" y="26" width="2.5" height="12" rx="1" fill="#ef4444"/>
-    <circle cx="53" cy="32" r="2.2" fill="#fef08a"/>
+    <rect x="52" y="24" width="3.5" height="14" rx="1" fill="url(#ashEmber)"/>
+    <circle cx="53.5" cy="31" r="2.5" fill="#fef08a"/>
+    <circle cx="53.5" cy="31" r="1.2" fill="#ffffff"/>
   </g>
-  <!-- 抖落的 4 颗金红与烟灰颗粒 -->
-  <circle cx="46" cy="41" r="2.5" fill="#f59e0b"/>
-  <circle cx="53" cy="36" r="1.8" fill="#fbbf24"/>
-  <circle cx="42" cy="50" r="2.2" fill="#e2e8f0"/>
-  <circle cx="50" cy="48" r="1.6" fill="#ef4444"/>
-  <!-- 弹抖微震光弧 -->
-  <path d="M 40 18 C 45 16 50 18 53 22" fill="none" stroke="#fef08a" stroke-width="1.8" stroke-linecap="round"/>
+  <!-- 弹落的立体炭火灰烬颗粒 (大颗粒 + 明暗层次，一秒认出弹灰) -->
+  <circle cx="48" cy="42" r="3" fill="#f59e0b"/>
+  <circle cx="48" cy="42" r="1.2" fill="#fef08a"/>
+  <circle cx="56" cy="37" r="2.2" fill="#ef4444"/>
+  <circle cx="44" cy="52" r="2.6" fill="#e2e8f0"/>
+  <circle cx="53" cy="49" r="1.8" fill="#fbbf24"/>
+  <!-- 弹指微振冲击波弧线 (代表弹指轻敲手势) -->
+  <path d="M 12 16 C 18 12 25 14 28 18" fill="none" stroke="#fef08a" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M 8 20 C 13 17 19 18 21 21" fill="none" stroke="#f59e0b" stroke-width="1.6" stroke-linecap="round"/>
 </svg>
 `);
 
@@ -641,44 +831,96 @@ export const GIVE_CIG_ICON_SVG = svgToUri(`
 </svg>
 `);
 
-// 6. 商店图标：奢享名品店 · 经典波浪篷与展示橱窗 (Luxury Boutique Storefront · 商店百辨不误)
-export const VAULT_GALLERY_ICON_SVG = svgToUri(`
+// 6. 商店图标：奢享精品店铺 · 经典双色遮阳雨篷与暖光橱窗 (Luxury Boutique Storefront · 商店百辨不误)
+export const STORE_SHOP_ICON_SVG = svgToUri(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
   <defs>
+    <!-- 奢华金渐变 -->
+    <linearGradient id="shopGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fffbeb"/>
+      <stop offset="35%" stop-color="#fde68a"/>
+      <stop offset="70%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <!-- 雨篷深红条纹 -->
     <linearGradient id="awningRed" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#f87171"/>
-      <stop offset="100%" stop-color="#dc2626"/>
+      <stop offset="0%" stop-color="#dc2626"/>
+      <stop offset="100%" stop-color="#991b1b"/>
     </linearGradient>
-    <linearGradient id="awningWhite" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="100%" stop-color="#e2e8f0"/>
+    <!-- 雨篷金色条纹 -->
+    <linearGradient id="awningGold" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="60%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
     </linearGradient>
-    <linearGradient id="storeWall" x1="0%" y1="0%" x2="100%" y2="100%">
+    <!-- 店铺建筑墙体 -->
+    <linearGradient id="shopWall" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="50%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <!-- 橱窗暖光 -->
+    <linearGradient id="windowGlow" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#fef3c7"/>
-      <stop offset="100%" stop-color="#fde68a"/>
+      <stop offset="60%" stop-color="#fde047"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <!-- 玻璃门光泽 -->
+    <linearGradient id="doorGlass" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#0284c7" stop-opacity="0.9"/>
     </linearGradient>
   </defs>
-  <!-- 屋檐顶横梁 -->
-  <rect x="10" y="13" width="44" height="5" rx="1.5" fill="#f59e0b"/>
-  <line x1="13" y1="15.5" x2="51" y2="15.5" stroke="#ffffff" stroke-width="1.2"/>
-  <!-- 醒目红白相间经典波浪遮阳篷 (最具辨识度的商店符号) -->
-  <path d="M 10 18 L 18 18 L 16 29 C 16 31 12 31 10 29 Z" fill="url(#awningRed)"/>
-  <path d="M 18 18 L 27 18 L 27 29 C 27 31 22 31 20 29 Z" fill="url(#awningWhite)"/>
-  <path d="M 27 18 L 37 18 L 38 29 C 38 31 33 31 31 29 Z" fill="url(#awningRed)"/>
-  <path d="M 37 18 L 46 18 L 44 29 C 44 31 41 31 39 29 Z" fill="url(#awningWhite)"/>
-  <path d="M 46 18 L 54 18 L 52 29 C 52 31 48 31 46 29 Z" fill="url(#awningRed)"/>
-  <!-- 店铺主体墙体 -->
-  <rect x="12" y="28" width="40" height="23" rx="1.5" fill="url(#storeWall)"/>
-  <!-- 左侧展示橱窗 (通透天蓝与反光) -->
-  <rect x="16" y="33" width="17" height="13" rx="1.5" fill="#38bdf8"/>
-  <line x1="19" y1="35" x2="27" y2="44" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" opacity="0.85"/>
-  <!-- 右侧金碧店门 -->
-  <rect x="37" y="33" width="11" height="18" rx="1.5" fill="#f59e0b"/>
-  <circle cx="39.5" cy="42" r="1.3" fill="#ffffff"/>
-  <!-- 门前基座石阶 -->
-  <rect x="9" y="51" width="46" height="4" rx="1.5" fill="#d97706"/>
+
+  <!-- 1. 顶部招牌与星芒 -->
+  <polygon points="32,4 33.5,8 37.5,9.5 33.5,11 32,15 30.5,11 26.5,9.5 30.5,8" fill="#fef08a"/>
+  <circle cx="32" cy="9.5" r="1.5" fill="#ffffff"/>
+
+  <!-- 2. 店铺墙体主体 -->
+  <rect x="13" y="27" width="38" height="28" rx="2" fill="url(#shopWall)" stroke="url(#shopGold)" stroke-width="1.2"/>
+
+  <!-- 3. 橱窗展示区 (左侧大型暖光展示窗) -->
+  <rect x="17" y="32" width="17" height="17" rx="2.5" fill="url(#windowGlow)" stroke="#fef08a" stroke-width="0.8"/>
+  <!-- 橱窗内展架与展品微影 -->
+  <line x1="17" y1="42" x2="34" y2="42" stroke="#b45309" stroke-width="1" stroke-opacity="0.6"/>
+  <rect x="20" y="36" width="4.5" height="6" rx="1" fill="#b91c1c" stroke="#fef08a" stroke-width="0.6"/>
+  <rect x="26.5" y="35" width="4.5" height="7" rx="1" fill="#d97706" stroke="#fef08a" stroke-width="0.6"/>
+
+  <!-- 4. 商店玻璃进门 (右侧经典双开店门) -->
+  <rect x="37" y="32" width="11" height="23" rx="1.5" fill="url(#doorGlass)" stroke="url(#shopGold)" stroke-width="0.8"/>
+  <line x1="42.5" y1="32" x2="42.5" y2="55" stroke="url(#shopGold)" stroke-width="0.7"/>
+  <!-- 门把手 -->
+  <circle cx="41.2" cy="44" r="1.1" fill="#fef08a"/>
+  <circle cx="43.8" cy="44" r="1.1" fill="#fef08a"/>
+
+  <!-- 5. 经典双色波浪遮阳雨篷 (The Boutique Striped Awning) -->
+  <!-- 条纹1 (左深红) -->
+  <path d="M 12 15 L 20 15 L 18.5 28 C 16.5 29 12 29 10.5 28 Z" fill="url(#awningRed)"/>
+  <!-- 条纹2 (金) -->
+  <path d="M 20 15 L 28 15 L 27.5 28 C 25.5 29 20.5 29 18.5 28 Z" fill="url(#awningGold)"/>
+  <!-- 条纹3 (中深红) -->
+  <path d="M 28 15 L 36 15 L 36.5 28 C 34.5 29 29.5 29 27.5 28 Z" fill="url(#awningRed)"/>
+  <!-- 条纹4 (金) -->
+  <path d="M 36 15 L 44 15 L 45.5 28 C 43.5 29 38.5 29 36.5 28 Z" fill="url(#awningGold)"/>
+  <!-- 条纹5 (右深红) -->
+  <path d="M 44 15 L 52 15 L 53.5 28 C 52 29 47.5 29 45.5 28 Z" fill="url(#awningRed)"/>
+
+  <!-- 篷顶金属边梁 -->
+  <rect x="11" y="14" width="42" height="2.5" rx="1" fill="url(#shopGold)"/>
+  <!-- 篷沿波浪花边装饰线 -->
+  <path d="M 10.5 28 Q 14.5 31 18.5 28 Q 23 31 27.5 28 Q 32 31 36.5 28 Q 41 31 45.5 28 Q 49.5 31 53.5 28" 
+        fill="none" stroke="url(#shopGold)" stroke-width="1.2" stroke-linecap="round"/>
+
+  <!-- 6. 店铺门口大理石台阶 -->
+  <rect x="9" y="55" width="46" height="4.5" rx="1.5" fill="url(#shopGold)" stroke="#78350f" stroke-width="0.8"/>
+  <line x1="10" y1="56.2" x2="54" y2="56.2" stroke="#ffffff" stroke-width="0.8" opacity="0.6"/>
+
+  <!-- 7. 右上角璀璨闪烁高光星 -->
+  <polygon points="52,10 53.2,13.5 56.5,14 53.2,14.5 52,18 50.8,14.5 47.5,14 50.8,13.5" fill="#fef08a"/>
 </svg>
 `);
+
+export const VAULT_GALLERY_ICON_SVG = STORE_SHOP_ICON_SVG;
 
 // 7. 排行榜图标：冠军金杯 · 荣耀之巅奖杯 (Golden Champion Trophy Cup · 绝顶胜者榜首)
 export const LEADERBOARD_TROPHY_SVG = svgToUri(`
@@ -797,35 +1039,45 @@ export const SOUND_MUTE_ICON_SVG = svgToUri(`
 </svg>
 `);
 
-// 11. 抽烟环境图标：峻岭雪山 · 晨曦红日与环山祥云 (Majestic Mountain Peaks & Rising Sun · 沉浸场景环境)
+// 11. 抽烟环境图标：天地穹顶 · 日月同辉与极光山峦 (Celestial Atmosphere World & Mountain Peaks · 环境场景一眼秒识)
 export const SCENE_AMBIENT_ICON_SVG = svgToUri(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
   <defs>
     <linearGradient id="mainPeak" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="35%" stop-color="#a7f3d0"/>
-      <stop offset="100%" stop-color="#059669"/>
+      <stop offset="35%" stop-color="#6ee7b7"/>
+      <stop offset="100%" stop-color="#047857"/>
     </linearGradient>
     <linearGradient id="backPeak" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#34d399"/>
-      <stop offset="100%" stop-color="#047857"/>
+      <stop offset="100%" stop-color="#064e3b"/>
     </linearGradient>
     <linearGradient id="sunGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="40%" stop-color="#fef08a"/>
+      <stop offset="35%" stop-color="#fef08a"/>
       <stop offset="100%" stop-color="#f59e0b"/>
     </linearGradient>
+    <linearGradient id="orbitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#67e8f9"/>
+      <stop offset="50%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#fef08a"/>
+    </linearGradient>
   </defs>
-  <!-- 晨曦红日 / 皎月 -->
-  <circle cx="45" cy="18" r="8" fill="url(#sunGrad)"/>
+  <!-- 宏伟时空天球外环轨道 (宇宙穹顶感，代表时空与环境) -->
+  <ellipse cx="32" cy="32" rx="27" ry="12" fill="none" stroke="url(#orbitGrad)" stroke-width="1.4" opacity="0.75" transform="rotate(-25 32 32)"/>
+  <circle cx="10" cy="21" r="1.5" fill="#67e8f9"/>
+  <!-- 晨曦红日与皎月金辉 -->
+  <circle cx="44" cy="18" r="7.5" fill="url(#sunGrad)"/>
+  <ellipse cx="46" cy="16" rx="3.5" ry="3.5" fill="#ffffff" opacity="0.6"/>
   <!-- 后山峻岭 -->
-  <polygon points="39,23 57,49 21,49" fill="url(#backPeak)"/>
+  <polygon points="38,22 56,48 20,48" fill="url(#backPeak)"/>
   <!-- 前景巍峨雪山主峰 -->
-  <polygon points="21,18 41,49 1,49" fill="url(#mainPeak)"/>
+  <polygon points="21,17 42,48 1,48" fill="url(#mainPeak)"/>
   <!-- 银雪高光峰顶 -->
-  <polygon points="21,18 27,27 23,28 20,26 16,28" fill="#ffffff"/>
+  <polygon points="21,17 27,27 23,28 20,26 16,28" fill="#ffffff"/>
   <!-- 环山流云祥雾 -->
-  <path d="M 16 46 C 16 41 21 39 26 39 C 29 36 35 36 38 39 C 42 39 46 41 46 46 C 46 49 42 51 26 51 Z" fill="#ffffff" opacity="0.95"/>
+  <path d="M 14 46 C 14 41 19 39 25 39 C 29 36 35 36 39 39 C 43 39 48 41 48 46 C 48 49 43 51 25 51 Z" fill="#ffffff" opacity="0.9"/>
+  <circle cx="53" cy="40" r="1.2" fill="#ffffff"/>
 </svg>
 `);
 
@@ -1101,20 +1353,54 @@ export const TOOL_BLUE_TORCH_SVG = svgToUri(`
 </svg>
 `);
 
-// 4. 车载电热点烟器 (通红螺旋电阻发热丝 + 金属套筒插拔握钮)
-export const TOOL_CAR_LIGHTER_SVG = svgToUri(`
+// 4. 赛博等离子双弧打火机 (航天钛金机身 + 4枚陶瓷电极柱 + 交叉高能紫青双弧)
+export const TOOL_PLASMA_ARC_SVG = svgToUri(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%">
-  <!-- 外发光辐射圈 -->
-  <circle cx="32" cy="26" r="17" fill="none" stroke="#ea580c" stroke-width="1" opacity="0.4"/>
-  <!-- 炽热通红螺旋盘香电阻丝 -->
-  <circle cx="32" cy="26" r="14" fill="#7c2d12" stroke="#ea580c" stroke-width="2.5"/>
-  <path d="M 32 15 A 11 11 0 1 1 23 33 A 8 8 0 1 1 32 20 A 5 5 0 1 1 32 26" fill="none" stroke="#ffedd5" stroke-width="2.2" stroke-linecap="round"/>
-  <circle cx="32" cy="26" r="2.5" fill="#fed7aa"/>
-  <!-- 插入式圆柱底座套筒与手柄 -->
-  <path d="M 24 38 L 40 38 L 38 52 L 26 52 Z" fill="#1e293b" stroke="#f97316" stroke-width="1.5"/>
-  <rect x="28" y="52" width="8" height="6" rx="2" fill="#475569" stroke="#94a3b8" stroke-width="1"/>
+  <defs>
+    <linearGradient id="plasmaBodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="50%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <radialGradient id="plasmaHaloGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="35%" stop-color="#c084fc"/>
+      <stop offset="70%" stop-color="#7c3aed" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- 高能电离背景光晕 -->
+  <circle cx="32" cy="18" r="16" fill="url(#plasmaHaloGrad)"/>
+  <!-- 4枚高压绝缘陶瓷电极柱 -->
+  <rect x="21" y="20" width="4" height="8" rx="1.5" fill="#94a3b8" stroke="#475569" stroke-width="0.8"/>
+  <circle cx="23" cy="21" r="1.2" fill="#e2e8f0"/>
+  <rect x="39" y="20" width="4" height="8" rx="1.5" fill="#94a3b8" stroke="#475569" stroke-width="0.8"/>
+  <circle cx="41" cy="21" r="1.2" fill="#e2e8f0"/>
+  <rect x="21" y="10" width="4" height="8" rx="1.5" fill="#94a3b8" stroke="#475569" stroke-width="0.8"/>
+  <circle cx="23" cy="15" r="1.2" fill="#e2e8f0"/>
+  <rect x="39" y="10" width="4" height="8" rx="1.5" fill="#94a3b8" stroke="#475569" stroke-width="0.8"/>
+  <circle cx="41" cy="15" r="1.2" fill="#e2e8f0"/>
+  <!-- 交叉高能等离子双弧 (X型电离电浆) -->
+  <path d="M 23 21 Q 28 16 32 17 Q 36 18 41 15" fill="none" stroke="#c084fc" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M 23 15 Q 28 18 32 17 Q 36 16 41 21" fill="none" stroke="#38bdf8" stroke-width="2.4" stroke-linecap="round"/>
+  <!-- 交叉核心超高能白炽光斑 -->
+  <circle cx="32" cy="17" r="2.8" fill="#ffffff"/>
+  <circle cx="32" cy="17" r="4.8" fill="none" stroke="#e0e7ff" stroke-width="0.8" opacity="0.85"/>
+  <!-- 航天钛金长方形机身 -->
+  <rect x="19" y="27" width="26" height="31" rx="4" fill="url(#plasmaBodyGrad)" stroke="#a855f7" stroke-width="1.8"/>
+  <!-- 机身极客发光电量指示柱 -->
+  <rect x="29" y="33" width="6" height="2" rx="1" fill="#38bdf8"/>
+  <rect x="29" y="37" width="6" height="2" rx="1" fill="#a855f7"/>
+  <rect x="29" y="41" width="6" height="2" rx="1" fill="#a855f7"/>
+  <rect x="29" y="45" width="6" height="2" rx="1" fill="#475569"/>
+  <!-- 触摸点火微动按键 -->
+  <circle cx="32" cy="52" r="2.2" fill="none" stroke="#a855f7" stroke-width="1"/>
+  <circle cx="32" cy="52" r="1" fill="#c084fc"/>
 </svg>
 `);
+
+// 向后兼容保留
+export const TOOL_CAR_LIGHTER_SVG = TOOL_PLASMA_ARC_SVG;
 
 // 5. Zippo 纯铜打火机 (标志性掀盖 45度角 + 防风烟囱气孔 + 金黄油焰)
 export const TOOL_ZIPPO_VINTAGE_SVG = svgToUri(`
@@ -1251,4 +1537,59 @@ export const HUD_LEAD_CURVES = {
 </svg>
 `)
 };
+
+// ============================================================================
+// 18. 🪙 紫铜托盘/烟灰缸 高清跨端矢量图标 (全平台免 Emoji 缺失问题)
+// ============================================================================
+export const ASHTRAY_BRONZE_ICON_SVG = svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="100%" height="100%">
+  <defs>
+    <radialGradient id="ashtrayRimGrad" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="25%" stop-color="#d97706"/>
+      <stop offset="70%" stop-color="#78350f"/>
+      <stop offset="100%" stop-color="#451a03"/>
+    </radialGradient>
+    <radialGradient id="ashtrayBedGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#262626"/>
+      <stop offset="70%" stop-color="#171717"/>
+      <stop offset="100%" stop-color="#0a0a0a"/>
+    </radialGradient>
+  </defs>
+  <!-- 外盘紫铜金属底圈 -->
+  <circle cx="24" cy="24" r="22" fill="url(#ashtrayRimGrad)" stroke="#fef08a" stroke-width="1.5"/>
+  <circle cx="24" cy="24" r="19" fill="none" stroke="#f59e0b" stroke-width="0.8" stroke-dasharray="2 1.5" opacity="0.6"/>
+  <!-- 内部凹槽 -->
+  <circle cx="24" cy="24" r="16" fill="url(#ashtrayBedGrad)" stroke="#78350f" stroke-width="1"/>
+  <!-- 搁烟金属凹槽 (左右上三向) -->
+  <rect x="2" y="22" width="8" height="4" rx="2" fill="#d97706"/>
+  <rect x="38" y="22" width="8" height="4" rx="2" fill="#d97706"/>
+  <rect x="22" y="2" width="4" height="8" rx="2" fill="#d97706"/>
+  <!-- 底部微距暖金星点 -->
+  <circle cx="20" cy="22" r="1.5" fill="#ca8a04"/>
+  <circle cx="27" cy="25" r="1.2" fill="#991b1b"/>
+  <circle cx="23" cy="28" r="1.8" fill="#e5e7eb" opacity="0.8"/>
+</svg>
+`);
+
+// 扫帚/拂尘清洗图标
+export const BROOM_CLEAN_ICON_SVG = svgToUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="100%" height="100%">
+  <!-- 斜向木质柄 -->
+  <line x1="38" y1="10" x2="22" y2="26" stroke="#fef08a" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="39" cy="9" r="2.5" fill="#f59e0b"/>
+  <!-- 扎绳接箍 -->
+  <rect x="18" y="24" width="8" height="4" rx="1.5" fill="#d97706" transform="rotate(-45 22 26)"/>
+  <!-- 棕刷毛 / 拂尘 (金黄渐变) -->
+  <path d="M 20 28 L 8 40 C 7 42 10 44 14 42 L 24 32 Z" fill="#fde047" stroke="#ca8a04" stroke-width="1"/>
+  <!-- 刷毛丝纹 -->
+  <line x1="16" y1="31" x2="9" y2="40" stroke="#b45309" stroke-width="1"/>
+  <line x1="19" y1="33" x2="12" y2="42" stroke="#b45309" stroke-width="1"/>
+  <!-- 扬起的微尘光星 -->
+  <circle cx="10" cy="26" r="1.5" fill="#fef08a" opacity="0.85"/>
+  <circle cx="6" cy="32" r="1.2" fill="#ffffff" opacity="0.9"/>
+  <circle cx="16" cy="20" r="1.2" fill="#fef08a" opacity="0.7"/>
+</svg>
+`);
+
 

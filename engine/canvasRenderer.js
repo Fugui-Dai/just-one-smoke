@@ -87,6 +87,8 @@ export class CanvasRenderer {
       screenFogAlpha,
       sceneType,
       isSparking,
+      sparkStartTime,
+      sparkDuration,
       ignitionTool,
       vipTheme,
       ashTapProgress // 0.0 ~ 1.0 抖灰阻尼弹性微振动画进度
@@ -131,16 +133,28 @@ export class CanvasRenderer {
     // 0.5 腾讯大师级 · 指节轻弹烟身物理阻尼微动效 (Elastic Damped Ash-Tap Kinematics)
     // 模拟食指轻弹滤嘴侧面的自然物理响应：侧向微移 + 极微小俯仰角度倾斜，呈现高质量弹簧正弦衰减
     // ==========================================
+    // ==========================================
+    // 0.5 腾讯大师级 · 弹性悬臂梁二阶阻尼抖灰微动效与吸烟气流动压动力学
+    // 模拟烟身作为悬臂梁在手指轻弹滤嘴侧面时的阻尼谐振响应 (Cantilever Beam 1st Mode Vibration)
+    // 烟嘴端锚定微动，燃烧端与烟灰尖端振幅随梁长二次方放大；吸烟时伴随微弱吸入气流动压微沉
+    // ==========================================
     let tapShakeX = 0;
     let tapShakeAngle = 0;
     if (typeof ashTapProgress === 'number' && ashTapProgress >= 0 && ashTapProgress < 1.0) {
       const tapT = ashTapProgress; // 0 ~ 1
-      // 指节轻弹微振：衰减包络 e^(-5.5t) * sin(26t * PI)
-      const dampEnv = Math.exp(-6.2 * tapT);
-      const sineWave = Math.sin(tapT * Math.PI * 6.5);
-      tapShakeX = 3.6 * dampEnv * sineWave;
-      tapShakeAngle = 0.018 * dampEnv * sineWave; // ~1.0° 优雅微倾微振
+      // 真实二阶欠阻尼弹簧包络：e^(-6.8t) * sin(24t * PI)
+      const dampEnv = Math.exp(-6.8 * tapT);
+      const sineWave = Math.sin(tapT * Math.PI * 6.8);
+      tapShakeX = 4.2 * dampEnv * sineWave;
+      tapShakeAngle = 0.022 * dampEnv * sineWave; // ~1.25° 优雅弹性悬臂回弹
     }
+
+    // 保持烟支平稳从容质感，消除高频微颤抖动
+    const microTremorX = 0;
+    const microTremorAngle = 0;
+
+    // 锁定烟嘴锚点高度，确保抽完或吸气松开时绝对不出现上下位移
+    const inhaleSuctionY = 0;
 
     // ==========================================
     const cx = w / 2;
@@ -151,7 +165,7 @@ export class CanvasRenderer {
     const topW = cigDims.topW;
     const filterRatio = cigDims.filterRatio;
 
-    const cy = h * 0.65; // 烟嘴底部锚点
+    const cy = h * 0.65; // 烟嘴底部锚点绝对锁定恒定坐标，杜绝任何轻微上移或沉降
     const filterH = Math.round(maxCigH * filterRatio);
     const maxPaperH = maxCigH - filterH;
     const paperH = maxPaperH * progress;
@@ -162,9 +176,19 @@ export class CanvasRenderer {
     // 手卷旱烟底部锚点（烟嘴与烟身通体合一，从 fireY 一体延伸至 cy + filterH，绝无独立接缝烟嘴）
     const hanyanBottomY = cy + filterH;
     // 当前燃烧口宽度 (喇叭筒手卷旱烟沿通体一体锥度随燃烧下移平滑收窄，机制烟恒定 cigW)
-    const curTopW = curCig.widthType === 'hand_rolled'
-      ? (cigW + (topW - cigW) * ((hanyanBottomY - fireY) / Math.max(1, maxCigH)))
-      : cigW;
+    let curTopW = cigW;
+    if (curCig.widthType === 'hand_rolled') {
+      curTopW = cigW + (topW - cigW) * ((hanyanBottomY - fireY) / Math.max(1, maxCigH));
+    } else if (curCig.id === 'eiffel_tower') {
+      // 埃菲尔铁塔从塔尖向底座逐渐变宽 (塔尖 ~10px -> 第一平台 ~34px)
+      curTopW = topW + (cigW - topW) * (1.0 - progress);
+    } else if (curCig.id === 'pyramid_giza') {
+      // 吉萨金字塔从金尖 (topW ~8px) 扩大至底座 (cigW ~36px)
+      curTopW = topW + (cigW - topW) * (1.0 - progress);
+    } else if (curCig.id === 'oriental_pearl') {
+      // 东方明珠天线针尖向中下段扩张
+      curTopW = topW + (cigW - topW) * (1.0 - progress) * 0.7;
+    }
 
     const filterBase = curCig.filterColor || '#991b1b';
     const paperBase = curCig.paperColor || '#fffdf5';
@@ -172,11 +196,15 @@ export class CanvasRenderer {
 
     // 施加烟身整体受力微振动几何变换 (以滤嘴底部 cy + filterH 为旋转支点)
     ctx.save();
-    if (tapShakeX !== 0 || tapShakeAngle !== 0) {
+    const finalShakeX = tapShakeX + microTremorX;
+    // 比萨斜塔专属 3.15° (~0.055 rad) 物理倾斜力学设计
+    const pisaLeanAngle = curCig.id === 'pisa_leaning' ? -0.055 : 0;
+    const finalShakeAngle = tapShakeAngle + microTremorAngle + pisaLeanAngle;
+    if (finalShakeX !== 0 || finalShakeAngle !== 0) {
       const pivotY = cy + filterH;
       ctx.translate(cx, pivotY);
-      ctx.rotate(tapShakeAngle);
-      ctx.translate(-cx + tapShakeX, -pivotY);
+      ctx.rotate(finalShakeAngle);
+      ctx.translate(-cx + finalShakeX, -pivotY);
     }
 
     // ==========================================
@@ -184,28 +212,206 @@ export class CanvasRenderer {
     // ==========================================
     ctx.save();
     const isHandRolled = curCig.widthType === 'hand_rolled';
-    const shadowY = cy + filterH + (isHandRolled ? 10 : 18);
-    const shadowR = isHandRolled ? cigW * 1.4 : cigW * 1.8;
+    const isEiffel = curCig.id === 'eiffel_tower';
+    const shadowY = cy + filterH + (isHandRolled ? 10 : (isEiffel ? 14 : 18));
+    const shadowR = isHandRolled ? cigW * 1.4 : (isEiffel ? cigW * 1.9 : cigW * 1.8);
     const shadowGrad = ctx.createRadialGradient(cx, shadowY, 3, cx, shadowY, shadowR);
     shadowGrad.addColorStop(0, 'rgba(0, 0, 0, 0.75)');
     shadowGrad.addColorStop(0.5, 'rgba(0, 0, 0, 0.35)');
     shadowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
     ctx.fillStyle = shadowGrad;
     ctx.beginPath();
-    drawEllipse(ctx, cx, shadowY, isHandRolled ? cigW * 1.15 : cigW * 1.6, isHandRolled ? 6 : 9);
+    drawEllipse(ctx, cx, shadowY, isHandRolled ? cigW * 1.15 : (isEiffel ? cigW * 1.7 : cigW * 1.6), isHandRolled ? 6 : 9);
     ctx.fill();
     ctx.restore();
 
     // ==========================================
-    // 3. 过滤嘴 / 古巴雪茄标 3D 圆柱体微距写实渐变渲染 (手卷旱烟通体一体无独立过滤嘴)
+    // 3. 过滤嘴 / 名筑底座 / 古巴雪茄标 3D 微距写实渲染
     // ==========================================
-    const fGrad = ctx.createLinearGradient(cx - cigW / 2, 0, cx + cigW / 2, 0);
-    fGrad.addColorStop(0, 'rgba(0, 0, 0, 0.40)');
-    fGrad.addColorStop(0.2, 'rgba(255, 255, 255, 0.32)');
-    fGrad.addColorStop(0.55, 'rgba(255, 255, 255, 0.06)');
-    fGrad.addColorStop(1, 'rgba(0, 0, 0, 0.45)');
+    if (curCig.id === 'eiffel_tower') {
+      // -------------------------------------------------------------
+      // 🏛️ 埃菲尔铁塔专属 3D 拱门底座 (Eiffel Tower Grand Arch Base & Pedestals)
+      // -------------------------------------------------------------
+      ctx.save();
+      const baseTopW = cigW * 0.92; // 1层平台底宽 ~31px
+      const baseBotW = cigW * 1.38; // 落地柱脚外展宽 ~47px
+      const baseH = filterH;
+      const legThickness = 9.5;
 
-    if (curCig.widthType !== 'hand_rolled') {
+      // 绘制左腿、右腿与中央双曲大拱门外轮廓
+      ctx.beginPath();
+      ctx.moveTo(cx - baseTopW / 2, cy);
+      ctx.lineTo(cx - baseBotW / 2, cy + baseH);
+      ctx.lineTo(cx - baseBotW / 2 + legThickness, cy + baseH);
+      ctx.lineTo(cx - baseBotW / 2 + legThickness + 2, cy + baseH * 0.85);
+      ctx.bezierCurveTo(
+        cx - baseTopW * 0.28, cy + baseH * 0.28,
+        cx + baseTopW * 0.28, cy + baseH * 0.28,
+        cx + baseBotW / 2 - legThickness - 2, cy + baseH * 0.85
+      );
+      ctx.lineTo(cx + baseBotW / 2 - legThickness, cy + baseH);
+      ctx.lineTo(cx + baseBotW / 2, cy + baseH);
+      ctx.lineTo(cx + baseTopW / 2, cy);
+      ctx.closePath();
+
+      // 3D 铁塔古铜金属渐变
+      const archGrad = ctx.createLinearGradient(cx - baseBotW / 2, 0, cx + baseBotW / 2, 0);
+      archGrad.addColorStop(0, '#1c160e');
+      archGrad.addColorStop(0.18, '#634b1c');
+      archGrad.addColorStop(0.35, '#c5a059');
+      archGrad.addColorStop(0.50, '#fef08a');
+      archGrad.addColorStop(0.68, '#b48a3c');
+      archGrad.addColorStop(0.85, '#634b1c');
+      archGrad.addColorStop(1.0, '#1c160e');
+      ctx.fillStyle = archGrad;
+      ctx.fill();
+
+      // 拱门大圆弧加强筋 (Arch Flange)
+      ctx.strokeStyle = '#fde047';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(cx - baseBotW / 2 + legThickness + 1, cy + baseH * 0.88);
+      ctx.bezierCurveTo(
+        cx - baseTopW * 0.28, cy + baseH * 0.28,
+        cx + baseTopW * 0.28, cy + baseH * 0.28,
+        cx + baseBotW / 2 - legThickness - 1, cy + baseH * 0.88
+      );
+      ctx.stroke();
+
+      // 柱腿内的 X-桁架钢构
+      ctx.strokeStyle = 'rgba(254, 240, 138, 0.65)';
+      ctx.lineWidth = 0.9;
+      // 左腿交叉梁
+      ctx.beginPath();
+      ctx.moveTo(cx - baseTopW / 2, cy + 4);
+      ctx.lineTo(cx - baseBotW / 2 + legThickness, cy + baseH * 0.5);
+      ctx.moveTo(cx - baseTopW / 2 + legThickness * 0.8, cy + 4);
+      ctx.lineTo(cx - baseBotW / 2, cy + baseH * 0.5);
+      ctx.stroke();
+      // 右腿交叉梁
+      ctx.beginPath();
+      ctx.moveTo(cx + baseTopW / 2, cy + 4);
+      ctx.lineTo(cx + baseBotW / 2 - legThickness, cy + baseH * 0.5);
+      ctx.moveTo(cx + baseTopW / 2 - legThickness * 0.8, cy + 4);
+      ctx.lineTo(cx + baseBotW / 2, cy + baseH * 0.5);
+      ctx.stroke();
+
+      // 1层平台 (Premier étage) 金色主平台梁
+      const p1H = 9.0;
+      const p1W = baseTopW + 4;
+      ctx.fillStyle = '#b48a3c';
+      ctx.fillRect(cx - p1W / 2, cy - 2, p1W, p1H);
+      ctx.fillStyle = '#fef08a';
+      ctx.fillRect(cx - p1W / 2, cy - 2, p1W, 1.8);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+      ctx.fillRect(cx - p1W / 2, cy + p1H - 3, p1W, 1.2);
+
+      // 平台中央烫金“PARIS 1889”铭文
+      ctx.font = 'bold 7px sans-serif';
+      ctx.fillStyle = '#1e1b4b';
+      ctx.textAlign = 'center';
+      ctx.fillText('PARIS 1889', cx, cy + 5.5);
+
+      // 左右基座支承墩石 (Masonry Pedestal Feet)
+      ctx.fillStyle = '#64748b';
+      ctx.fillRect(cx - baseBotW / 2 - 1.5, cy + baseH - 4.5, legThickness + 3, 5);
+      ctx.fillRect(cx + baseBotW / 2 - legThickness - 1.5, cy + baseH - 4.5, legThickness + 3, 5);
+
+      ctx.restore();
+    } else if (curCig.id === 'pisa_leaning') {
+      // -------------------------------------------------------------
+      // 🏛️ 比萨斜塔专属底座 (Pisa Romanesque Blind Arcade Base)
+      // -------------------------------------------------------------
+      ctx.save();
+      const pisaW = cigW;
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillRect(cx - pisaW / 2, cy, pisaW, filterH);
+      const pfGrad = ctx.createLinearGradient(cx - pisaW / 2, 0, cx + pisaW / 2, 0);
+      pfGrad.addColorStop(0, 'rgba(0, 0, 0, 0.40)');
+      pfGrad.addColorStop(0.22, 'rgba(255, 255, 255, 0.55)');
+      pfGrad.addColorStop(0.65, 'rgba(255, 255, 255, 0.12)');
+      pfGrad.addColorStop(1, 'rgba(0, 0, 0, 0.45)');
+      ctx.fillStyle = pfGrad;
+      ctx.fillRect(cx - pisaW / 2, cy, pisaW, filterH);
+
+      // 底层盲拱券 (Blind Arcades)
+      const numBlind = 5;
+      const bGap = pisaW / numBlind;
+      for (let bi = 0; bi < numBlind; bi++) {
+        const bx = cx - pisaW / 2 + bi * bGap + bGap * 0.5;
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.45)';
+        ctx.beginPath();
+        ctx.arc(bx, cy + 10, bGap * 0.32, Math.PI, 0);
+        ctx.lineTo(bx + bGap * 0.32, cy + filterH - 4);
+        ctx.lineTo(bx - bGap * 0.32, cy + filterH - 4);
+        ctx.closePath();
+        ctx.fill();
+      }
+      // 顶部大理石飞檐与托斯卡纳绿金饰带
+      ctx.fillStyle = '#059669';
+      ctx.fillRect(cx - pisaW / 2, cy, pisaW, 3.5);
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(cx - pisaW / 2, cy + 3.5, pisaW, 1.2);
+      ctx.restore();
+    } else if (curCig.id === 'pyramid_giza') {
+      // -------------------------------------------------------------
+      // 🏛️ 吉萨金字塔专属巨石基座 (Giza Megalithic Foundation)
+      // -------------------------------------------------------------
+      ctx.save();
+      const pyrBaseW = cigW * 1.05;
+      ctx.fillStyle = '#18181b';
+      ctx.fillRect(cx - pyrBaseW / 2, cy, pyrBaseW, filterH);
+      // 金色阶梯线与荷鲁斯之眼底纹
+      ctx.fillStyle = '#d97706';
+      ctx.fillRect(cx - pyrBaseW / 2, cy, pyrBaseW, 3.0);
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(cx - pyrBaseW / 2, cy + 3.0, pyrBaseW, 1.5);
+      // 象形文字金字金纹
+      ctx.font = 'bold 7.5px sans-serif';
+      ctx.fillStyle = 'rgba(251, 191, 36, 0.85)';
+      ctx.textAlign = 'center';
+      ctx.fillText('GIZA BC2560', cx, cy + 18);
+      ctx.restore();
+    } else if (curCig.id === 'oriental_pearl') {
+      // -------------------------------------------------------------
+      // 🏛️ 东方明珠专属下球体与三斜撑底座 (Oriental Pearl Lower Sphere & Tripod)
+      // -------------------------------------------------------------
+      ctx.save();
+      const pW = cigW;
+      // 下球体 (Lower Sphere 50m)
+      const s1R = 12.0;
+      const s1Y = cy + filterH * 0.42;
+      const s1Grad = ctx.createRadialGradient(cx - 3, s1Y - 3, 1, cx, s1Y, s1R);
+      s1Grad.addColorStop(0, '#ffffff');
+      s1Grad.addColorStop(0.35, '#fb7185');
+      s1Grad.addColorStop(0.72, '#be185d');
+      s1Grad.addColorStop(1.0, '#700730');
+      ctx.fillStyle = s1Grad;
+      ctx.beginPath();
+      ctx.arc(cx, s1Y, s1R, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 三根外斜撑巨柱
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.moveTo(cx - 4, s1Y + s1R * 0.7);
+      ctx.lineTo(cx - pW * 0.65, cy + filterH);
+      ctx.moveTo(cx + 4, s1Y + s1R * 0.7);
+      ctx.lineTo(cx + pW * 0.65, cy + filterH);
+      ctx.stroke();
+
+      // 顶部钛金箍圈
+      ctx.fillStyle = '#ec4899';
+      ctx.fillRect(cx - pW / 2, cy, pW, 3.0);
+      ctx.restore();
+    } else if (curCig.widthType !== 'hand_rolled') {
+      const fGrad = ctx.createLinearGradient(cx - cigW / 2, 0, cx + cigW / 2, 0);
+      fGrad.addColorStop(0, 'rgba(0, 0, 0, 0.40)');
+      fGrad.addColorStop(0.2, 'rgba(255, 255, 255, 0.32)');
+      fGrad.addColorStop(0.55, 'rgba(255, 255, 255, 0.06)');
+      fGrad.addColorStop(1, 'rgba(0, 0, 0, 0.45)');
+
       // 工业过滤嘴 / 古巴雪茄标 3D 圆柱体微距写实渐变渲染
       ctx.fillStyle = filterBase;
       ctx.fillRect(cx - cigW / 2, cy, cigW, filterH);
@@ -278,18 +484,39 @@ export class CanvasRenderer {
         }
         ctx.restore();
 
-        // 过滤嘴与烟身交界处精细饰线/金箍 (Accent Band Line - 贴合接缝 cy，1:1 对标真烟与呈现页)
-        const bandH = 2.0;
-        ctx.fillStyle = curCig.bandColor || 'rgba(217, 119, 6, 0.90)';
-        ctx.fillRect(cx - cigW / 2, cy, cigW, bandH);
-        // 微弱圆柱立体高光，使饰线质感纯正立体
-        const bandShineGrad = ctx.createLinearGradient(cx - cigW / 2, 0, cx + cigW / 2, 0);
-        bandShineGrad.addColorStop(0, 'rgba(0, 0, 0, 0.25)');
-        bandShineGrad.addColorStop(0.3, 'rgba(255, 255, 255, 0.45)');
-        bandShineGrad.addColorStop(0.65, 'rgba(255, 255, 255, 0.05)');
-        bandShineGrad.addColorStop(1, 'rgba(0, 0, 0, 0.35)');
+        // 过滤嘴与烟身交界处精细饰线/金箍 (Accent Band Line - 腾讯主美级：各向异性烫金流光与微浮雕槽线)
+        const bandH = 2.4;
+        const bandY = cy;
+        const bandX0 = cx - cigW / 2;
+        const bandX1 = cx + cigW / 2;
+
+        // 1. 各向异性金属烫金渐变 (Anisotropic Gold Foil Specularity)
+        const bandShineGrad = ctx.createLinearGradient(bandX0, 0, bandX1, 0);
+        bandShineGrad.addColorStop(0, '#78350f');
+        bandShineGrad.addColorStop(0.18, '#d97706');
+        bandShineGrad.addColorStop(0.32, '#fef08a');
+        bandShineGrad.addColorStop(0.48, '#ffffff'); // 镜面极亮高光
+        bandShineGrad.addColorStop(0.62, '#f59e0b');
+        bandShineGrad.addColorStop(0.82, '#b45309');
+        bandShineGrad.addColorStop(1.0, '#451a03');
         ctx.fillStyle = bandShineGrad;
-        ctx.fillRect(cx - cigW / 2, cy, cigW, bandH);
+        ctx.fillRect(bandX0, bandY, cigW, bandH);
+
+        // 2. 金属高光质感 (固定优雅金属镜面质感，杜绝流光移动干扰)
+        const staticGleamX = bandX0 + cigW * 0.42;
+        const staticGleamW = cigW * 0.28;
+        const gleamGrad = ctx.createLinearGradient(staticGleamX - staticGleamW, 0, staticGleamX + staticGleamW, 0);
+        gleamGrad.addColorStop(0, 'rgba(255, 255, 255, 0)');
+        gleamGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.35)');
+        gleamGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = gleamGrad;
+        ctx.fillRect(bandX0, bandY, cigW, bandH);
+
+        // 3. 上下双微浮雕槽线 (Embossed Micro-Grooves)
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.38)';
+        ctx.fillRect(bandX0, bandY, cigW, 0.5);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.48)';
+        ctx.fillRect(bandX0, bandY + bandH - 0.5, cigW, 0.5);
 
         // 过滤嘴上的烫金英文字体与金色微颗粒 (实机同款: CHAOTIANMEN / CHUNGHWA)
         ctx.save();
@@ -327,7 +554,8 @@ export class CanvasRenderer {
     const burntRatio = Math.max(0, Math.min(1.0, 1.0 - progress));
 
     // 1) 烟嘴柱体物理焦油浸润染色 (普通机制烟，随烟支长度变短逐渐焦黄暗化)
-    if (burntRatio > 0.01 && curCig.widthType !== 'hand_rolled') {
+    const isLandmarkFilter = ['eiffel_tower', 'pisa_leaning', 'pyramid_giza', 'oriental_pearl'].includes(curCig.id);
+    if (burntRatio > 0.01 && curCig.widthType !== 'hand_rolled' && !isLandmarkFilter) {
       ctx.save();
       const stainAlpha = Math.min(0.85, burntRatio * 0.9);
       const nicStainGrad = ctx.createLinearGradient(0, cy, 0, cy + filterH);
@@ -347,7 +575,7 @@ export class CanvasRenderer {
     }
 
     // 2) 烟嘴底端 3D 吸嘴切面与焦油凝聚环 (普通机制烟与雪茄)
-    if (curCig.widthType !== 'hand_rolled') {
+    if (curCig.widthType !== 'hand_rolled' && !isLandmarkFilter) {
       ctx.save();
       const mouthY = cy + filterH;
       const mouthGrad = ctx.createRadialGradient(cx, mouthY, 2, cx, mouthY, cigW / 2);
@@ -455,6 +683,16 @@ export class CanvasRenderer {
         ctx.arc(cx, beadY, beadR, 0, Math.PI * 2);
         ctx.fill();
 
+        // 腾讯总监级 · 内部双折射菲涅尔焦散核心 (Internal Caustic Core)
+        const causticGrad = ctx.createRadialGradient(cx + 0.6, beadY + 0.6, 0.2, cx + 0.6, beadY + 0.6, beadR * 0.58);
+        causticGrad.addColorStop(0, 'rgba(255, 255, 255, 0.85)');
+        causticGrad.addColorStop(0.45, hexToRgba(beadColor, 0.88));
+        causticGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = causticGrad;
+        ctx.beginPath();
+        ctx.arc(cx + 0.6, beadY + 0.6, beadR * 0.58, 0, Math.PI * 2);
+        ctx.fill();
+
         // 外层高反差纯白水晶壳体环
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.92)';
         ctx.lineWidth = 1.05;
@@ -474,6 +712,7 @@ export class CanvasRenderer {
         ctx.beginPath();
         ctx.arc(cx, beadY, beadR - 1.2, Math.PI * 0.25, Math.PI * 0.75);
         ctx.stroke();
+        this._beadSprayEmitted = false;
       } else {
         // 4.2 已捏破：与“咔啪！”音效同步的拟真过程（一点点微晶原液四处分散流淌 -> 被海绵迅速吸住收干 -> 只留下淡淡印子 + 清晰的碎裂扁瘪残壳）
         if (this.beadFlowStartTime === null || this.beadFlowStartTime === undefined) {
@@ -482,9 +721,13 @@ export class CanvasRenderer {
         const flowElapsed = Math.max(0, this.time - this.beadFlowStartTime);
 
         // ----------------------------------------------------
-        // 阶段一 (0s ~ 0.16s)：指尖重捏瞬态脆裂爆开（壳体受力压扁、蛛网脆裂）
+        // 阶段一 (0s ~ 0.16s)：指尖重捏瞬态脆裂爆开（壳体受力压扁、蛛网脆裂、微米香精液滴外溅）
         // ----------------------------------------------------
         if (flowElapsed < 0.16) {
+          if (!this._beadSprayEmitted && particles && typeof particles.emitBeadSpray === 'function') {
+            this._beadSprayEmitted = true;
+            particles.emitBeadSpray(cx, beadY, beadColor);
+          }
           const crackProg = Math.min(1.0, flowElapsed / 0.16);
           const pinchFactor = Math.sin(crackProg * Math.PI * 0.5);
           const rx = beadR * (1.0 + 0.22 * pinchFactor);
@@ -836,6 +1079,360 @@ export class CanvasRenderer {
         ctx.stroke();
 
         ctx.restore(); // 对应手卷旱烟整体的 save
+      } else if (curCig.id === 'eiffel_tower') {
+        // -------------------------------------------------------------
+        // 🏛️ 埃菲尔铁塔专属 3D 钢构全景一根烟 (Eiffel Tower Silhouette & Lattice)
+        // -------------------------------------------------------------
+        const getEiffelHalfW = (y) => {
+          const u = Math.max(0, Math.min(1.0, (cy - y) / Math.max(1, maxPaperH)));
+          if (u >= 0.88) return 2.0; // 塔尖避雷针
+          if (u >= 0.84) return 4.8; // 3层顶层观景台穹顶
+          if (u >= 0.40) {
+            // 2层至3层修长主塔身
+            const t = (0.84 - u) / (0.84 - 0.40);
+            return 4.8 + t * (8.5 - 4.8);
+          }
+          if (u >= 0.36) return 11.2; // 2层观景台突出平台
+          // 1层至2层下段主塔身 (逐步外扩至底座平台)
+          const t = (0.36 - u) / 0.36;
+          return 9.0 + t * (15.5 - 9.0);
+        };
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(cx - getEiffelHalfW(fireY), fireY);
+        for (let y = fireY; y <= cy; y += 3) {
+          ctx.lineTo(cx - getEiffelHalfW(y), y);
+        }
+        ctx.lineTo(cx - getEiffelHalfW(cy), cy);
+        ctx.lineTo(cx + getEiffelHalfW(cy), cy);
+        for (let y = cy; y >= fireY; y -= 3) {
+          ctx.lineTo(cx + getEiffelHalfW(y), y);
+        }
+        ctx.lineTo(cx + getEiffelHalfW(fireY), fireY);
+        ctx.closePath();
+
+        // 3D 埃菲尔铁塔青铜/香槟金高光金属渐变
+        const eGrad = ctx.createLinearGradient(cx - 16, 0, cx + 16, 0);
+        eGrad.addColorStop(0, '#262017');
+        eGrad.addColorStop(0.18, '#785c2c');
+        eGrad.addColorStop(0.36, '#c5a059');
+        eGrad.addColorStop(0.50, '#fef08a');
+        eGrad.addColorStop(0.68, '#b48a3c');
+        eGrad.addColorStop(0.85, '#543e18');
+        eGrad.addColorStop(1.0, '#1c160e');
+        ctx.fillStyle = eGrad;
+        ctx.fill();
+
+        ctx.save();
+        ctx.clip();
+
+        // 1. 经典 X-桁架钢构交叉梁 (X-Bracing Trusses)
+        ctx.strokeStyle = 'rgba(254, 240, 138, 0.65)';
+        ctx.lineWidth = 0.9;
+        const trussStep = 13;
+        for (let ly = cy - 4; ly >= fireY; ly -= trussStep) {
+          const w1 = getEiffelHalfW(ly);
+          const w2 = getEiffelHalfW(Math.max(fireY, ly - trussStep));
+          ctx.beginPath();
+          ctx.moveTo(cx - w1 * 0.88, ly);
+          ctx.lineTo(cx + w2 * 0.88, Math.max(fireY, ly - trussStep));
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(cx + w1 * 0.88, ly);
+          ctx.lineTo(cx - w2 * 0.88, Math.max(fireY, ly - trussStep));
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(cx - w1 * 0.95, ly);
+          ctx.lineTo(cx + w1 * 0.95, ly);
+          ctx.stroke();
+        }
+
+        // 2. 中央电梯轨道立柱 (Central Lift Tracks)
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx, fireY);
+        ctx.stroke();
+
+        // 3. 2层主观景台 (Deuxième étage) 金色护栏与走廊
+        const deck2Y = cy - maxPaperH * 0.385;
+        if (fireY < deck2Y) {
+          const d2w = getEiffelHalfW(deck2Y);
+          ctx.fillStyle = '#fde047';
+          ctx.fillRect(cx - d2w, deck2Y - 1.5, d2w * 2, 3.0);
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+          ctx.fillRect(cx - d2w, deck2Y + 1.5, d2w * 2, 1.2);
+        }
+
+        // 4. 3层顶层观景台 (Sommet) 穹顶走廊
+        const deck3Y = cy - maxPaperH * 0.86;
+        if (fireY < deck3Y) {
+          const d3w = getEiffelHalfW(deck3Y);
+          ctx.fillStyle = '#fef08a';
+          ctx.fillRect(cx - d3w, deck3Y - 1.2, d3w * 2, 2.4);
+        }
+
+        // 5. 铁塔夜景闪烁星芒节点 (Paris Golden Sparkles)
+        const sparkleTime = this.time * 4.0;
+        for (let sy = cy - 8; sy >= fireY; sy -= 18) {
+          const sw = getEiffelHalfW(sy);
+          const blink1 = 0.4 + 0.6 * Math.sin(sparkleTime + sy * 0.5);
+          const blink2 = 0.4 + 0.6 * Math.cos(sparkleTime + sy * 0.7);
+          ctx.fillStyle = `rgba(255, 255, 255, ${blink1.toFixed(2)})`;
+          ctx.fillRect(cx - sw * 0.85 - 0.7, sy - 0.7, 1.4, 1.4);
+          ctx.fillStyle = `rgba(254, 240, 138, ${blink2.toFixed(2)})`;
+          ctx.fillRect(cx + sw * 0.85 - 0.7, sy - 0.7, 1.4, 1.4);
+        }
+
+        // 6. 吸烟升温向下热漫射 (GI Thermal Downward Bleed)
+        if (isLit && emberIntensity > 0 && paperH > 2) {
+          const bleedH = Math.min(paperH, 32);
+          const bleedGrad = ctx.createLinearGradient(0, fireY, 0, fireY + bleedH);
+          bleedGrad.addColorStop(0, `rgba(255, 140, 20, ${(0.42 * emberIntensity).toFixed(2)})`);
+          bleedGrad.addColorStop(0.4, `rgba(249, 115, 22, ${(0.22 * emberIntensity).toFixed(2)})`);
+          bleedGrad.addColorStop(1.0, 'rgba(249, 115, 22, 0)');
+          ctx.fillStyle = bleedGrad;
+          ctx.fillRect(cx - 20, fireY, 40, bleedH);
+        }
+
+        ctx.restore(); // clip
+        ctx.restore(); // main
+      } else if (curCig.id === 'pisa_leaning') {
+        // -------------------------------------------------------------
+        // 🏛️ 比萨斜塔专属 3D 罗马柱廊白大理石回廊 (Pisa Leaning Tower Colonnades)
+        // -------------------------------------------------------------
+        ctx.save();
+        const pisaW = cigW;
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(cx - pisaW / 2, fireY, pisaW, paperH);
+
+        const pisaGrad = ctx.createLinearGradient(cx - pisaW / 2, 0, cx + pisaW / 2, 0);
+        pisaGrad.addColorStop(0, 'rgba(0, 0, 0, 0.32)');
+        pisaGrad.addColorStop(0.22, 'rgba(255, 255, 255, 0.65)');
+        pisaGrad.addColorStop(0.55, 'rgba(255, 255, 255, 0.15)');
+        pisaGrad.addColorStop(1, 'rgba(0, 0, 0, 0.42)');
+        ctx.fillStyle = pisaGrad;
+        ctx.fillRect(cx - pisaW / 2, fireY, pisaW, paperH);
+
+        ctx.save();
+        ctx.beginPath();
+        drawRect(ctx, cx - pisaW / 2, fireY, pisaW, paperH);
+        ctx.clip();
+
+        const tierH = maxPaperH / 7.2;
+        const colCount = 6;
+        const colGap = pisaW / colCount;
+
+        for (let ty = cy; ty >= fireY - tierH; ty -= tierH) {
+          ctx.fillStyle = '#e2e8f0';
+          ctx.fillRect(cx - pisaW / 2, ty - 2.5, pisaW, 2.5);
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
+          ctx.fillRect(cx - pisaW / 2, ty, pisaW, 1.2);
+          
+          for (let ci = 0; ci < colCount; ci++) {
+            const colX = cx - pisaW / 2 + ci * colGap + colGap * 0.5;
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.58)';
+            ctx.beginPath();
+            ctx.arc(colX, ty - tierH + 5, colGap * 0.32, Math.PI, 0);
+            ctx.lineTo(colX + colGap * 0.32, ty - 2.5);
+            ctx.lineTo(colX - colGap * 0.32, ty - 2.5);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(colX - colGap * 0.44, ty - tierH + 4, 1.6, tierH - 6.5);
+          }
+        }
+
+        const bellY = cy - maxPaperH * 0.90;
+        if (fireY <= bellY) {
+          ctx.fillStyle = '#cbd5e1';
+          ctx.fillRect(cx - pisaW * 0.38, bellY - 8, pisaW * 0.76, 8);
+          ctx.fillStyle = '#78350f';
+          ctx.beginPath();
+          ctx.arc(cx, bellY - 3, 2.5, Math.PI, 0);
+          ctx.fill();
+        }
+
+        ctx.restore(); // clip
+        ctx.restore(); // main
+      } else if (curCig.id === 'pyramid_giza') {
+        // -------------------------------------------------------------
+        // 🏛️ 吉萨金字塔专属 3D 曜金阶梯金字塔 (Great Pyramid of Giza)
+        // -------------------------------------------------------------
+        ctx.save();
+        const getPyrHalfW = (y) => {
+          const norm = Math.max(0, Math.min(1.0, (cy - y) / Math.max(1, maxPaperH)));
+          return 18.0 - norm * 15.5;
+        };
+
+        ctx.beginPath();
+        ctx.moveTo(cx - getPyrHalfW(fireY), fireY);
+        for (let y = fireY; y <= cy; y += 3) {
+          ctx.lineTo(cx - getPyrHalfW(y), y);
+        }
+        ctx.lineTo(cx - getPyrHalfW(cy), cy);
+        ctx.lineTo(cx + getPyrHalfW(cy), cy);
+        for (let y = cy; y >= fireY; y -= 3) {
+          ctx.lineTo(cx + getPyrHalfW(y), y);
+        }
+        ctx.lineTo(cx + getPyrHalfW(fireY), fireY);
+        ctx.closePath();
+
+        const pyrGrad = ctx.createLinearGradient(cx - 18, 0, cx + 18, 0);
+        pyrGrad.addColorStop(0, '#78350f');
+        pyrGrad.addColorStop(0.35, '#f59e0b');
+        pyrGrad.addColorStop(0.50, '#fef08a');
+        pyrGrad.addColorStop(0.68, '#d97706');
+        pyrGrad.addColorStop(1.0, '#451a03');
+        ctx.fillStyle = pyrGrad;
+        ctx.fill();
+
+        ctx.save();
+        ctx.clip();
+
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.32)';
+        ctx.lineWidth = 0.9;
+        const blockStep = 7.5;
+        for (let by = cy - 4; by >= fireY; by -= blockStep) {
+          const bw = getPyrHalfW(by);
+          ctx.beginPath();
+          ctx.moveTo(cx - bw, by);
+          ctx.lineTo(cx + bw, by);
+          ctx.stroke();
+
+          const stagger = (Math.floor(by / blockStep) % 2) * 5.0;
+          for (let bx = cx - bw + 3 + stagger; bx < cx + bw - 2; bx += 9) {
+            ctx.beginPath();
+            ctx.moveTo(bx, by);
+            ctx.lineTo(bx, by - blockStep);
+            ctx.stroke();
+          }
+        }
+
+        const capstoneY = cy - maxPaperH * 0.82;
+        if (fireY < capstoneY) {
+          ctx.fillStyle = '#fef08a';
+          ctx.beginPath();
+          ctx.moveTo(cx, cy - maxPaperH);
+          ctx.lineTo(cx - getPyrHalfW(capstoneY), capstoneY);
+          ctx.lineTo(cx + getPyrHalfW(capstoneY), capstoneY);
+          ctx.closePath();
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1.0;
+          ctx.stroke();
+        }
+
+        const eyeY = cy - maxPaperH * 0.45;
+        if (fireY < eyeY - 10) {
+          ctx.save();
+          ctx.strokeStyle = '#fef08a';
+          ctx.fillStyle = '#fef08a';
+          ctx.lineWidth = 1.3;
+          ctx.beginPath();
+          ctx.arc(cx, eyeY, 4.5, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(cx, eyeY, 2.0, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.lineWidth = 0.8;
+          for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
+            ctx.moveTo(cx + Math.cos(a) * 5.5, eyeY + Math.sin(a) * 5.5);
+            ctx.lineTo(cx + Math.cos(a) * 8.5, eyeY + Math.sin(a) * 8.5);
+          }
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        ctx.restore(); // clip
+        ctx.restore(); // main
+      } else if (curCig.id === 'oriental_pearl') {
+        // -------------------------------------------------------------
+        // 🏛️ 东方明珠专属 3D 太空舱双球天际线一根烟 (Shanghai Oriental Pearl Tower)
+        // -------------------------------------------------------------
+        ctx.save();
+        const getPearlHalfW = (y) => {
+          const norm = Math.max(0, Math.min(1.0, (cy - y) / Math.max(1, maxPaperH)));
+          if (norm > 0.86) return 2.0;
+          if (norm > 0.80) return 4.5;
+          if (norm > 0.48) return 5.5;
+          if (norm > 0.38) return 9.5;
+          return 6.5;
+        };
+
+        ctx.beginPath();
+        ctx.moveTo(cx - getPearlHalfW(fireY), fireY);
+        for (let y = fireY; y <= cy; y += 3) {
+          ctx.lineTo(cx - getPearlHalfW(y), y);
+        }
+        ctx.lineTo(cx - getPearlHalfW(cy), cy);
+        ctx.lineTo(cx + getPearlHalfW(cy), cy);
+        for (let y = cy; y >= fireY; y -= 3) {
+          ctx.lineTo(cx + getPearlHalfW(y), y);
+        }
+        ctx.lineTo(cx + getPearlHalfW(fireY), fireY);
+        ctx.closePath();
+
+        const pearlGrad = ctx.createLinearGradient(cx - 10, 0, cx + 10, 0);
+        pearlGrad.addColorStop(0, '#1e293b');
+        pearlGrad.addColorStop(0.25, '#94a3b8');
+        pearlGrad.addColorStop(0.50, '#f8fafc');
+        pearlGrad.addColorStop(0.75, '#64748b');
+        pearlGrad.addColorStop(1.0, '#0f172a');
+        ctx.fillStyle = pearlGrad;
+        ctx.fill();
+
+        ctx.save();
+        ctx.clip();
+
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(cx - 3.5, cy); ctx.lineTo(cx - 3.5, fireY);
+        ctx.moveTo(cx, cy); ctx.lineTo(cx, fireY);
+        ctx.moveTo(cx + 3.5, cy); ctx.lineTo(cx + 3.5, fireY);
+        ctx.stroke();
+
+        const sphere2Y = cy - maxPaperH * 0.43;
+        if (fireY < sphere2Y) {
+          const s2R = 9.5;
+          const sGrad = ctx.createRadialGradient(cx - 2, sphere2Y - 2, 1, cx, sphere2Y, s2R);
+          sGrad.addColorStop(0, '#ffffff');
+          sGrad.addColorStop(0.3, '#fb7185');
+          sGrad.addColorStop(0.7, '#e11d48');
+          sGrad.addColorStop(1.0, '#881337');
+          ctx.fillStyle = sGrad;
+          ctx.beginPath();
+          ctx.arc(cx, sphere2Y, s2R, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+          ctx.fillRect(cx - s2R + 1, sphere2Y - 1, (s2R - 1) * 2, 2.0);
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = 1.0;
+          ctx.beginPath();
+          drawEllipse(ctx, cx, sphere2Y, s2R + 1.5, 3.0);
+          ctx.stroke();
+        }
+
+        const sphere3Y = cy - maxPaperH * 0.82;
+        if (fireY < sphere3Y) {
+          const s3R = 4.8;
+          const s3Grad = ctx.createRadialGradient(cx - 1, sphere3Y - 1, 0.5, cx, sphere3Y, s3R);
+          s3Grad.addColorStop(0, '#ffffff');
+          s3Grad.addColorStop(0.4, '#f43f5e');
+          s3Grad.addColorStop(1.0, '#9f1239');
+          ctx.fillStyle = s3Grad;
+          ctx.beginPath();
+          ctx.arc(cx, sphere3Y, s3R, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.restore(); // clip
+        ctx.restore(); // main
       } else {
         const isDarkPaper = !curCig.isCigar && curCig.paperColor && ['#18181b', '#09090b', '#1e1b4b', '#111827'].includes(curCig.paperColor);
         ctx.fillStyle = curCig.isCigar ? '#382218' : (curCig.paperColor || '#fcfbf7');
@@ -864,23 +1461,80 @@ export class CanvasRenderer {
         ctx.fillStyle = pGrad;
         ctx.fillRect(cx - cigW / 2, cy - paperH, cigW, paperH);
 
-        // 横向极细微罗纹水印 (Laid Paper Fine Ribbing - 间距 4.2px, 1:1对标参考图真烟卷纸纹理)
+        // 横向极细微罗纹水印 (Laid Paper Fine Ribbing - 间距 3.6px, 1:1对标参考图真烟卷纸纹理)
         // 核心物理法则：以滤嘴接缝 cy 绝对世界坐标为固定基准向上渲染，绝不随燃烧向下位移（100% 绝对静止）
         if (!curCig.isCigar) {
-          const ribStep = 4.2;
+          const ribStep = 3.6;
           for (let wy = cy - ribStep; wy >= cy - paperH; wy -= ribStep) {
-            ctx.fillStyle = isDarkPaper ? 'rgba(0, 0, 0, 0.35)' : 'rgba(0, 0, 0, 0.04)';
+            ctx.fillStyle = isDarkPaper ? 'rgba(0, 0, 0, 0.35)' : 'rgba(0, 0, 0, 0.045)';
             ctx.fillRect(cx - cigW / 2, wy, cigW, 0.8);
-            ctx.fillStyle = isDarkPaper ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.35)';
-            ctx.fillRect(cx - cigW / 2, wy + 0.8, cigW, 0.6);
+            ctx.fillStyle = isDarkPaper ? 'rgba(255, 255, 255, 0.06)' : 'rgba(255, 255, 255, 0.45)';
+            ctx.fillRect(cx - cigW / 2 + 1, wy + 0.8, cigW - 2, 0.5);
+          }
+
+          // 腾讯总监设计级 · 卷烟纸透光与内部金黄烟丝次表面剪影 (Subsurface Tobacco Silhouette)
+          if (!isDarkPaper && paperH > 10) {
+            ctx.save();
+            ctx.beginPath();
+            drawRect(ctx, cx - cigW / 2 + 1.5, cy - paperH, cigW - 3.0, paperH);
+            ctx.clip();
+            ctx.fillStyle = 'rgba(180, 83, 9, 0.055)';
+            const shredStep = 8.5;
+            for (let sy = cy - shredStep; sy >= cy - paperH + 4; sy -= shredStep) {
+              const shredX = cx - cigW / 2 + 2 + (((sy * 31 + 7) % 1000) / 1000) * (cigW - 6);
+              const shredW = 1.6 + (((sy * 17) % 10) / 10) * 1.8;
+              const shredH = 1.2 + (((sy * 23) % 10) / 10) * 1.5;
+              ctx.fillRect(shredX, sy, shredW, shredH);
+            }
+            ctx.restore();
+          }
+
+          // 腾讯总监设计级 · 3D 微距菲涅尔圆柱边缘轮廓光 (Bilateral Rim Light)
+          // 左侧漫射反光轮廓光 + 右侧环境暗边缘遮蔽，彻底立体化
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.16)';
+          ctx.fillRect(cx - cigW / 2, cy - paperH, 0.7, paperH);
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
+          ctx.fillRect(cx + cigW / 2 - 0.7, cy - paperH, 0.7, paperH);
+
+          // 腾讯总监设计级 · 燃烧端向下全局光漫射反弹 (GI Thermal Downward Bleed)
+          // 吸烟升温时，炽热红外光子穿透纸质向下延展 28px 暖金光晕
+          if (isLit && emberIntensity > 0 && paperH > 2) {
+            const bleedH = Math.min(paperH, 28);
+            const bleedGrad = ctx.createLinearGradient(0, fireY, 0, fireY + bleedH);
+            bleedGrad.addColorStop(0, `rgba(255, 140, 20, ${(0.38 * emberIntensity).toFixed(2)})`);
+            bleedGrad.addColorStop(0.35, `rgba(249, 115, 22, ${(0.18 * emberIntensity).toFixed(2)})`);
+            bleedGrad.addColorStop(1.0, 'rgba(249, 115, 22, 0)');
+            ctx.fillStyle = bleedGrad;
+            ctx.fillRect(cx - cigW / 2, fireY, cigW, bleedH);
           }
         } else {
-          // 雪茄烟叶天然斜纹叶脉 (以滤嘴接缝 cy 为静态基准向上渲染，世界坐标锁死)
-          const cigarVeinStep = 14;
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
-          for (let wy = cy - cigarVeinStep; wy >= cy - paperH; wy -= cigarVeinStep) {
-            ctx.fillRect(cx - cigW / 2, wy, cigW, 1.2);
+          // 腾讯总监级 · 古巴手卷雪茄螺旋斜向包叶接缝 (Spiral Leaf Wrapper Seams)
+          // 模拟大师级手卷对角线 26° 螺旋搭接与立体微阴影
+          ctx.save();
+          ctx.beginPath();
+          drawRect(ctx, cx - cigW / 2, cy - paperH, cigW, paperH);
+          ctx.clip();
+          
+          const cigarVeinStep = 22;
+          const slantAngleOffset = cigW * 0.45;
+          for (let wy = cy; wy >= cy - paperH - cigarVeinStep; wy -= cigarVeinStep) {
+            // 斜向搭接缝暗阴影
+            ctx.strokeStyle = 'rgba(18, 9, 4, 0.52)';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.moveTo(cx - cigW / 2 - 2, wy + slantAngleOffset);
+            ctx.lineTo(cx + cigW / 2 + 2, wy - slantAngleOffset);
+            ctx.stroke();
+
+            // 搭接边缘油性高光微芒 (Silky Leaf Sheen Rim)
+            ctx.strokeStyle = 'rgba(254, 240, 138, 0.18)';
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(cx - cigW / 2 - 2, wy + slantAngleOffset + 1.2);
+            ctx.lineTo(cx + cigW / 2 + 2, wy - slantAngleOffset + 1.2);
+            ctx.stroke();
           }
+          ctx.restore();
         }
 
         // 品牌竖向烫印与高定IP微雕徽印 (实机同款: 潮天门 / 中華 / 牛来 / 迪迦奥特曼)
@@ -990,6 +1644,7 @@ export class CanvasRenderer {
             ctx.closePath();
             ctx.fill();
           }
+
           ctx.restore();
         }
       }
@@ -999,7 +1654,47 @@ export class CanvasRenderer {
       if (curState === 'UNLIT' && progress >= 0.999 && curAsh <= 0.01) {
         const topY = cy - paperH;
         const isAirCig = !!(curCig.id === 'pure_oxygen_zen' || curCig.isAirCig);
-        if (isAirCig) {
+        if (curCig.id === 'eiffel_tower') {
+          // 埃菲尔铁塔塔尖信标与避雷针
+          ctx.save();
+          const tipY = fireY;
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(cx, tipY - 4, 2.2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#fef08a';
+          ctx.lineWidth = 1.2;
+          ctx.stroke();
+          ctx.strokeStyle = '#f59e0b';
+          ctx.lineWidth = 1.0;
+          ctx.beginPath();
+          ctx.moveTo(cx, tipY - 4);
+          ctx.lineTo(cx, tipY - 9);
+          ctx.stroke();
+          ctx.restore();
+        } else if (curCig.id === 'pyramid_giza') {
+          // 吉萨金字塔纯金尖顶
+          ctx.save();
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(cx, fireY - 1, 1.8, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        } else if (curCig.id === 'oriental_pearl') {
+          // 东方明珠发射天线顶
+          ctx.save();
+          ctx.strokeStyle = '#ec4899';
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.moveTo(cx, fireY);
+          ctx.lineTo(cx, fireY - 8);
+          ctx.stroke();
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(cx, fireY - 8, 1.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        } else if (isAirCig) {
           // 纯空气烟卷：100% 中空纯净无烟丝！展示纯白纸管口壁与通透纯氧空腔
           ctx.save();
           const wAtTop = curTopW;
@@ -1177,35 +1872,71 @@ export class CanvasRenderer {
       const rightProfile = [];
       const isHandRolled = curCig.widthType === 'hand_rolled';
 
+      const maxSagX = (displayAshH >= 12 && ashRatio > 0.12)
+        ? (Math.min(3.2, displayAshH * 0.055) * ((curCig.id || 'c').charCodeAt(0) % 2 === 0 ? 1 : -1))
+        : 0;
+
       for (let L = startLayer; L <= endLayer; L++) {
         const curY = L * stepY;
         const layerSeed1 = ((L * 1337 + 17) % 1000) / 1000;
         const layerSeed2 = ((L * 2843 + 31) % 1000) / 1000;
-        // 靠近顶部(ashTopY)完全归零阻尼，保证烟灰柱头部与烟身一样严格笔直正立
+        // 靠近顶部(ashTopY)阻尼平滑，保证烟灰柱头部与烟身一样微弧
         const distFromTop = Math.max(0, curY - ashTopY);
         const topDamp = Math.min(1.0, Math.pow(distFromTop / 12.0, 1.5));
-        const jitterAmp = isHandRolled ? 1.8 : 1.2;
-        const leftJitter = (Math.sin(layerSeed1 * Math.PI * 2) * jitterAmp) * topDamp;
-        const rightJitter = (Math.cos(layerSeed2 * Math.PI * 2) * jitterAmp) * topDamp;
 
-        // 计算当前高度 Y 处烟身烧化前的物理基底宽度 (锥筒几何继承)
+        // 腾讯总监级 · 悬臂梁重力弯曲微挠度 (Cantilever Gravity Sagging)
+        // 根部 fireY 坚挺固定，上段随高度平方递增微弯，呈现真实刚体受力张力
+        const fireDist = Math.max(0, fireY - curY);
+        const normDist = fireDist / Math.max(1, displayAshH);
+        const sagFactor = Math.pow(normDist, 2.0);
+        const curSagX = sagFactor * maxSagX;
+
+        // 计算当前高度 Y 处烟身烧化前的物理基底宽度 (名筑/锥筒/机制烟几何精确继承)
         let layerW;
         if (isHandRolled) {
           const coneRatio = Math.max(0, (hanyanBottomY - curY) / Math.max(1, maxCigH));
           const origW = cigW + (topW - cigW) * coneRatio;
-          const fireDist = Math.max(0, fireY - curY);
-          // 老辈旱烟散碎原叶天然蓬松：越远离火线越受热微发胀 (+6%)，而在火线处与 curTopW 严丝合缝
           const fluff = 1.0 + Math.min(0.06, fireDist / 35.0 * 0.06);
           layerW = Math.max(curTopW, origW * fluff);
+        } else if (curCig.id === 'eiffel_tower') {
+          // 埃菲尔铁塔通天钢构烟灰：物理自适应高度截面！彻底告别烟灰过粗
+          // 塔尖避雷针针尖 (4px) -> 3层穹顶 (9.6px) -> 2至3层修长身 (10~17px) -> 2层平台 (22px) -> 1至2层下身 (18~31px)
+          const u = Math.max(0, Math.min(1.0, (cy - curY) / Math.max(1, maxPaperH)));
+          let halfW;
+          if (u >= 0.88) {
+            halfW = 2.0; // 塔尖避雷针
+          } else if (u >= 0.84) {
+            halfW = 4.8; // 3层顶层观景台穹顶
+          } else if (u >= 0.40) {
+            const t = (0.84 - u) / (0.84 - 0.40);
+            halfW = 4.8 + t * (8.5 - 4.8);
+          } else if (u >= 0.36) {
+            halfW = 11.2; // 2层观景台突出平台
+          } else {
+            const t = (0.36 - u) / 0.36;
+            halfW = 9.0 + t * (15.5 - 9.0);
+          }
+          const fluff = 1.0 + Math.min(0.05, fireDist / 30.0 * 0.05);
+          layerW = halfW * 2 * fluff;
+        } else if (curCig.id === 'pyramid_giza') {
+          const u = Math.max(0, Math.min(1.0, (cy - curY) / Math.max(1, maxPaperH)));
+          layerW = (topW + (cigW - topW) * (1.0 - u)) * 1.03;
+        } else if (curCig.id === 'oriental_pearl') {
+          const u = Math.max(0, Math.min(1.0, (cy - curY) / Math.max(1, maxPaperH)));
+          layerW = (topW + (cigW - topW) * (1.0 - u) * 0.72) * 1.03;
         } else {
           layerW = cigW;
         }
 
-        leftProfile.push({ x: cx - layerW / 2 + leftJitter, y: curY });
-        rightProfile.push({ x: cx + layerW / 2 + rightJitter, y: curY });
+        const jitterAmp = isHandRolled ? 1.8 : (curCig.id === 'eiffel_tower' ? Math.min(0.85, layerW * 0.1) : 1.2);
+        const leftJitter = (Math.sin(layerSeed1 * Math.PI * 2) * jitterAmp) * topDamp;
+        const rightJitter = (Math.cos(layerSeed2 * Math.PI * 2) * jitterAmp) * topDamp;
+
+        leftProfile.push({ x: cx - layerW / 2 + leftJitter + curSagX, y: curY });
+        rightProfile.push({ x: cx + layerW / 2 + rightJitter + curSagX, y: curY });
       }
 
-      // 绘制完整烟灰封闭多边形底座（顶部绝对平齐对称封顶，彻底保证正立笔挺）
+      // 绘制完整烟灰封闭多边形底座（顶部平齐封顶）
       ctx.beginPath();
       ctx.moveTo(leftProfile[0].x, ashTopY);
       ctx.lineTo(rightProfile[0].x, ashTopY);
@@ -1219,7 +1950,9 @@ export class CanvasRenderer {
       ctx.closePath();
 
       // 3D 灰白圆柱/锥体微距光影底色 (自适应最大灰柱宽度，完美覆盖左暗、20%高光白、50%灰白、右暗)
-      const maxAshW = isHandRolled ? Math.max(topW * 1.06, curTopW) : cigW;
+      const maxAshW = isHandRolled
+        ? Math.max(topW * 1.06, curTopW)
+        : (curCig.id === 'eiffel_tower' ? Math.max(curTopW * 1.08, 12) : cigW);
       const ashBaseGrad = ctx.createLinearGradient(cx - maxAshW / 2, 0, cx + maxAshW / 2, 0);
       ashBaseGrad.addColorStop(0, '#52525b');
       ashBaseGrad.addColorStop(0.20, '#ffffff');
@@ -1232,7 +1965,7 @@ export class CanvasRenderer {
       // -------------------------------------------------------------
       // 2. 多层重叠有机鳞片集群 (Organic Flake Clusters - 批量合批极速渲染)
       // -------------------------------------------------------------
-      const flakesCount = isHandRolled ? 6 : 4;
+      const flakesCount = isHandRolled ? 6 : (curCig.id === 'eiffel_tower' ? Math.max(2, Math.min(4, Math.floor(curTopW / 6.0))) : 4);
       const fh = stepY * 1.25;
       const cosRimStart = Math.cos(Math.PI * 1.1);
       const sinRimStart = Math.sin(Math.PI * 1.1);
@@ -1244,14 +1977,14 @@ export class CanvasRenderer {
         const curY = L * stepY;
         const isTopZone = (curY - ashTopY) < 6.0;
         const layerIdx = L - startLayer;
-        const curLayerW = (rightProfile[layerIdx] && leftProfile[layerIdx])
-          ? (rightProfile[layerIdx].x - leftProfile[layerIdx].x)
-          : (isHandRolled ? topW : cigW);
+        const curLeftX = leftProfile[layerIdx] ? leftProfile[layerIdx].x : (cx - (isHandRolled ? topW : cigW) / 2);
+        const curRightX = rightProfile[layerIdx] ? rightProfile[layerIdx].x : (cx + (isHandRolled ? topW : cigW) / 2);
+        const curLayerW = curRightX - curLeftX;
         const colW = curLayerW / flakesCount;
         const fw = colW * 0.95;
         for (let col = 0; col < flakesCount; col++) {
           const flakeSeed = ((L * 17 + col * 37 + 11) % 1000) / 1000;
-          const fx = cx - curLayerW / 2 + (col + 0.5) * colW + (isTopZone ? 0 : (flakeSeed - 0.5) * (isHandRolled ? 2.8 : 2.0));
+          const fx = curLeftX + (col + 0.5) * colW + (isTopZone ? 0 : (flakeSeed - 0.5) * (isHandRolled ? 2.8 : 2.0));
           const fy = curY + (isTopZone ? 0 : Math.sin(flakeSeed * Math.PI * 4) * 1.0);
           drawEllipse(ctx, fx, fy + 1.0, fw * 0.48, fh * 0.42);
         }
@@ -1269,9 +2002,9 @@ export class CanvasRenderer {
           const distToFire = fireY - curY;
           const isTopZone = (curY - ashTopY) < 6.0;
           const layerIdx = L - startLayer;
-          const curLayerW = (rightProfile[layerIdx] && leftProfile[layerIdx])
-            ? (rightProfile[layerIdx].x - leftProfile[layerIdx].x)
-            : (isHandRolled ? topW : cigW);
+          const curLeftX = leftProfile[layerIdx] ? leftProfile[layerIdx].x : (cx - (isHandRolled ? topW : cigW) / 2);
+          const curRightX = rightProfile[layerIdx] ? rightProfile[layerIdx].x : (cx + (isHandRolled ? topW : cigW) / 2);
+          const curLayerW = curRightX - curLeftX;
           const colW = curLayerW / flakesCount;
           const fw = colW * 0.95;
           for (let col = 0; col < flakesCount; col++) {
@@ -1287,7 +2020,7 @@ export class CanvasRenderer {
               flakeColor = '#a1a1aa';
             }
             if (flakeColor !== targetColor) continue;
-            const fx = cx - curLayerW / 2 + (col + 0.5) * colW + (isTopZone ? 0 : (flakeSeed - 0.5) * (isHandRolled ? 2.8 : 2.0));
+            const fx = curLeftX + (col + 0.5) * colW + (isTopZone ? 0 : (flakeSeed - 0.5) * (isHandRolled ? 2.8 : 2.0));
             const fy = curY + (isTopZone ? 0 : Math.sin(flakeSeed * Math.PI * 4) * 1.0);
             drawEllipse(ctx, fx, fy, fw * 0.46, fh * 0.38);
           }
@@ -1303,14 +2036,14 @@ export class CanvasRenderer {
         const curY = L * stepY;
         const isTopZone = (curY - ashTopY) < 6.0;
         const layerIdx = L - startLayer;
-        const curLayerW = (rightProfile[layerIdx] && leftProfile[layerIdx])
-          ? (rightProfile[layerIdx].x - leftProfile[layerIdx].x)
-          : (isHandRolled ? topW : cigW);
+        const curLeftX = leftProfile[layerIdx] ? leftProfile[layerIdx].x : (cx - (isHandRolled ? topW : cigW) / 2);
+        const curRightX = rightProfile[layerIdx] ? rightProfile[layerIdx].x : (cx + (isHandRolled ? topW : cigW) / 2);
+        const curLayerW = curRightX - curLeftX;
         const colW = curLayerW / flakesCount;
         const rimR = colW * 0.95 * 0.36;
         for (let col = 0; col < flakesCount; col++) {
           const flakeSeed = ((L * 17 + col * 37 + 11) % 1000) / 1000;
-          const fx = cx - curLayerW / 2 + (col + 0.5) * colW + (isTopZone ? 0 : (flakeSeed - 0.5) * (isHandRolled ? 2.8 : 2.0));
+          const fx = curLeftX + (col + 0.5) * colW + (isTopZone ? 0 : (flakeSeed - 0.5) * (isHandRolled ? 2.8 : 2.0));
           const fy = curY + (isTopZone ? 0 : Math.sin(flakeSeed * Math.PI * 4) * 1.0) - 0.5;
           ctx.moveTo(fx + cosRimStart * rimR, fy + sinRimStart * rimR);
           ctx.arc(fx, fy, rimR, Math.PI * 1.1, Math.PI * 1.9);
@@ -1321,13 +2054,17 @@ export class CanvasRenderer {
       // -------------------------------------------------------------
       // 3. 顶端绝对水平端面与正立微弧透视火山口 (Orthogonal Upright Top Cap)
       // -------------------------------------------------------------
+      const topAshCX = (leftProfile[0] && rightProfile[0])
+        ? (leftProfile[0].x + rightProfile[0].x) / 2
+        : cx;
+      const topAshCY = leftProfile[0] ? leftProfile[0].y : ashTopY;
       const topAshW = (rightProfile[0] && leftProfile[0])
         ? (rightProfile[0].x - leftProfile[0].x)
         : (isHandRolled ? topW : cigW);
       const capH = Math.min(3.6, topAshW * 0.085);
 
-      // 顶端微弧端面基底 (严格贴合顶部端面宽度 topAshW)
-      const capGrad = ctx.createLinearGradient(cx - topAshW / 2, 0, cx + topAshW / 2, 0);
+      // 顶端微弧端面基底 (严格贴合顶部端面宽度 topAshW 与偏移中心 topAshCX)
+      const capGrad = ctx.createLinearGradient(topAshCX - topAshW / 2, 0, topAshCX + topAshW / 2, 0);
       capGrad.addColorStop(0, '#52525b');
       capGrad.addColorStop(0.20, '#f4f4f5');
       capGrad.addColorStop(0.50, '#d4d4d8');
@@ -1335,19 +2072,19 @@ export class CanvasRenderer {
       capGrad.addColorStop(1.0, '#3f3f46');
       ctx.fillStyle = capGrad;
       ctx.beginPath();
-      drawEllipse(ctx, cx, ashTopY, topAshW * 0.50, capH);
+      drawEllipse(ctx, topAshCX, topAshCY, topAshW * 0.50, capH);
       ctx.fill();
 
-      // 顶面正中央微凹炭核与白灰边缘，正立中轴对称
+      // 顶面正中央微凹炭核与白灰边缘
       ctx.fillStyle = 'rgba(24, 24, 27, 0.75)';
       ctx.beginPath();
-      drawEllipse(ctx, cx, ashTopY - 0.3, topAshW * 0.28, capH * 0.65);
+      drawEllipse(ctx, topAshCX, topAshCY - 0.3, topAshW * 0.28, capH * 0.65);
       ctx.fill();
 
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
       ctx.lineWidth = 0.9;
       ctx.beginPath();
-      drawEllipse(ctx, cx, ashTopY - 0.4, topAshW * 0.42, capH * 0.85);
+      drawEllipse(ctx, topAshCX, topAshCY - 0.4, topAshW * 0.42, capH * 0.85);
       ctx.stroke();
 
       // -------------------------------------------------------------
@@ -1386,14 +2123,14 @@ export class CanvasRenderer {
       const heat = Math.max(0, Math.min(1.0, this.emberHeat || 0));
       const glowFactor = 1.0 + 0.15 * pulse + 0.55 * heat;
 
-      // 1. 锯齿炭化焦黑破损边缘 (Scalloped Charred Black Rim - 参考图焦黑不规则撕纸边)
+      // 1. 锯齿炭化焦黑破损边缘 (Scalloped Charred Black Rim - 参考图焦黑不规则撕纸边与微距碳化纤维)
       ctx.save();
       ctx.beginPath();
       const activeRimW = curTopW;
-      const rimSteps = 12;
+      const rimSteps = 14;
       const stepW = activeRimW / rimSteps;
       const leftX = cx - activeRimW / 2;
-      const rimOffsets = [0, 1.8, -0.6, 2.4, 0.8, -1.2, 1.5, 2.8, 0.4, -0.8, 1.9, 0.5, 0];
+      const rimOffsets = [0, 1.8, -0.6, 2.4, 0.8, -1.2, 1.5, 2.8, 0.4, -0.8, 1.9, 0.5, 1.4, -0.4, 0];
       ctx.moveTo(leftX, fireY + 8);
       ctx.lineTo(leftX, fireY + rimOffsets[0]);
       for (let ri = 0; ri < rimSteps; ri++) {
@@ -1411,6 +2148,14 @@ export class CanvasRenderer {
       charBorderGrad.addColorStop(1, 'rgba(120, 53, 15, 0)');
       ctx.fillStyle = charBorderGrad;
       ctx.fill();
+
+      // 微距碳化纤维焦芒 (Organic Char Spurs)
+      ctx.fillStyle = '#050507';
+      for (let ri = 1; ri < rimSteps; ri += 2) {
+        const sx = leftX + ri * stepW;
+        const sy = fireY + rimOffsets[ri];
+        ctx.fillRect(sx - 0.6, sy, 1.2, 1.8);
+      }
       ctx.restore();
 
       // 4-7-8 呼吸减压光晕
@@ -1426,7 +2171,7 @@ export class CanvasRenderer {
         ctx.fill();
       }
 
-      // 2. 燃烧端与火星表现 (Burning Ember / Cherry)
+      // 2. 燃烧端与普朗克黑体辐射色谱表现 (Planck Blackbody Radiation Spectrum)
       if (isAirCig) {
         // 纯空气烟卷核心灵魂设计：
         // 内部 100% 中空无烟丝！燃烧只有外面那一层白纸壁在灼烧 (Incandescent Hollow Paper Rim)！
@@ -1475,13 +2220,21 @@ export class CanvasRenderer {
         }
         ctx.restore();
       } else {
-        const bloomR = (curTopW * 0.95) * glowFactor;
-        const bloomGrad = ctx.createRadialGradient(cx, fireY, 2, cx, fireY, bloomR);
-        const coreAlpha = 0.65 + 0.27 * heat;
-        const midAlpha = 0.38 + 0.27 * heat;
-        bloomGrad.addColorStop(0, `rgba(255, ${Math.round(65 + 65 * heat)}, 0, ${coreAlpha.toFixed(2)})`);
-        bloomGrad.addColorStop(0.35, `rgba(${Math.round(239 + 10 * heat)}, ${Math.round(68 + 47 * heat)}, ${Math.round(68 - 46 * heat)}, ${midAlpha.toFixed(2)})`);
-        bloomGrad.addColorStop(0.75, 'rgba(220, 38, 38, 0.12)');
+        // 腾讯总监级 · 普朗克黑体辐射高光球晕 (Planck Blackbody Thermal Incandescence)
+        // 随强对流供氧 (heat -> 1.0) 核心色温由 550°C 暗绯红骤升至 950°C 炽白光核
+        const bloomR = (curTopW * 0.98) * glowFactor;
+        const bloomGrad = ctx.createRadialGradient(cx, fireY, 1.5, cx, fireY, bloomR);
+        const coreAlpha = 0.72 + 0.26 * heat;
+        const midAlpha = 0.42 + 0.32 * heat;
+        
+        // 黑体阶梯：超温白炽核心 -> 高能金黄 -> 动力橙橙 -> 辐射绯红
+        const rVal = 255;
+        const gVal = Math.round(75 + 160 * heat); // 吸烟时涌现明亮鹅黄与纯白热能
+        const bVal = Math.round(15 + 180 * Math.pow(heat, 2.2)); // 极高温核心泛白
+        bloomGrad.addColorStop(0, `rgba(${rVal}, ${gVal}, ${bVal}, ${coreAlpha.toFixed(2)})`);
+        bloomGrad.addColorStop(0.25, `rgba(254, 215, 170, ${(coreAlpha * 0.85).toFixed(2)})`);
+        bloomGrad.addColorStop(0.55, `rgba(${Math.round(234 + 15 * heat)}, ${Math.round(88 + 40 * heat)}, 12, ${midAlpha.toFixed(2)})`);
+        bloomGrad.addColorStop(0.82, 'rgba(185, 28, 28, 0.16)');
         bloomGrad.addColorStop(1.0, 'rgba(0, 0, 0, 0)');
         ctx.fillStyle = bloomGrad;
         ctx.beginPath();
@@ -1492,36 +2245,82 @@ export class CanvasRenderer {
         const spotScale = curTopW / 28;
         const hotspots = [
           { ox: -4.5 * spotScale, oy: 0.5, r: 3.2 * spotScale },
-          { ox: 0.0, oy: -1.0, r: 4.2 * spotScale },
+          { ox: 0.0, oy: -1.0, r: 4.4 * spotScale },
           { ox: 4.8 * spotScale, oy: 0.8, r: 3.0 * spotScale },
-          { ox: -1.8 * spotScale, oy: 2.2, r: 2.6 * spotScale },
-          { ox: 3.2 * spotScale, oy: 2.0, r: 2.4 * spotScale }
+          { ox: -1.8 * spotScale, oy: 2.2, r: 2.8 * spotScale },
+          { ox: 3.2 * spotScale, oy: 2.0, r: 2.5 * spotScale }
         ];
 
         for (const spot of hotspots) {
           const sx = cx + spot.ox;
           const sy = fireY + spot.oy;
-          const sr = spot.r * ((0.9 + 0.15 * Math.sin(time * 0.009 + spot.ox)) + 0.45 * heat);
+          // 仿生微热裂隙高频布朗扰动 (Brownian Micro-Jitter 14~18Hz)
+          const jitter = heat > 0.1 ? (Math.sin(time * 0.045 + spot.ox * 4.5) * 0.12 * heat) : 0;
+          const sr = spot.r * ((0.9 + 0.15 * Math.sin(time * 0.009 + spot.ox)) + 0.55 * heat + jitter);
 
-          const spotGrad = ctx.createRadialGradient(sx, sy, 0.5, sx, sy, sr);
+          const spotGrad = ctx.createRadialGradient(sx, sy, 0.4, sx, sy, sr);
           spotGrad.addColorStop(0, '#ffffff'); // 极白炽心
-          spotGrad.addColorStop(0.25, heat > 0.3 ? '#ffffff' : '#fef08a'); // 亮金至极白
+          spotGrad.addColorStop(0.28, heat > 0.25 ? '#ffffff' : '#fef08a'); // 亮金至极白
           spotGrad.addColorStop(0.65, '#ea580c'); // 橙红
-          spotGrad.addColorStop(1.0, 'rgba(220, 38, 38, 0.1)'); // 边缘暗红
+          spotGrad.addColorStop(1.0, 'rgba(153, 27, 27, 0.12)'); // 边缘暗红
           ctx.fillStyle = spotGrad;
           ctx.beginPath();
           ctx.arc(sx, sy, sr, 0, Math.PI * 2);
           ctx.fill();
         }
+
+        // 腾讯总监设计级 · 表面冷凝微距多孔灰壳 (Oxide Ash Lattice Film)
+        // 吸气停歇后，外界冷空气切断热源，火头表面最外层瞬态结成薄薄一层灰白冷凝炭壳，内部依旧深红阴燃
+        if (!isInhaling && isLit && heat < 0.85) {
+          const coolRatio = Math.max(0, 1.0 - heat);
+          ctx.save();
+          ctx.fillStyle = `rgba(161, 161, 170, ${(0.42 * coolRatio).toFixed(2)})`;
+          for (let ci = 0; ci < 7; ci++) {
+            const ca = (ci / 7) * Math.PI * 2;
+            const cr = (curTopW * 0.28) * (0.4 + 0.6 * ((ci * 37) % 10) / 10);
+            ctx.beginPath();
+            ctx.arc(cx + Math.cos(ca) * cr, fireY + Math.sin(ca) * (cr * 0.45), 1.2 + ((ci * 13) % 4) * 0.4, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
       }
 
-      // 纸身向下受热微光散射 (随热惯性平滑暗淡)
-      const downLight = ctx.createLinearGradient(0, fireY, 0, fireY + 18);
-      const downAlpha = 0.22 + 0.28 * heat;
-      downLight.addColorStop(0, `rgba(255, 69, 0, ${downAlpha.toFixed(2)})`);
-      downLight.addColorStop(1, 'rgba(255, 69, 0, 0)');
-      ctx.fillStyle = downLight;
-      ctx.fillRect(cx - curTopW / 2, fireY, curTopW, 18);
+      // ==========================================
+      // 腾讯总监级 · 未燃卷纸真实热解微焦圈 (Pyrolysis Scorching Heat Ring)
+      // 0.8px ~ 2.0px 紧贴炭化锯齿边界的高温炙热微焦痕，深吸升温时隐现暗金微芒
+      // ==========================================
+      const scorchH = 1.6 + 1.2 * heat;
+      const scorchGrad = ctx.createLinearGradient(0, fireY, 0, fireY + scorchH);
+      scorchGrad.addColorStop(0, '#1c0f06');
+      scorchGrad.addColorStop(0.32, '#78350f');
+      scorchGrad.addColorStop(0.68, '#b45309');
+      scorchGrad.addColorStop(1.0, 'rgba(180, 83, 9, 0)');
+      ctx.fillStyle = scorchGrad;
+      ctx.fillRect(cx - curTopW / 2, fireY, curTopW, scorchH);
+
+      // ==========================================
+      // 腾讯总监级 · 烟纸次表面散射透光带 (Subsurface Scattering SSS Paper Ember Bleed)
+      // 燃烧端向下方未燃纸质内部透光扩散，呈现纤维红润透光与微焦过渡
+      // ==========================================
+      const sssDepth = Math.min(24, Math.max(12, curTopW * 0.52 * (0.85 + 0.65 * heat)));
+      const sssLight = ctx.createLinearGradient(0, fireY, 0, fireY + sssDepth);
+      const sssAlpha = 0.35 + 0.45 * heat;
+      sssLight.addColorStop(0, `rgba(255, 180, 80, ${(sssAlpha * 0.95).toFixed(2)})`);
+      sssLight.addColorStop(0.25, `rgba(249, 115, 22, ${(sssAlpha * 0.75).toFixed(2)})`);
+      sssLight.addColorStop(0.60, `rgba(220, 38, 38, ${(sssAlpha * 0.40).toFixed(2)})`);
+      sssLight.addColorStop(0.85, `rgba(180, 83, 9, ${(sssAlpha * 0.15).toFixed(2)})`);
+      sssLight.addColorStop(1.0, 'rgba(180, 83, 9, 0)');
+      ctx.fillStyle = sssLight;
+      ctx.fillRect(cx - curTopW / 2, fireY, curTopW, sssDepth);
+
+      // 微距焦化渐变细线 (0.5px Charring Boundary)
+      ctx.strokeStyle = `rgba(120, 53, 15, ${Math.min(0.8, 0.4 + 0.4 * heat)})`;
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(cx - curTopW / 2 + 1, fireY + 1.2);
+      ctx.lineTo(cx + curTopW / 2 - 1, fireY + 1.2);
+      ctx.stroke();
 
       // 4. 自然脱落飘散的细小灰烬微粒 (Flaking Ash Specks - 纯空气卷无烟灰不散落)
       if (!isAirCig && displayAshH > 2 && typeof particles.emitFlakingAsh === 'function') {
@@ -1585,7 +2384,7 @@ export class CanvasRenderer {
     // 7.5 点火器具高保真火焰视觉 (Dynamic Ignition Flame)
     // ==========================================
     if (isSparking && ignitionTool) {
-      this.renderIgnitionFlame(ctx, cx, fireY, ignitionTool, time, cigW);
+      this.renderIgnitionFlame(ctx, cx, fireY, ignitionTool, time, cigW, sparkStartTime, sparkDuration);
     }
 
     // 闭合烟身受力轻弹微振动几何变换 (对应 line 152 的 ctx.save)
@@ -1600,233 +2399,455 @@ export class CanvasRenderer {
     }
   }
 
-  // 绘制 5 种不同点火工具的真实火焰粒子与光影 (腾讯级：伴随烟头炽烈爆红与引燃吸附)
-  renderIgnitionFlame(ctx, cx, fireY, tool, time, cigW) {
+  // 绘制 5 种不同点火工具的真实火焰粒子与光影 (腾讯 AAA 级：三段式运动学入场/燃烧/撤出 + 拟真火焰物理 + 赛博双弧)
+  renderIgnitionFlame(ctx, cx, fireY, tool, time, cigW, sparkStartTime, sparkDuration) {
     ctx.save();
     const flameType = tool.flameType || 'yellow';
-    const flicker = Math.sin(time * 0.035) * 3;
+    const flicker = Math.sin(time * 0.038) * 3.2;
 
-    // 【腾讯级视觉特效核心】：点火瞬间烟头烟丝纤维瞬间炽白爆燃 (Ember Flare)
-    const flareR = Math.max(cigW * 0.85, 20);
-    const flareGrad = ctx.createRadialGradient(cx, fireY, 2, cx, fireY, flareR);
-    flareGrad.addColorStop(0, '#ffffff');
-    flareGrad.addColorStop(0.3, '#fef08a');
-    flareGrad.addColorStop(0.65, '#f97316');
-    flareGrad.addColorStop(0.9, 'rgba(239, 68, 68, 0.55)');
-    flareGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
-    ctx.fillStyle = flareGrad;
-    ctx.beginPath();
-    ctx.arc(cx, fireY, flareR, 0, Math.PI * 2);
-    ctx.fill();
+    // 1. 三段式动力学时间轴 (Kinematic Timeline: Ingress -> Sustained Burn -> Egress)
+    const duration = sparkDuration || 1200;
+    const elapsed = sparkStartTime ? Math.max(0, Date.now() - sparkStartTime) : 400;
+    const p = Math.min(1.0, elapsed / duration);
 
-    // 焦化烟丝表面瞬态白炽高温点
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.arc(cx - 3 + flicker * 0.3, fireY, 3, 0, Math.PI * 2);
-    ctx.arc(cx + 4 - flicker * 0.2, fireY - 1, 2.5, 0, Math.PI * 2);
-    ctx.fill();
+    let toolOffsetX = 0;
+    let toolOffsetY = 0;
+    let toolAlpha = 1.0;
+    let flameScale = 1.0;
 
-    if (flameType === 'match') {
-      // 1. 复古红头木质火柴：倾斜木棒从侧方靠近 + 磷红火头 + 松木橙焰吸附
-      ctx.save();
-      ctx.translate(cx - 32, fireY + 20);
-      ctx.rotate(-0.38);
-      ctx.fillStyle = '#d4a373';
-      ctx.fillRect(-2.5, 0, 5, 42);
-      ctx.fillStyle = '#b91c1c';
-      ctx.beginPath();
-      ctx.arc(0, 0, 5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-
-      const mx = cx - 14;
-      const my = fireY + 4;
-      const rGrad = ctx.createRadialGradient(mx, my, 2, mx, my, 28);
-      rGrad.addColorStop(0, '#ffffff');
-      rGrad.addColorStop(0.25, '#fef08a');
-      rGrad.addColorStop(0.6, '#f97316');
-      rGrad.addColorStop(0.9, 'rgba(239, 68, 68, 0.4)');
-      rGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
-      ctx.fillStyle = rGrad;
-      ctx.beginPath();
-      ctx.arc(mx, my, 28, 0, Math.PI * 2);
-      ctx.fill();
-
-      // 水滴形火舌
-      ctx.fillStyle = '#f59e0b';
-      ctx.beginPath();
-      ctx.moveTo(mx - 7, my + 8);
-      ctx.quadraticCurveTo(mx - 10, my - 6, mx + flicker, my - 22);
-      ctx.quadraticCurveTo(mx + 10, my - 6, mx + 7, my + 8);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      drawEllipse(ctx, mx + flicker * 0.3, my - 3, 3, 7);
-      ctx.fill();
-    } else if (flameType === 'blue_torch') {
-      // 2. 雪茄三喷高温防风蓝焰：强劲幽蓝风暴等离子光锥
-      const tx = cx;
-      const ty = fireY + 12;
-
-      const bGrad = ctx.createRadialGradient(tx, ty, 3, tx, ty, 42);
-      bGrad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
-      bGrad.addColorStop(0.2, 'rgba(6, 182, 212, 0.85)');
-      bGrad.addColorStop(0.55, 'rgba(37, 99, 235, 0.55)');
-      bGrad.addColorStop(1, 'rgba(30, 58, 138, 0)');
-      ctx.fillStyle = bGrad;
-      ctx.beginPath();
-      ctx.arc(tx, ty, 42, 0, Math.PI * 2);
-      ctx.fill();
-
-      const cones = [-8, 0, 8];
-      cones.forEach((offsetX) => {
-        ctx.fillStyle = '#06b6d4';
-        ctx.beginPath();
-        ctx.moveTo(tx + offsetX - 3, ty + 24);
-        ctx.lineTo(tx + offsetX + flicker * 0.2, fireY - 4);
-        ctx.lineTo(tx + offsetX + 3, ty + 24);
-        ctx.closePath();
-        ctx.fill();
-
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.moveTo(tx + offsetX - 1.5, ty + 20);
-        ctx.lineTo(tx + offsetX, fireY);
-        ctx.lineTo(tx + offsetX + 1.5, ty + 20);
-        ctx.closePath();
-        ctx.fill();
-      });
-    } else if (flameType === 'car_coil') {
-      // 3. 车载螺旋电热丝点烟器：同心圆炽红发热电阻丝烙烫
-      const coilY = fireY + 10;
-      const cGrad = ctx.createRadialGradient(cx, coilY, 2, cx, coilY, 36);
-      cGrad.addColorStop(0, '#fffbeb');
-      cGrad.addColorStop(0.3, '#f97316');
-      cGrad.addColorStop(0.7, 'rgba(220, 38, 38, 0.45)');
-      cGrad.addColorStop(1, 'rgba(153, 27, 27, 0)');
-      ctx.fillStyle = cGrad;
-      ctx.beginPath();
-      ctx.arc(cx, coilY, 36, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.strokeStyle = '#fef08a';
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      for (let r = 2; r < 14; r += 2.5) {
-        ctx.arc(cx, coilY, r, 0, Math.PI * 2);
-      }
-      ctx.stroke();
-
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(cx - 3 + flicker, fireY - 1, 6, 4);
-    } else if (flameType === 'zippo') {
-      // 4. Zippo 纯铜打火机：掀盖金属外壳 + 防风孔金属罩 + 跳动金黄油焰
-      ctx.save();
-      const zx = cx - 22;
-      const zy = fireY + 16;
-      ctx.translate(zx, zy);
-      ctx.rotate(-0.18);
-
-      // Zippo 防风烟囱罩 (银亮金属)
-      ctx.fillStyle = '#cbd5e1';
-      ctx.fillRect(-7, -12, 14, 12);
-      ctx.fillStyle = '#475569';
-      ctx.beginPath();
-      ctx.arc(-3, -7, 1.2, 0, Math.PI * 2);
-      ctx.arc(3, -7, 1.2, 0, Math.PI * 2);
-      ctx.arc(0, -3, 1.2, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Zippo 掀开的上盖 (45度倾斜)
-      ctx.fillStyle = '#b45309';
-      ctx.beginPath();
-      ctx.moveTo(-7, 0);
-      ctx.lineTo(-18, -16);
-      ctx.lineTo(-12, -22);
-      ctx.lineTo(-2, -6);
-      ctx.closePath();
-      ctx.fill();
-
-      // Zippo 纯铜长方体下机身
-      ctx.fillStyle = '#d97706';
-      ctx.strokeStyle = '#fde047';
-      ctx.lineWidth = 1.5;
-      ctx.fillRect(-8, 0, 16, 26);
-      ctx.strokeRect(-8, 0, 16, 26);
-      ctx.restore();
-
-      // 金黄油焰与微风扰动
-      const fx = cx + flicker * 0.5;
-      const fy = fireY + 2;
-      const zGrad = ctx.createRadialGradient(fx, fy, 2, fx, fy, 38);
-      zGrad.addColorStop(0, '#ffffff');
-      zGrad.addColorStop(0.2, '#fef08a');
-      zGrad.addColorStop(0.6, '#f59e0b');
-      zGrad.addColorStop(0.85, 'rgba(217, 119, 6, 0.4)');
-      zGrad.addColorStop(1, 'rgba(180, 83, 9, 0)');
-      ctx.fillStyle = zGrad;
-      ctx.beginPath();
-      ctx.arc(fx, fy, 38, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Zippo 跳跃火舌
-      ctx.fillStyle = '#f59e0b';
-      ctx.beginPath();
-      ctx.moveTo(fx - 9, fy + 8);
-      ctx.quadraticCurveTo(fx - 14, fy - 10, fx + flicker * 0.9, fy - 28);
-      ctx.quadraticCurveTo(fx + 14, fy - 10, fx + 9, fy + 8);
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      drawEllipse(ctx, fx, fy - 5, 4, 11);
-      ctx.fill();
+    if (p < 0.28) {
+      // 阶段一：平滑斜向滑入并伴随轻微弹性减速 (Ease-out Cubic Ingress)
+      const tIn = p / 0.28;
+      const easeIn = 1.0 - Math.pow(1.0 - tIn, 3);
+      toolOffsetX = (1.0 - easeIn) * -42;
+      toolOffsetY = (1.0 - easeIn) * 54;
+      toolAlpha = Math.min(1.0, tIn * 1.6);
+      flameScale = 0.35 + easeIn * 0.65;
+    } else if (p > 0.80) {
+      // 阶段三：点燃完成后优雅斜向回撤淡出 (Smooth Egress & Retreat)
+      const tOut = (p - 0.80) / 0.20;
+      const easeOut = tOut * tOut;
+      toolOffsetX = easeOut * -34;
+      toolOffsetY = easeOut * 46;
+      toolAlpha = Math.max(0, 1.0 - easeOut);
+      flameScale = Math.max(0.08, 1.0 - tOut * 0.88);
     } else {
-      // 5. 经典便携砂轮打火机：微型滚花砂轮 + 温暖黄色跳跃油火
-      ctx.save();
-      const lx = cx - 18;
-      const ly = fireY + 18;
-      ctx.translate(lx, ly);
-      ctx.rotate(-0.15);
-      // 黄铜滚花砂轮防风头
-      ctx.fillStyle = '#94a3b8';
-      ctx.fillRect(-6, -8, 12, 8);
-      // 打火机身
-      ctx.fillStyle = '#d97706';
-      ctx.fillRect(-6, 0, 12, 24);
-      ctx.restore();
+      // 阶段二：持续燃烧点火，伴随极微弱生理持握浮动 (Sustained Natural Hover)
+      toolOffsetX = Math.sin(time * 0.04) * 0.8;
+      toolOffsetY = Math.cos(time * 0.045) * 0.6;
+      toolAlpha = 1.0;
+      flameScale = 1.0 + Math.sin(time * 0.08) * 0.05;
+    }
 
-      const fx = cx + flicker * 0.4;
-      const fy = fireY + 4;
-
-      const yGrad = ctx.createRadialGradient(fx, fy, 2, fx, fy, 32);
-      yGrad.addColorStop(0, '#ffffff');
-      yGrad.addColorStop(0.25, '#fef08a');
-      yGrad.addColorStop(0.65, '#f59e0b');
-      yGrad.addColorStop(0.88, 'rgba(239, 68, 68, 0.35)');
-      yGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
-      ctx.fillStyle = yGrad;
+    // 2. 烟头接触面炽烈红热光晕 (Ember Thermal Bloom)
+    const flareIntensity = p < 0.28 ? (p / 0.28) : (p > 0.80 ? (1.0 - (p - 0.80) / 0.20 * 0.35) : 1.0);
+    const flareR = Math.max(cigW * 0.95, 22) * flareIntensity;
+    if (flareR > 2) {
+      const flareGrad = ctx.createRadialGradient(cx, fireY, 2, cx, fireY, flareR);
+      flareGrad.addColorStop(0, '#ffffff');
+      flareGrad.addColorStop(0.25, '#fef08a');
+      flareGrad.addColorStop(0.60, '#f97316');
+      flareGrad.addColorStop(0.85, 'rgba(239, 68, 68, 0.45)');
+      flareGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+      ctx.fillStyle = flareGrad;
       ctx.beginPath();
-      ctx.arc(fx, fy, 32, 0, Math.PI * 2);
+      ctx.arc(cx, fireY, flareR, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.fillStyle = '#f59e0b';
-      ctx.beginPath();
-      ctx.moveTo(fx - 8, fy + 10);
-      ctx.quadraticCurveTo(fx - 12, fy - 8, fx + flicker * 0.8, fy - 26);
-      ctx.quadraticCurveTo(fx + 12, fy - 8, fx + 8, fy + 10);
-      ctx.closePath();
-      ctx.fill();
-
+      // 瞬态焦化炽白亮点
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
-      drawEllipse(ctx, fx, fy - 4, 3.5, 9);
+      ctx.arc(cx - 2.5 + flicker * 0.25, fireY, 2.8, 0, Math.PI * 2);
+      ctx.arc(cx + 3.2 - flicker * 0.2, fireY - 0.8, 2.2, 0, Math.PI * 2);
       ctx.fill();
     }
 
+    // 3. 各器具高保真矢量机身与火焰物理渲染
+    ctx.save();
+    ctx.globalAlpha = toolAlpha;
+
+    if (flameType === 'match') {
+      // ----------------------------------------------------
+      // 1. 复古火柴 (Vintage Birch Matchstick)
+      // ----------------------------------------------------
+      const mx = cx - 16 + toolOffsetX;
+      const my = fireY + 6 + toolOffsetY;
+
+      // 倾斜白桦木火柴梗
+      ctx.save();
+      ctx.translate(mx - 8, my + 14);
+      ctx.rotate(-0.48);
+      // 木梗渐变
+      const woodGrad = ctx.createLinearGradient(-3, 0, 3, 0);
+      woodGrad.addColorStop(0, '#e5c396');
+      woodGrad.addColorStop(0.6, '#deb887');
+      woodGrad.addColorStop(1, '#b8860b');
+      ctx.fillStyle = woodGrad;
+      ctx.fillRect(-2.5, 0, 5, 48);
+      // 磷红碳化火柴头
+      const headGrad = ctx.createLinearGradient(0, -6, 0, 4);
+      headGrad.addColorStop(0, '#991b1b');
+      headGrad.addColorStop(0.7, '#b91c1c');
+      headGrad.addColorStop(1, '#450a0a');
+      ctx.fillStyle = headGrad;
+      ctx.beginPath();
+      drawEllipse(ctx, 0, 0, 4.5, 6.5);
+      ctx.fill();
+      ctx.restore();
+
+      // 火柴柔和烛光光晕
+      const mHalo = ctx.createRadialGradient(mx, my, 2, mx, my, 32 * flameScale);
+      mHalo.addColorStop(0, '#ffffff');
+      mHalo.addColorStop(0.2, '#fef08a');
+      mHalo.addColorStop(0.55, '#f59e0b');
+      mHalo.addColorStop(0.85, 'rgba(239, 68, 68, 0.35)');
+      mHalo.addColorStop(1, 'rgba(239, 68, 68, 0)');
+      ctx.fillStyle = mHalo;
+      ctx.beginPath();
+      ctx.arc(mx, my, 32 * flameScale, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 蓝紫色微弱内焰根部 (Oxygen-rich blue flame base)
+      ctx.fillStyle = 'rgba(37, 99, 235, 0.65)';
+      ctx.beginPath();
+      ctx.moveTo(mx - 5 * flameScale, my + 6);
+      ctx.quadraticCurveTo(mx, my + 9, mx + 5 * flameScale, my + 6);
+      ctx.quadraticCurveTo(mx, my - 2, mx - 5 * flameScale, my + 6);
+      ctx.fill();
+
+      // 温暖橙黄跳跃主火舌
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.moveTo(mx - 7 * flameScale, my + 6);
+      ctx.quadraticCurveTo(mx - 11 * flameScale, my - 8 * flameScale, mx + flicker * 0.8, my - 24 * flameScale);
+      ctx.quadraticCurveTo(mx + 11 * flameScale, my - 8 * flameScale, mx + 7 * flameScale, my + 6);
+      ctx.closePath();
+      ctx.fill();
+
+      // 白炽金光内芯
+      ctx.fillStyle = '#fffbeb';
+      ctx.beginPath();
+      drawEllipse(ctx, mx + flicker * 0.3, my - 4 * flameScale, 3.2 * flameScale, 8 * flameScale);
+      ctx.fill();
+
+    } else if (flameType === 'zippo') {
+      // ----------------------------------------------------
+      // 2. 经典 Zippo 纯铜打火机 (Iconic Brass Zippo)
+      // ----------------------------------------------------
+      const zx = cx - 24 + toolOffsetX;
+      const zy = fireY + 18 + toolOffsetY;
+
+      ctx.save();
+      ctx.translate(zx, zy);
+      ctx.rotate(-0.16);
+
+      // Zippo 银亮防风烟囱罩 (Stainless Steel Chimney with Air Holes)
+      const chimGrad = ctx.createLinearGradient(-8, 0, 8, 0);
+      chimGrad.addColorStop(0, '#94a3b8');
+      chimGrad.addColorStop(0.4, '#f1f5f9');
+      chimGrad.addColorStop(1, '#64748b');
+      ctx.fillStyle = chimGrad;
+      ctx.fillRect(-8, -14, 16, 14);
+
+      // 烟囱防风通风圆孔 (8 Holes)
+      ctx.fillStyle = '#1e293b';
+      for (let r = 0; r < 2; r++) {
+        for (let c = 0; c < 3; c++) {
+          ctx.beginPath();
+          ctx.arc(-5 + c * 5, -11 + r * 5.5, 1.1, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // 掀开的纯铜机盖 (Opened 42-degree Brass Lid)
+      ctx.save();
+      ctx.translate(-8, 0);
+      ctx.rotate(-0.75);
+      const lidGrad = ctx.createLinearGradient(-18, 0, 0, 0);
+      lidGrad.addColorStop(0, '#b45309');
+      lidGrad.addColorStop(0.5, '#fde047');
+      lidGrad.addColorStop(1, '#92400e');
+      ctx.fillStyle = lidGrad;
+      ctx.fillRect(-18, -4, 20, 8);
+      ctx.strokeStyle = '#fef08a';
+      ctx.lineWidth = 0.8;
+      ctx.strokeRect(-18, -4, 20, 8);
+      ctx.restore();
+
+      // 纯铜下机身 (Brushed Brass Lower Body)
+      const bodyGrad = ctx.createLinearGradient(-10, 0, 10, 0);
+      bodyGrad.addColorStop(0, '#92400e');
+      bodyGrad.addColorStop(0.3, '#f59e0b');
+      bodyGrad.addColorStop(0.7, '#fde047');
+      bodyGrad.addColorStop(1, '#b45309');
+      ctx.fillStyle = bodyGrad;
+      ctx.fillRect(-10, 0, 20, 28);
+      ctx.strokeStyle = '#fef08a';
+      ctx.lineWidth = 1.0;
+      ctx.strokeRect(-10, 0, 20, 28);
+
+      // 铰链铆钉圆点
+      ctx.fillStyle = '#fde047';
+      ctx.beginPath();
+      ctx.arc(-8.5, 1, 1.8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Zippo 雄浑金黄油焰与气流扰动
+      const fx = cx - 4 + toolOffsetX * 0.5 + flicker * 0.4;
+      const fy = fireY + 4 + toolOffsetY * 0.4;
+
+      const zHalo = ctx.createRadialGradient(fx, fy, 2, fx, fy, 44 * flameScale);
+      zHalo.addColorStop(0, '#ffffff');
+      zHalo.addColorStop(0.22, '#fef08a');
+      zHalo.addColorStop(0.55, '#f59e0b');
+      zHalo.addColorStop(0.85, 'rgba(217, 119, 6, 0.45)');
+      zHalo.addColorStop(1, 'rgba(180, 83, 9, 0)');
+      ctx.fillStyle = zHalo;
+      ctx.beginPath();
+      ctx.arc(fx, fy, 44 * flameScale, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 蓝色油芯底座微焰
+      ctx.fillStyle = 'rgba(29, 78, 216, 0.7)';
+      ctx.beginPath();
+      drawEllipse(ctx, fx, fy + 7 * flameScale, 6 * flameScale, 3 * flameScale);
+      ctx.fill();
+
+      // 金色饱满跃动火舌
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.moveTo(fx - 10 * flameScale, fy + 6 * flameScale);
+      ctx.quadraticCurveTo(fx - 15 * flameScale, fy - 12 * flameScale, fx + flicker * 0.9, fy - 32 * flameScale);
+      ctx.quadraticCurveTo(fx + 15 * flameScale, fy - 12 * flameScale, fx + 10 * flameScale, fy + 6 * flameScale);
+      ctx.closePath();
+      ctx.fill();
+
+      // 亮白油焰中心
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      drawEllipse(ctx, fx + flicker * 0.2, fy - 6 * flameScale, 4.5 * flameScale, 12 * flameScale);
+      ctx.fill();
+
+    } else if (flameType === 'blue_torch') {
+      // ----------------------------------------------------
+      // 3. 雪茄三喷蓝焰喷枪 (Triple Jet Supersonic Blue Torch)
+      // ----------------------------------------------------
+      const bx = cx + toolOffsetX;
+      const by = fireY + 16 + toolOffsetY;
+
+      // 战术枪灰喷枪机头
+      const gunGrad = ctx.createLinearGradient(bx - 14, 0, bx + 14, 0);
+      gunGrad.addColorStop(0, '#0f172a');
+      gunGrad.addColorStop(0.5, '#334155');
+      gunGrad.addColorStop(1, '#1e293b');
+      ctx.fillStyle = gunGrad;
+      ctx.fillRect(bx - 14, by + 12, 28, 24);
+      // 科技青蓝阳极氧化装饰圈
+      ctx.fillStyle = '#06b6d4';
+      ctx.fillRect(bx - 14, by + 10, 28, 2.5);
+      // 3 个精密陶瓷喷火嘴
+      ctx.fillStyle = '#64748b';
+      [-8, 0, 8].forEach(offX => {
+        ctx.fillRect(bx + offX - 2.5, by + 6, 5, 4);
+      });
+
+      // 超高温等离子外发光风暴
+      const bHalo = ctx.createRadialGradient(bx, by, 3, bx, by, 46 * flameScale);
+      bHalo.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+      bHalo.addColorStop(0.2, 'rgba(6, 182, 212, 0.85)');
+      bHalo.addColorStop(0.55, 'rgba(37, 99, 235, 0.5)');
+      bHalo.addColorStop(1, 'rgba(30, 58, 138, 0)');
+      ctx.fillStyle = bHalo;
+      ctx.beginPath();
+      ctx.arc(bx, by, 46 * flameScale, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 三束超音速刚性蓝焰火锥
+      const jetAngles = [-0.12, 0, 0.12];
+      [-8, 0, 8].forEach((offX, idx) => {
+        const targetX = cx + (offX * 0.4);
+        const targetY = fireY - 4;
+        const nozzleX = bx + offX;
+        const nozzleY = by + 6;
+
+        // 外层幽蓝等离子锥
+        ctx.fillStyle = '#06b6d4';
+        ctx.beginPath();
+        ctx.moveTo(nozzleX - 3.5 * flameScale, nozzleY);
+        ctx.lineTo(targetX + flicker * 0.15, targetY);
+        ctx.lineTo(nozzleX + 3.5 * flameScale, nozzleY);
+        ctx.closePath();
+        ctx.fill();
+
+        // 内层激光白炽蓝心
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.moveTo(nozzleX - 1.8 * flameScale, nozzleY);
+        ctx.lineTo(targetX, targetY + 2);
+        ctx.lineTo(nozzleX + 1.8 * flameScale, nozzleY);
+        ctx.closePath();
+        ctx.fill();
+
+        // 超音速马赫激波环 (Mach shock diamond)
+        if (idx === 1) {
+          ctx.strokeStyle = '#e0f2fe';
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          drawEllipse(ctx, bx, by - 4, 3 * flameScale, 1.2 * flameScale);
+          ctx.stroke();
+        }
+      });
+
+    } else if (flameType === 'plasma_arc') {
+      // ----------------------------------------------------
+      // 4. 赛博等离子双弧 (Cyber High-Frequency Dual Plasma Arc)
+      // ----------------------------------------------------
+      const px = cx + toolOffsetX;
+      const py = fireY + 14 + toolOffsetY;
+
+      // 航空钛金暗灰机身
+      const tiGrad = ctx.createLinearGradient(px - 15, 0, px + 15, 0);
+      tiGrad.addColorStop(0, '#0f172a');
+      tiGrad.addColorStop(0.4, '#1e1b4b');
+      tiGrad.addColorStop(0.8, '#334155');
+      tiGrad.addColorStop(1, '#0f172a');
+      ctx.fillStyle = tiGrad;
+      ctx.fillRect(px - 14, py + 12, 28, 24);
+      // 机身极客发光能量线
+      ctx.fillStyle = '#a855f7';
+      ctx.fillRect(px - 14, py + 10, 28, 2);
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(px - 4, py + 20, 8, 2);
+
+      // 4 枚陶瓷绝缘放电电极柱
+      const posts = [
+        { x: px - 8, y: py + 4 },
+        { x: px + 8, y: py + 4 },
+        { x: px - 8, y: py - 4 },
+        { x: px + 8, y: py - 4 }
+      ];
+      ctx.fillStyle = '#94a3b8';
+      posts.forEach(pt => {
+        ctx.fillRect(pt.x - 1.5, pt.y, 3, 4);
+      });
+
+      // 等离子电离紫青辐射光晕
+      const pHalo = ctx.createRadialGradient(px, py, 2, px, py, 38 * flameScale);
+      pHalo.addColorStop(0, '#ffffff');
+      pHalo.addColorStop(0.25, '#c084fc');
+      pHalo.addColorStop(0.65, 'rgba(124, 58, 237, 0.45)');
+      pHalo.addColorStop(1, 'rgba(88, 28, 135, 0)');
+      ctx.fillStyle = pHalo;
+      ctx.beginPath();
+      ctx.arc(px, py, 38 * flameScale, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 交叉高能等离子双弧 (X型高频电浆放电电弧，带微频抖动)
+      const jitterA = Math.sin(time * 0.09) * 2.2;
+      const jitterB = Math.cos(time * 0.08) * 2.2;
+
+      // 电弧 1: 左下到右上
+      ctx.strokeStyle = '#c084fc';
+      ctx.lineWidth = 2.4 * flameScale;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(posts[0].x, posts[0].y);
+      ctx.quadraticCurveTo(px + jitterA, py - 1, posts[3].x, posts[3].y);
+      ctx.stroke();
+
+      // 电弧 2: 右下到左上
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2.4 * flameScale;
+      ctx.beginPath();
+      ctx.moveTo(posts[1].x, posts[1].y);
+      ctx.quadraticCurveTo(px + jitterB, py - 1, posts[2].x, posts[2].y);
+      ctx.stroke();
+
+      // 交叉核心白炽等离子爆破斑点
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(px + (jitterA + jitterB) * 0.2, py - 1, 3.2 * flameScale, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 触及烟头的微电弧放电丝
+      ctx.strokeStyle = 'rgba(192, 132, 252, 0.85)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(px, py - 2);
+      ctx.lineTo(cx + jitterA * 0.5, fireY);
+      ctx.stroke();
+
+    } else {
+      // ----------------------------------------------------
+      // 5. 经典便携砂轮打火机 (Classic Flint Wheel Lighter)
+      // ----------------------------------------------------
+      const lx = cx - 18 + toolOffsetX;
+      const ly = fireY + 18 + toolOffsetY;
+
+      ctx.save();
+      ctx.translate(lx, ly);
+      ctx.rotate(-0.14);
+
+      // 黄铜滚花砂轮与防风口 (Knurled Wheel & Windshield)
+      const whGrad = ctx.createLinearGradient(-7, 0, 7, 0);
+      whGrad.addColorStop(0, '#64748b');
+      whGrad.addColorStop(0.5, '#cbd5e1');
+      whGrad.addColorStop(1, '#475569');
+      ctx.fillStyle = whGrad;
+      ctx.fillRect(-7, -10, 14, 10);
+
+      // 砂轮滚花咬合纹路
+      ctx.fillStyle = '#334155';
+      for (let i = -5; i <= 5; i += 2) {
+        ctx.fillRect(i, -9, 1, 8);
+      }
+
+      // 打火机便携机身 (Classic Ergonomic Amber Body)
+      const fBodyGrad = ctx.createLinearGradient(-8, 0, 8, 0);
+      fBodyGrad.addColorStop(0, '#b45309');
+      fBodyGrad.addColorStop(0.4, '#f59e0b');
+      fBodyGrad.addColorStop(0.8, '#d97706');
+      fBodyGrad.addColorStop(1, '#78350f');
+      ctx.fillStyle = fBodyGrad;
+      ctx.fillRect(-8, 0, 16, 26);
+      ctx.strokeStyle = '#fef08a';
+      ctx.lineWidth = 0.8;
+      ctx.strokeRect(-8, 0, 16, 26);
+      ctx.restore();
+
+      // 温馨柔黄自然火苗
+      const fx = cx - 2 + toolOffsetX * 0.4 + flicker * 0.35;
+      const fy = fireY + 4 + toolOffsetY * 0.4;
+
+      const yHalo = ctx.createRadialGradient(fx, fy, 2, fx, fy, 36 * flameScale);
+      yHalo.addColorStop(0, '#ffffff');
+      yHalo.addColorStop(0.24, '#fef08a');
+      yHalo.addColorStop(0.62, '#f59e0b');
+      yHalo.addColorStop(0.88, 'rgba(239, 68, 68, 0.35)');
+      yHalo.addColorStop(1, 'rgba(239, 68, 68, 0)');
+      ctx.fillStyle = yHalo;
+      ctx.beginPath();
+      ctx.arc(fx, fy, 36 * flameScale, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 双贝塞尔波浪摇曳火舌
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.moveTo(fx - 8 * flameScale, fy + 8 * flameScale);
+      ctx.quadraticCurveTo(fx - 13 * flameScale, fy - 10 * flameScale, fx + flicker * 0.8, fy - 28 * flameScale);
+      ctx.quadraticCurveTo(fx + 13 * flameScale, fy - 10 * flameScale, fx + 8 * flameScale, fy + 8 * flameScale);
+      ctx.closePath();
+      ctx.fill();
+
+      // 白炽金光内焰芯
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      drawEllipse(ctx, fx + flicker * 0.2, fy - 5 * flameScale, 3.8 * flameScale, 10 * flameScale);
+      ctx.fill();
+    }
+
+    ctx.restore();
     ctx.restore();
   }
 }
@@ -1851,6 +2872,7 @@ export class PackFlightVfxRenderer {
     for (let i = 0; i < 150; i++) {
       this.scratchPts.push({ u: 0, x: 0, y: 0, tx: 0, ty: 0, nx: 0, ny: 0 });
     }
+    this.scratchSample = { u: 0, x: 0, y: 0, tx: 0, ty: 0, nx: 0, ny: 0 };
     this.burstTriggered = false;
     this.initParticles();
   }
@@ -2118,7 +3140,7 @@ export class PackFlightVfxRenderer {
           for (let i = 0; i < 16; i++) {
             const sd = this.stardust[i];
             if (sd.u > curveHeadU) continue;
-            const p = this.sampleSCurve(sd.u, w, h, slotOffsetX);
+            const p = this.sampleSCurve(sd.u, w, h, slotOffsetX, this.scratchSample);
             const drift = Math.sin(elapsedSec * 3 + sd.phase) * 5;
             const sx = p.x + p.nx * (sd.normalSpread * 18 + drift);
             const sy = p.y + p.ny * (sd.normalSpread * 18 + drift);
@@ -2347,7 +3369,7 @@ export class PackFlightVfxRenderer {
           for (let i = 0; i < 24; i++) {
             const sd = this.stardust[i];
             if (sd.u > curveHeadU) continue;
-            const p = this.sampleSCurve(sd.u, w, h, slotOffsetX);
+            const p = this.sampleSCurve(sd.u, w, h, slotOffsetX, this.scratchSample);
             const drift = Math.sin(elapsedSec * 4 + sd.phase) * 6;
             const sx = p.x + p.nx * (sd.normalSpread * 22 + drift);
             const sy = p.y + p.ny * (sd.normalSpread * 22 + drift);
@@ -2615,7 +3637,7 @@ export class PackFlightVfxRenderer {
           for (let i = 0; i < 32; i++) {
             const sd = this.stardust[i];
             if (sd.u > curveHeadU) continue;
-            const p = this.sampleSCurve(sd.u, w, h, slotOffsetX);
+            const p = this.sampleSCurve(sd.u, w, h, slotOffsetX, this.scratchSample);
             const sx = p.x + p.nx * (sd.normalSpread * 26);
             const sy = p.y + p.ny * (sd.normalSpread * 26);
             ctx.fillStyle = i % 3 === 0 ? '#f5d0fe' : (i % 3 === 1 ? '#c084fc' : '#38bdf8');
@@ -2820,7 +3842,7 @@ export class PackFlightVfxRenderer {
     if (elapsedSec >= 0.22 && elapsedSec < 2.25) {
       const curveHeadU = Math.min(1.0, (elapsedSec - 0.22) / 1.16);
       const ribbonFade = elapsedSec > 1.38 ? Math.max(0, 1 - (elapsedSec - 1.38) / 0.82) : 1.0;
-      const count = Math.min(105, Math.max(10, Math.floor(curveHeadU * 105)));
+      const count = Math.min(54, Math.max(8, Math.floor(curveHeadU * 54)));
 
       if (ribbonFade > 0.01) {
         ctx.save();
@@ -2829,7 +3851,7 @@ export class PackFlightVfxRenderer {
         const tailStartU = Math.max(0, curveHeadU - 0.68);
         let ptCount = 0;
         for (let i = 0; i <= count; i++) {
-          const u = i / 105;
+          const u = i / 54;
           if (u < tailStartU || u > curveHeadU) continue;
           this.sampleSCurve(u, w, h, slotOffsetX, this.scratchPts[ptCount]);
           ptCount++;
@@ -2912,7 +3934,7 @@ export class PackFlightVfxRenderer {
           for (let i = 0; i < 36; i++) {
             const sd = this.stardust[i];
             if (sd.u > curveHeadU) continue;
-            const sample = this.sampleSCurve(sd.u, w, h, slotOffsetX);
+            const sample = this.sampleSCurve(sd.u, w, h, slotOffsetX, this.scratchSample);
             const drift = Math.sin(elapsedSec * 3.6 + sd.phase) * 5;
             const sx = sample.x + sample.nx * (sd.normalSpread * 26 + drift);
             const sy = sample.y + sample.ny * (sd.normalSpread * 26 + drift);

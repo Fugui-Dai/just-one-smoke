@@ -21,7 +21,7 @@
 
       <!-- 导航中心标题 -->
       <view class="nav-center-title-box">
-        <text class="nav-center-title-text">全国戒烟英雄榜</text>
+        <text class="nav-center-title-text">巅峰天梯</text>
       </view>
 
       <!-- 右侧占位保持对称 -->

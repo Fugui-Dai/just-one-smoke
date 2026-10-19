@@ -66,9 +66,21 @@ export function buildTrendLineChartSvg(dailyList = []) {
   const gridY2 = Math.round(padT + ch * 0.5);
   const gridY3 = Math.round(padT + ch);
 
+function escapeXml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
   let dotsSvg = '';
   points.forEach(pt => {
     const textY = Math.max(20, pt.y - 10);
+    const safeVal = escapeXml(pt.val);
+    const safeLabel = escapeXml(pt.label);
     dotsSvg += `
       <!-- 数据圆点与外发光环 -->
       <circle cx="${pt.x}" cy="${pt.y}" r="${pt.isToday ? 6 : 4.5}" fill="#131826" stroke="#10b981" stroke-width="${pt.isToday ? 3 : 2.5}" />
@@ -76,10 +88,10 @@ export function buildTrendLineChartSvg(dailyList = []) {
       ${pt.isToday ? `<circle cx="${pt.x}" cy="${pt.y}" r="11" fill="none" stroke="#34d399" stroke-width="1.8" stroke-dasharray="3,3" opacity="0.9" />` : ''}
       
       <!-- 顶部数值标签 -->
-      <text x="${pt.x}" y="${textY}" fill="${pt.isToday ? '#34d399' : '#f8fafc'}" font-size="${pt.isToday ? 15 : 13}" font-weight="${pt.isToday ? 800 : 700}" text-anchor="middle" font-family="-apple-system, system-ui, sans-serif">${pt.val}</text>
+      <text x="${pt.x}" y="${textY}" fill="${pt.isToday ? '#34d399' : '#f8fafc'}" font-size="${pt.isToday ? 15 : 13}" font-weight="${pt.isToday ? 800 : 700}" text-anchor="middle" font-family="-apple-system, system-ui, sans-serif">${safeVal}</text>
       
       <!-- 底部日期标签 -->
-      <text x="${pt.x}" y="${height - 14}" fill="${pt.isToday ? '#34d399' : '#94a3b8'}" font-size="13" font-weight="${pt.isToday ? '700' : '500'}" text-anchor="middle" font-family="-apple-system, system-ui, sans-serif">${pt.label}</text>
+      <text x="${pt.x}" y="${height - 14}" fill="${pt.isToday ? '#34d399' : '#94a3b8'}" font-size="13" font-weight="${pt.isToday ? '700' : '500'}" text-anchor="middle" font-family="-apple-system, system-ui, sans-serif">${safeLabel}</text>
     `;
   });
 

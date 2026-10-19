@@ -396,6 +396,32 @@
   font-weight: 800;
 }
 
+/* 节余榜基准防刷提示徽标 */
+.rank-fairness-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  margin: 12rpx auto 4rpx;
+  padding: 8rpx 18rpx;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.22);
+  border-radius: 20rpx;
+  width: fit-content;
+}
+
+.rfp-icon {
+  font-size: 20rpx;
+  line-height: 1;
+}
+
+.rfp-text {
+  font-size: 20rpx;
+  color: #d97706;
+  font-weight: 600;
+  letter-spacing: 0.5rpx;
+}
+
 .theme-day .rank-cat-tab.active,
 .theme-emerald .rank-cat-tab.active {
   background: rgba(16, 185, 129, 0.18);

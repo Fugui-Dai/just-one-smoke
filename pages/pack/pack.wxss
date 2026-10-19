@@ -712,84 +712,6 @@
   gap: 10rpx;
 }
 
-/* ====================================================================================
-   【模式 A: 宽幕轻奢 6 支单排品鉴装】 (PACK_LAYOUT_MODE === 'row6')
-   - 商业化高频闭环：6 支适中容量，高频刺激看广告与 VIP 开包转化
-   - 视觉品质提升：Retina 级大滤嘴微距特写，云纹金箍细节毕现，点触命中率极佳
-   - 兼容性：与原 20 支双排代码完全解耦，下方原 20 支所有规则完整保留随时切回
-   ==================================================================================== */
-.cigarettes-matrix.row6-matrix {
-  top: 76rpx;
-  left: 24rpx;
-  right: 24rpx;
-  grid-template-columns: repeat(6, 1fr);
-  grid-template-rows: 140rpx;
-  column-gap: 12rpx;
-  row-gap: 0;
-}
-
-.row6-matrix .cig-filter-slot.row6-slot {
-  grid-row: 1;
-  top: 0;
-  height: 140rpx;
-  z-index: 8;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transform: none;
-  filter: brightness(1.02) drop-shadow(0 2rpx 6rpx rgba(0, 0, 0, 0.45));
-}
-
-.row6-matrix .cig-filter-slot.row6-slot:active {
-  transform: translateY(-8rpx);
-}
-
-.row6-matrix .cig-filter-slot.row6-slot.slot-pulled-out {
-  transform: translateY(-68rpx);
-  transition: transform 1.1s cubic-bezier(0.18, 0.89, 0.32, 1.15);
-  filter: drop-shadow(0 0 14rpx rgba(251, 191, 36, 0.85));
-}
-
-/* 严格对齐真实香烟与吸烟页面的黄金标准粗细 (常规支 28rpx，细支 20rpx)，白色纸管深插盒身彻底消除黑边悬空 */
-.row6-matrix .cig-filter-slot.row6-slot .slot-cigarette-stick {
-  width: 28rpx;
-  height: 140rpx;
-}
-
-.slender-box .row6-matrix .cig-filter-slot.row6-slot .slot-cigarette-stick {
-  width: 20rpx;
-}
-
-.row6-matrix .cig-filter-slot.row6-slot .slot-filter-cylinder {
-  width: 100%;
-  height: 74rpx;
-  border-radius: 6rpx 6rpx 0 0;
-}
-
-/* 白色烟身纸管：向上外露 18rpx，向下深插盒身 48rpx (总高 66rpx)，彻底消除下沿悬空与黑底穿帮 */
-.row6-matrix .cig-filter-slot.row6-slot .slot-paper-cylinder {
-  width: 100%;
-  height: 66rpx;
-}
-
-.row6-matrix .cig-filter-slot.row6-slot .slot-hanyan-stick {
-  width: 28rpx;
-  height: 140rpx;
-}
-
-.row6-matrix .cig-filter-slot.row6-slot .slot-empty-groove {
-  width: 28rpx;
-  height: 92rpx;
-}
-
-.slender-box .row6-matrix .cig-filter-slot.row6-slot .slot-empty-groove {
-  width: 20rpx;
-}
-
-.row6-matrix .cig-filter-slot.row6-slot.empty-slot {
-  z-index: 2;
-  height: 92rpx;
-}
 
 .cig-filter-slot {
   width: 100%;
@@ -2006,17 +1928,65 @@
 }
 
 
-/* 表面高光反射层 (3D 舞台关闭扫光) */
-.facade-sheen-overlay {
+/* 表面高光反射层 (腾讯总监级 · 3D 展台高定整壳一体化全息珠光扫掠 · 贯穿盒盖与盒身) */
+.pack-shell-unified-sheen {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   overflow: hidden;
   pointer-events: none;
-  z-index: 5;
-  border-radius: inherit;
+  z-index: 40;
+  border-radius: 12rpx;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
 }
-.pack-3d-stage .facade-sheen-overlay {
-  display: none !important;
+
+/* 盒盖打开后消隐，合盖时呈现整盒一体贯穿扫光 */
+.pack-box-wrapper.lid-open .pack-shell-unified-sheen {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transition: opacity 0.15s ease, visibility 0s linear 0.15s !important;
+}
+
+.pack-shell-unified-sheen::after {
+  content: '';
+  position: absolute;
+  top: -60%;
+  left: -80%;
+  width: 60%;
+  height: 220%;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 35%,
+    rgba(255, 255, 255, 0.18) 48%,
+    rgba(254, 240, 138, 0.38) 52%,
+    rgba(255, 255, 255, 0.14) 56%,
+    transparent 70%
+  );
+  transform: rotate(22deg);
+  animation: packUnifiedLusterSweep 6.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes packUnifiedLusterSweep {
+  0%, 25% {
+    left: -80%;
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  62% {
+    left: 160%;
+    opacity: 0.85;
+  }
+  68%, 100% {
+    left: 160%;
+    opacity: 0;
+  }
 }
 
 /* 3D 视图下的价格行与容器 */
@@ -2829,21 +2799,29 @@
 
 .slot-cigarette-stick.stick-rising-out {
   box-shadow: 0 0 24rpx #38bdf8, 0 0 42rpx #fde047 !important;
-  animation: slotStickAscendOut 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards !important;
+  animation: slotStickAscendOut 0.26s cubic-bezier(0.25, 0.1, 0.25, 1) forwards !important;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform, opacity;
 }
 
 @keyframes slotStickAscendOut {
   0% {
-    transform: translateY(0) scale(1);
-    filter: brightness(1.1);
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 1;
   }
-  45% {
-    transform: translateY(-58rpx) scale(1.04);
-    filter: brightness(1.35);
+  50% {
+    transform: translate3d(0, -60rpx, 0) scale(1.03);
+    opacity: 1;
+  }
+  82% {
+    transform: translate3d(0, -118rpx, 0) scale(1.05);
+    opacity: 0.95;
   }
   100% {
-    transform: translateY(-155rpx) scale(1.06);
-    filter: brightness(1.5);
+    transform: translate3d(0, -140rpx, 0) scale(1.06);
+    opacity: 0;
   }
 }
 
@@ -2858,6 +2836,8 @@
   z-index: 306;
   pointer-events: none;
   opacity: 0;
+  transform: translateZ(0);
+  backface-visibility: hidden;
   transition: opacity 0.18s ease-out;
 }
 
@@ -2879,6 +2859,8 @@
   );
   opacity: 0;
   pointer-events: none;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .ssr-stage-backdrop.ssr-active {
@@ -2903,6 +2885,8 @@
   justify-content: center;
   overflow: hidden;
   pointer-events: auto;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 /* 顶部全息分镜状态铭牌 (02 [点击触发] ~ 06 [屏幕呈现]) */
@@ -2943,15 +2927,9 @@
   text-shadow: 0 0 12rpx rgba(56, 189, 248, 0.85);
 }
 
-/* ---------- 2. CSS 3D S-Curve 银河星云三色流光绶带 (与 60fps Canvas 协同辉映) ---------- */
+/* ---------- 2. CSS 3D S-Curve 银河星云三色流光绶带 (交由 60fps Canvas 2D 硬件加速独占渲染，消除 DOM 重叠高开销) ---------- */
 .ssr-scurve-galaxy-layer {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: none !important;
 }
 
 .scurve-ribbon-arc {
@@ -3156,7 +3134,8 @@
   -webkit-mask-image: radial-gradient(circle, #000 0%, rgba(0, 0, 0, 0.7) 40%, transparent 72%);
   mask-image: radial-gradient(circle, #000 0%, rgba(0, 0, 0, 0.7) 40%, transparent 72%);
   animation: ssrWheelSpinCw 36s linear infinite;
-  filter: blur(8rpx);
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .ssr-radial-starburst {
@@ -3311,13 +3290,16 @@
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transform: translate3d(var(--slot-offset-x, 0rpx), 160rpx, 0) scale(0.46) rotate(0deg);
+  transform: translate3d(var(--slot-offset-x, 0rpx), 140rpx, 0) scale(0.48) rotate(0deg);
+  transform-origin: center center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   will-change: transform, opacity;
 }
 
-/* 经典宝刀出鞘 360° 单周掠空大回环 (1.42s) + 定格后无缝衔接 3D 浮空轻柔呼吸浮动 (杜绝画面突兀暂停感) */
+/* 经典宝刀出鞘 360° 单周掠空大回环 (1.42s) + 定格后无缝衔接 3D 浮空轻柔呼吸浮动 (平滑 Quad 曲线，杜绝初速率突变断层) */
 .ssr-awaken-overlay.ssr-active .ssr-hero-cigarette-stage {
-  animation: ssrHeroArcFlight 1.42s cubic-bezier(0.22, 1, 0.36, 1) forwards, ssrHeroFloatBreathing 2.2s ease-in-out 1.42s infinite alternate;
+  animation: ssrHeroArcFlight 1.42s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards, ssrHeroFloatBreathing 2.2s ease-in-out 1.42s infinite alternate;
 }
 
 @keyframes ssrHeroFloatBreathing {
@@ -3329,31 +3311,35 @@
   }
 }
 
-/* 经典宝刀出鞘 · 游龙惊鸿 360° 挽剑花大回环 (382deg = 360° + 22°，精准落入粉黄蓝旋转中心) */
+/* 经典宝刀出鞘 · 游龙惊鸿 360° 挽剑花大回环 (平滑速度连续过渡，精准衔接出盒物理动量) */
 @keyframes ssrHeroArcFlight {
   0% {
-    opacity: 0.95;
-    transform: translate3d(var(--slot-offset-x, 0rpx), 160rpx, 0) scale(0.46) rotate(0deg);
+    opacity: 0.92;
+    transform: translate3d(var(--slot-offset-x, 0rpx), 140rpx, 0) scale(0.48) rotate(0deg);
   }
-  15% {
+  12% {
     opacity: 1;
-    transform: translate3d(calc(var(--slot-offset-x, 0rpx) * 0.35), -170rpx, 0) scale(0.66) rotate(-18deg);
+    transform: translate3d(calc(var(--slot-offset-x, 0rpx) * 0.65), 30rpx, 0) scale(0.58) rotate(-8deg);
   }
-  35% {
+  24% {
     opacity: 1;
-    transform: translate3d(205rpx, -75rpx, 0) scale(0.84) rotate(138deg);
+    transform: translate3d(calc(var(--slot-offset-x, 0rpx) * 0.25 + 75rpx), -105rpx, 0) scale(0.72) rotate(26deg);
   }
-  58% {
+  42% {
     opacity: 1;
-    transform: translate3d(-185rpx, 125rpx, 0) scale(1.36) rotate(286deg);
+    transform: translate3d(190rpx, -65rpx, 0) scale(0.90) rotate(155deg);
   }
-  82% {
+  62% {
     opacity: 1;
-    transform: translate3d(10rpx, -8rpx, 0) scale(1.22) rotate(388deg);
+    transform: translate3d(-170rpx, 115rpx, 0) scale(1.32) rotate(288deg);
   }
-  91% {
+  84% {
     opacity: 1;
-    transform: translate3d(-4rpx, 3rpx, 0) scale(1.13) rotate(379deg);
+    transform: translate3d(10rpx, -8rpx, 0) scale(1.20) rotate(386deg);
+  }
+  93% {
+    opacity: 1;
+    transform: translate3d(-3rpx, 2rpx, 0) scale(1.14) rotate(380deg);
   }
   100% {
     opacity: 1;
@@ -3497,7 +3483,7 @@
   height: 8rpx;
   border-radius: 999rpx;
   background: linear-gradient(90deg, transparent 0%, #38bdf8 15%, #fde047 35%, #ffffff 50%, #fde047 65%, #38bdf8 85%, transparent 100%);
-  box-shadow: 0 0 32rpx #38bdf8, 0 0 56rpx #fde047, 0 0 80rpx #ffffff;
+  box-shadow: 0 0 16rpx #38bdf8, 0 0 28rpx #fde047;
 }
 
 .slash-beam.beam-a { transform: rotate(34deg); }
@@ -3506,7 +3492,7 @@
 .slash-core-star {
   font-size: 68rpx;
   color: #ffffff;
-  text-shadow: 0 0 28rpx #fde047, 0 0 54rpx #38bdf8, 0 0 72rpx #ffffff;
+  text-shadow: 0 0 16rpx #fde047, 0 0 28rpx #38bdf8;
   line-height: 1;
 }
 
@@ -3639,6 +3625,563 @@
   color: rgba(180, 83, 9, 0.85);
   writing-mode: vertical-lr;
   letter-spacing: 3rpx;
+}
+
+/* ==================== 🏛️ 奇趣名筑专属 3D 宏伟地标模型 (整根香烟即世界名筑) ==================== */
+.ssr-hero-cigarette-body.is-landmark-body {
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+  filter: drop-shadow(0 20rpx 48rpx rgba(0, 0, 0, 0.92)) drop-shadow(0 0 28rpx rgba(251, 191, 36, 0.65));
+}
+
+/* 1. 埃菲尔铁塔专属 3D 钢构全景一根烟 */
+.ssr-eiffel-stick {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+/* 塔尖避雷针与信标球 */
+.eiffel-hero-spire {
+  width: 4rpx;
+  height: 48rpx;
+  background: linear-gradient(180deg, #fef08a 0%, #f59e0b 60%, #b45309 100%);
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+.eiffel-hero-beacon {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 16rpx #fef08a, 0 0 24rpx #f59e0b;
+  position: absolute;
+  top: -6rpx;
+  animation: beacon-blink 1.4s infinite ease-in-out;
+}
+@keyframes beacon-blink {
+  0%, 100% { opacity: 0.7; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+/* 3层顶层观景台穹顶 */
+.eiffel-hero-deck3 {
+  width: 22rpx;
+  height: 12rpx;
+  background: linear-gradient(180deg, #fef08a 0%, #c5a059 100%);
+  border-radius: 6rpx 6rpx 2rpx 2rpx;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.5);
+}
+
+/* 上段修长塔身 */
+.eiffel-hero-upper-shaft {
+  width: 24rpx;
+  height: 120rpx;
+  background: linear-gradient(90deg, #262017 0%, #c5a059 40%, #fef08a 55%, #785c2c 100%);
+  clip-path: polygon(15% 0, 85% 0, 100% 100%, 0 100%);
+  -webkit-clip-path: polygon(15% 0, 85% 0, 100% 100%, 0 100%);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  padding: 6rpx 0;
+  box-sizing: border-box;
+}
+
+.eiffel-hero-truss {
+  width: 100%;
+  height: 24rpx;
+  background-image: 
+    linear-gradient(45deg, transparent 42%, #fef08a 44%, #fef08a 56%, transparent 58%),
+    linear-gradient(-45deg, transparent 42%, #fef08a 44%, #fef08a 56%, transparent 58%);
+  opacity: 0.75;
+}
+
+/* 2层主观景台 (Deuxième étage) */
+.eiffel-hero-deck2 {
+  width: 44rpx;
+  height: 14rpx;
+  background: linear-gradient(180deg, #fef08a 0%, #d97706 60%, #451a03 100%);
+  border-radius: 4rpx;
+  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.6);
+  position: relative;
+  z-index: 5;
+}
+.deck2-railing {
+  position: absolute;
+  top: 0;
+  left: 2rpx;
+  right: 2rpx;
+  height: 4rpx;
+  border-top: 1.5rpx solid #ffffff;
+  background-image: repeating-linear-gradient(90deg, #ffffff 0, #ffffff 2rpx, transparent 2rpx, transparent 6rpx);
+}
+
+/* 中下段外扩塔身 */
+.eiffel-hero-mid-shaft {
+  width: 52rpx;
+  height: 110rpx;
+  background: linear-gradient(90deg, #1c160e 0%, #785c2c 25%, #c5a059 50%, #fef08a 65%, #262017 100%);
+  clip-path: polygon(18% 0, 82% 0, 100% 100%, 0 100%);
+  -webkit-clip-path: polygon(18% 0, 82% 0, 100% 100%, 0 100%);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  padding: 6rpx 0;
+}
+.eiffel-hero-elevator {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 3rpx;
+  transform: translateX(-50%);
+  background: #ffffff;
+  opacity: 0.6;
+}
+
+/* 1层平台 (Premier étage) */
+.eiffel-hero-deck1 {
+  width: 62rpx;
+  height: 20rpx;
+  background: linear-gradient(180deg, #fef08a 0%, #b45309 60%, #1e1b4b 100%);
+  border-radius: 4rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 6;
+}
+.deck1-label {
+  font-size: 11rpx;
+  font-weight: 900;
+  color: #fef08a;
+  letter-spacing: 1.5rpx;
+  text-shadow: 0 1rpx 3rpx rgba(0, 0, 0, 0.9);
+}
+
+/* 底部双曲拱门基座 (4柱外展 + 宏大中空拱门) */
+.eiffel-hero-base {
+  width: 72rpx;
+  height: 94rpx;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+}
+.base-leg {
+  width: 22rpx;
+  height: 100%;
+  background: linear-gradient(90deg, #262017 0%, #c5a059 50%, #785c2c 100%);
+  position: relative;
+}
+.base-leg.leg-left {
+  clip-path: polygon(25% 0, 100% 0, 80% 100%, 0 100%);
+  -webkit-clip-path: polygon(25% 0, 100% 0, 80% 100%, 0 100%);
+}
+.base-leg.leg-right {
+  clip-path: polygon(0 0, 75% 0, 100% 100%, 20% 100%);
+  -webkit-clip-path: polygon(0 0, 75% 0, 100% 100%, 20% 100%);
+}
+.leg-truss {
+  width: 100%;
+  height: 100%;
+  background-image: repeating-linear-gradient(45deg, transparent 0, transparent 8rpx, rgba(254, 240, 138, 0.6) 8rpx, rgba(254, 240, 138, 0.6) 10rpx);
+}
+.base-grand-arch {
+  position: absolute;
+  bottom: 8rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44rpx;
+  height: 60rpx;
+  border: 4rpx solid #fef08a;
+  border-bottom: none;
+  border-radius: 24rpx 24rpx 0 0;
+  box-shadow: 0 -4rpx 12rpx rgba(245, 158, 11, 0.5), inset 0 4rpx 8rpx rgba(0, 0, 0, 0.8);
+}
+.base-feet-row {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 8rpx;
+  display: flex;
+  justify-content: space-between;
+}
+.foot-stone {
+  width: 22rpx;
+  height: 100%;
+  background: #64748b;
+  border-radius: 2rpx;
+  box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.6);
+}
+
+/* 2. 比萨斜塔专属 3D 罗马柱廊白大理石回廊 */
+.ssr-pisa-stick {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  transform: rotate(3.99deg);
+}
+.pisa-hero-belfry {
+  width: 32rpx;
+  height: 44rpx;
+  background: linear-gradient(90deg, #94a3b8 0%, #f8fafc 40%, #cbd5e1 100%);
+  border-radius: 12rpx 12rpx 0 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.4);
+}
+.belfry-dome {
+  position: absolute;
+  top: -6rpx;
+  width: 20rpx;
+  height: 8rpx;
+  background: #64748b;
+  border-radius: 10rpx 10rpx 0 0;
+}
+.belfry-bell {
+  width: 10rpx;
+  height: 12rpx;
+  background: #78350f;
+  border-radius: 4rpx 4rpx 2rpx 2rpx;
+}
+.pisa-hero-gallery {
+  width: 44rpx;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(90deg, #94a3b8 0%, #f8fafc 35%, #ffffff 50%, #cbd5e1 75%, #64748b 100%);
+  border-left: 2rpx solid #ffffff;
+  border-right: 2rpx solid #94a3b8;
+}
+.pisa-gallery-tier {
+  flex: 1;
+  border-bottom: 2rpx solid #94a3b8;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.tier-cornice {
+  height: 4rpx;
+  background: #e2e8f0;
+  box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.25);
+}
+.tier-columns {
+  flex: 1;
+  background-image: repeating-linear-gradient(90deg, #ffffff 0, #ffffff 3rpx, rgba(15, 23, 42, 0.65) 3rpx, rgba(15, 23, 42, 0.65) 7rpx);
+}
+.pisa-hero-base {
+  width: 46rpx;
+  height: 60rpx;
+  background: linear-gradient(90deg, #64748b 0%, #e2e8f0 40%, #94a3b8 100%);
+  border-radius: 0 0 6rpx 6rpx;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.base-blind-arcades {
+  flex: 1;
+  background-image: repeating-linear-gradient(90deg, transparent 0, transparent 4rpx, rgba(15, 23, 42, 0.45) 4rpx, rgba(15, 23, 42, 0.45) 10rpx);
+}
+.base-plinth {
+  height: 8rpx;
+  background: #059669;
+}
+
+/* 3. 吉萨金字塔专属 3D 曜金阶梯金字塔 */
+.ssr-pyramid-stick {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+.pyr-hero-capstone {
+  width: 24rpx;
+  height: 44rpx;
+  background: linear-gradient(135deg, #fef08a 0%, #f59e0b 50%, #b45309 100%);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  -webkit-clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  box-shadow: 0 0 20rpx rgba(254, 240, 138, 0.85);
+  position: relative;
+  z-index: 5;
+}
+.pyr-hero-body {
+  width: 68rpx;
+  flex: 1;
+  background: linear-gradient(90deg, #d97706 0%, #fef08a 48%, #78350f 52%, #451a03 100%);
+  clip-path: polygon(20% 0, 80% 0, 100% 100%, 0 100%);
+  -webkit-clip-path: polygon(20% 0, 80% 0, 100% 100%, 0 100%);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pyr-ashlar-courses {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.35) 0, rgba(0, 0, 0, 0.35) 2rpx, transparent 2rpx, transparent 16rpx);
+}
+.pyr-hero-eye {
+  position: relative;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.eye-symbol {
+  font-size: 32rpx;
+  color: #fef08a;
+  text-shadow: 0 0 16rpx #f59e0b, 0 0 28rpx #ffffff;
+}
+.pyr-hero-base {
+  width: 72rpx;
+  height: 52rpx;
+  background: linear-gradient(180deg, #18181b 0%, #09090b 100%);
+  border: 1.5rpx solid #fbbf24;
+  border-radius: 0 0 6rpx 6rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pyr-base-inscription {
+  font-size: 8rpx;
+  color: #fbbf24;
+  font-weight: 800;
+  letter-spacing: 1rpx;
+  text-align: center;
+}
+
+/* 4. 东方明珠专属 3D 太空舱双球天际线 */
+.ssr-pearl-stick {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+.pearl-hero-needle {
+  width: 4rpx;
+  height: 70rpx;
+  background: linear-gradient(180deg, #ffffff 0%, #ec4899 70%, #be185d 100%);
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+.needle-beacon {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 14rpx #ec4899, 0 0 22rpx #38bdf8;
+  position: absolute;
+  top: -4rpx;
+}
+.pearl-hero-capsule {
+  width: 18rpx;
+  height: 18rpx;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #fb7185 45%, #9f1239 100%);
+  box-shadow: 0 0 10rpx rgba(236, 72, 153, 0.7);
+}
+.pearl-hero-sphere-upper {
+  width: 42rpx;
+  height: 42rpx;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #f43f5e 40%, #be185d 80%, #700730 100%);
+  box-shadow: 0 0 24rpx rgba(236, 72, 153, 0.85);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8rpx 0;
+}
+.sphere-window-ring {
+  width: 90%;
+  height: 6rpx;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 999rpx;
+}
+.sphere-neon-halo {
+  position: absolute;
+  inset: -6rpx;
+  border-radius: 50%;
+  border: 1.5rpx solid #38bdf8;
+  box-shadow: 0 0 12rpx #38bdf8;
+}
+.pearl-hero-columns {
+  width: 24rpx;
+  height: 90rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.col-shaft {
+  width: 5rpx;
+  height: 100%;
+  background: linear-gradient(180deg, #cbd5e1 0%, #64748b 100%);
+}
+.col-elevator {
+  width: 8rpx;
+  height: 80%;
+  background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+  border-radius: 4rpx;
+  box-shadow: 0 0 8rpx #38bdf8;
+}
+.pearl-hero-sphere-lower {
+  width: 52rpx;
+  height: 52rpx;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #fb7185 35%, #be185d 75%, #4c0519 100%);
+  box-shadow: 0 0 28rpx rgba(236, 72, 153, 0.9);
+  position: relative;
+}
+.pearl-hero-tripod-base {
+  width: 54rpx;
+  height: 44rpx;
+  position: relative;
+}
+.tripod-leg {
+  position: absolute;
+  bottom: 0;
+  width: 6rpx;
+  height: 100%;
+  background: linear-gradient(180deg, #94a3b8 0%, #475569 100%);
+}
+.tripod-leg.tl-1 { left: 4rpx; transform: rotate(18deg); }
+.tripod-leg.tl-2 { right: 4rpx; transform: rotate(-18deg); }
+
+/* ==================== 槽位微缩名筑烟支模型 ==================== */
+/* 槽位微缩埃菲尔铁塔 */
+.slot-eiffel-stick {
+  width: 100%;
+  height: 104rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+.slot-eiffel-spire {
+  width: 2rpx;
+  height: 20rpx;
+  background: #fef08a;
+}
+.slot-eiffel-deck2 {
+  width: 14rpx;
+  height: 3rpx;
+  background: #f59e0b;
+}
+.slot-eiffel-body {
+  width: 18rpx;
+  height: 38rpx;
+  background: linear-gradient(90deg, #262017 0%, #c5a059 50%, #262017 100%);
+  clip-path: polygon(25% 0, 75% 0, 100% 100%, 0 100%);
+  -webkit-clip-path: polygon(25% 0, 75% 0, 100% 100%, 0 100%);
+}
+.slot-eiffel-deck1 {
+  width: 22rpx;
+  height: 4rpx;
+  background: #b45309;
+}
+.slot-eiffel-arch {
+  width: 24rpx;
+  height: 39rpx;
+  background: linear-gradient(90deg, #262017 0%, #c5a059 50%, #262017 100%);
+  clip-path: polygon(0 0, 100% 0, 85% 100%, 65% 100%, 50% 45%, 35% 100%, 15% 100%);
+  -webkit-clip-path: polygon(0 0, 100% 0, 85% 100%, 65% 100%, 50% 45%, 35% 100%, 15% 100%);
+}
+
+/* 槽位微缩比萨斜塔 */
+.slot-pisa-stick {
+  width: 100%;
+  height: 104rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: rotate(3.99deg);
+}
+.slot-pisa-belfry {
+  width: 14rpx;
+  height: 16rpx;
+  background: #e2e8f0;
+  border-radius: 6rpx 6rpx 0 0;
+}
+.slot-pisa-arcades {
+  width: 18rpx;
+  flex: 1;
+  background: linear-gradient(90deg, #94a3b8 0%, #ffffff 50%, #64748b 100%);
+  background-image: repeating-linear-gradient(180deg, #ffffff 0, #ffffff 3rpx, rgba(15, 23, 42, 0.45) 3rpx, rgba(15, 23, 42, 0.45) 8rpx);
+}
+
+/* 槽位微缩金字塔 */
+.slot-pyramid-stick {
+  width: 100%;
+  height: 104rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.slot-pyramid-cap {
+  width: 10rpx;
+  height: 16rpx;
+  background: #fef08a;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  -webkit-clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+.slot-pyramid-steps {
+  width: 24rpx;
+  flex: 1;
+  background: linear-gradient(90deg, #d97706 0%, #fef08a 45%, #78350f 100%);
+  clip-path: polygon(25% 0, 75% 0, 100% 100%, 0 100%);
+  -webkit-clip-path: polygon(25% 0, 75% 0, 100% 100%, 0 100%);
+  background-image: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.35) 0, rgba(0, 0, 0, 0.35) 2rpx, transparent 2rpx, transparent 10rpx);
+}
+
+/* 槽位微缩东方明珠 */
+.slot-pearl-stick {
+  width: 100%;
+  height: 104rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.slot-pearl-needle {
+  width: 2rpx;
+  height: 20rpx;
+  background: #ec4899;
+}
+.slot-pearl-s2 {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #f43f5e;
+}
+.slot-pearl-shaft {
+  width: 4rpx;
+  height: 28rpx;
+  background: #cbd5e1;
+}
+.slot-pearl-s1 {
+  width: 18rpx;
+  height: 18rpx;
+  border-radius: 50%;
+  background: #be185d;
 }
 
 /* 贯穿烟身的扫光已按要求移除 */

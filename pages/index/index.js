@@ -2,15 +2,16 @@
 import { SmokeStateMachine } from '../../engine/smokeStateMachine.js';
 import { ParticleSystem } from '../../engine/particleSystem.js';
 import { canvasRenderer } from '../../engine/canvasRenderer.js';
-import { ATMOSPHERE_SCENES, SCENE_CATEGORIES, getSceneById } from '../../engine/sceneRenderer.js';
+import { ATMOSPHERE_SCENES, SCENE_CATEGORIES, getSceneById, isSceneUnlocked, sceneRenderer } from '../../engine/sceneRenderer.js';
 
 import { audioManager } from '../../services/audioManager.js';
 import { triggerHaptic } from '../../services/haptics.js';
 import { storageService } from '../../services/storageService.js';
 import { toast } from '../../services/toastService.js';
-import { IGNITION_TOOLS, getActiveIgnitionTool } from '../../services/ignitionService.js';
+import { IGNITION_TOOLS, getActiveIgnitionTool, isIgnitionToolUnlocked } from '../../services/ignitionService.js';
 import { vipService } from '../../services/vipService.js';
 import { leaderboardService } from '../../services/leaderboardService.js';
+import { detectIsIOS } from '../../utils/safeArea.js';
 
 import {
   calculateSavings,
@@ -18,6 +19,7 @@ import {
   calculateLifeRegained,
   calculateQuitDays
 } from '../../configs/healthCalculator.js';
+import { adConfig } from '../../configs/adConfig.js';
 import {
   CIGARETTE_CATALOG,
   DEFAULT_CIGARETTE,
@@ -25,7 +27,8 @@ import {
   isCigaretteUnlocked,
   computeCigaretteDimensions
 } from '../../configs/catalog.js';
-import { checkAchievementsToUnlock, getAchievementById } from '../../configs/achievements.js';
+import { ACHIEVEMENTS, checkAchievementsToUnlock, getAchievementById } from '../../configs/achievements.js';
+import { VIP_THEME_OPTIONS } from '../../configs/vipThemes.js';
 import {
   SMOKE_EFFECTS,
   DEFAULT_SMOKE_EFFECT,
@@ -41,6 +44,7 @@ import {
   SMOKE_VFX_ICON_SVG,
   ASH_TAP_ICON_SVG,
   GIVE_CIG_ICON_SVG,
+  STORE_SHOP_ICON_SVG,
   VAULT_GALLERY_ICON_SVG,
   LEADERBOARD_TROPHY_SVG,
   DIGITAL_TWIN_USER_SVG,
@@ -52,14 +56,21 @@ import {
   DOCK_AURORA_TOP_SVG,
   DOCK_AURORA_BOTTOM_SVG,
   CYBER_GOLD_VOUCHER_SVG,
-  VICTORY_MEDAL_SVG
+  VICTORY_MEDAL_SVG,
+  ASHTRAY_BRONZE_ICON_SVG,
+  BROOM_CLEAN_ICON_SVG
 } from '../../utils/vectorIcons.js';
 import { measureSafeAreaSync } from '../../utils/safeArea.js';
+import { navigateBackWithSound } from '../../utils/navigation.js';
 
 Page({
   data: {
     isVipUser: false,
     vipTheme: '',
+    isDevAdminMode: false,
+    showAdminTestModal: false,
+    devVipActive: false,
+    devVipInfo: null,
     victoryMedalSvgUri: VICTORY_MEDAL_SVG,
     goldVoucherSvgUri: CYBER_GOLD_VOUCHER_SVG,
     dockFluidShellUri: DOCK_FLUID_SHELL_SVG,
@@ -76,7 +87,7 @@ Page({
     smokeVfxIconUri: SMOKE_VFX_ICON_SVG,
     ashTapIconUri: ASH_TAP_ICON_SVG,
     giveCigIconUri: GIVE_CIG_ICON_SVG,
-    storeIconUri: VAULT_GALLERY_ICON_SVG,
+    storeIconUri: STORE_SHOP_ICON_SVG,
     leaderboardIconUri: LEADERBOARD_TROPHY_SVG,
     myProfileIconUri: DIGITAL_TWIN_USER_SVG,
     // 导航与屏幕尺寸适配
@@ -121,8 +132,6 @@ Page({
     isGuideFading: false,
     showSceneGuide: false, // 💡 首次进入呼吸气泡长按引导 (抽烟环境)
     isSceneGuideFading: false,
-    isTrialActive: false, // 30秒尊享免费试抽
-    trialSecondsLeft: 0,
     isBeadPopped: false, // 爆珠是否已捏碎
 
     // 点火器具工坊
@@ -147,10 +156,44 @@ Page({
     quitDays: 0,
 
     // 弹窗状态
+    isAdEnabled: adConfig.IS_AD_ENABLED,
     showRewardModal: false,
     showGiftModal: false,
     giftCigarette: null,
     giftSenderName: '老哥',
+
+    // 禅意心流 HUD & 桌面小抽屉 & 饮茶润喉
+    showZenHud: false,
+    zenHudText: '',
+    showTeaModal: false,
+    teaBadgeText: '',
+    teaDescriptionText: '',
+    showDeskDrawerModal: false,
+    unopenedPacksCount: 1,
+
+
+    // 🌿 4-7-8 顺顺气静心吐纳空间
+    showBreathingSpaceModal: false,
+    breathingCompleted: false,
+    breathingCycle: 1,
+    breathingPhase: 'INHALE', // 'INHALE' | 'HOLD' | 'EXHALE'
+    breathingPhaseLabel: '深吸气',
+    breathingCountdown: 4,
+    breathingGuideQuote: '慢吸气 · 气沉丹田，引清凉入肺腑',
+
+    ashtrayButts: [],
+    ashtrayAshFlakes: [],
+    ashtrayAshLevel: 0,
+    ashtrayAshCount: 0,
+    ashtrayBronzeIcon: ASHTRAY_BRONZE_ICON_SVG,
+    broomCleanIcon: BROOM_CLEAN_ICON_SVG,
+    showAshtrayModal: false,
+    showMoodModal: false,
+    currentMoodText: '',
+    customMoodInput: '',
+    isMoodDissolving: false,
+    moodPresets: ['琐事心烦', '身心疲惫', '夜深难眠', '放空片刻', '微醺独处', '焦虑紧绷'],
+    showAshtraySmoke: false,
 
     // 结算数据
     lastReward: {
@@ -160,7 +203,7 @@ Page({
       inhaleCount: 0,
       durationSeconds: 0
     },
-    rewardPunchline: '尼古丁骂骂咧咧地退出了群聊！'
+    rewardPunchline: '指间清风过，心头杂念消。'
   },
 
   onLoad(options) {
@@ -188,25 +231,37 @@ Page({
     this._carLighterTimer = null;
     this._sparkResetTimer = null;
     this._guideTimer = null;
+    this._zenHudTimer = null;
     this._isCarLighterHeating = false;
     this._suppressNextTapUntil = 0;
 
     // 动态精确测算胶囊按钮与安全状态栏
     this.measureSafeArea();
 
+    // 只要登录进入首页即自动签到打卡
+    try {
+      storageService.recordDailyCheckIn();
+    } catch (e) {}
+
     const savedCigId = storageService.getSelectedCigaretteId();
     let curCig = getCigaretteById(savedCigId) || DEFAULT_CIGARETTE;
     let isReceivedGift = false;
     let giftSender = '老哥';
 
-    // 承接好友递烟礼遇链路
+    // 承接好友递烟礼遇链路 (大厂标准：受赠单支专属品鉴，绝不凭空给整盒，保护名烟珍贵感)
     if (options && options.from === 'give_smoke' && options.cigId) {
       const giftCig = getCigaretteById(options.cigId);
       if (giftCig) {
         curCig = giftCig;
-        isReceivedGift = true;
-        giftSender = options.senderName ? decodeURIComponent(options.senderName) : '老哥';
+        try {
+          giftSender = options.senderName ? decodeURIComponent(options.senderName).replace(/[\r\n\t]/g, '').trim().slice(0, 16) : '老哥';
+          if (!giftSender) giftSender = '老哥';
+        } catch {
+          giftSender = '老哥';
+        }
         storageService.setSelectedCigaretteId(giftCig.id);
+        // 单支专属品鉴：仅将主吸食位设为 1 支待抽，绝不无脑重置满盒 20 支
+        storageService.setHomeStickDigested(true);
         triggerHaptic('medium');
       }
     }
@@ -239,7 +294,11 @@ Page({
       isAmbientEnabled: isAmbient,
       currentIgnitionTool: activeTool,
       currentSmokeEffect: curSmokeEffect,
-      smokeEffectType: curSmokeEffect.id
+      smokeEffectType: curSmokeEffect.id,
+      ashtrayButts: storageService.getAshtrayButts(),
+      ashtrayAshFlakes: (storageService.getAshtrayAsh() || {}).flakes || [],
+      ashtrayAshLevel: (storageService.getAshtrayAsh() || {}).level || 0,
+      ashtrayAshCount: (storageService.getAshtrayAsh() || {}).count || 0
     });
 
     this._skipFirstShowRefresh = true;
@@ -252,6 +311,14 @@ Page({
     const savedCigId = storageService.getSelectedCigaretteId();
     const curCig = getCigaretteById(savedCigId) || DEFAULT_CIGARETTE;
 
+    // 每日 00:00 跨天物理法则：保留盒内剩余，晨间新包自动静默入库（零弹窗打扰，自动接收）
+    const capacity = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
+    storageService.checkDailyRefresh(curCig.id, capacity);
+    if (storageService.hasPendingMailboxDelivery()) {
+      storageService.claimMailboxDelivery();
+    }
+    const unopenedPacks = storageService.getUnopenedPacksCount();
+
     const isDifferentCig = this.data.currentCigarette && this.data.currentCigarette.id !== curCig.id;
     let needsRestart = false;
     try {
@@ -261,10 +328,18 @@ Page({
 
     const packRemaining = storageService.getPackCount(curCig.id, curCig.packCapacity || (curCig.isCigar ? 5 : 20));
 
+    const ashtrayButts = storageService.getAshtrayButts();
+    const ashtrayAsh = storageService.getAshtrayAsh() || { flakes: [], level: 0, count: 0 };
+
     if (isDifferentCig || needsRestart) {
       this.setData({
         currentCigarette: curCig,
         currentPackRemaining: packRemaining,
+        unopenedPacksCount: unopenedPacks,
+        ashtrayButts,
+        ashtrayAshFlakes: ashtrayAsh.flakes || [],
+        ashtrayAshLevel: ashtrayAsh.level || 0,
+        ashtrayAshCount: ashtrayAsh.count || 0,
         shareProgressDeg: this._calcShareProgressDeg(packRemaining, curCig),
         isBeadPopped: false
       });
@@ -273,12 +348,15 @@ Page({
         this.restartCigarette();
       }
     } else {
-      if (this.data.currentPackRemaining !== packRemaining) {
-        this.setData({
-          currentPackRemaining: packRemaining,
-          shareProgressDeg: this._calcShareProgressDeg(packRemaining, curCig)
-        });
-      }
+      this.setData({
+        currentPackRemaining: packRemaining,
+        unopenedPacksCount: unopenedPacks,
+        ashtrayButts,
+        ashtrayAshFlakes: ashtrayAsh.flakes || [],
+        ashtrayAshLevel: ashtrayAsh.level || 0,
+        ashtrayAshCount: ashtrayAsh.count || 0,
+        shareProgressDeg: this._calcShareProgressDeg(packRemaining, curCig)
+      });
       // 腾讯总监设计级：时空流转与环境空气净空 (Atmospheric Air Cleansed & Living Ember)
       // 用户离开页面去商店（离开超过 400ms）后返回：
       // 1. 空中漂浮的旧呼出浓烟团、烟圈等自然扩散消解于空气中，视野重归通透高奢；
@@ -293,30 +371,49 @@ Page({
       }
     }
 
+    let isDevAdminMode = !!wx.getStorageSync('__DEV_ADMIN_MODE__');
+    if (isDevAdminMode) {
+      try {
+        const accountInfo = wx.getAccountInfoSync ? wx.getAccountInfoSync() : null;
+        const envVersion = (accountInfo && accountInfo.miniProgram) ? accountInfo.miniProgram.envVersion : 'release';
+        if (envVersion === 'release') {
+          isDevAdminMode = false;
+          wx.removeStorageSync('__DEV_ADMIN_MODE__');
+        }
+      } catch (e) {}
+    }
     const isVipUser = vipService.isVip();
     const vipTheme = vipService.getVipTheme();
+    const devVipInfo = vipService.getVipInfo();
+    // 跨天或重新进入首页前台，自动补齐当日签到
+    try {
+      storageService.recordDailyCheckIn();
+    } catch (e) {}
+    const totalSubs = storageService.getRecords().length;
     if (this._skipFirstShowRefresh) {
       this._skipFirstShowRefresh = false;
-      this.setData({ isVipUser, vipTheme });
+      this.setData({ isVipUser, vipTheme, isDevAdminMode, devVipActive: isVipUser, devVipInfo, totalSubstituted: totalSubs });
     } else {
       const updatePayload = {
         isMuted: audioManager.isMuted(),
         isVipUser,
-        vipTheme
+        vipTheme,
+        isDevAdminMode,
+        devVipActive: isVipUser,
+        devVipInfo,
+        totalSubstituted: totalSubs
       };
-      if (!this.data.isTrialActive) {
-        const savedEffId = storageService.getSelectedSmokeEffectId();
-        const isEffUnlocked = isSmokeEffectUnlocked(
-          savedEffId,
-          storageService.getRecords().length,
-          storageService.getUnlockedSmokeEffects()
-        );
-        const activeEffect = isEffUnlocked
-          ? (getSmokeEffectById(savedEffId) || DEFAULT_SMOKE_EFFECT)
-          : DEFAULT_SMOKE_EFFECT;
-        updatePayload.currentSmokeEffect = activeEffect;
-        updatePayload.smokeEffectType = activeEffect.id;
-      }
+      const savedEffId = storageService.getSelectedSmokeEffectId();
+      const isEffUnlocked = isSmokeEffectUnlocked(
+        savedEffId,
+        storageService.getRecords().length,
+        storageService.getUnlockedSmokeEffects()
+      );
+      const activeEffect = isEffUnlocked
+        ? (getSmokeEffectById(savedEffId) || DEFAULT_SMOKE_EFFECT)
+        : DEFAULT_SMOKE_EFFECT;
+      updatePayload.currentSmokeEffect = activeEffect;
+      updatePayload.smokeEffectType = activeEffect.id;
       this.setData(updatePayload);
       audioManager.startAmbientSound(this.data.currentScene);
       this.refreshAllData();
@@ -382,7 +479,7 @@ Page({
           this.fsm.state = devAction.state || 'IDLE_BURNING';
           const p = typeof devAction.progress === 'number' ? devAction.progress : 0.10;
           this.fsm.cigaretteProgress = p;
-          this.fsm.lastTapProgress = p;
+          this.fsm.lastTapProgress = 1.0;
           this.fsm.ashRatio = typeof devAction.ashRatio === 'number' ? devAction.ashRatio : (1.0 - p);
           const isLit = this.fsm.state !== 'UNLIT' && this.fsm.state !== 'FINISHED';
           this.setData({
@@ -421,6 +518,1077 @@ Page({
       console.warn('[DEV_ADMIN_TEST] check error', e);
     }
   },
+
+  openAdminTest() {
+    audioManager.unlockAudio();
+    audioManager.playSwitchSound();
+    triggerHaptic('medium');
+    const isVip = vipService.isVip();
+    const vipInfo = vipService.getVipInfo();
+    const curCigId = this.data.currentCigarette ? this.data.currentCigarette.id : DEFAULT_CIGARETTE.id;
+    const curCount = storageService.getPackCount(curCigId, 20);
+    const profile = storageService.getProfile();
+    const records = storageService.getRecords();
+    const quitDays = calculateQuitDays(profile.quitStartDate);
+    const dailySmoked = storageService.getDailySmokedCount();
+    this.setData({
+      showAdminTestModal: true,
+      devVipActive: isVip,
+      devVipInfo: vipInfo,
+      currentPackRemaining: curCount,
+      devQuitDays: quitDays,
+      devTotalSubs: records.length,
+      devDailySmokedCount: dailySmoked
+    });
+  },
+
+  closeAdminTest() {
+    audioManager.unlockAudio();
+    audioManager.playSwitchSound();
+    triggerHaptic('light');
+    this.setData({ showAdminTestModal: false });
+  },
+
+  devSetSmokeProgress90() {
+    triggerHaptic('heavy');
+    if (this.fsm) {
+      this.fsm.state = 'IDLE_BURNING';
+      this.fsm.cigaretteProgress = 0.10;
+      this.fsm.lastTapProgress = 1.0; // 维持自上次未弹灰以来的燃烧差值，确保后续帧不被归零
+      this.fsm.ashRatio = 0.90;
+      const ashDeg = Math.round(0.90 * 360);
+      const midDeg = Math.round(ashDeg * 0.45);
+      const ashProgressStyle = `background: conic-gradient(#fbbf24 0deg, #f59e0b ${midDeg}deg, #ef4444 ${ashDeg}deg, rgba(255, 255, 255, 0.14) ${ashDeg}deg 360deg);`;
+      this.setData({
+        isLit: true,
+        simulatorState: 'IDLE_BURNING',
+        cigaretteProgress: 0.10,
+        ashRatio: 0.90,
+        ashDeg,
+        ashProgressStyle
+      });
+      toast.flame('🔥 进度已设为 90% (保留90%厚灰柱，请在桌面轻触弹灰)！');
+    }
+  },
+
+  devSetSmokeProgress50() {
+    triggerHaptic('medium');
+    if (this.fsm) {
+      this.fsm.state = 'IDLE_BURNING';
+      this.fsm.cigaretteProgress = 0.50;
+      this.fsm.lastTapProgress = 1.0;
+      this.fsm.ashRatio = 0.50;
+      const ashDeg = Math.round(0.50 * 360);
+      const midDeg = Math.round(ashDeg * 0.6);
+      const ashProgressStyle = `background: conic-gradient(#fbbf24 0deg, #f59e0b ${midDeg}deg, #f97316 ${ashDeg}deg, rgba(255, 255, 255, 0.14) ${ashDeg}deg 360deg);`;
+      this.setData({
+        isLit: true,
+        simulatorState: 'IDLE_BURNING',
+        cigaretteProgress: 0.50,
+        ashRatio: 0.50,
+        ashDeg,
+        ashProgressStyle
+      });
+      toast.flame('🔥 进度已设为 50% (保留50%中段灰，可自行弹灰)！');
+    }
+  },
+
+  devSetSmokeProgress10() {
+    triggerHaptic('light');
+    if (this.fsm) {
+      this.fsm.state = 'IDLE_BURNING';
+      this.fsm.cigaretteProgress = 0.90;
+      this.fsm.lastTapProgress = 1.0;
+      this.fsm.ashRatio = 0.10;
+      const ashDeg = Math.round(0.10 * 360);
+      const midDeg = Math.round(ashDeg * 0.6);
+      const ashProgressStyle = `background: conic-gradient(#fbbf24 0deg, #f59e0b ${midDeg}deg, #f97316 ${ashDeg}deg, rgba(255, 255, 255, 0.14) ${ashDeg}deg 360deg);`;
+      this.setData({
+        isLit: true,
+        simulatorState: 'IDLE_BURNING',
+        cigaretteProgress: 0.90,
+        ashRatio: 0.10,
+        ashDeg,
+        ashProgressStyle
+      });
+      toast.flame('🔥 进度已设为 10% (刚抽两口，保留10%轻灰)！');
+    }
+  },
+
+  devSetSmokeAsh100() {
+    triggerHaptic('heavy');
+    if (this.fsm) {
+      this.fsm.ashRatio = 1.0;
+      this.fsm.lastTapProgress = Math.min(1.0, this.fsm.cigaretteProgress + 1.0);
+      const ashDeg = 360;
+      const ashProgressStyle = `background: conic-gradient(#fbbf24 0deg, #f59e0b 160deg, #ef4444 360deg);`;
+      this.setData({
+        ashRatio: 1.0,
+        ashDeg,
+        ashProgressStyle
+      });
+      toast.flame('💨 烟灰已拉满 100% (满灰危悬，请立即弹灰)！');
+    }
+  },
+
+  devInhaleOnce() {
+    triggerHaptic('heavy');
+    if (this.fsm) {
+      if (this.data.simulatorState === 'UNLIT' || this.data.simulatorState === 'FINISHED') {
+        this.triggerIgnite();
+      }
+      this.fsm.startInhale();
+      this.setData({ simulatorState: 'INHALING' });
+      toast.flame('💨 沉浸深吸中... (凝聚呼吸暗角)');
+      setTimeout(() => {
+        if (this.fsm && this.fsm.state === 'INHALING') {
+          this.fsm.stopInhale();
+          this.setData({ simulatorState: 'EXHALING' });
+          setTimeout(() => {
+            if (this.fsm && this.fsm.state === 'EXHALING') {
+              this.fsm.finishExhale();
+              this.setData({ simulatorState: 'IDLE_BURNING' });
+            }
+          }, 1800);
+        }
+      }, 2000);
+    }
+  },
+
+  devResetFullSmoke() {
+    triggerHaptic('medium');
+    if (this.fsm) {
+      this.restartCigarette();
+      toast.success('✨ 烟支已恢复 100% 全新满长！');
+    }
+  },
+
+  devIgniteNow() {
+    triggerHaptic('heavy');
+    if (this.data.simulatorState === 'UNLIT' || this.data.simulatorState === 'FINISHED') {
+      this.triggerIgnite();
+      toast.flame('🔥 烟支已点燃！');
+    } else {
+      toast.info('烟支已处于点燃状态');
+    }
+  },
+
+  devExtinguishNow() {
+    triggerHaptic('medium');
+    this.extinguishCigarette();
+    toast.info('💨 烟支已掐灭！');
+  },
+
+  devTapAshNow() {
+    triggerHaptic('light');
+    this.manualTapAsh();
+    toast.info('💨 烟灰已弹落清空！');
+  },
+
+  devToggleBead() {
+    triggerHaptic('heavy');
+    if (this.data.isBeadPopped) {
+      this.setData({ isBeadPopped: false });
+      toast.info('🔮 爆珠已复原！');
+    } else {
+      this.popBead();
+      toast.flame('🔮 爆珠已捏破！');
+    }
+  },
+
+  devFinishSmokeNow() {
+    triggerHaptic('heavy');
+    if (this.fsm) {
+      this.fsm.state = 'FINISHED';
+      this.fsm.cigaretteProgress = 0.0;
+      this.fsm.ashRatio = 0.0;
+      this.handleSmokingFinished();
+      this.setData({ showAdminTestModal: false });
+    }
+  },
+
+  devRefillCurrentPack() {
+    triggerHaptic('medium');
+    const curCig = this.data.currentCigarette || DEFAULT_CIGARETTE;
+    const capacity = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
+    storageService.setPackCount(curCig.id, capacity);
+    this.setData({
+      currentPackRemaining: capacity,
+      shareProgressDeg: 360
+    });
+    toast.success(`📦 当前【${curCig.name}】烟盒已补满（${capacity}支）！`);
+  },
+
+  devRefillAllPacks() {
+    triggerHaptic('heavy');
+    CIGARETTE_CATALOG.forEach(c => {
+      const cap = c.packCapacity || (c.isCigar ? 5 : 20);
+      storageService.setPackCount(c.id, cap);
+    });
+    const curCig = this.data.currentCigarette || DEFAULT_CIGARETTE;
+    const capacity = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
+    this.setData({
+      currentPackRemaining: capacity,
+      shareProgressDeg: 360
+    });
+    toast.success('📦 全馆 37 款名烟烟盒已全部补满！');
+  },
+
+  devSetCurrentPack0() {
+    triggerHaptic('light');
+    const curCig = this.data.currentCigarette || DEFAULT_CIGARETTE;
+    storageService.setPackCount(curCig.id, 0);
+    this.setData({
+      currentPackRemaining: 0,
+      shareProgressDeg: 0
+    });
+    toast.info('📦 当前烟盒已清空（0支，可测试抽空提示）');
+  },
+
+  devActivateVipLifetime() {
+    triggerHaptic('heavy');
+    vipService.activateTier('lifetime');
+    const isVip = vipService.isVip();
+    const vipInfo = vipService.getVipInfo();
+    const vipTheme = vipService.getVipTheme();
+    this.setData({
+      isVipUser: isVip,
+      vipTheme,
+      devVipActive: isVip,
+      devVipInfo: vipInfo
+    });
+    toast.flame('👑 已激活【至尊永久卡】终身免广与黑金荣耀！');
+  },
+
+  devActivateVipMonth() {
+    triggerHaptic('heavy');
+    vipService.activateTier('month');
+    const isVip = vipService.isVip();
+    const vipInfo = vipService.getVipInfo();
+    const vipTheme = vipService.getVipTheme();
+    this.setData({
+      isVipUser: isVip,
+      vipTheme,
+      devVipActive: isVip,
+      devVipInfo: vipInfo
+    });
+    toast.success('👑 已激活【30天月卡】特权！');
+  },
+
+  devActivateVipDay() {
+    triggerHaptic('medium');
+    vipService.activateTier('day');
+    const isVip = vipService.isVip();
+    const vipInfo = vipService.getVipInfo();
+    const vipTheme = vipService.getVipTheme();
+    this.setData({
+      isVipUser: isVip,
+      vipTheme,
+      devVipActive: isVip,
+      devVipInfo: vipInfo
+    });
+    toast.flame('✨ 已激活【24小时畅玩日卡】！');
+  },
+
+  devExpireVipNow() {
+    triggerHaptic('medium');
+    const expiredData = {
+      isVip: false,
+      tierId: 'month',
+      tierName: '尊享月卡',
+      customTheme: 'month',
+      activatedAt: Date.now() - 31 * 86400000,
+      expireTime: Date.now() - 1000,
+      isLifetime: false
+    };
+    try {
+      wx.setStorageSync('JUST_ONE_SMOKE_VIP_INFO_V1', expiredData);
+    } catch (err) {}
+    const isVip = vipService.isVip();
+    const vipInfo = vipService.getVipInfo();
+    this.setData({
+      isVipUser: isVip,
+      vipTheme: '',
+      devVipActive: isVip,
+      devVipInfo: vipInfo
+    });
+    toast.info('⚠️ VIP 状态已模拟设置为【刚过期1秒】！');
+  },
+
+  devClearVip() {
+    triggerHaptic('medium');
+    vipService.clearVip();
+    const isVip = vipService.isVip();
+    const vipInfo = vipService.getVipInfo();
+    const vipTheme = vipService.getVipTheme();
+    this.setData({
+      isVipUser: isVip,
+      vipTheme,
+      devVipActive: isVip,
+      devVipInfo: vipInfo
+    });
+    toast.info('👑 已恢复非VIP普通用户状态');
+  },
+
+  // 打卡天数与时间测试
+  devAddQuitDays(e) {
+    const days = Number(e.currentTarget.dataset.days) || 1;
+    triggerHaptic('medium');
+    const p = storageService.getProfile();
+    const curStart = p.quitStartDate ? new Date(p.quitStartDate).getTime() : Date.now();
+    const newStart = curStart - days * 86400000;
+    storageService.updateProfile({ quitStartDate: newStart });
+    this.refreshAllData();
+    const profile = storageService.getProfile();
+    const quitDays = calculateQuitDays(profile.quitStartDate);
+    this.setData({
+      devQuitDays: quitDays
+    });
+    toast.success(`📅 打卡天数已 +${days} 天（当前第 ${quitDays + 1} 天）！`);
+  },
+
+  devSetQuitDays(e) {
+    const days = Number(e.currentTarget.dataset.days) || 1;
+    triggerHaptic('medium');
+    const now = new Date();
+    const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const newStart = midnight - Math.max(0, days - 1) * 86400000;
+    storageService.updateProfile({ quitStartDate: newStart });
+    this.refreshAllData();
+    const profile = storageService.getProfile();
+    const quitDays = calculateQuitDays(profile.quitStartDate);
+    this.setData({
+      devQuitDays: quitDays
+    });
+    toast.success(`📅 打卡已重设为第 ${days} 天！`);
+  },
+
+  // 替烟记录与健康图表
+  devAddRecords(e) {
+    const count = Number(e.currentTarget.dataset.count) || 1;
+    triggerHaptic('medium');
+    const curCigId = this.data.currentCigarette ? this.data.currentCigarette.id : DEFAULT_CIGARETTE.id;
+    for (let i = 0; i < count; i++) {
+      storageService.addRecord({
+        id: `sub_dev_${Date.now()}_${i}`,
+        timestamp: Date.now() - i * 60000,
+        cigaretteId: curCigId,
+        durationSeconds: 180,
+        inhaleCount: 12
+      });
+    }
+    this.refreshAllData();
+    this._checkAndUnlockAchievements();
+    const records = storageService.getRecords();
+    this.setData({ devTotalSubs: records.length });
+    toast.success(`📊 替烟记录已累加 +${count} 支（累计 ${records.length} 支）！`);
+  },
+
+  devSetTotalRecords(e) {
+    const target = Number(e.currentTarget.dataset.count) || 60;
+    triggerHaptic('heavy');
+    const curCigId = this.data.currentCigarette ? this.data.currentCigarette.id : DEFAULT_CIGARETTE.id;
+    const records = [];
+    const now = Date.now();
+    for (let i = 0; i < target; i++) {
+      const offsetMs = Math.floor((i / target) * 7 * 86400000);
+      records.push({
+        id: `sub_dev_batch_${now}_${i}`,
+        timestamp: now - offsetMs,
+        cigaretteId: curCigId,
+        durationSeconds: 180,
+        inhaleCount: 12
+      });
+    }
+    try {
+      wx.setStorageSync('SMOKEFREE_RECORDS', records);
+    } catch (err) {}
+    this.refreshAllData();
+    this._checkAndUnlockAchievements();
+    this.setData({ devTotalSubs: target });
+    toast.flame(`📊 累计替烟已重设为 ${target} 支！`);
+  },
+
+  devFill7DaysTrends() {
+    triggerHaptic('heavy');
+    const curCigId = this.data.currentCigarette ? this.data.currentCigarette.id : DEFAULT_CIGARETTE.id;
+    const records = [];
+    const now = new Date();
+    for (let day = 6; day >= 0; day--) {
+      const targetDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day, 12, 0, 0);
+      const countForDay = Math.floor(Math.random() * 9) + 8;
+      for (let k = 0; k < countForDay; k++) {
+        records.push({
+          id: `sub_dev_trend_${targetDay.getTime()}_${k}`,
+          timestamp: targetDay.getTime() + k * 1800000,
+          cigaretteId: curCigId,
+          durationSeconds: 180,
+          inhaleCount: 12
+        });
+      }
+    }
+    try {
+      wx.setStorageSync('SMOKEFREE_RECORDS', records);
+    } catch (err) {}
+    this.refreshAllData();
+    this._checkAndUnlockAchievements();
+    const allRecords = storageService.getRecords();
+    this.setData({ devTotalSubs: allRecords.length });
+    toast.flame('✨ 已填充近 7 天真实替烟趋势与折线图！');
+  },
+
+  devClearRecords() {
+    triggerHaptic('medium');
+    try {
+      wx.setStorageSync('SMOKEFREE_RECORDS', []);
+    } catch (err) {}
+    this.refreshAllData();
+    this.setData({ devTotalSubs: 0 });
+    toast.info('📊 已清空全部替烟历史（0支）！');
+  },
+
+  devSetCurrentPackCount(e) {
+    const count = Number(e.currentTarget.dataset.count) || 0;
+    triggerHaptic('medium');
+    const curCig = this.data.currentCigarette || DEFAULT_CIGARETTE;
+    storageService.setPackCount(curCig.id, count);
+    const deg = this._calcShareProgressDeg(count, curCig);
+    this.setData({
+      currentPackRemaining: count,
+      shareProgressDeg: deg
+    });
+    toast.info(`📦 当前【${curCig.name}】余量已设为 ${count} 支！`);
+  },
+
+  devUnlockAllCigarettes() {
+    triggerHaptic('heavy');
+    const allIds = CIGARETTE_CATALOG.map(c => c.id);
+    storageService.setUnlockedCigarettes(allIds);
+    toast.success('🌟 全馆 37 款名烟与雪茄已全部解锁！');
+  },
+
+  devLockAllCigarettes() {
+    triggerHaptic('medium');
+    try {
+      wx.setStorageSync('SMOKEFREE_CUSTOM_UNLOCKED_CIGARETTES', []);
+    } catch (err) {}
+    toast.info('🔒 已锁定全部名烟，仅保留默认款！');
+  },
+
+  devUnlockAllSmokeEffects() {
+    triggerHaptic('heavy');
+    const allIds = SMOKE_EFFECTS.map(s => s.id);
+    storageService.setUnlockedSmokeEffects(allIds);
+    toast.success('🌟 全套 6 款殿堂级烟雾特效已全部解锁！');
+  },
+
+  devLockAllSmokeEffects() {
+    triggerHaptic('medium');
+    try {
+      wx.setStorageSync('SMOKEFREE_SUMMONED_SMOKE_EFFECTS', []);
+    } catch (err) {}
+    toast.info('🔒 已重置烟雾特效，仅保留经典空灵烟圈！');
+  },
+
+  devUnlockAllAchievements() {
+    triggerHaptic('heavy');
+    if (Array.isArray(ACHIEVEMENTS)) {
+      const allAchIds = ACHIEVEMENTS.map(a => a.id);
+      storageService.saveUnlockedAchievements(allAchIds);
+      storageService.setEquippedTitle('无烟圣尊');
+    }
+    this.refreshAllData();
+    toast.flame('👑 全部 16 阶成就已点亮！已佩戴最高称号【无烟圣尊】！');
+  },
+
+  devShowDataSnapshot() {
+    triggerHaptic('light');
+    const p = storageService.getProfile();
+    const records = storageService.getRecords();
+    const vip = vipService.getVipInfo();
+    const curCig = this.data.currentCigarette || DEFAULT_CIGARETTE;
+    const packCount = storageService.getPackCount(curCig.id, 20);
+    const snap = {
+      戒烟天数: calculateQuitDays(p.quitStartDate),
+      累计替烟: records.length,
+      VIP状态: vip.isVip ? (vip.isLifetime ? '至尊永久' : vip.tierName) : '非VIP',
+      当前装配烟: curCig.name,
+      当前盒余量: `${packCount}支`,
+      烟价基准: `¥${p.packPrice}/盒`,
+      日均抽吸: `${p.cigsPerDay}支`
+    };
+    wx.showModal({
+      title: '当前本地业务数据快照',
+      content: JSON.stringify(snap, null, 2),
+      showCancel: false,
+      confirmText: '已知晓'
+    });
+  },
+
+  devResetAllStorage() {
+    wx.showModal({
+      title: '⚠️ 恢复出厂设置确认',
+      content: '此操作将清空所有本地测试缓存（打卡、替烟、VIP、烟盒等），恢复至全新安装状态。确定继续吗？',
+      confirmColor: '#ef4444',
+      success: (res) => {
+        if (res.confirm) {
+          try {
+            wx.clearStorageSync();
+          } catch (e) {}
+          toast.info('已清空所有本地数据，正在重载...');
+          setTimeout(() => {
+            wx.reLaunch({ url: '/pages/index/index' });
+          }, 600);
+        }
+      }
+    });
+  },
+
+  /* ==================== [DEV_ADMIN_TEST] 快捷长按唤醒 ==================== */
+  devQuickUnlockAdmin() {
+    // 生产环境 (release) 严格封禁测试入口，彻底防范审核与线上风险
+    try {
+      const accountInfo = wx.getAccountInfoSync ? wx.getAccountInfoSync() : null;
+      const envVersion = (accountInfo && accountInfo.miniProgram) ? accountInfo.miniProgram.envVersion : 'release';
+      if (envVersion === 'release') {
+        return;
+      }
+    } catch (e) {}
+
+    triggerHaptic('celebration');
+    wx.setStorageSync('__DEV_ADMIN_MODE__', true);
+    this.setData({ isDevAdminMode: true });
+    toast.flame('🛠️ 管理员极速测试已唤醒！');
+    this.openAdminTest();
+  },
+
+  /* ==================== 🍂 1. 心绪便笺 · 随烟散尽与赛博贤者时刻 ==================== */
+  devSetMoodNote(e) {
+    const mood = (e && e.currentTarget && e.currentTarget.dataset && e.currentTarget.dataset.mood) || '身心疲惫';
+    triggerHaptic('light');
+    this.setData({
+      currentMoodText: mood,
+      showMoodModal: false
+    });
+    toast.flame(`【${mood}】已入笺 · 吸烟时随青烟散尽`);
+  },
+
+  devTestMoodDissolveAndFinish() {
+    triggerHaptic('heavy');
+    const mood = this.data.currentMoodText || '烦恼琐事';
+    this.setData({
+      currentMoodText: mood,
+      isMoodDissolving: true,
+      showAdminTestModal: false
+    });
+    toast.flame(`【${mood}】随青烟消散升华中...`);
+    setTimeout(() => {
+      if (this.fsm) {
+        this.fsm.state = 'FINISHED';
+        this.fsm.cigaretteProgress = 0.0;
+        this.fsm.ashRatio = 0.0;
+        this.handleSmokingFinished();
+      }
+    }, 1200);
+  },
+
+  devClearMoodNote() {
+    triggerHaptic('light');
+    this.setData({
+      currentMoodText: '',
+      isMoodDissolving: false,
+      showMoodModal: false
+    });
+    toast.info('心绪笺已重归纯净');
+  },
+
+  /* ==================== 🍵 2. 桌面微距烟灰缸与物理沉淀留存 ==================== */
+  devFillAshtrayWithButts() {
+    triggerHaptic('heavy');
+    const curCig = this.data.currentCigarette || DEFAULT_CIGARETTE;
+    const mockButts = [
+      { id: `b_dev_${Date.now()}_1`, filterColor: curCig.filterColor || '#ca8a04', extinguishedAt: Date.now() - 3600000 },
+      { id: `b_dev_${Date.now()}_2`, filterColor: '#1e293b', extinguishedAt: Date.now() - 2400000 },
+      { id: `b_dev_${Date.now()}_3`, filterColor: '#e0e7ff', extinguishedAt: Date.now() - 1800000 },
+      { id: `b_dev_${Date.now()}_4`, filterColor: '#f59e0b', extinguishedAt: Date.now() - 900000 },
+      { id: `b_dev_${Date.now()}_5`, filterColor: curCig.filterColor || '#ca8a04', extinguishedAt: Date.now() }
+    ];
+    try {
+      wx.setStorageSync('SMOKEFREE_ASHTRAY_BUTTS_LIST', mockButts);
+    } catch (e) {}
+
+    const mockFlakes = [
+      { id: 'f1', x: 28, y: 32, size: 10, opacity: 0.75, rot: 42, color: '#475569' },
+      { id: 'f2', x: 55, y: 40, size: 14, opacity: 0.85, rot: 115, color: '#334155' },
+      { id: 'f3', x: 72, y: 60, size: 8, opacity: 0.65, rot: 75, color: '#64748b' },
+      { id: 'f4', x: 38, y: 70, size: 12, opacity: 0.8, rot: 190, color: '#1e293b' },
+      { id: 'f5', x: 62, y: 25, size: 9, opacity: 0.7, rot: 250, color: '#475569' }
+    ];
+    const mockAsh = { count: 8, level: 85, flakes: mockFlakes };
+    try {
+      wx.setStorageSync('SMOKEFREE_ASHTRAY_ASH_DATA', mockAsh);
+    } catch (e) {}
+
+    this.setData({
+      ashtrayButts: mockButts,
+      ashtrayAshFlakes: mockFlakes,
+      ashtrayAshLevel: 85,
+      showAshtraySmoke: true
+    });
+    toast.flame('🍵 烟灰缸已沉淀 5 根烟蒂 + 85% 积灰 + 余温青烟！');
+  },
+
+  devAddAshtrayButt1() {
+    triggerHaptic('light');
+    const colors = ['#ca8a04', '#9333ea', '#d97706', '#dc2626', '#2563eb', '#16a34a', '#e0e7ff', '#f59e0b'];
+    const curCig = this.data.currentCigarette || DEFAULT_CIGARETTE;
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const updatedButts = storageService.addAshtrayButt({
+      cigaretteId: curCig.id || 'default',
+      cigaretteName: curCig.name || '经典香烟',
+      filterColor: color,
+      paperColor: '#fffdf5',
+      savedMoney: '1.25',
+      timestamp: Date.now()
+    });
+    this.setData({
+      ashtrayButts: updatedButts,
+      showAshtraySmoke: true
+    });
+    toast.flame(`🍵 缸内烟蒂 +1 (现存 ${updatedButts.length} 支)！`);
+  },
+
+  devAddAshtrayButt10() {
+    triggerHaptic('medium');
+    const colors = ['#ca8a04', '#9333ea', '#d97706', '#dc2626', '#2563eb', '#16a34a', '#e0e7ff', '#f59e0b'];
+    const curCig = this.data.currentCigarette || DEFAULT_CIGARETTE;
+    let updatedButts = this.data.ashtrayButts || [];
+    const now = Date.now();
+    for (let i = 0; i < 10; i++) {
+      updatedButts = storageService.addAshtrayButt({
+        cigaretteId: curCig.id || 'default',
+        cigaretteName: curCig.name || '经典香烟',
+        filterColor: colors[(updatedButts.length + i) % colors.length],
+        paperColor: '#fffdf5',
+        savedMoney: '1.25',
+        timestamp: now + i * 10
+      });
+    }
+    this.setData({
+      ashtrayButts: updatedButts,
+      showAshtraySmoke: true
+    });
+    toast.flame(`🍵 缸内烟蒂 +10 (现存 ${updatedButts.length} 支，层叠可见)！`);
+  },
+
+  devFill20Butts() {
+    triggerHaptic('medium');
+    const colors = ['#ca8a04', '#9333ea', '#d97706', '#dc2626', '#2563eb', '#16a34a', '#e0e7ff', '#f59e0b'];
+    const mockButts = [];
+    const now = Date.now();
+    for (let i = 0; i < 20; i++) {
+      mockButts.push({
+        id: `b_dev20_${now}_${i}`,
+        filterColor: colors[i % colors.length],
+        extinguishedAt: now - (20 - i) * 600000
+      });
+    }
+    try {
+      wx.setStorageSync('SMOKEFREE_ASHTRAY_BUTTS_LIST', mockButts);
+    } catch (e) {}
+
+    const mockFlakes = [];
+    for (let f = 0; f < 30; f++) {
+      const r = Math.random() * 22;
+      const theta = Math.random() * 2 * Math.PI;
+      mockFlakes.push({
+        id: `f_dev_${now}_${f}`,
+        x: Math.round(36 + r * Math.cos(theta)),
+        y: Math.round(36 + r * Math.sin(theta)),
+        size: (Math.random() * 4 + 3).toFixed(1),
+        opacity: (Math.random() * 0.4 + 0.55).toFixed(2),
+        rot: Math.round(Math.random() * 360),
+        color: Math.random() > 0.4 ? '#262626' : '#71717a'
+      });
+    }
+    const mockAsh = { count: 20, level: 240, flakes: mockFlakes };
+    try {
+      wx.setStorageSync('SMOKEFREE_ASHTRAY_ASH_DATA', mockAsh);
+    } catch (e) {}
+
+    this.setData({
+      ashtrayButts: mockButts,
+      ashtrayAshFlakes: mockFlakes,
+      ashtrayAshLevel: 240,
+      ashtrayAshCount: 20,
+      showAshtraySmoke: true
+    });
+    toast.flame('🍵 烟灰缸已沉淀整包 20 根烟蒂 + 240% 余灰！');
+  },
+
+  devFill50Butts() {
+    triggerHaptic('heavy');
+    const colors = ['#ca8a04', '#9333ea', '#d97706', '#dc2626', '#2563eb', '#16a34a', '#e0e7ff', '#f59e0b', '#71717a'];
+    const mockButts = [];
+    const now = Date.now();
+    for (let i = 0; i < 50; i++) {
+      mockButts.push({
+        id: `b_dev50_${now}_${i}`,
+        filterColor: colors[i % colors.length],
+        extinguishedAt: now - (50 - i) * 300000
+      });
+    }
+    try {
+      wx.setStorageSync('SMOKEFREE_ASHTRAY_BUTTS_LIST', mockButts);
+    } catch (e) {}
+
+    const mockFlakes = [];
+    for (let f = 0; f < 50; f++) {
+      const r = Math.random() * 24;
+      const theta = Math.random() * 2 * Math.PI;
+      mockFlakes.push({
+        id: `f_dev50_${now}_${f}`,
+        x: Math.round(36 + r * Math.cos(theta)),
+        y: Math.round(36 + r * Math.sin(theta)),
+        size: (Math.random() * 4.5 + 3).toFixed(1),
+        opacity: (Math.random() * 0.45 + 0.55).toFixed(2),
+        rot: Math.round(Math.random() * 360),
+        color: Math.random() > 0.4 ? '#262626' : '#71717a'
+      });
+    }
+    const mockAsh = { count: 50, level: 360, flakes: mockFlakes };
+    try {
+      wx.setStorageSync('SMOKEFREE_ASHTRAY_ASH_DATA', mockAsh);
+    } catch (e) {}
+
+    this.setData({
+      ashtrayButts: mockButts,
+      ashtrayAshFlakes: mockFlakes,
+      ashtrayAshLevel: 360,
+      ashtrayAshCount: 50,
+      showAshtraySmoke: true
+    });
+    toast.flame('🍵 烟灰缸已沉淀 50 根烟蒂 + 360% 厚积余灰！');
+  },
+
+  devAddAshtrayAsh1() {
+    triggerHaptic('light');
+    const updatedAsh = storageService.addAshtrayAsh(1);
+    this.setData({
+      ashtrayAshFlakes: updatedAsh.flakes || [],
+      ashtrayAshLevel: updatedAsh.level || 0,
+      ashtrayAshCount: updatedAsh.count || 0
+    });
+    toast.info(`💨 缸内烟灰 +1 (厚度 ${updatedAsh.level}% · ${updatedAsh.flakes.length}处灰屑)！`);
+  },
+
+  devAddAshtrayAsh10() {
+    triggerHaptic('medium');
+    const updatedAsh = storageService.addAshtrayAsh(10);
+    this.setData({
+      ashtrayAshFlakes: updatedAsh.flakes || [],
+      ashtrayAshLevel: updatedAsh.level || 0,
+      ashtrayAshCount: updatedAsh.count || 0
+    });
+    toast.flame(`💨 缸内烟灰 +10 (厚度 ${updatedAsh.level}% · 密集散落)！`);
+  },
+
+  devSetAshtrayAsh100() {
+    triggerHaptic('medium');
+    const ash = storageService.getAshtrayAsh();
+    ash.level = 100;
+    try {
+      wx.setStorageSync('SMOKEFREE_ASHTRAY_ASH_DATA', ash);
+    } catch (e) {}
+    this.setData({
+      ashtrayAshLevel: 100
+    });
+    toast.info('💨 缸内余灰厚度已设为 100%！');
+  },
+
+  devSetAshtrayAsh300() {
+    triggerHaptic('heavy');
+    const ash = storageService.getAshtrayAsh();
+    ash.level = 300;
+    try {
+      wx.setStorageSync('SMOKEFREE_ASHTRAY_ASH_DATA', ash);
+    } catch (e) {}
+    this.setData({
+      ashtrayAshLevel: 300
+    });
+    toast.flame('💨 缸内余灰厚度已设为 300% (极厚积存)！');
+  },
+
+  devSwitchIgnitionTool(e) {
+    const toolId = e.currentTarget.dataset.tool;
+    if (!toolId) return;
+    storageService.setSelectedIgnitionTool(toolId);
+    const activeTool = getActiveIgnitionTool();
+    this.setData({ currentIgnitionTool: activeTool });
+    triggerHaptic('medium');
+    audioManager.playIgnitionToolSound(toolId);
+    toast.flame(`🔥 已换用点火器具：【${activeTool.name}】！`);
+  },
+
+  devTriggerZenToast() {
+    triggerHaptic('medium');
+    this.setData({
+      showZenHud: true,
+      zenHudText: '今日第 3 支 · 节余 ¥3.75 · 焦油减免 30.0mg'
+    });
+    if (this._zenHudTimer) clearTimeout(this._zenHudTimer);
+    this._zenHudTimer = setTimeout(() => {
+      this.setData({ showZenHud: false });
+    }, 6000);
+    toast.flame('🌿 赛博灵动岛 HUD 贤者胶囊已在顶部升起！');
+  },
+
+  devTapAshIntoTray() {
+    triggerHaptic('light');
+    this.manualTapAsh();
+    const updatedAsh = storageService.addAshtrayAsh(1);
+    this.setData({
+      ashtrayAshFlakes: updatedAsh.flakes || [],
+      ashtrayAshLevel: updatedAsh.level || 0,
+      ashtrayAshCount: updatedAsh.count || 0
+    });
+    toast.info(`💨 烟灰已弹落，厚度 ${updatedAsh.level}%！`);
+  },
+
+  devClearAshtrayTray() {
+    triggerHaptic('medium');
+    storageService.clearAshtray();
+    this.setData({
+      ashtrayButts: [],
+      ashtrayAshFlakes: [],
+      ashtrayAshLevel: 0,
+      ashtrayAshCount: 0,
+      showAshtraySmoke: false
+    });
+    toast.success('✨ 烟灰缸已倾倒刷净，桌面复原雅洁！');
+  },
+
+  devToggleAshtraySmoke() {
+    triggerHaptic('light');
+    const next = !this.data.showAshtraySmoke;
+    this.setData({ showAshtraySmoke: next });
+    toast.info(next ? '🌫️ 烟灰缸余温青烟：已开启' : '🌫️ 烟灰缸余温青烟：已平息');
+  },
+
+  /* ==================== 🗄️ 3. 空盒应急闭环与桌面抽屉 ==================== */
+  devOpenDeskDrawer() {
+    triggerHaptic('medium');
+    this.setData({
+      showDeskDrawerModal: true,
+      unopenedPacksCount: storageService.getUnopenedPacksCount(),
+      showAdminTestModal: false
+    });
+    toast.info('🗄️ 已拉出桌面应急抽屉！');
+  },
+
+  devTriggerZenBreathing() {
+    triggerHaptic('light');
+    this.setData({ showAdminTestModal: false });
+    this.openBreathingSpace();
+  },
+
+  devAddUnopenedPack(e) {
+    const delta = Number(e.currentTarget.dataset.delta) || 1;
+    triggerHaptic('medium');
+    if (delta > 0) {
+      storageService.addUnopenedPack(delta);
+    } else {
+      try {
+        wx.setStorageSync('SMOKEFREE_UNOPENED_PACKS_COUNT', 0);
+      } catch (err) {}
+    }
+    const current = storageService.getUnopenedPacksCount();
+    this.setData({ unopenedPacksCount: current });
+    toast.info(`📦 抽屉未拆新包存量已设为：${current} 包！`);
+  },
+
+  /* ==================== 🍵 4. 40支生理阻尼 · 饮茶润喉模式 ==================== */
+  devTriggerTeaModal() {
+    triggerHaptic('medium');
+    this.setData({
+      showTeaModal: true,
+      showAdminTestModal: false
+    });
+    toast.flame('🍵 40支生理阻尼【饮茶润喉】模态框已唤出！');
+  },
+
+  devResetTeaDamping() {
+    triggerHaptic('light');
+    this.setData({ showTeaModal: false });
+    toast.info('🍃 饮茶润喉阻尼状态已解除');
+  },
+
+  devAddDailySmoked10() {
+    triggerHaptic('heavy');
+    const newCount = storageService.addDailySmokedCount(10);
+    this.setData({
+      devDailySmokedCount: newCount
+    });
+    // 如果达到或超过 40 支阈值，触发饮茶润喉阻尼
+    if (newCount >= 40) {
+      this.setData({ showTeaModal: true, showAdminTestModal: false });
+      audioManager.playZenChimeSound(440);
+      toast.flame(`⚡ 今日吸烟已累计 +10（达 ${newCount} 支，触发健康阻尼！）`);
+    } else {
+      toast.flame(`⚡ 今日吸烟累计 +10（当前今日共: ${newCount} 支）`);
+    }
+  },
+
+  devSetDailySmoked40() {
+    triggerHaptic('heavy');
+    const cur = storageService.getDailySmokedCount();
+    const delta = Math.max(0, 40 - cur);
+    const newCount = storageService.addDailySmokedCount(delta);
+    this.setData({
+      devDailySmokedCount: newCount,
+      showTeaModal: true,
+      showAdminTestModal: false
+    });
+    audioManager.playZenChimeSound(440);
+    toast.flame('🍵 今日吸烟已直达 40 支上限！已唤出饮茶润喉阻尼！');
+  },
+
+  devClearDailySmoked() {
+    triggerHaptic('light');
+    const today = storageService.getTodayDateKey();
+    try {
+      wx.setStorageSync('SMOKEFREE_DAILY_SMOKE_COUNT', { date: today, count: 0 });
+    } catch (e) {}
+    this.setData({
+      devDailySmokedCount: 0,
+      showTeaModal: false
+    });
+    toast.info('🧹 今日吸烟计数已清零 (0 支)');
+  },
+
+  /* ==================== 🌌 5. 全景心境天幕即时循环轮换 ==================== */
+  devCycleVipTheme() {
+    triggerHaptic('heavy');
+    const themes = VIP_THEME_OPTIONS || [];
+    if (!themes.length) return;
+    const currentTheme = this.data.vipTheme || 'classic';
+    const currentIndex = themes.findIndex(t => t.id === currentTheme);
+    const nextIndex = (currentIndex + 1) % themes.length;
+    const targetTheme = themes[nextIndex];
+    try {
+      wx.setStorageSync('JUST_ONE_SMOKE_PREVIEW_THEME', targetTheme.id);
+    } catch (e) {}
+    this.setData({ vipTheme: targetTheme.id });
+    toast.flame(`🌌 心境天幕切换至：【${targetTheme.name}】（${targetTheme.tag || ''}）`);
+  },
+
+  devResetClassicTheme() {
+    triggerHaptic('medium');
+    try {
+      wx.setStorageSync('JUST_ONE_SMOKE_PREVIEW_THEME', 'classic');
+    } catch (e) {}
+    this.setData({ vipTheme: 'classic' });
+    toast.info('🌑 已复原至【原色深曜】经典黑静谧天幕');
+  },
+
+  devSetAtmosphereScene(e) {
+    const sceneId = e.currentTarget.dataset.scene;
+    if (!sceneId) return;
+    storageService.setAtmosphereScene(sceneId);
+    const sceneInfo = getSceneById(sceneId);
+    this.setData({
+      currentScene: sceneId,
+      currentSceneInfo: sceneInfo
+    });
+    audioManager.startAmbientSound(sceneId);
+    triggerHaptic('heavy');
+    toast.flame(`${sceneInfo.icon || '✨'} 已沉浸置身：【${sceneInfo.name}】（${sceneInfo.subtitle}）！`);
+  },
+
+  /* ==================== 🤝 6. 好友社交礼遇与单支品鉴茶歇 ==================== */
+  devSimulateReceiveGift(e) {
+    const cigId = (e && e.currentTarget && e.currentTarget.dataset && e.currentTarget.dataset.cigid) || 'huanghelou_1916';
+    const targetCig = getCigaretteById(cigId) || this.data.currentCigarette || DEFAULT_CIGARETTE;
+    triggerHaptic('celebration');
+    storageService.setSelectedCigaretteId(targetCig.id);
+    this.setData({
+      currentCigarette: targetCig,
+      giftCigarette: targetCig,
+      giftSenderName: '腾讯老友',
+      showGiftModal: true,
+      showAdminTestModal: false
+    });
+    toast.flame(`🤝 收到【腾讯老友】递来的【${targetCig.name}】礼遇品鉴单支！`);
+  },
+
+  /* ==================== 📳 7. 阶梯通感触觉与 528Hz 磬音 ==================== */
+  devTestSensoryHaptics() {
+    toast.flame('📳 启动阶梯触觉通感：0s点火 ➔ 0.2s负压 ➔ 2.2s炭火微震！');
+    triggerHaptic('heavy');
+    setTimeout(() => {
+      triggerHaptic('light');
+    }, 200);
+    setTimeout(() => {
+      triggerHaptic('medium');
+      const { cx, cy } = this.getTipCoordinates();
+      if (this.particles) this.particles.emitSparks(cx, cy, 12);
+    }, 2200);
+  },
+
+  devPlayZenChimeSound() {
+    triggerHaptic('light');
+    audioManager.playZenChimeSound(528);
+    toast.info('🔔 已播放 528Hz 治愈禅意磬音');
+  },
+
+  /* ==================== 📜 8. 16 阶成语境界称号逐级步进 ==================== */
+  devStepTitleNext() {
+    this._stepTitle(1);
+  },
+
+  devStepTitlePrev() {
+    this._stepTitle(-1);
+  },
+
+  devSetTitleTier(e) {
+    const targetTitle = e && e.currentTarget && e.currentTarget.dataset && e.currentTarget.dataset.title;
+    if (!targetTitle) return;
+    triggerHaptic('medium');
+    storageService.setEquippedTitle(targetTitle);
+    this.refreshAllData();
+    toast.flame(`🎖️ 境界称号已设为：【${targetTitle}】！`);
+  },
+
+  _stepTitle(dir) {
+    triggerHaptic('medium');
+    const titles = [
+      '破土初萌', '第一缕风', '晨曦破晓', '三日生机',
+      '积微成著', '日省月试', '七日淬火', '身轻气爽',
+      '从容自若', '重塑新程', '静水流深', '金石为开',
+      '百日涅槃', '千帆历尽', '心如琉璃', '返璞归真',
+      '无烟圣尊'
+    ];
+    const curTitle = storageService.getEquippedTitle() || '破土初萌';
+    let idx = titles.indexOf(curTitle);
+    if (idx === -1) idx = 0;
+    const nextIdx = (idx + dir + titles.length) % titles.length;
+    const nextTitle = titles[nextIdx];
+    storageService.setEquippedTitle(nextTitle);
+    this.refreshAllData();
+    toast.flame(`🎖️ 境界称号切换为 (Lv.${nextIdx + 1}/${titles.length})：【${nextTitle}】！`);
+  },
+
+  devLockAdminMode() {
+    triggerHaptic('medium');
+    try {
+      wx.removeStorageSync('__DEV_ADMIN_MODE__');
+    } catch (e) {}
+    this.setData({
+      isDevAdminMode: false,
+      showAdminTestModal: false
+    });
+    toast.info('🔒 管理员测试模式已关闭，首页测试按钮已隐藏！');
+  },
   /* ==================== [DEV_ADMIN_TEST] 结束 ==================== */
 
   _calcShareProgressDeg(remaining, cig) {
@@ -457,10 +1625,6 @@ Page({
       this.exhaleEffectTimers.forEach(t => clearTimeout(t));
       this.exhaleEffectTimers = [];
     }
-    if (this.trialInterval) {
-      clearInterval(this.trialInterval);
-      this.trialInterval = null;
-    }
     if (this.smokeGuideTimer) {
       clearTimeout(this.smokeGuideTimer);
       this.smokeGuideTimer = null;
@@ -489,9 +1653,21 @@ Page({
       this._achToastTimers.forEach(t => clearTimeout(t));
       this._achToastTimers = [];
     }
-    if (this.ashTapLockTimer) {
-      clearTimeout(this.ashTapLockTimer);
-      this.ashTapLockTimer = null;
+    if (this._zenHudTimer) {
+      clearTimeout(this._zenHudTimer);
+      this._zenHudTimer = null;
+    }
+    if (this._ashtraySmokeTimer) {
+      clearTimeout(this._ashtraySmokeTimer);
+      this._ashtraySmokeTimer = null;
+    }
+    if (this.inhalePulseTimer1) {
+      clearTimeout(this.inhalePulseTimer1);
+      this.inhalePulseTimer1 = null;
+    }
+    if (this.inhalePulseTimer2) {
+      clearTimeout(this.inhalePulseTimer2);
+      this.inhalePulseTimer2 = null;
     }
     this._isCarLighterHeating = false;
   },
@@ -509,26 +1685,17 @@ Page({
       }
     }
 
-    const wasTrial = this.data.isTrialActive;
-    const savedEffect = getSmokeEffectById(storageService.getSelectedSmokeEffectId()) || DEFAULT_SMOKE_EFFECT;
     this._clearTransientTimers();
 
     this.screenFogAlpha = 0;
-    const resetPatch = {
+    this.setData({
       isSparking: false,
       isAshTapping: false,
       showSmokeEffectGuide: false,
       showSceneGuide: false,
       isGuideFading: false,
       isSceneGuideFading: false
-    };
-    if (wasTrial) {
-      resetPatch.isTrialActive = false;
-      resetPatch.trialSecondsLeft = 0;
-      resetPatch.currentSmokeEffect = savedEffect;
-      resetPatch.smokeEffectType = savedEffect.id;
-    }
-    this.setData(resetPatch);
+    });
 
     audioManager.stopBurnSound();
     audioManager.stopInhaleSound();
@@ -543,6 +1710,10 @@ Page({
   destroyEngine() {
     this.stopRenderLoop();
     this._clearTransientTimers();
+    if (this._breathingTimer) {
+      clearInterval(this._breathingTimer);
+      this._breathingTimer = null;
+    }
     audioManager.stopBurnSound();
     audioManager.stopInhaleSound();
     audioManager.stopExhaleSound();
@@ -655,8 +1826,11 @@ Page({
         triggerHaptic('light');
       }
 
-      // 燃尽结算触发
-      if (curState === 'FINISHED' && this.data.simulatorState !== 'FINISHED') {
+      // 燃尽结算触发 (增加防重入与即时状态同步锁，彻底杜绝帧循环与异步状态迟滞导致的死循环递归)
+      if (curState === 'FINISHED' && this.data.simulatorState !== 'FINISHED' && !this._isFinishingSmoke) {
+        this._isFinishingSmoke = true;
+        this.data.simulatorState = 'FINISHED';
+        this.setData({ simulatorState: 'FINISHED' });
         if (this.isHoldingInhale) {
           this.isHoldingInhale = false;
           if (this.hapticInterval) clearInterval(this.hapticInterval);
@@ -686,6 +1860,8 @@ Page({
         screenFogAlpha: this.screenFogAlpha,
         sceneType: this.data.currentScene,
         isSparking: this.data.isSparking,
+        sparkStartTime: this.sparkStartTime,
+        sparkDuration: this.sparkDuration || 1200,
         ignitionTool: this.data.currentIgnitionTool,
         vipTheme: this.data.vipTheme,
         ashTapProgress
@@ -756,7 +1932,7 @@ Page({
     return { cx, cy: fireY };
   },
 
-  // 获取用户嘴部 / 过滤嘴底部呼气吐烟锚点坐标 (真实口部吐雾源头)
+  // 获取用户嘴部 / 过滤嘴底部呼气吐烟锚点坐标 (保留兼容接口)
   getMouthCoordinates() {
     if (!this.cWidth || !this.cHeight) return { mx: 180, my: 480 };
     const mx = this.cWidth / 2;
@@ -769,9 +1945,35 @@ Page({
     return { mx, my };
   },
 
+  // 获取修长烟支当前居中锚点坐标 (特效在烟身居中绽放，完美居中)
+  getCigaretteCenterCoordinates() {
+    if (!this.cWidth || !this.cHeight) return { cx: 180, cy: 380, midY: 380 };
+    const cx = this.cWidth / 2;
+    const cy = this.cHeight * 0.65;
+    const curCig = this.data.currentCigarette || {};
+    const dims = computeCigaretteDimensions(curCig, this.cHeight);
+    const maxCigH = dims.maxCigH;
+    const filterH = Math.round(maxCigH * dims.filterRatio);
+    const maxPaperH = maxCigH - filterH;
+    const p = this.fsm ? this.fsm.getProgress() : 1.0;
+    const progress = (typeof p === 'number' && !isNaN(p)) ? p : 1.0;
+    const paperH = maxPaperH * progress;
+    const fireY = cy - paperH;
+    const filterBottom = cy + filterH;
+    // 烟身整体几何中心点 (烟头燃烧端与滤嘴底部的中点，确保特效在烟身居中显示)
+    const midY = Math.round((fireY + filterBottom) / 2);
+    return { cx, cy: midY, midY, fireY, filterBottom };
+  },
+
   // 配合烟雾特效执行真实拟真吐烟流程 (支持根据吸入时长动态注入吸力强度 intensity，具备连击防卡顿节流与上一波延时清理)
   performRealisticExhale(intensity = 1.0) {
-    if (!this.particles) return;
+    if (!this.particles || !this.fsm) return;
+
+    // 状态严格防护锁：掐灭、未点燃或已燃尽状态下严禁呼出任何特效
+    const curState = this.fsm.getState();
+    if (curState === 'EXTINGUISHED' || curState === 'UNLIT' || curState === 'FINISHED') {
+      return;
+    }
 
     // 1. 疯点限流保护：350ms 内连续点击合并节流，杜绝海量并发定时器导致界面卡死
     const now = Date.now();
@@ -786,9 +1988,10 @@ Page({
     }
     this.exhaleEffectTimers = [];
 
-    const { mx, my } = this.getMouthCoordinates();
+    // 烟雾特效锚点：横向严格沿香烟中轴线居中 (cx = w / 2)，纵向保持嘴部/烟嘴吐雾自然起始位 (my)
+    const { mx: cx, my } = this.getMouthCoordinates();
     const currentEff = this.data.currentSmokeEffect || DEFAULT_SMOKE_EFFECT;
-    const curCig = this.data.currentCigarette;
+    const curCig = this.data.currentCigarette || {};
     let smokeColor = curCig.smokeColor || 'rgba(238, 246, 255, ';
     if (curCig.hasBead && this.data.isBeadPopped) {
       if (curCig.beadColor === '#f97316' || curCig.beadColor === '#f59e0b') {
@@ -819,107 +2022,106 @@ Page({
     const effectId = currentEff.id;
     storageService.recordSmokeEffectSummoned(effectId);
 
-    // 腾讯总监设计级：独占特效调度，清除异构大实体与多余旧烟雾，杜绝多特效交叉重叠
+    // 独占特效调度，清除异构大实体与多余旧烟雾，杜绝多特效交叉重叠
     this.particles.ensureExclusiveEffect(effectId);
 
     if (effectId === 'ring_classic') {
-      // 1. 经典空灵烟圈：单次呼气喷射 1 枚 3D 俯仰透视环形涡流大烟圈；双击时喷射第 2 枚异构伴飞烟圈；第 3 枚喷射时第 1 枚隐退，始终同屏至多 2 个烟圈优雅翱翔
-      this.particles.emitSmokeRing(mx, my - 20, smokeColor, 1.0 * effIntensity, { speedMul: Math.min(1.35, 0.82 + effIntensity * 0.28) });
+      // 1. 经典空灵烟圈：沿香烟中轴横向严格居中发射，向前上方优雅翱翔
+      this.particles.emitSmokeRing(cx, my - 20, smokeColor, 1.0 * effIntensity, { speedMul: Math.min(1.35, 0.82 + effIntensity * 0.28) });
       const timer = setTimeout(() => {
-        if (!this.particles) return;
-        // 延时只补给微量轻盈气羽微烟，绝不生成第二个主烟圈
-        this.particles.emitVolumetricCombustionSmoke(mx, my - 24, smokeColor);
+        if (!this.particles || (this.fsm && this.fsm.getState() === 'EXTINGUISHED')) return;
+        this.particles.emitVolumetricCombustionSmoke(cx, my - 24, smokeColor);
       }, 190);
       this.exhaleEffectTimers.push(timer);
     } else if (effectId === 'gold_stardust') {
-      // 4. 黑金流沙：主呼气喷射 24K 金币雨与黑曜石流沙 (spawnWave = true)；双击时触发第 2 场暴富金雨；第 3 场喷射时第 1 场隐退，同屏至多 2 场
-      this.particles.emitGoldStardust(mx, my - 16, true);
+      // 2. 黑金流沙：沿香烟中轴横向严格居中喷射 24K 金币雨与黑曜石流沙
+      this.particles.emitGoldStardust(cx, my - 16, true);
       const timer = setTimeout(() => {
-        if (!this.particles) return;
-        this.particles.emitGoldStardust(mx, my - 18, false);
+        if (!this.particles || (this.fsm && this.fsm.getState() === 'EXTINGUISHED')) return;
+        this.particles.emitGoldStardust(cx, my - 18, false);
       }, 160);
       this.exhaleEffectTimers.push(timer);
     } else if (effectId === 'heart_double') {
-      // 2. 双爱心烟：浪漫同心双心形涡流环，平滑浮游舒展并柔美羽化（单次自然喷发，杜绝二次重写闪动）
-      this.particles.emitHeartDouble(mx, my - 20);
+      // 3. 双爱心烟：沿香烟中轴横向严格居中升腾浪漫同心双心形涡流环
+      this.particles.emitHeartDouble(cx, my - 20);
     } else if (effectId === 'dragon_breath') {
-      // 7. 金龙吐息：浓金祥云破雾而出，神龙腾云驾雾盘旋九天
-      this.particles.emitDragonBreath(mx, my - 20, true);
+      // 4. 金龙吐息：沿香烟中轴横向严格居中盘旋腾空，浓金祥云破雾而出
+      this.particles.emitDragonBreath(cx, my - 20, true);
       const timer = setTimeout(() => {
-        if (!this.particles) return;
-        this.particles.emitDragonBreath(mx, my - 30, false);
+        if (!this.particles || (this.fsm && this.fsm.getState() === 'EXTINGUISHED')) return;
+        this.particles.emitDragonBreath(cx, my - 30, false);
       }, 180);
       this.exhaleEffectTimers.push(timer);
     } else if (effectId === 'galaxy_stars') {
-      // 4. 星穹浩瀚 · 璀璨星河：主呼气喷射双旋臂极光星云与二十四颗八芒星钻 (spawnWave = true)；双击时触发第 2 组星河；第 3 组喷射时第 1 组隐退，同屏至多 2 组
-      this.particles.emitGalaxyStars(mx, my - 16, true);
+      // 5. 璀璨星河：沿香烟中轴横向严格居中喷射双旋臂极光星云与二十四颗八芒星钻
+      this.particles.emitGalaxyStars(cx, my - 16, true);
       const timer = setTimeout(() => {
-        if (!this.particles) return;
-        this.particles.emitGalaxyStars(mx, my - 20, false);
+        if (!this.particles || (this.fsm && this.fsm.getState() === 'EXTINGUISHED')) return;
+        this.particles.emitGalaxyStars(cx, my - 20, false);
       }, 160);
       this.exhaleEffectTimers.push(timer);
     } else if (effectId === 'grand_fireworks') {
-      // 9. 华夏盛世 · 万家璀璨烟火：主呼气发射孔明祈愿天灯与金龙响尾火箭盛典 (spawnCelebration = true)；双击时触发第 2 场盛典；第 3 场触发时第 1 场隐退，同屏至多 2 场
-      this.particles.emitGrandFireworks(mx, my - 20, true);
+      // 6. 华夏盛世烟火：沿香烟中轴横向严格居中发射
+      this.particles.emitGrandFireworks(cx, my - 20, true);
       const timer = setTimeout(() => {
-        if (!this.particles) return;
-        this.particles.emitGrandFireworks(mx, my - 24, false);
+        if (!this.particles || (this.fsm && this.fsm.getState() === 'EXTINGUISHED')) return;
+        this.particles.emitGrandFireworks(cx, my - 24, false);
       }, 180);
       this.exhaleEffectTimers.push(timer);
     } else if (effectId === 'auspicious_river') {
-      // 10. 步步高升：金红祥瑞四字吉语星河螺旋腾空而起，双轨流光缎带与破晓金光 (纯净字河，无福印遮挡)
-      this.particles.emitAuspiciousRiver(mx, my - 16, true);
+      // 7. 步步高升：沿香烟中轴横向严格居中升腾
+      this.particles.emitAuspiciousRiver(cx, my - 16, true);
       const timer = setTimeout(() => {
-        if (!this.particles) return;
-        this.particles.emitAuspiciousRiver(mx, my - 20, false);
+        if (!this.particles || (this.fsm && this.fsm.getState() === 'EXTINGUISHED')) return;
+        this.particles.emitAuspiciousRiver(cx, my - 20, false);
       }, 170);
       this.exhaleEffectTimers.push(timer);
     } else if (effectId === 'blessing_runes') {
-      // 10.5 福愿金墨：主呼气凝结升腾古雅篆金福印 (spawnWave = true)；双击时触发第 2 批福印；第 3 批触发时第 1 批隐退，同屏至多 2 批
-      this.particles.emitBlessingRunes(mx, my - 16, true);
+      // 8. 福愿金墨：沿香烟中轴横向严格居中升腾古雅篆金福印
+      this.particles.emitBlessingRunes(cx, my - 16, true);
       const timer = setTimeout(() => {
-        if (!this.particles) return;
-        this.particles.emitBlessingRunes(mx, my - 20, false);
+        if (!this.particles || (this.fsm && this.fsm.getState() === 'EXTINGUISHED')) return;
+        this.particles.emitBlessingRunes(cx, my - 20, false);
       }, 170);
       this.exhaleEffectTimers.push(timer);
     } else if (effectId === 'phoenix_nirvana') {
-      // 11. 凤舞九天：赤金南明离火长鸣，百鸟朝凤九天神凰振翅翱翔，周身烈焰漩涡环绕
-      this.particles.emitPhoenixNirvana(mx, my - 20, true);
+      // 9. 凤舞九天：沿香烟中轴横向严格居中升腾
+      this.particles.emitPhoenixNirvana(cx, my - 20, true);
       const timer = setTimeout(() => {
-        if (!this.particles) return;
-        this.particles.emitPhoenixNirvana(mx, my - 28, false);
+        if (!this.particles || (this.fsm && this.fsm.getState() === 'EXTINGUISHED')) return;
+        this.particles.emitPhoenixNirvana(cx, my - 28, false);
       }, 180);
       this.exhaleEffectTimers.push(timer);
     } else if (effectId === 'bagua_taichi') {
-      // 12. 乾坤八卦 · 紫微天穹大阵：巨幅太极八卦大阵恢弘展开，阴阳两仪灵气双鱼流转，八荒天罡剑芒与二十八星宿连珠漫空激荡
-      this.particles.emitBaguaTaichi(mx, my - 20, true);
+      // 10. 乾坤八卦：沿香烟中轴横向严格居中展开
+      this.particles.emitBaguaTaichi(cx, my - 20, true);
       const timer = setTimeout(() => {
-        if (!this.particles) return;
-        this.particles.emitBaguaTaichi(mx, my - 28, false);
+        if (!this.particles || (this.fsm && this.fsm.getState() === 'EXTINGUISHED')) return;
+        this.particles.emitBaguaTaichi(cx, my - 28, false);
       }, 180);
       this.exhaleEffectTimers.push(timer);
     } else if (effectId === 'buddha_light') {
-      // 13. 佛光普照 · 梵天千叶金莲：峨眉金顶五色祥瑞圆光与十六道万丈佛光普照苍穹，三层宝相金莲盛放，真言梵音流转，漫天飘洒金莲花瓣与菩提舍利金雨
-      this.particles.emitBuddhaLight(mx, my - 20, true);
+      // 11. 佛光普照：沿香烟中轴横向严格居中升腾
+      this.particles.emitBuddhaLight(cx, my - 20, true);
       const timer = setTimeout(() => {
-        if (!this.particles) return;
-        this.particles.emitBuddhaLight(mx, my - 28, false);
+        if (!this.particles || (this.fsm && this.fsm.getState() === 'EXTINGUISHED')) return;
+        this.particles.emitBuddhaLight(cx, my - 28, false);
       }, 180);
       this.exhaleEffectTimers.push(timer);
     } else if (effectId === 'seven_fairies') {
-      // 14. 七仙降世 · 霓裳羽衣阵：七位轻灵仙女环阵起舞，七彩流光仙绸，天女散花琼花落雨 (偏左安全区绽放，绝不遮挡 DOCK)
-      this.particles.emitSevenFairies(mx - 16, my - 20, true);
+      // 12. 七仙降世：沿香烟中轴横向严格居中绽放
+      this.particles.emitSevenFairies(cx, my - 20, true);
       const timer = setTimeout(() => {
-        if (!this.particles) return;
-        this.particles.emitSevenFairies(mx - 22, my - 28, false);
+        if (!this.particles || (this.fsm && this.fsm.getState() === 'EXTINGUISHED')) return;
+        this.particles.emitSevenFairies(cx, my - 28, false);
       }, 180);
       this.exhaleEffectTimers.push(timer);
     } else {
-      // 默认兜底：舒缓轻柔纯净白雾漫卷，绝不过度弥漫遮挡视线
-      this.particles.emitExhalePlume(mx, my - 16, 12, smokeColor, { speedMul: 1.1, lateralMul: 1.0 });
+      // 默认兜底：沿香烟中轴横向严格居中轻柔白雾漫卷
+      this.particles.emitExhalePlume(cx, my - 16, 12, smokeColor, { speedMul: 1.1, lateralMul: 1.0 });
       const timer1 = setTimeout(() => {
-        if (!this.particles) return;
-        this.particles.emitExhalePlume(mx, my - 16, 8, smokeColor, { speedMul: 0.85, lateralMul: 0.8 });
+        if (!this.particles || (this.fsm && this.fsm.getState() === 'EXTINGUISHED')) return;
+        this.particles.emitExhalePlume(cx, my - 16, 8, smokeColor, { speedMul: 0.85, lateralMul: 0.8 });
       }, 140);
       this.exhaleEffectTimers.push(timer1);
     }
@@ -939,9 +2141,8 @@ Page({
       const maxCap = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
       const remaining = storageService.getPackCount(curCig.id, maxCap);
       if (remaining <= 0) {
-        // 盒内已无烟：仅底部 Toast 提示，绝对不跳转页面，跟点击递烟一样的效果
         triggerHaptic('medium');
-        toast.info('烟盒已空，可前往商店挑选名烟');
+        this.handleEmptyPackForDraw(curCig, maxCap);
         return;
       }
       this.drawNewCigarette();
@@ -965,6 +2166,111 @@ Page({
       // 腾讯拟真触控级：仅当爆珠未捏爆 (!this.data.isBeadPopped) 且触碰爆珠微距圆圈内 (半径 <= 18px) 时执行捏爆；爆珠爆了之后再次点击爆珠位置，直接穿透进入吸烟流程
       if (hitDist <= 18 && !this.data.isBeadPopped) {
         this.popBead();
+        return;
+      }
+    }
+
+    // 暖阁喵眠 · 案头打盹橘猫直接触控抚摸反馈 (Direct Petting on Cat Loaf)
+    const currentScene = this.data.currentScene || storageService.getAtmosphereScene() || 'rainy_car';
+    if (currentScene === 'cat_companion' && e && e.touches && e.touches[0] && this.cWidth && this.cHeight) {
+      const touch = e.touches[0];
+      const tx = touch.x !== undefined ? touch.x : (touch.clientX - (this.canvasLeft || 0));
+      const ty = touch.y !== undefined ? touch.y : (touch.clientY - (this.canvasTop || 0));
+      const catCenterX = this.cWidth * 0.28;
+      const catCenterY = this.cHeight * 0.70 - 12;
+      const hitCatDist = Math.hypot(tx - catCenterX, ty - catCenterY);
+      // 猫咪触摸热区判定 (椭圆半径约 52px)
+      if (hitCatDist <= 52) {
+        if (sceneRenderer && sceneRenderer.triggerCatPet) {
+          sceneRenderer.triggerCatPet();
+        }
+        triggerHaptic('cat_purr');
+        const catQuotes = [
+          '🐱 呼噜呼噜... 橘猫舒服地眯起眼睛，蹭了蹭你的手心',
+          '🐱 咪呜~ 橘猫把小下巴搭在手边，暖烘烘地陪着你',
+          '🐱 呼噜... 揣着手手的小橘猫翻了个身，继续安心打盹',
+          '🐱 呼噜噜~ 橘猫抖了抖小耳朵，发出满足的呼噜声'
+        ];
+        const randomQuote = catQuotes[Math.floor(Math.random() * catQuotes.length)];
+        toast.flame(randomQuote);
+        return;
+      }
+    }
+
+    // 雨夜龙猫 · 森林车站大龙猫大肚皮触控弹性反馈 (Direct Petting on Totoro Belly)
+    if ((currentScene === 'totoro_rain' || currentScene === 'moonlit_dance') && e && e.touches && e.touches[0] && this.cWidth && this.cHeight) {
+      const touch = e.touches[0];
+      const tx = touch.x !== undefined ? touch.x : (touch.clientX - (this.canvasLeft || 0));
+      const ty = touch.y !== undefined ? touch.y : (touch.clientY - (this.canvasTop || 0));
+      const totoroCenterX = this.cWidth * 0.33;
+      const totoroCenterY = this.cHeight * 0.72 - 32;
+      const hitTotoroDist = Math.hypot(tx - totoroCenterX, ty - totoroCenterY);
+      // 龙猫大肚皮触摸热区判定 (椭圆半径约 58px)
+      if (hitTotoroDist <= 58) {
+        if (sceneRenderer && sceneRenderer.triggerTotoroBounce) {
+          sceneRenderer.triggerTotoroBounce();
+        }
+        triggerHaptic('totoro_bounce');
+        const totoroQuotes = [
+          '🍃 嗷呜~ 龙猫的大肚子软绵绵地晃了晃，递给你一片遮雨的荷叶',
+          '🍃 呼呼~ 龙猫眨了眨圆溜溜的大眼睛，荷叶伞上的雨滴噼啪作响',
+          '🍃 身边的小煤球精灵好奇地跳了起来，围着你欢快转圈~',
+          '🍃 龙猫抖了抖尖尖的长耳朵，雨夜的森林静谧又安详'
+        ];
+        const randomQuote = totoroQuotes[Math.floor(Math.random() * totoroQuotes.length)];
+        toast.flame(randomQuote);
+        return;
+      }
+    }
+
+    // 史努比星空 · 红屋顶史努比与糊涂塌客触控互动 (Direct Petting on Snoopy on the Roof)
+    if ((currentScene === 'snoopy_stargazing' || currentScene === 'jazz_sway') && e && e.touches && e.touches[0] && this.cWidth && this.cHeight) {
+      const touch = e.touches[0];
+      const tx = touch.x !== undefined ? touch.x : (touch.clientX - (this.canvasLeft || 0));
+      const ty = touch.y !== undefined ? touch.y : (touch.clientY - (this.canvasTop || 0));
+      const snoopyCenterX = this.cWidth * 0.32;
+      const snoopyCenterY = this.cHeight * 0.72 - 32;
+      const hitSnoopyDist = Math.hypot(tx - snoopyCenterX, ty - snoopyCenterY);
+      // 史努比红屋顶触摸热区判定 (半径约 58px)
+      if (hitSnoopyDist <= 58) {
+        if (sceneRenderer && sceneRenderer.triggerSnoopyBounce) {
+          sceneRenderer.triggerSnoopyBounce();
+        }
+        triggerHaptic('snoopy_tap');
+        const snoopyQuotes = [
+          '🐶 史努比在红屋顶翻了个身：趴在屋顶上，烦恼就都像星星一样小了~',
+          '🐥 糊涂塌客（Woodstock）叽喳扑腾着小翅膀，蹭了蹭史努比的脚趾',
+          '🐶 史努比安逸地数着星星：明天又是充满希望的一天！',
+          '✨ 一颗流星悄悄划过夜空，许一个纯真温暖的心愿吧~'
+        ];
+        const randomQuote = snoopyQuotes[Math.floor(Math.random() * snoopyQuotes.length)];
+        toast.flame(randomQuote);
+        return;
+      }
+    }
+
+    // 温馨小家 · 壁炉暖木小熊一家三口触控互动 (Direct Petting on Cozy Bear Family)
+    if (currentScene === 'cozy_family' && e && e.touches && e.touches[0] && this.cWidth && this.cHeight) {
+      const touch = e.touches[0];
+      const tx = touch.x !== undefined ? touch.x : (touch.clientX - (this.canvasLeft || 0));
+      const ty = touch.y !== undefined ? touch.y : (touch.clientY - (this.canvasTop || 0));
+      const familyCenterX = this.cWidth * 0.32;
+      const familyCenterY = this.cHeight * 0.72 - 24;
+      const hitFamilyDist = Math.hypot(tx - familyCenterX, ty - familyCenterY);
+      // 小熊一家触摸热区判定 (半径约 60px)
+      if (hitFamilyDist <= 60) {
+        if (sceneRenderer && sceneRenderer.triggerFamilyBounce) {
+          sceneRenderer.triggerFamilyBounce();
+        }
+        triggerHaptic('family_warmth');
+        const familyQuotes = [
+          '🏡 家人围坐，灯火可亲。无论走多远，这里永远是你的避风港~',
+          '🐻 熊爸爸轻轻拉了拉毛毯，熊妈妈温柔地抚着小熊宝，梦里都是蜜糖的香甜',
+          '✨ 小熊宝在睡梦中甜甜地笑了笑，抱紧了怀里的小熊玩偶',
+          '🕯️ 壁炉里的火苗噼啪作响，风雪再大，家里的暖意也融化了一切疲惫'
+        ];
+        const randomQuote = familyQuotes[Math.floor(Math.random() * familyQuotes.length)];
+        toast.flame(randomQuote);
         return;
       }
     }
@@ -994,19 +2300,55 @@ Page({
         this.particles.retireExhaleEntities(false);
       }
 
-      this.setData({ simulatorState: this.fsm.getState() });
+      const inhaleUpdate = { simulatorState: this.fsm.getState() };
+      if (this.data.currentMoodText) {
+        inhaleUpdate.isMoodDissolving = true;
+      }
+      this.setData(inhaleUpdate);
       audioManager.startBurnSound();
-      triggerHaptic('light');
+
+      // 腾讯总监设计级：负压通感阶梯震动 (0.2s 负压轻吸 + 2.2s 炭火深吸峰值微震)
+      if (this._negativePressureTimer) clearTimeout(this._negativePressureTimer);
+      this._negativePressureTimer = setTimeout(() => {
+        if (this.isHoldingInhale) triggerHaptic('light');
+      }, 200);
+
+      if (this._thermalPeakTimer) clearTimeout(this._thermalPeakTimer);
+      this._thermalPeakTimer = setTimeout(() => {
+        if (this.isHoldingInhale) {
+          triggerHaptic('medium');
+          const { cx, cy } = this.getTipCoordinates();
+          if (this.particles) this.particles.emitSparks(cx, cy, 8);
+        }
+      }, 2200);
 
       if (this.hapticInterval) clearInterval(this.hapticInterval);
       this.hapticInterval = setInterval(() => {
         triggerHaptic('light');
-      }, 700);
+      }, 650);
     }
+  },
+
+  // 腾讯与字节大厂级动效：手指轻划屏幕触发微风扰动烟雾 (Touch Turbulence)
+  onTouchMove(e) {
+    if (!e || !e.touches || !e.touches[0] || !this.particles) return;
+    const touch = e.touches[0];
+    this.particles.setTouchTurbulence(touch.x, touch.y, true);
   },
 
   // 触摸结束（呼气）
   onTouchEnd() {
+    if (this.particles) {
+      this.particles.setTouchTurbulence(0, 0, false);
+    }
+    if (this._negativePressureTimer) {
+      clearTimeout(this._negativePressureTimer);
+      this._negativePressureTimer = null;
+    }
+    if (this._thermalPeakTimer) {
+      clearTimeout(this._thermalPeakTimer);
+      this._thermalPeakTimer = null;
+    }
     if (this.autoInhaleTimer) {
       clearTimeout(this.autoInhaleTimer);
       this.autoInhaleTimer = null;
@@ -1028,8 +2370,15 @@ Page({
 
       this.fsm.stopInhale();
       const nextSt = this.fsm.getState();
+      const endInhaleData = {};
       if (this.data.simulatorState !== nextSt) {
-        this.setData({ simulatorState: nextSt });
+        endInhaleData.simulatorState = nextSt;
+      }
+      if (this.data.isMoodDissolving) {
+        endInhaleData.isMoodDissolving = false;
+      }
+      if (Object.keys(endInhaleData).length > 0) {
+        this.setData(endInhaleData);
       }
       audioManager.playExhaleSound();
       triggerHaptic(inhaleDurationSec > 1.2 ? 'heavy' : 'medium');
@@ -1044,12 +2393,12 @@ Page({
         }
       }, 2500);
 
-      // 真实口部呼气吐烟动作：从嘴部向上喷涌浓白烟气，并根据吸入时长动态注入烟雾物理初速度与体积
+      // 真实口部呼气吐烟动作：烟身几何中心居中向上升腾，并根据吸入时长动态注入烟雾物理初速度与体积
       this.performRealisticExhale(inhaleIntensity);
     }
   },
 
-  // 掐灭香烟：点击掐灭立即灭掉火头，升起一缕微弱青灰余烟
+  // 掐灭香烟：点击掐灭立即灭掉火头，彻底清退烟雾特效与定时器，升起一缕微弱青灰余烟
   extinguishCigarette() {
     if (!this.fsm) return;
     // 抖灰过程中严格锁定，禁止掐灭，必须等抖灰完成
@@ -1066,18 +2415,35 @@ Page({
         clearInterval(this.hapticInterval);
         this.hapticInterval = null;
       }
+      // 彻底清理呼气吐烟定时器与特效延时，杜绝掐灭后底部或烟身突兀冒出烟雾特效
+      if (this.exhaleTimer) {
+        clearTimeout(this.exhaleTimer);
+        this.exhaleTimer = null;
+      }
+      if (this.exhaleEffectTimers && this.exhaleEffectTimers.length) {
+        this.exhaleEffectTimers.forEach(t => clearTimeout(t));
+        this.exhaleEffectTimers = [];
+      }
+
       this.isHoldingInhale = false;
       audioManager.stopBurnSound();
       audioManager.playSizzleSound();
       triggerHaptic('heavy');
 
-      // 腾讯设计级：只清除烟头点火阴燃烟气与火星，空中呼出的专属烟雾特效 100% 完整保留继续升腾
+      // 清除烟头燃烧、阴燃烟气与空中残留的大型特效实体
       if (this.particles) {
         const { cx, cy } = this.getTipCoordinates();
         if (typeof this.particles.extinguishTipSmoke === 'function') {
           this.particles.extinguishTipSmoke(cx, cy);
         } else if (this.particles.silkStreams) {
           this.particles.silkStreams.forEach(s => { s.nodes = []; });
+        }
+        if (typeof this.particles.retireExhaleEntities === 'function') {
+          this.particles.retireExhaleEntities(true);
+        }
+        // 彻底清退呼气烟羽与特效粒子，杜绝掐灭后残余特效或烟雾从底部/烟身冒出
+        if (this.particles.particles && this.particles.particles.length) {
+          this.particles.particles = this.particles.particles.filter(p => !p.isExhalePlume && !p.goldWaveId && !p.galaxyWaveId && !p.blessingWaveId);
         }
       }
 
@@ -1103,6 +2469,7 @@ Page({
       const revertId = (trialInfo && trialInfo.prevId) ? trialInfo.prevId : 'chaotianmen_gold';
       curCig = getCigaretteById(revertId) || DEFAULT_CIGARETTE;
       storageService.setSelectedCigaretteId(curCig.id);
+      const revCap = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
       const revRem = storageService.getPackCount(curCig.id, revCap);
       this.setData({
         currentCigarette: curCig,
@@ -1124,46 +2491,24 @@ Page({
     }
     if (this.data.isSparking) return;
 
-    const tool = this.data.currentIgnitionTool;
-
-    // 车载点烟器专属：按下加热 1s 后通红弹起点燃
-    if (tool.id === 'car_lighter' && !this._isCarLighterHeating) {
-      this._isCarLighterHeating = true;
+    // 单日 40 支健康硬顶阻尼与清茶润喉关怀（普通用户点火硬顶拦截；VIP 尊享吸完柔性提醒、点火畅通）
+    const dailyCount = storageService.getDailySmokedCount();
+    const isVip = vipService.isVip();
+    if (dailyCount >= 40 && !isVip) {
+      // 普通用户：严格硬顶拦截，保护身心
       triggerHaptic('medium');
-      if (this._carLighterTimer) clearTimeout(this._carLighterTimer);
-      this._carLighterTimer = setTimeout(() => {
-        this._carLighterTimer = null;
-        this._isCarLighterHeating = false;
-        audioManager.playCarLighterPopSound();
-        triggerHaptic('heavy');
-        this.setData({ isSparking: true });
-        audioManager.playSizzleSound();
-        const { cx, cy } = this.getTipCoordinates();
-        this.particles.emitSparks(cx, cy, 14);
-
-        if (this.particles && this.particles.resetSilkStream) {
-          this.particles.resetSilkStream(true);
-        }
-
-        if (this.fsm.light()) {
-          storageService.incrementIgniteCount();
-          this.sessionStartTime = Date.now();
-          this.setData({ simulatorState: this.fsm.getState() });
-        }
-
-        if (this._sparkResetTimer) clearTimeout(this._sparkResetTimer);
-        this._sparkResetTimer = setTimeout(() => {
-          this._sparkResetTimer = null;
-          this.setData({ isSparking: false });
-        }, 600);
-      }, 1000);
+      this.setData({ showTeaModal: true });
+      audioManager.playZenChimeSound(440);
       return;
     }
 
+    const tool = this.data.currentIgnitionTool;
+
     this.setData({ isSparking: true });
     this.sparkStartTime = Date.now();
+    this.sparkDuration = 1200;
     audioManager.playIgnitionSoundByTool(tool.id);
-    triggerHaptic('heavy');
+    triggerHaptic(tool.id === 'plasma_arc' ? 'plasma_arc' : 'heavy');
 
     if (this.particles && this.particles.resetSilkStream) {
       this.particles.resetSilkStream(true);
@@ -1176,6 +2521,9 @@ Page({
     } else if (tool.id === 'blue_torch') {
       // 强劲蓝焰火枪密集穿透火星
       this.particles.emitSparks(cx, cy, 32);
+    } else if (tool.id === 'plasma_arc') {
+      // 等离子电离紫青高能火花
+      this.particles.emitSparks(cx, cy, 26);
     } else {
       this.particles.emitSparks(cx, cy, 24);
     }
@@ -1190,7 +2538,7 @@ Page({
     this._sparkResetTimer = setTimeout(() => {
       this._sparkResetTimer = null;
       this.setData({ isSparking: false });
-    }, 750);
+    }, 1200);
 
     if (this.fsm.light()) {
       storageService.incrementIgniteCount();
@@ -1213,11 +2561,7 @@ Page({
 
     // 触发高拟真“咔啪！”胶壳脆裂声与双段物理震感反馈
     audioManager.playPopBeadSound();
-    triggerHaptic('heavy');
-    // 双段触感拟真：0ms 外壳脆裂重震 + 32ms 内部精油泄压喷薄次级轻震
-    setTimeout(() => {
-      triggerHaptic('light');
-    }, 32);
+    triggerHaptic('bead_pop');
 
     if (canvasRenderer && typeof canvasRenderer.resetBeadFlow === 'function') {
       canvasRenderer.resetBeadFlow();
@@ -1274,12 +2618,16 @@ Page({
         ashProgressStyle: 'background: rgba(255, 255, 255, 0.14);'
       });
 
-      // 双段拟真指节轻弹触感与音效反馈 (0ms 指节轻弹 + 70ms 烟身微振回弹)
+      // 双段拟真指节轻弹触感与音效反馈 (0ms 指节轻弹 + 55ms 烟身微振回弹)
       audioManager.playAshTapSound();
-      triggerHaptic('medium');
-      setTimeout(() => {
-        triggerHaptic('light');
-      }, 70);
+      triggerHaptic('ash_tap');
+
+      // 桌面铜托盘物理沉淀：将抖落的炭灰微粒真实留存在烟灰缸内
+      const updatedAsh = storageService.addAshtrayAsh(1);
+      this.setData({
+        ashtrayAshFlakes: updatedAsh.flakes || [],
+        ashtrayAshLevel: updatedAsh.level || 0
+      });
 
       // 触发高品质复合烟灰掉落与断裂特效
       if (this.particles) {
@@ -1346,14 +2694,27 @@ Page({
 
   // 抽完结算
   handleSmokingFinished() {
+    this._isFinishingSmoke = true;
+    if (this.data.simulatorState !== 'FINISHED') {
+      this.data.simulatorState = 'FINISHED';
+      this.setData({ simulatorState: 'FINISHED' });
+    }
     const duration = this.sessionStartTime > 0 ? Math.round((Date.now() - this.sessionStartTime) / 1000) : 0;
     const inhales = this.fsm.getInhaleCount();
-    const profile = storageService.getProfile();
-    const saved = calculateSavings(1, profile.packPrice);
-    const tar = calculateTarAvoided(1);
-    const life = calculateLifeRegained(1);
     const curCig = this.data.currentCigarette || DEFAULT_CIGARETTE;
     const maxCap = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
+    // 动态提取香烟焦油量 (如 '10mg' -> 10, '0mg' -> 0, '6mg' -> 6, 旱烟/特殊规格默认 10)
+    let singleTar = 10;
+    if (curCig.isAirCig) {
+      singleTar = 0;
+    } else if (curCig.packTheme && curCig.packTheme.tar) {
+      const match = String(curCig.packTheme.tar).match(/(\d+(\.\d+)?)/);
+      if (match) singleTar = parseFloat(match[1]);
+    }
+    const profile = storageService.getProfile();
+    const saved = calculateSavings(1, profile.packPrice);
+    const tar = calculateTarAvoided(1, singleTar);
+    const life = calculateLifeRegained(1);
 
     // 若该支烟在进入首页时已从烟盒消化扣减，则抽完结算时不再重复扣减烟盒余量
     if (storageService.isHomeStickDigested()) {
@@ -1388,7 +2749,7 @@ Page({
     this._checkAndUnlockAchievements();
 
     audioManager.playSuccessSound();
-    triggerHaptic('heavy');
+    triggerHaptic('celebration');
 
     // 实时计算排行榜排位荣誉 (打通主包真实业务调用链，消除无引用告警)
     const records = storageService.getRecords();
@@ -1440,17 +2801,54 @@ Page({
     }
 
     const PUNCHLINES = [
-      '尼古丁骂骂咧咧地退出了群聊！',
-      '你的双肺正在后台给你疯狂点赞 👍',
-      '真香！又省下一支，钱包君露出了微笑 😎',
-      '战胜心魔 +1！今天也是意志力爆棚的大佬！',
-      '这一支没抽，身体细胞正在全力加速自愈 ✨'
+      '指间清风过，心头杂念消。',
+      '深呼吸，这一刻的从容属于你自己。',
+      '克制是一种力量，今天又踏实走过一步。',
+      '烟雾散去，留下的唯有内心的清明。',
+      '少抽一支真烟，肺部与身心都轻盈了许多。'
     ];
     const punchline = PUNCHLINES[Math.floor(Math.random() * PUNCHLINES.length)];
 
+    // 记录单日吸食支数（40支硬顶阻尼）与烟灰缸沉淀
+    storageService.incrementDailySmokedCount();
+    const updatedButts = storageService.addAshtrayButt({
+      cigaretteId: curCig.id || 'default',
+      cigaretteName: curCig.name || '经典香烟',
+      filterColor: curCig.filterColor || '#ca8a04',
+      paperColor: curCig.paperColor || '#fffdf5',
+      savedMoney: saved.toFixed(2),
+      timestamp: Date.now()
+    });
+    // 真实生活灭烟沉淀：吸尽掐灭在烟灰缸内时，余灰与碎屑自然入缸
+    const updatedAsh = storageService.addAshtrayAsh(1);
+
+    if (this._ashtraySmokeTimer) clearTimeout(this._ashtraySmokeTimer);
+    this._ashtraySmokeTimer = setTimeout(() => {
+      this.setData({ showAshtraySmoke: false });
+    }, 45000);
+
+    // 腾讯总监级禅意心流（赛博贤者时刻）：赛博灵动岛轻量呈现，把留白还给用户
+    const activeMood = this.data.currentMoodText;
+    if (activeMood && this.particles) {
+      const moodX = (this.cWidth || 375) * 0.25;
+      const moodY = (this.cHeight || 667) * 0.75;
+      this.particles.emitMoodNoteEmberSparks(moodX, moodY, 32);
+    }
+    const zenText = activeMood
+      ? `今日第 ${totalSubs} 支 · 【${activeMood}】随青烟消散升华`
+      : `今日第 ${totalSubs} 支 · 节余 ¥${saved.toFixed(2)} · 焦油减免 ${tar}mg`;
     this.setData({
-      showRewardModal: true,
+      showRewardModal: false, // 彻底关闭生硬全屏大弹窗，保护贤者时刻
+      showZenHud: true,
+      zenHudText: zenText,
       rewardPunchline: punchline,
+      ashtrayButts: updatedButts,
+      ashtrayAshFlakes: updatedAsh.flakes || [],
+      ashtrayAshLevel: updatedAsh.level || 0,
+      ashtrayAshCount: updatedAsh.count || 0,
+      showAshtraySmoke: true,
+      currentMoodText: '',
+      isMoodDissolving: false,
       lastReward: {
         savedMoney: saved.toFixed(2),
         tarAvoided: tar,
@@ -1463,10 +2861,126 @@ Page({
       myRankInfo
     });
 
+    if (this._zenHudTimer) clearTimeout(this._zenHudTimer);
+    this._zenHudTimer = setTimeout(() => {
+      this._zenHudTimer = null;
+      this.setData({ showZenHud: false });
+    }, 4200);
+
+    // 检查短时连抽生理阻尼与关怀：每吸完一整包（40支=第2包完、60支=第3包完、80支=第4包完...）均贴心触发饮茶关怀
+    const dailyCount = storageService.getDailySmokedCount();
+    const isPackBoundary = dailyCount >= 40 && (dailyCount % 20 === 0);
+    if (isPackBoundary) {
+      const packNum = Math.floor(dailyCount / 20);
+      const isVipUser = vipService.isVip();
+      const teaBadgeTag = isVipUser 
+        ? `👑 VIP尊享关怀 · 今日已品吸 ${packNum} 包 (${dailyCount}支)` 
+        : `🌿 今日已抽满 ${packNum} 包 (${dailyCount}支) · 请歇一歇`;
+      const teaDescText = `您今天已连续抽吸第 ${packNum} 包（共 ${dailyCount} 支）。高频抽吸极易引起咽喉灼燥与神经紧绷，建议放下手机饮一杯温水，静心休憩片刻。`;
+      
+      this.setData({
+        teaBadgeText: teaBadgeTag,
+        teaDescriptionText: teaDescText
+      });
+
+      setTimeout(() => {
+        this.setData({ showTeaModal: true });
+        triggerHaptic('medium');
+      }, 1200);
+    }
+
     this.refreshAllData();
   },
 
+  onTapAshtray() {
+    triggerHaptic('light');
+    this.setData({ showAshtrayModal: true });
+  },
+
+  closeAshtrayModal() {
+    this.setData({ showAshtrayModal: false });
+  },
+
+  // 腾讯与字节大厂级体验：ASMR 清风扫灰 + 延迟洁净底座呈现，拒绝廉价0ms闪断
+  clearAshtrayNow() {
+    if (this.data.ashtrayButts.length === 0 && this.data.ashtrayAshLevel === 0) return;
+    this.setData({ isCleaningAshtray: true });
+    triggerHaptic('light');
+    if (audioManager.playAshtraySweepSound) {
+      audioManager.playAshtraySweepSound();
+    }
+    setTimeout(() => {
+      triggerHaptic('medium');
+      storageService.clearAshtray();
+      this.setData({
+        ashtrayButts: [],
+        ashtrayAshFlakes: [],
+        ashtrayAshLevel: 0,
+        ashtrayAshCount: 0,
+        showAshtraySmoke: false
+      });
+      setTimeout(() => {
+        this.setData({
+          isCleaningAshtray: false,
+          showAshtrayModal: false
+        });
+        toast.flame('烟缸空明如洗 · 心境澄澈自律');
+      }, 500);
+    }, 450);
+  },
+
+  /* ==================== 🍂 心绪便笺 · 随烟散尽交互 ==================== */
+  openMoodModal() {
+    triggerHaptic('light');
+    this.setData({ showMoodModal: true });
+  },
+
+  closeMoodModal() {
+    this.setData({ showMoodModal: false });
+  },
+
+  onSelectMoodPreset(e) {
+    const mood = e.currentTarget.dataset.mood;
+    triggerHaptic('light');
+    this.setData({
+      currentMoodText: mood,
+      showMoodModal: false
+    });
+    toast.flame(`【${mood}】已入笺 · 吸烟时随青烟散尽`);
+  },
+
+  onInputCustomMood(e) {
+    this.setData({ customMoodInput: e.detail.value });
+  },
+
+  onConfirmCustomMood() {
+    const text = (this.data.customMoodInput || '').trim();
+    if (!text) return;
+    triggerHaptic('light');
+    this.setData({
+      currentMoodText: text,
+      customMoodInput: '',
+      showMoodModal: false
+    });
+    toast.flame(`【${text}】已入笺 · 吸烟时随青烟散尽`);
+  },
+
+  onClearMood() {
+    triggerHaptic('light');
+    this.setData({
+      currentMoodText: '',
+      customMoodInput: '',
+      showMoodModal: false
+    });
+    toast.info('心绪笺已重归纯净');
+  },
+
+  openRewardModal() {
+    this.setData({ showZenHud: false, showRewardModal: true });
+  },
+
   restartCigarette() {
+    this._isFinishingSmoke = false;
     if (this.autoInhaleTimer) {
       clearTimeout(this.autoInhaleTimer);
       this.autoInhaleTimer = null;
@@ -1533,10 +3047,10 @@ Page({
     const maxCap = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
     const remaining = storageService.getPackCount(curCig.id, maxCap);
 
-    // 3. 烟盒已空：零弹框、不跳转，仅通过底部微胶囊 Toast 优雅提示
+    // 3. 烟盒已空：触发全站统一拆新盒闭环
     if (remaining <= 0) {
       triggerHaptic('medium');
-      toast.info('烟盒已空，可前往商店挑选名烟');
+      this.handleEmptyPackForDraw(curCig, maxCap);
       setTimeout(() => {
         this._isDrawingCigarette = false;
       }, 500);
@@ -1662,6 +3176,10 @@ Page({
         }, 500);
       }
     });
+  },
+
+  onNavigateBack() {
+    navigateBackWithSound();
   },
 
   _clearGuideTimers() {
@@ -2009,10 +3527,10 @@ Page({
       return;
     }
 
-    // 4. 车载电热丝：按下下压
-    if (tool.id === 'car_lighter' && dy > 25) {
+    // 4. 赛博双弧：轻触或向下滑动触发高频电浆放电
+    if ((tool.id === 'plasma_arc' || tool.id === 'car_lighter') && Math.abs(dy) > 20) {
       this._hasTriggeredGesture = true;
-      this.triggerFidgetStrike('car_lighter');
+      this.triggerFidgetStrike(tool.id);
       return;
     }
   },
@@ -2054,6 +3572,17 @@ Page({
   /** 掌心 EDC：装配为专属伴侣 (无缝契约仪式感) */
   onConfirmEquipTool() {
     const tool = this.data.previewIgnitionTool || IGNITION_TOOLS[0];
+    const totalSubs = this.data.totalSubstituted || storageService.getRecords().length || 0;
+    const isUnlocked = isIgnitionToolUnlocked(tool.id, totalSubs);
+
+    if (!isUnlocked) {
+      triggerHaptic('light');
+      const reqCount = tool.requiredCount || 0;
+      const diff = Math.max(0, reqCount - totalSubs);
+      toast.show(`🔥 累计替烟 ${reqCount} 支解锁（还差 ${diff} 支）或开通 VIP 即刻畅享`, 'info');
+      return;
+    }
+
     if (tool.id === this.data.currentIgnitionTool.id) {
       // 已经装配过了，触发一次试火增强满足感
       this.onTapHeroStage();
@@ -2161,17 +3690,7 @@ Page({
 
     if (!isUnlocked) {
       triggerHaptic('medium');
-      wx.showModal({
-        title: `🔒 【${item.name}】尊享特效未解锁`,
-        content: `该特效解锁条件：\n1. 累计替烟满 ${item.requiredCount} 支（当前已替 ${totalSubs} 支）\n2. 或通过替烟省下的烟资零元兑换（需 ¥${item.requiredSavings || item.price}）\n\n您可以先点击【30秒免费试抽】沉浸体验！`,
-        confirmText: '30s试抽',
-        cancelText: '知道了',
-        success: (res) => {
-          if (res.confirm) {
-            this.startTrialSmokeEffect(item);
-          }
-        }
-      });
+      toast.warn(`【${item.name}】待点亮，可使用替烟基金兑换或坚持自律解锁！`);
       return;
     }
 
@@ -2200,60 +3719,6 @@ Page({
     this._checkAndUnlockAchievements();
   },
 
-  startTrialSmokeEffect(itemOrEvent) {
-    const item = itemOrEvent.currentTarget ? itemOrEvent.currentTarget.dataset.item : itemOrEvent;
-    if (!item) return;
-
-    if (this.trialInterval) clearInterval(this.trialInterval);
-    const originalEffect = getSmokeEffectById(storageService.getSelectedSmokeEffectId()) || DEFAULT_SMOKE_EFFECT;
-
-    // 清理前置延时定时器，杜绝跨特效杂糅
-    if (this.exhaleEffectTimers && this.exhaleEffectTimers.length) {
-      this.exhaleEffectTimers.forEach(t => clearTimeout(t));
-      this.exhaleEffectTimers = [];
-    }
-
-    // 腾讯总监设计级：瞬态软流转，清退异构大实体，聚焦新特效
-    if (this.particles) {
-      this.particles.switchEffectGracefully(item.id);
-    }
-
-    audioManager.playZenChimeSound(528);
-    triggerHaptic('heavy');
-
-    this.setData({
-      currentSmokeEffect: item,
-      smokeEffectType: item.id,
-      isTrialActive: true,
-      trialSecondsLeft: 30,
-      showSmokeEffectDrawer: false
-    });
-
-    if (['dragon_breath', 'phoenix_nirvana', 'buddha_light', 'bagua_taichi', 'seven_fairies'].includes(item.id)) {
-      storageService.recordSmokeEffectSummoned(item.id);
-      this._checkAndUnlockAchievements();
-    }
-
-    toast.flame(`开启【${item.name}】30秒尊享试抽`);
-
-    this.trialInterval = setInterval(() => {
-      const left = this.data.trialSecondsLeft - 1;
-      if (left <= 0) {
-        clearInterval(this.trialInterval);
-        this.trialInterval = null;
-        this.setData({
-          isTrialActive: false,
-          trialSecondsLeft: 0,
-          currentSmokeEffect: originalEffect,
-          smokeEffectType: originalEffect.id
-        });
-        toast.info('30秒尊享试抽已结束，已切回原特效');
-      } else {
-        this.setData({ trialSecondsLeft: left });
-      }
-    }, 1000);
-  },
-
   onUnlockSmokeEffectWithSavings(e) {
     const item = e.currentTarget.dataset.item;
     if (!item) return;
@@ -2270,38 +3735,27 @@ Page({
       return;
     }
 
-    wx.showModal({
-      title: `💎 替烟基金零元购兑换`,
-      content: `您当前可用替烟基金 ¥${availableSaved.toFixed(2)}！\n确定使用替烟基金 ¥${needMoney} 兑换尊享【${item.name}】(${item.priceDisplay})？\n（健康替烟，零元尊享！）`,
-      confirmText: '立即兑换',
-      cancelText: '再想想',
-      success: (res) => {
-        if (res.confirm) {
-          storageService.addSpentSavings(needMoney);
-          storageService.unlockSmokeEffect(item.id);
-          audioManager.playSuccessSound();
-          triggerHaptic('heavy');
+    storageService.addSpentSavings(needMoney);
+    storageService.unlockSmokeEffect(item.id);
+    audioManager.playSuccessSound();
+    triggerHaptic('heavy');
+    toast.success(`🎉 成功使用替烟基金 ¥${needMoney} 零元兑换【${item.name}】！`);
 
-          if (this.exhaleEffectTimers && this.exhaleEffectTimers.length) {
-            this.exhaleEffectTimers.forEach(t => clearTimeout(t));
-            this.exhaleEffectTimers = [];
-          }
-          if (this.particles) {
-            this.particles.switchEffectGracefully(item.id);
-          }
+    if (this.exhaleEffectTimers && this.exhaleEffectTimers.length) {
+      this.exhaleEffectTimers.forEach(t => clearTimeout(t));
+      this.exhaleEffectTimers = [];
+    }
+    if (this.particles) {
+      this.particles.switchEffectGracefully(item.id);
+    }
 
-          this.setData({
-            currentSmokeEffect: item,
-            smokeEffectType: item.id
-          });
-          storageService.setSelectedSmokeEffectId(item.id);
-          this.refreshAllData();
-          this._checkAndUnlockAchievements();
-
-          toast.success(`成功兑换并装配【${item.name}】！`);
-        }
-      }
+    this.setData({
+      currentSmokeEffect: item,
+      smokeEffectType: item.id
     });
+    storageService.setSelectedSmokeEffectId(item.id);
+    this.refreshAllData();
+    this._checkAndUnlockAchievements();
   },
 
   triggerInhale() {
@@ -2359,10 +3813,10 @@ Page({
     const cap = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
     const cur = storageService.getPackCount(curCig.id, cap);
 
-    // 若当前烟盒已空（0支）：零弹框、不跳转，仅通过底部微胶囊 Toast 优雅提示
+    // 若当前烟盒已空（0支）：触发全站统一拆新盒递烟闭环
     if (cur <= 0) {
       triggerHaptic('medium');
-      toast.info('烟盒已空，可前往商店挑选名烟');
+      this.handleEmptyPackForGive(curCig, cap);
       return 0;
     }
 
@@ -2374,6 +3828,221 @@ Page({
     });
 
     return next;
+  },
+
+  // 抽新烟空盒处理：彻底干掉 wx.showModal，唤出小抽屉手柄
+  handleEmptyPackForDraw(curCig, maxCap) {
+    this._isDrawingCigarette = false;
+    triggerHaptic('medium');
+    // 桌面滑出小抽屉手柄与提示，绝不弹原生弹窗
+    this.setData({
+      showDeskDrawerModal: true,
+      unopenedPacksCount: storageService.getUnopenedPacksCount()
+    });
+  },
+
+  // 递烟空盒处理：手中烟盒已空，体面送出茶几迎客烟，绝不擅自拆开整包把空盒刷满（恪守控烟自律）
+  handleEmptyPackForGive(curCig, cap) {
+    triggerHaptic('medium');
+    toast.flame('🤝 手中烟盒已空，特为你备了一支【雅致迎客烟】，已随心意体面递出！');
+  },
+
+  // ================= 桌面小抽屉核心业务交互 =================
+  onTapDeskDrawer() {
+    triggerHaptic('light');
+    this.setData({
+      showDeskDrawerModal: true,
+      unopenedPacksCount: storageService.getUnopenedPacksCount()
+    });
+  },
+
+  closeDeskDrawerModal() {
+    this.setData({ showDeskDrawerModal: false });
+  },
+
+  onTakeSingleEmergencyStick() {
+    this.closeDeskDrawerModal();
+    const curCig = this.data.currentCigarette || DEFAULT_CIGARETTE;
+    storageService.setHomeStickDigested(true);
+    audioManager.playPackOpenSound();
+    triggerHaptic('medium');
+    toast.success('摸出 1 支抽屉应急烟，即点即抽');
+    this.restartCigarette();
+  },
+
+  /* ================= 🌿 4-7-8 静心顺顺气吐纳空间 ================= */
+  openBreathingSpace() {
+    this.closeDeskDrawerModal();
+    audioManager.unlockAudio();
+    audioManager.playZenChimeSound(528);
+    triggerHaptic('light');
+
+    if (this._breathingTimer) {
+      clearInterval(this._breathingTimer);
+      this._breathingTimer = null;
+    }
+
+    this.setData({
+      showBreathingSpaceModal: true,
+      breathingCompleted: false,
+      breathingCycle: 1,
+      breathingPhase: 'INHALE',
+      breathingPhaseLabel: '慢吸气',
+      breathingCountdown: 4,
+      breathingGuideQuote: '慢吸气 · 气沉丹田，引清凉入肺腑'
+    });
+
+    this._runBreathingPhase('INHALE', 4, 1);
+  },
+
+  closeBreathingSpace() {
+    if (this._breathingTimer) {
+      clearInterval(this._breathingTimer);
+      this._breathingTimer = null;
+    }
+    audioManager.playSwitchSound();
+    triggerHaptic('light');
+    this.setData({ showBreathingSpaceModal: false });
+  },
+
+  _runBreathingPhase(phase, duration, cycle) {
+    if (this._breathingTimer) {
+      clearInterval(this._breathingTimer);
+      this._breathingTimer = null;
+    }
+
+    let remaining = duration;
+    let label = '慢吸气';
+    let quote = '慢吸气 · 气沉丹田，引清凉入肺腑';
+
+    if (phase === 'INHALE') {
+      label = '慢吸气';
+      quote = '慢吸气 · 气沉丹田，引清凉入肺腑';
+      triggerHaptic('light');
+    } else if (phase === 'HOLD') {
+      label = '静屏息';
+      quote = '静屏息 · 心无杂念，安住当下心境';
+    } else if (phase === 'EXHALE') {
+      label = '深呼气';
+      quote = '深呼气 · 释去烦热，吐出胸中积郁';
+      audioManager.playZenChimeSound(528);
+      triggerHaptic('medium');
+    }
+
+    this.setData({
+      breathingPhase: phase,
+      breathingPhaseLabel: label,
+      breathingCountdown: remaining,
+      breathingCycle: cycle,
+      breathingGuideQuote: quote
+    });
+
+    this._breathingTimer = setInterval(() => {
+      remaining -= 1;
+      if (remaining > 0) {
+        this.setData({ breathingCountdown: remaining });
+      } else {
+        clearInterval(this._breathingTimer);
+        this._breathingTimer = null;
+        this._advanceBreathingPhase(phase, cycle);
+      }
+    }, 1000);
+  },
+
+  _advanceBreathingPhase(currentPhase, cycle) {
+    if (currentPhase === 'INHALE') {
+      this._runBreathingPhase('HOLD', 7, cycle);
+    } else if (currentPhase === 'HOLD') {
+      this._runBreathingPhase('EXHALE', 8, cycle);
+    } else if (currentPhase === 'EXHALE') {
+      // 4-7-8 单次19秒完整精粹吐纳：平复副交感神经，极佳正向心流，直接圆满达成
+      this._finishBreathingSuccess();
+    }
+  },
+
+  finishBreathingEarly() {
+    if (this._breathingTimer) {
+      clearInterval(this._breathingTimer);
+      this._breathingTimer = null;
+    }
+    this._finishBreathingSuccess();
+  },
+
+  _finishBreathingSuccess() {
+    audioManager.playZenChimeSound(528);
+    triggerHaptic('celebration');
+    storageService.addUnopenedPack(1);
+    const totalPacks = storageService.getUnopenedPacksCount();
+    this.setData({
+      breathingCompleted: true,
+      unopenedPacksCount: totalPacks
+    });
+  },
+
+  // 顺气成果自选 A: 身心已平 · 今日自律到此 (克制自律胜利)
+  onBreathingChoicePeace() {
+    triggerHaptic('celebration');
+    this.setData({ showBreathingSpaceModal: false });
+    toast.flame('🌿 心平气和 · 今日深呼吸替烟成功，自律克制胜利！');
+  },
+
+  // 顺气成果自选 B: 取单支应急品吸 (体面克制)
+  onBreathingChoiceTakeSingle() {
+    this.setData({ showBreathingSpaceModal: false });
+    const curCig = this.data.currentCigarette || DEFAULT_CIGARETTE;
+    storageService.setHomeStickDigested(true);
+    audioManager.playPackOpenSound();
+    triggerHaptic('medium');
+    toast.success('摸出 1 支备用好烟，慢吸品味');
+    this.restartCigarette();
+  },
+
+  // VIP 专属特权：无限开箱拆新盒直通
+  onVipDirectUnwrapNewPack() {
+    this.closeDeskDrawerModal();
+    const curCig = this.data.currentCigarette || DEFAULT_CIGARETTE;
+    const maxCap = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
+    audioManager.playUnwrapSound();
+    triggerHaptic('heavy');
+    storageService.setPackCount(curCig.id, maxCap);
+    storageService.consumePackSlot(curCig.id, -1, maxCap);
+    storageService.setHomeStickDigested(true);
+    this.setData({
+      currentPackRemaining: maxCap - 1,
+      shareProgressDeg: this._calcShareProgressDeg(maxCap - 1, curCig)
+    });
+    this.restartCigarette();
+    toast.flame(`👑 尊享黑金私藏特权 · 撕开金拉线开新盒！取出【${curCig.name}】！`);
+  },
+
+  onUnwrapNewPackFromDrawer() {
+    this.closeDeskDrawerModal();
+    const curCig = this.data.currentCigarette || DEFAULT_CIGARETTE;
+    const maxCap = curCig.packCapacity || (curCig.isCigar ? 5 : 20);
+    this.executeUnwrapPackInScene(curCig, maxCap);
+  },
+
+  executeUnwrapPackInScene(curCig, maxCap) {
+    const res = storageService.executeUnwrapNewPack(curCig.id, maxCap);
+    if (!res.success) {
+      toast.warn('今日拆包配额已用完，不如顺顺气或明天再抽');
+      return;
+    }
+    const { remaining: newRem } = storageService.consumePackSlot(curCig.id, -1, maxCap);
+    storageService.setHomeStickDigested(true);
+    audioManager.playUnwrapSound();
+    triggerHaptic('heavy');
+    this.setData({
+      currentPackRemaining: newRem,
+      unopenedPacksCount: storageService.getUnopenedPacksCount(),
+      shareProgressDeg: this._calcShareProgressDeg(newRem, curCig)
+    });
+    this.restartCigarette();
+    toast.success(`📦 撕开金拉线，已取出一支【${curCig.name}】！`);
+  },
+
+  closeTeaModal() {
+    this.setData({ showTeaModal: false });
   },
 
   giveCigarette() {
@@ -2504,6 +4173,17 @@ Page({
       return;
     }
     const sceneInfo = getSceneById(sceneId);
+    const totalSubs = this.data.totalSubstituted || storageService.getRecords().length || 0;
+    const isUnlocked = isSceneUnlocked(sceneId, totalSubs);
+
+    if (!isUnlocked) {
+      triggerHaptic('light');
+      const reqCount = sceneInfo.requiredCount || 0;
+      const diff = Math.max(0, reqCount - totalSubs);
+      toast.show(`🌿 累计替烟 ${reqCount} 支解锁（还差 ${diff} 支）或开通 VIP 即刻畅享`, 'info');
+      return;
+    }
+
     storageService.setAtmosphereScene(sceneId);
     audioManager.playSwitchSound();
     triggerHaptic('medium');

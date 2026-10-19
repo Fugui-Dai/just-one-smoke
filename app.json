@@ -44,13 +44,13 @@
     }
   },
   "window": {
-    "navigationBarBackgroundColor": "#080a0f",
+    "navigationBarBackgroundColor": "#0d111a",
     "navigationBarTextStyle": "white",
     "navigationBarTitleText": "我抽一支",
     "navigationStyle": "custom",
-    "backgroundColor": "#080a0f",
-    "backgroundColorTop": "#080a0f",
-    "backgroundColorBottom": "#080a0f",
+    "backgroundColor": "#0d111a",
+    "backgroundColorTop": "#0d111a",
+    "backgroundColorBottom": "#0d111a",
     "backgroundTextStyle": "dark",
     "enablePullDownRefresh": false
   },

@@ -4,7 +4,7 @@
 .pack-page-container {
   width: 100vw;
   height: 100vh;
-  background: radial-gradient(circle at 50% 10%, #17181c 0%, #111215 45%, #0b0c0e 100%);
+  background: radial-gradient(circle at 50% 10%, #202430 0%, #151824 45%, #0e111a 100%);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -12,9 +12,9 @@
   box-sizing: border-box;
   transition: background 0.35s ease;
 }
-/* 基础暗黑舞台背景；已选高定 VIP 车色时由 app.wxss .theme-* 或行内样式生效全站流光 */
+/* 基础通透舞台背景；已选高定 VIP 车色时由 app.wxss .theme-* 或行内样式生效全站流光 */
 .pack-page-container.theme-classic {
-  background: radial-gradient(circle at 50% -10%, rgba(148, 163, 184, 0.14) 0%, #111318 45%, #07080b 100%);
+  background: radial-gradient(circle at 50% -10%, rgba(148, 163, 184, 0.28) 0%, #171c28 45%, #0f131d 100%);
 }
 
 /* VIP 动态极光天幕与浮光星尘舞台 */
@@ -29,32 +29,32 @@
 .vip-aurora-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(56rpx);
-  opacity: 0.55;
+  filter: blur(52rpx);
+  opacity: 0.72;
   animation: vipOrbBreath 6s infinite alternate ease-in-out;
 }
 
 .vip-aurora-orb.orb-primary {
-  width: 520rpx;
-  height: 320rpx;
+  width: 580rpx;
+  height: 340rpx;
   top: -60rpx;
   left: 50%;
-  margin-left: -260rpx;
-  background: radial-gradient(circle, var(--vip-theme-orb1, rgba(168, 85, 247, 0.42)) 0%, transparent 72%);
+  margin-left: -290rpx;
+  background: radial-gradient(circle, var(--vip-theme-orb1, rgba(168, 85, 247, 0.55)) 0%, transparent 72%);
 }
 
 .vip-aurora-orb.orb-secondary {
-  width: 420rpx;
-  height: 420rpx;
+  width: 480rpx;
+  height: 480rpx;
   bottom: 12%;
   right: -120rpx;
-  background: radial-gradient(circle, var(--vip-theme-orb2, rgba(192, 132, 252, 0.22)) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--vip-theme-orb2, rgba(192, 132, 252, 0.32)) 0%, transparent 70%);
   animation-delay: -3s;
 }
 
 @keyframes vipOrbBreath {
-  0% { transform: scale(0.92) translateY(0); opacity: 0.42; }
-  100% { transform: scale(1.12) translateY(18rpx); opacity: 0.72; }
+  0% { transform: scale(0.95) translateY(0); opacity: 0.58; }
+  100% { transform: scale(1.18) translateY(18rpx); opacity: 0.88; }
 }
 
 .vip-spark {
@@ -197,7 +197,7 @@
 
 .shelf-content-container {
   padding: 10rpx 16rpx;
-  padding-bottom: calc(48rpx + env(safe-area-inset-bottom, 0px));
+  padding-bottom: 0;
   display: flex;
   flex-direction: column;
   gap: 10rpx;
@@ -424,7 +424,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12rpx;
+  gap: 8rpx;
   padding: 0;
 }
 
@@ -435,10 +435,10 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   padding: 8rpx 0;
   border-radius: 999rpx;
-  font-size: 23rpx;
+  font-size: 21rpx;
   color: #e2e8f0;
   font-weight: 600;
-  letter-spacing: 2rpx;
+  letter-spacing: 1rpx;
   transition: all 0.22s ease;
 }
 
@@ -450,7 +450,7 @@
   box-shadow: 0 4rpx 14rpx rgba(218, 178, 92, 0.32), inset 0 1rpx 2rpx rgba(255, 240, 195, 0.38);
 }
 
-/* ==================== 6. 控烟健康指引提示栏 ==================== */
+/* ==================== 6. 控烟健康指引提示栏与底部免责卡片 ==================== */
 .shelf-compliance-banner {
   display: flex;
   align-items: center;
@@ -477,6 +477,61 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.shelf-legal-disclaimer {
+  width: 100%;
+  margin: 32rpx 0 calc(48rpx + env(safe-area-inset-bottom, 0px));
+  padding: 24rpx 24rpx;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 20rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+  box-sizing: border-box;
+}
+
+.sld-badge {
+  font-size: 21rpx;
+  color: #94a3b8;
+  letter-spacing: 1.5rpx;
+  font-weight: 700;
+  text-align: center;
+}
+
+.sld-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.sld-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8rpx;
+}
+
+.sld-dot {
+  font-size: 20rpx;
+  color: #64748b;
+  font-weight: 700;
+  line-height: 1.5;
+  flex-shrink: 0;
+}
+
+.sld-item-text {
+  font-size: 20rpx;
+  color: #64748b;
+  line-height: 1.55;
+  letter-spacing: 0.2rpx;
+  text-align: left;
+}
+
+.sld-warning-item .sld-dot,
+.sld-warning-item .sld-item-text {
+  color: #94a3b8;
+  font-weight: 600;
 }
 
 /* ==================== 7. 3列×3行沉浸式 3D 展柜网格 ==================== */
@@ -541,19 +596,41 @@
   transform: none;
 }
 
-.shelf-equipped-badge {
+
+.shelf-equipped-tag.shelf-equipped-tag-vertical {
   position: absolute;
   top: 8rpx;
   right: 8rpx;
   z-index: 15;
-  background: linear-gradient(90deg, #c89e4c 0%, #ecd28f 50%, #b88c36 100%);
-  color: #1c1305;
-  font-size: 20rpx;
-  font-weight: 800;
-  padding: 3rpx 10rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 32rpx;
+  padding: 6rpx 0;
+  background: linear-gradient(180deg, #fae8b2 0%, #e5be60 45%, #b8860b 100%);
+  color: #1a1205;
   border-radius: 8rpx;
-  box-shadow: 0 2rpx 12rpx rgba(226, 190, 111, 0.55), inset 0 1rpx 1rpx rgba(255, 248, 220, 0.65);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.65), 0 0 10rpx rgba(226, 190, 111, 0.45), inset 0 1rpx 1rpx rgba(255, 255, 255, 0.7);
+  border: 0.5px solid rgba(255, 255, 255, 0.4);
   pointer-events: none;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.shelf-equipped-tag-vertical .set-spark {
+  font-size: 14rpx;
+  line-height: 1;
+  color: #784a00;
+  margin-bottom: 2rpx;
+}
+
+.shelf-equipped-tag-vertical .set-char {
+  font-size: 16rpx;
+  font-weight: 900;
+  line-height: 1.15;
+  color: #1a1205;
+  text-align: center;
 }
 
 .shelf-vip-badge {
@@ -598,6 +675,62 @@
   border-radius: 8rpx;
   white-space: nowrap;
   pointer-events: none;
+}
+
+/* 腾讯总监级 · 展柜实时烟盒余量微光胶囊 */
+.shelf-stock-pill {
+  position: absolute;
+  bottom: 8rpx;
+  right: 8rpx;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(52, 211, 153, 0.40);
+  padding: 3rpx 10rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.65);
+  pointer-events: none;
+}
+
+.shelf-stock-pill .ssp-dot {
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 6rpx #34d399;
+}
+
+.shelf-stock-pill .ssp-num {
+  font-size: 19rpx;
+  font-weight: 700;
+  color: #34d399;
+  line-height: 1;
+}
+
+.shelf-stock-pill.is-stock-empty {
+  border-color: rgba(239, 68, 68, 0.48);
+}
+.shelf-stock-pill.is-stock-empty .ssp-dot {
+  background: #ef4444;
+  box-shadow: 0 0 6rpx #ef4444;
+}
+.shelf-stock-pill.is-stock-empty .ssp-num {
+  color: #f87171;
+}
+
+.shelf-stock-pill.is-stock-low {
+  border-color: rgba(245, 158, 11, 0.48);
+}
+.shelf-stock-pill.is-stock-low .ssp-dot {
+  background: #f59e0b;
+  box-shadow: 0 0 6rpx #f59e0b;
+}
+.shelf-stock-pill.is-stock-low .ssp-num {
+  color: #fbbf24;
 }
 
 .card-ambient-spot {
@@ -845,10 +978,10 @@
 
 /* ==================== 货架商品信息与真实参考零售价 ==================== */
 .shelf-meta-block {
-  padding: 10rpx 10rpx 12rpx 10rpx;
+  padding: 12rpx 10rpx 14rpx 10rpx;
   display: flex;
   flex-direction: column;
-  gap: 6rpx;
+  gap: 8rpx;
   box-sizing: border-box;
   background: linear-gradient(180deg, #121419 0%, #0d0e12 100%);
   position: relative;
@@ -858,22 +991,21 @@
 .meta-title-row {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
   width: 100%;
-  text-align: left;
 }
 
 .shelf-brand-title {
   width: 100%;
   text-align: left;
-  font-size: 19rpx;
+  font-size: 25rpx;
   font-weight: 800;
-  color: #f1d798;
-  line-height: 1.2;
-  letter-spacing: 0;
+  color: #f6e3b4;
+  line-height: 1.3;
+  letter-spacing: 0.5rpx;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-right: 0;
 }
 
 .shelf-price-row {
@@ -882,38 +1014,78 @@
   justify-content: space-between;
   width: 100%;
   margin-top: 0;
+  gap: 2rpx;
+  flex-wrap: nowrap;
 }
 
 .price-val-wrap {
   display: flex;
   align-items: baseline;
   gap: 2rpx;
+  flex-shrink: 1;
+  min-width: 0;
+  white-space: nowrap;
 }
 
 .price-ref-label {
-  font-size: 18rpx;
-  color: #9ca3af;
-  font-weight: 500;
+  font-size: 20rpx;
+  color: #94a3b8;
+  font-weight: 600;
   margin-right: 2rpx;
+  flex-shrink: 0;
 }
 
 .price-symbol {
-  font-size: 19rpx;
+  font-size: 20rpx;
   color: #f5b82e;
   font-weight: 800;
+  flex-shrink: 0;
 }
 
 .price-val {
-  font-size: 24rpx;
+  font-size: 26rpx;
   font-weight: 900;
   color: #f5b82e;
   line-height: 1;
+  flex-shrink: 0;
+  letter-spacing: -0.5rpx;
 }
 
 .price-unit {
-  font-size: 18rpx;
-  color: #9ca3af;
-  margin-left: 1rpx;
+  font-size: 19rpx;
+  color: #94a3b8;
+  margin-left: 0;
+  flex-shrink: 0;
+}
+
+/* 腾讯总监级 · 展柜商品信息状态胶囊微标 (无遮挡纯净对齐) */
+.meta-status-pill {
+  font-size: 20rpx;
+  font-weight: 700;
+  padding: 3rpx 10rpx;
+  border-radius: 8rpx;
+  line-height: 1.25;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+
+.meta-status-pill.stock {
+  background: rgba(52, 211, 153, 0.15);
+  border: 1rpx solid rgba(52, 211, 153, 0.45);
+  color: #6ee7b7;
+}
+
+.meta-status-pill.stock.empty {
+  background: rgba(239, 68, 68, 0.18);
+  border: 1rpx solid rgba(239, 68, 68, 0.45);
+  color: #fca5a5;
+}
+
+.meta-status-pill.locked {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1rpx solid rgba(255, 255, 255, 0.18);
+  color: #94a3b8;
 }
 
 .tar-tag {

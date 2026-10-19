@@ -3,8 +3,8 @@
   width: 100vw;
   height: 100vh;
   background: 
-    radial-gradient(circle at 50% 6%, rgba(245, 158, 11, 0.14) 0%, rgba(217, 119, 6, 0.04) 40%, transparent 68%),
-    linear-gradient(180deg, #0c101b 0%, #070912 36%, #030407 100%);
+    radial-gradient(circle at 50% 6%, rgba(245, 158, 11, 0.22) 0%, rgba(217, 119, 6, 0.08) 40%, transparent 68%),
+    linear-gradient(180deg, #182030 0%, #111624 36%, #0b0f18 100%);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -15,26 +15,26 @@
 .leaderboard-page-container.theme-emerald,
 .leaderboard-page-container.theme-day {
   background: 
-    radial-gradient(circle at 50% 6%, rgba(16, 185, 129, 0.22) 0%, rgba(5, 150, 105, 0.05) 40%, transparent 68%),
-    linear-gradient(180deg, #091a15 0%, #050e0b 38%, #020504 100%);
+    radial-gradient(circle at 50% 6%, rgba(16, 185, 129, 0.35) 0%, rgba(5, 150, 105, 0.10) 40%, transparent 68%),
+    linear-gradient(180deg, #122b23 0%, #0c1c16 38%, #07120e 100%);
 }
 
 .leaderboard-page-container.theme-purple,
 .leaderboard-page-container.theme-month {
   background: 
-    radial-gradient(circle at 50% 6%, rgba(168, 85, 247, 0.22) 0%, rgba(126, 34, 206, 0.05) 40%, transparent 68%),
-    linear-gradient(180deg, #170d28 0%, #0c0715 38%, #040208 100%);
+    radial-gradient(circle at 50% 6%, rgba(168, 85, 247, 0.35) 0%, rgba(126, 34, 206, 0.10) 40%, transparent 68%),
+    linear-gradient(180deg, #25163d 0%, #180d29 38%, #0f071a 100%);
 }
 
 .leaderboard-page-container.theme-glacier,
 .leaderboard-page-container.theme-lifetime {
   background: 
-    radial-gradient(circle at 50% 6%, rgba(251, 191, 36, 0.25) 0%, rgba(180, 83, 9, 0.08) 42%, transparent 70%),
-    linear-gradient(180deg, #1f170b 0%, #110d06 38%, #050402 100%);
+    radial-gradient(circle at 50% 6%, rgba(251, 191, 36, 0.38) 0%, rgba(180, 83, 9, 0.14) 42%, transparent 70%),
+    linear-gradient(180deg, #2e2212 0%, #1f160b 38%, #140d06 100%);
 }
 
 .leaderboard-page-container.theme-gold {
-  background: radial-gradient(circle at 50% 18%, #2a2011 0%, #080705 78%);
+  background: radial-gradient(circle at 50% 18%, #362916 0%, #141008 78%);
 }
 
 /* ==================== 顶部自定义导航栏 ==================== */

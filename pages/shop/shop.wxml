@@ -22,7 +22,7 @@
 
       <!-- 导航中心标题：与全站其他页面统一银白字色 -->
       <view class="nav-center-title-box">
-        <text class="nav-center-title-text">替烟艺术展柜</text>
+        <text class="nav-center-title-text">传世典藏</text>
       </view>
 
       <!-- 右侧占位保持对称 -->
@@ -40,48 +40,7 @@
   >
     <view class="shelf-content-container" style="padding-top: {{ statusBarHeight + navBarHeight + 10 }}px;">
       
-      <!-- 1A. 未开通 VIP：置顶 VIP 特权横幅 -->
-      <view wx:if="{{ !isVipUser }}" class="shelf-vip-banner" bindtap="onTapVipBanner">
-        <view class="shelf-vip-banner-left">
-          <view class="vip-crown-icon-wrap">
-            <text class="vip-crown-icon">👑</text>
-          </view>
-          <view class="vip-banner-texts">
-            <view class="vip-banner-headline">
-              <text class="vip-headline-tag">VIP 直通特权</text>
-              <text class="vip-headline-title">全场33款名烟免解畅吸</text>
-            </view>
-            <text class="vip-banner-sub">跳过替烟门槛 · 全系列名烟0门槛开盒品吸</text>
-          </view>
-        </view>
-        <view class="shelf-vip-banner-btn">
-          <text class="vip-btn-text">开通直通</text>
-          <text class="vip-btn-arrow">➔</text>
-        </view>
-      </view>
-
-      <!-- 1B. 已开通 VIP：尊享流光礼遇横幅（根据当前 VIP / SU7 车身定制色彩动态映射） -->
-      <view wx:else class="shelf-vip-banner vip-active-banner" bindtap="onTapVipBanner">
-        <view class="vip-banner-shimmer"></view>
-        <view class="shelf-vip-banner-left">
-          <view class="vip-crown-icon-wrap active-crown-wrap">
-            <text class="vip-crown-icon">👑</text>
-          </view>
-          <view class="vip-banner-texts">
-            <view class="vip-banner-headline">
-              <text class="vip-headline-tag active-vip-tag">{{ vipThemeName ? (vipThemeName + ' · VIP') : (vipTheme === 'lifetime' ? '至尊永久VIP' : (vipTheme === 'day' ? '翡翠日卡VIP' : '极光月卡VIP')) }}</text>
-              <text class="vip-headline-title">全馆 33 款典藏名烟已为您敞开</text>
-            </view>
-            <text class="vip-banner-sub">尊享 0 门槛无限拆封 · 专属流光天幕已点亮</text>
-          </view>
-        </view>
-        <view class="shelf-vip-banner-btn active-vip-btn">
-          <text class="vip-btn-text">尊享权益</text>
-          <text class="vip-btn-arrow">✦</text>
-        </view>
-      </view>
-
-      <!-- 2. 分类筛选胶囊条 (腾讯级五大精炼分组，对称双字排版) -->
+      <!-- 2. 分类筛选胶囊条 (腾讯级五大精炼分组，经典移至首位，对称双字排版) -->
       <view class="category-filter-strip">
         <view 
           class="cat-filter-item {{ activeFilter === 'all' ? 'active-cat' : '' }}" 
@@ -89,6 +48,13 @@
           data-filter="all"
         >
           全部
+        </view>
+        <view 
+          class="cat-filter-item {{ activeFilter === 'heritage' ? 'active-cat' : '' }}" 
+          bindtap="onSelectFilter" 
+          data-filter="heritage"
+        >
+          经典
         </view>
         <view 
           class="cat-filter-item {{ activeFilter === 'national' ? 'active-cat' : '' }}" 
@@ -112,11 +78,11 @@
           港外
         </view>
         <view 
-          class="cat-filter-item {{ activeFilter === 'heritage' ? 'active-cat' : '' }}" 
+          class="cat-filter-item {{ activeFilter === 'wonder' ? 'active-cat' : '' }}" 
           bindtap="onSelectFilter" 
-          data-filter="heritage"
+          data-filter="wonder"
         >
-          经典
+          名筑
         </view>
       </view>
 
@@ -135,24 +101,18 @@
           bindtap="onTapShelfPack"
           data-item="{{ item }}"
         >
-          <!-- 正在使用角标 (发光金标) -->
-          <view class="shelf-equipped-badge" wx:if="{{ item.isEquipped }}">当前使用中</view>
-
-          <!-- 未解锁 VIP 免解直通角标 -->
-          <view class="shelf-vip-badge" wx:if="{{ !item.unlocked && !item.isEquipped }}">
-            <text class="vip-badge-crown">👑</text>
-            <text class="vip-badge-txt">VIP免解</text>
-          </view>
-
-          <!-- 展柜左上角锁定微标 (保持底部信息栏严格 2 行对齐) -->
-          <view class="pack-lock-tip" wx:if="{{ !item.unlocked }}">
-            <text>🔒 需替{{ item.requiredCount }}支</text>
+          <!-- 当前品吸专属尊贵立式金签 (竖向典雅封签，紧贴右上极窄边缘，绝不横向遮挡烟盒) -->
+          <view class="shelf-equipped-tag shelf-equipped-tag-vertical" wx:if="{{ item.isEquipped }}">
+            <text class="set-spark">✦</text>
+            <text class="set-char">品</text>
+            <text class="set-char">吸</text>
+            <text class="set-char">中</text>
           </view>
 
           <!-- 货架背部同源基因氛围光 -->
           <view class="card-ambient-spot" style="background: {{ item.packTheme.accentColor }};"></view>
 
-          <!-- 烟盒 3D 展厅腔体与数字底座 (Dark Gallery Chamber & 3D Digital Pedestal) -->
+          <!-- 烟盒 3D 展厅腔体与数字底座 (Dark Gallery Chamber & 3D Digital Pedestal - 纯净艺术无浮层干扰) -->
           <view class="shelf-pack-facade {{ item.packImage ? 'has-real-pack' : '' }} {{ item.packType === 'slender' ? 'slender-facade' : (item.isCigar ? 'cigar-facade' : '') }}">
             <block wx:if="{{ item.packImage }}">
               <!-- 展厅竖向光栅背景纹理 -->
@@ -180,13 +140,13 @@
             </block>
           </view>
 
-          <!-- 货架商品信息与真实参考零售价 (高对比度奢华排版，严格2行网格对齐) -->
+          <!-- 货架商品信息与真实参考零售价 (高对比度奢华排版，100%全宽舒展品名，两端严整对齐) -->
           <view class="shelf-meta-block">
             <view class="meta-title-row">
               <text class="shelf-brand-title">{{ item.shelfTitle || item.name }}</text>
             </view>
 
-            <!-- 官方指导零售价高光标签 + 细线圆角规格标签 -->
+            <!-- 官方指导零售价高光标签 + 余量/自律解锁标签 (右侧严整对齐) -->
             <view class="shelf-price-row">
               <view class="price-val-wrap">
                 <text class="price-ref-label">参考</text>
@@ -194,10 +154,34 @@
                 <text class="price-val">{{ item.price }}</text>
                 <text class="price-unit">/{{ item.isCigar ? '支' : '盒' }}</text>
               </view>
-              <text class="tar-tag">{{ item.shelfSpecTag || (item.id === 'pure_oxygen_zen' ? '0mg空气卷' : (item.packTheme.tar || '10mg')) }}</text>
+              <text class="meta-status-pill stock {{ item.currentStock === 0 ? 'empty' : '' }}" wx:if="{{ item.unlocked }}">{{ item.currentStock === 0 ? '空盒' : ('余' + item.currentStock + '支') }}</text>
+              <text class="meta-status-pill locked" wx:else>需替{{ item.requiredCount }}支</text>
             </view>
           </view>
 
+        </view>
+      </view>
+
+      <!-- 4. 展柜底部权威合规免责声明 (腾讯大厂合规高规格 · 彻底消除烟草广告与商标侵权争议) -->
+      <view class="shelf-legal-disclaimer">
+        <view class="sld-badge">✦ 公益控烟与健康倡导声明 ✦</view>
+        <view class="sld-list">
+          <view class="sld-item">
+            <text class="sld-dot">1.</text>
+            <text class="sld-item-text">本应用为公益控烟与健康打卡工具，绝不售卖任何香烟、烟草及电子烟实物。</text>
+          </view>
+          <view class="sld-item">
+            <text class="sld-dot">2.</text>
+            <text class="sld-item-text">展柜中的虚拟烟盒与烟支均为 3D 原创数字艺术建模，旨在通过心理替代辅助戒烟，与任何现实烟草品牌无商业合作或代言关系。</text>
+          </view>
+          <view class="sld-item">
+            <text class="sld-dot">3.</text>
+            <text class="sld-item-text">界面标注的参考价格仅用于为您测算「替烟省下的真实开支与健康收益」。</text>
+          </view>
+          <view class="sld-item sld-warning-item">
+            <text class="sld-dot">4.</text>
+            <text class="sld-item-text">吸烟严重危害健康，未成年人严禁使用本应用。</text>
+          </view>
         </view>
       </view>
     </view>
@@ -221,8 +205,8 @@
         <view class="dialog-lock-crest">
           <text class="dialog-lock-icon">🔒</text>
         </view>
-        <text class="dialog-title">名烟解锁与开盒直通</text>
-        <text class="dialog-sub">坚持健康替烟达成目标，或尊享 VIP 特权即刻品吸</text>
+        <text class="dialog-title">经典烟盒 · 开启新盒</text>
+        <text class="dialog-sub">坚持少抽达成目标，或通过尊享特权即刻开盒</text>
       </view>
 
       <!-- 选中的名烟信息展台卡片 -->
@@ -268,7 +252,7 @@
           <view class="track-header">
             <view class="track-title-wrap">
               <view class="track-dot dot-green"></view>
-              <text class="track-title">路径一：健康替烟积累</text>
+              <text class="track-title">路径一：坚持控烟少抽</text>
             </view>
             <text class="track-status-tag">{{ dialogProgressPercent }}%</text>
           </view>
@@ -278,24 +262,24 @@
           </view>
 
           <view class="track-progress-desc">
-            <text>已替 {{ dialogTotalSubs }} 支 / 需达 {{ dialogNeededCount }} 支（还差 {{ dialogRemainingCount }} 支）</text>
+            <text>已少抽 {{ dialogTotalSubs }} 支 / 需达 {{ dialogNeededCount }} 支（还差 {{ dialogRemainingCount }} 支）</text>
           </view>
         </view>
 
-        <!-- 路径 B: 尊享 VIP 直通畅吸 -->
+        <!-- 路径 B: 尊享沙龙特权直通 -->
         <view class="pathway-track track-vip" bindtap="onGoToVipFromDialog">
           <view class="track-header">
             <view class="track-title-wrap">
               <view class="track-dot dot-gold"></view>
-              <text class="track-title">路径二：VIP 会员免解直通</text>
+              <text class="track-title">路径二：VIP尊享特权直通</text>
             </view>
-            <text class="track-vip-badge">推荐直通</text>
+            <text class="track-vip-badge">特权直通</text>
           </view>
           
           <view class="track-vip-perks-row">
-            <view class="perk-chip"><text class="perk-chip-icon">⚡</text><text>33款名烟免解</text></view>
-            <view class="perk-chip"><text class="perk-chip-icon">🚫</text><text>全域免广告</text></view>
-            <view class="perk-chip"><text class="perk-chip-icon">♾️</text><text>无限即拆补满</text></view>
+            <view class="perk-chip"><text class="perk-chip-icon">⚡</text><text>37款烟盒全畅享</text></view>
+            <view class="perk-chip"><text class="perk-chip-icon">🚫</text><text>全域纯净无广</text></view>
+            <view class="perk-chip"><text class="perk-chip-icon">♾️</text><text>随心即拆新包</text></view>
           </view>
         </view>
 
@@ -303,12 +287,12 @@
 
       <!-- 核心转化行动按键组 (The Conversion CTA Stack) -->
       <view class="dialog-actions-stack">
-        <!-- 1. 主行动点 (Primary CTA): VIP 直通开通 -->
+        <!-- 1. 主行动点 (Primary CTA): 沙龙特权开通 -->
         <view class="dialog-cta-primary" bindtap="onGoToVipFromDialog">
           <text class="cta-crown-glyph">👑</text>
           <view class="cta-text-group">
-            <text class="cta-main-title">开启 VIP 特权立即开盒品吸</text>
-            <text class="cta-sub-title">全套名烟畅吸 · 尊享全图鉴特权</text>
+            <text class="cta-main-title">开启VIP特权即刻开盒</text>
+            <text class="cta-sub-title">全套烟盒解锁 · 尊享全图鉴体验</text>
           </view>
           <text class="cta-arrow-glyph">➔</text>
         </view>
@@ -316,19 +300,18 @@
         <!-- 2. 次行动点 (Secondary CTA): 免费解锁今日整盒畅吸 (静默生效，无需扰民提示) -->
         <view class="dialog-cta-secondary" bindtap="onTrialSmokeFromDialog">
           <text class="cta-sec-icon">✨</text>
-          <text class="cta-sec-text">免费解锁今日整盒畅抽</text>
-          <text class="cta-sec-tag">今日限免</text>
+          <text class="cta-sec-text">掌柜特赠今日整盒品尝</text>
+          <text class="cta-sec-tag">每日特赠</text>
         </view>
 
         <!-- 3. 第三行动点 (Tertiary CTA): 继续坚持健康替烟 -->
         <view class="dialog-cta-tertiary" bindtap="closeUnlockDialog">
-          <text class="cta-tert-text">继续坚持健康替烟免费解锁</text>
+          <text class="cta-tert-text">稍后再说 · 坚持打卡</text>
         </view>
       </view>
 
     </view>
   </view>
-
 
   <!-- 全局腾讯级灵动微胶囊 Toast HUD -->
   <custom-toast id="customToast" />
